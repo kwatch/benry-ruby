@@ -1,6 +1,15 @@
+*~
+*.pyc
+*.pyo
+__pycache__/*
+*.rbc
 *.class
-
-# Package Files #
+*.o
+*.a
+*.cache
+*.DS_Store
+tmp/*
+.svn/*
 *.jar
 *.war
 *.ear
