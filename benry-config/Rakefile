@@ -28,11 +28,8 @@ end
 
 desc "do test"
 task :test do
-  Dir.glob("test/*.rb").each do |test_file|
-    sh "ruby #{test_file}"
-  end
+  sh "ruby", *Dir.glob("test/*.rb")
 end
-
 
 
 desc "create package"
