@@ -23,7 +23,7 @@ require 'benry/config'
 class CommonConfig < Benry::BaseConfig
   add :db_user            , "user1"
   add :db_pass            , ABSTRACT
-  add :session_cooie      , "SESS"
+  add :session_cooie      , "sess"
   add :session_secret     , SECRET
 end
 
@@ -49,11 +49,11 @@ load    "./config/#{rack_env}.private"
 $config = Config.new.freeze
 p $config.db_user             #=> "user1"
 p $config.db_pass             #=> "pass1"
-p $config.session_cookie      #=> "SESS"
+p $config.session_cookie      #=> "sess"
 p $config.session_secret      #=> "abc123"
 #
 p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
-p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"abc123"}
+p $config.get_all(:session_)  #=> {:cookie=>"sess", :secret=>"abc123"}
 ```
 
 
