@@ -23,6 +23,7 @@ task :help do
   puts "rake test                   # run test"
   puts "rake package RELEASE=X.X.X  # create gem file"
   puts "rake publish RELEASE=X.X.X  # upload gem file"
+  puts "rake clean                  # remove files"
 end
 
 
@@ -80,4 +81,10 @@ task :publish do
     sh "git tag ruby-#{project}-#{release}"
     sh "git push --tags"
   end
+end
+
+
+desc "remove build files"
+task :clean do
+  rm_rf "build"
 end
