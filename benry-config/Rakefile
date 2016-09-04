@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+
+
+task :default => :test
+
+desc "do test"
+task :test do
+  Dir.glob("test/*.rb").each do |test_file|
+    sh "ruby #{test_file}"
+  end
+end
