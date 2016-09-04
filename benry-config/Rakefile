@@ -73,14 +73,11 @@ task :publish do
     raise "specify $RELEASE"
   #
   gemfile = "#{project}-#{release}.gem"
-  ans = ""
-  while ans.empty?
-    print "** Are you sure to publish #{gemfile}? [y/N]: "
-    ans = $stdin.gets().strip()
-  end
-  if ans.upcase.start_with?('Y')
-    command = "gem publish #{gemfile}"
-    puts command
-    system command
+  print "** Are you sure to publish #{gemfile}? [y/N]: "
+  ans = $stdin.gets().strip()
+  if ans.downcase.start_with?("y")
+    sh "gem publish #{gemfile}"
+    sh "git tag #{project}-#{release}"
+    sh "git push --tags"
   end
 end
