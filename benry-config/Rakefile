@@ -38,13 +38,12 @@ task :package do
     raise "specify $RELEASE"
   ## copy
   dir = "build"
-  require 'fileutils'
-  FileUtils.rm_rf dir, :verbose=>true if File.exist?(dir)
-  FileUtils.mkdir dir, :verbose=>true
+  rm_rf dir if File.exist?(dir)
+  mkdir dir
   target_files.each do |file|
     dest = File.join(dir, File.dirname(file))
-    FileUtils.mkdir_p dest unless File.exist?(dest)
-    FileUtils.cp file, "#{dir}/#{file}", :verbose=>true
+    mkdir_p dest, :verbose=>false unless File.exist?(dest)
+    cp file, "#{dir}/#{file}"
   end
   ## edit
   Dir.glob("#{dir}/**/*").each do |file|
@@ -61,11 +60,10 @@ task :package do
     end
   end
   ## build
-  FileUtils.chdir dir, :verbose=>true do
-    puts "gem build #{project}.gemspec"
-    system "gem build #{project}.gemspec"
+  chdir dir do
+    sh "gem build #{project}.gemspec"
   end
-  FileUtils.mv "#{dir}/#{project}-#{release}.gem", ".", :verbose=>true
+  mv "#{dir}/#{project}-#{release}.gem", "."
 end
 
 
