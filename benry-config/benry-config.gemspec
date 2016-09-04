@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "useful configuration class"
   spec.description   = <<'END'
-See https://github.com/kwatch/benry/tree/ruby for details.
+See https://github.com/kwatch/benry/tree/ruby/benry-config for details.
 END
-  spec.homepage      = "https://github.com/kwatch/benry/tree/ruby"
+  spec.homepage      = "https://github.com/kwatch/benry/tree/ruby/benry-config"
   spec.license       = "MIT"
 
   spec.files         = Dir[*%w[
