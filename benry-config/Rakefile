@@ -58,3 +58,21 @@ task :package do
   end
   FileUtils.mv "#{dir}/#{project}-#{release}.gem", ".", :verbose=>true
 end
+
+desc "upload gem file to rubygems.org"
+task :publish do
+  release != "0.0.0"  or
+    raise "specify $RELEASE"
+  #
+  gemfile = "#{project}-#{release}.gem"
+  ans = ""
+  while ans.empty?
+    print "** Are you sure to publish #{gemfile}? [y/N]: "
+    ans = $stdin.gets().strip()
+  end
+  if ans.upcase.start_with?('Y')
+    command = "gem publish #{gemfile}"
+    puts command
+    system command
+  end
+end
