@@ -77,7 +77,7 @@ task :publish do
   ans = $stdin.gets().strip()
   if ans.downcase.start_with?("y")
     sh "gem push #{gemfile}"
-    sh "git tag #{project}-#{release}"
+    sh "git tag ruby-#{project}-#{release}"
     sh "git push --tags"
   end
 end
