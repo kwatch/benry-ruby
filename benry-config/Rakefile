@@ -7,7 +7,15 @@ copyright = "copyright(c) 2016 kuwata-lab.com all rights reserved"
 license   = "MIT License"
 
 
-task :default => :test
+task :default => :help
+
+desc "show help"
+task :help do
+  puts "rake help                   # help"
+  puts "rake test                   # run test"
+  puts "rake package RELEASE=X.X.X  # create gem file"
+  puts "rake publish RELEASE=X.X.X  # upload gem file"
+end
 
 desc "do test"
 task :test do
