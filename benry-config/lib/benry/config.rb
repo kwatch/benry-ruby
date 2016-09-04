@@ -7,46 +7,6 @@
 ###
 
 
-##
-## Configuration class.
-##
-## ex:
-##
-##     #----- config/common.rb -----
-##     require 'benry/config'
-##     class CommonConfig < Benry::BaseConfig
-##       add :db_user            , "user1"
-##       add :db_pass            , ABSTRACT
-##       add :session_cooie      , "SESS"
-##       add :session_secret     , SECRET
-##     end
-##
-##     #----- config/development.rb -----
-##     require 'config/common'
-##     class Config < TestCommonConfig
-##       set :db_pass            , "pass1"
-##     end
-##
-##     #----- config/development.private -----
-##     class Config
-##       set :session_secret     , "abc123"
-##     end
-##
-##     #----- main.rb -----
-##     rack_env = ENV['RACK_ENV']  or raise "$RACK_ENV required."
-##     require "./config/#{rack_env}.rb"
-##     load    "./config/#{rack_env}.private"
-##     #
-##     $config = Config.new.freeze
-##     p $config.db_user             #=> "user1"
-##     p $config.db_pass             #=> "pass1"
-##     p $config.session_cookie      #=> "SESS"
-##     p $config.session_secret      #=> "abc123"
-##     #
-##     p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
-##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"abc123"}
-##
-
 module Benry
 
 
@@ -54,6 +14,45 @@ module Benry
   end
 
 
+  ##
+  ## Configuration class.
+  ##
+  ## ex:
+  ##
+  ##     #----- config/common.rb -----
+  ##     require 'benry/config'
+  ##     class CommonConfig < Benry::BaseConfig
+  ##       add :db_user            , "user1"
+  ##       add :db_pass            , ABSTRACT
+  ##       add :session_cooie      , "SESS"
+  ##       add :session_secret     , SECRET
+  ##     end
+  ##
+  ##     #----- config/development.rb -----
+  ##     require 'config/common'
+  ##     class Config < TestCommonConfig
+  ##       set :db_pass            , "pass1"
+  ##     end
+  ##
+  ##     #----- config/development.private -----
+  ##     class Config
+  ##       set :session_secret     , "abc123"
+  ##     end
+  ##
+  ##     #----- main.rb -----
+  ##     rack_env = ENV['RACK_ENV']  or raise "$RACK_ENV required."
+  ##     require "./config/#{rack_env}.rb"
+  ##     load    "./config/#{rack_env}.private"
+  ##     #
+  ##     $config = Config.new.freeze
+  ##     p $config.db_user             #=> "user1"
+  ##     p $config.db_pass             #=> "pass1"
+  ##     p $config.session_cookie      #=> "SESS"
+  ##     p $config.session_secret      #=> "abc123"
+  ##     #
+  ##     p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
+  ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"abc123"}
+  ##
   class BaseConfig
 
     class AbstractValue
