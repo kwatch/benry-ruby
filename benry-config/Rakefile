@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
+project   = "benry-config"
+release   = ENV['RELEASE'] || "0.0.0"
+copyright = "copyright(c) 2016 kuwata-lab.com all rights reserved"
+license   = "MIT License"
+
+
 task :default => :test
 
 desc "do test"
@@ -8,4 +14,47 @@ task :test do
   Dir.glob("test/*.rb").each do |test_file|
     sh "ruby #{test_file}"
   end
+end
+
+target_files = Dir[*%W[
+  README.md MIT-LICENSE.txt Rakefile
+  lib/**/*.rb
+  test/**/*_test.rb
+  #{project}.gemspec
+]]
+
+desc "create package"
+task :package do
+  release != "0.0.0"  or
+    raise "specify $RELEASE"
+  ## copy
+  dir = "build"
+  require 'fileutils'
+  FileUtils.rm_rf dir, :verbose=>true if File.exist?(dir)
+  FileUtils.mkdir dir, :verbose=>true
+  target_files.each do |file|
+    dest = File.join(dir, File.dirname(file))
+    FileUtils.mkdir_p dest unless File.exist?(dest)
+    FileUtils.cp file, "#{dir}/#{file}", :verbose=>true
+  end
+  ## edit
+  Dir.glob("#{dir}/**/*").each do |file|
+    next unless File.file?(file)
+    File.open(file, 'rb+') do |f|
+      s = f.read()
+      s = s.gsub(/\$Release:.*?\$/,   "$"+"Release: #{release} $")
+      s = s.gsub(/\$Copyright:.*?\$/, "$"+"Copyright: #{copyright} $")
+      s = s.gsub(/\$License:.*?\$/,   "$"+"License: #{license} $")
+      #
+      f.rewind()
+      f.truncate(0)
+      f.write(s)
+    end
+  end
+  ## build
+  FileUtils.chdir dir, :verbose=>true do
+    puts "gem build #{project}.gemspec"
+    system "gem build #{project}.gemspec"
+  end
+  FileUtils.mv "#{dir}/#{project}-#{release}.gem", ".", :verbose=>true
 end
