@@ -76,7 +76,7 @@ task :publish do
   print "** Are you sure to publish #{gemfile}? [y/N]: "
   ans = $stdin.gets().strip()
   if ans.downcase.start_with?("y")
-    sh "gem publish #{gemfile}"
+    sh "gem push #{gemfile}"
     sh "git tag #{project}-#{release}"
     sh "git push --tags"
   end
