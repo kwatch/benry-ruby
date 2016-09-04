@@ -6,8 +6,16 @@ release   = ENV['RELEASE'] || "0.0.0"
 copyright = "copyright(c) 2016 kuwata-lab.com all rights reserved"
 license   = "MIT License"
 
+target_files = Dir[*%W[
+  README.md MIT-LICENSE.txt Rakefile
+  lib/**/*.rb
+  test/**/*_test.rb
+  #{project}.gemspec
+]]
+
 
 task :default => :help
+
 
 desc "show help"
 task :help do
@@ -17,6 +25,7 @@ task :help do
   puts "rake publish RELEASE=X.X.X  # upload gem file"
 end
 
+
 desc "do test"
 task :test do
   Dir.glob("test/*.rb").each do |test_file|
@@ -24,12 +33,7 @@ task :test do
   end
 end
 
-target_files = Dir[*%W[
-  README.md MIT-LICENSE.txt Rakefile
-  lib/**/*.rb
-  test/**/*_test.rb
-  #{project}.gemspec
-]]
+
 
 desc "create package"
 task :package do
@@ -66,6 +70,7 @@ task :package do
   end
   FileUtils.mv "#{dir}/#{project}-#{release}.gem", ".", :verbose=>true
 end
+
 
 desc "upload gem file to rubygems.org"
 task :publish do
