@@ -30,7 +30,7 @@ module Benry::CLI
       @argname  = argname
       @argflag  = argflag
       @desc     = desc
-      @block = block
+      @block    = block
     end
 
     attr_reader :short, :long, :argname, :argflag, :desc, :block
@@ -112,15 +112,17 @@ module Benry::CLI
         if argstr == '--'
           break
         elsif argstr.start_with?('--')
-          _parse_long_option(argstr, option_values)
+          parse_long_option(argstr, option_values)
         else
-          _parse_short_option(argstr, option_values)
+          parse_short_option(args, argstr, option_values)
         end
       end
       return option_values
     end
 
-    def _parse_long_option(argstr, option_values)
+    private
+
+    def parse_long_option(argstr, option_values)
       argstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/
       long, value = $1, $2
       opt = @option_schemas.find {|x| x.long == long }  or
@@ -139,7 +141,7 @@ module Benry::CLI
       option_values[opt.canonical_name] = value
     end
 
-    def _parse_short_option(argstr, option_values)
+    def parse_short_option(args, argstr, option_values)
       n = argstr.length
       i = 0
       while (i += 1) < n
@@ -183,7 +185,7 @@ module Benry::CLI
         end
         @option = proc do |defstr, desc|
           @__defining  or
-            raise ArgumentError.new("@option.(): @action is missing.")
+            raise ArgumentError.new("@option.(): @action.() should be called prior to @option.().")
           option_schemas = @__defining[2]
           option_schemas << OptionSchema.parse(defstr, desc)
         end
@@ -223,10 +225,12 @@ module Benry::CLI
         case kind
         when :req ; argstr << " #{name_str}"
         when :opt ; argstr << " [#{name_str}]"
+        when :rest; argstr << " [#{name_str}...]"
         end
       end
       msg = ""
-      msg << "#{command} #{@full_name}  --  #{@desc}\n"
+      #msg << "#{command} #{@full_name}  --  #{@desc}\n"
+      msg << "#{@desc}\n"
       msg << "\n"
       msg << "Usage:\n"
       msg << "  #{command} #{@full_name} [options]#{argstr}\n"
@@ -316,9 +320,11 @@ module Benry::CLI
       n_min = meth.parameters.count {|x| x[0] == :req }
       args.length >= n_min  or
         raise err("too few arguments (at least #{n_min} args expected).")
-      n_max = meth.parameters.count {|x| x[0] == :req || x[0] == :opt }
-      args.length <= n_max  or
-        raise err("too many arguments (at most #{n_max} args expected).")
+      unless meth.parameters.find {|x| x[0] == :rest }
+        n_max = meth.parameters.count {|x| x[0] == :req || x[0] == :opt }
+        args.length <= n_max  or
+          raise err("too many arguments (at most #{n_max} args expected).")
+      end
       ## do action
       kwargs = option_values
       has_kwargs = meth.parameters.any? {|x| x[0] == :key }
@@ -356,8 +362,9 @@ module Benry::CLI
     def help_message(command)
       msg = ""
       if @desc
-        msg << "#{command}  -- #{@desc}\n"
-        msg << "\n"
+        #msg << "#{command}  -- #{@desc}\n"
+        #msg << "\n"
+        msg << @desc << "\n\n"
       end
       msg << "Usage:\n"
       msg << "  #{command} [actions]\n"
@@ -409,6 +416,12 @@ if __FILE__ == $0
       puts "Hello #{name}!"
     end
 
+    @action.(:echo, "say hello")
+    @option.("-p, --port=N", "port number (default 8080)")
+    def echo(x, y=0, *args, port: 8080)
+      puts args
+    end
+
   end
 
   class GitAction < Benry::CLI::Action
@@ -433,6 +446,11 @@ if __FILE__ == $0
     @action.(:merge, "merge branch with --no-ff option")
     def do_merge(branch)
       sys 'git', 'merge', '--no-ff', branch
+    end
+
+    @action.(:switch, "switch branch")
+    def do_switch(branch)
+      sys 'git', 'checkout', branch
     end
 
     @action.(:stage, "add changes into staging area")
