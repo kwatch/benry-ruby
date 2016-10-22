@@ -28,45 +28,71 @@ module Benry::CLI
       @short    = short
       @long     = long
       @argname  = argname
-      @argflag  = argflag
+      @argflag  = argflag   # :required, :optional, or nil
       @desc     = desc
       @block    = block
     end
 
     attr_reader :short, :long, :argname, :argflag, :desc, :block
 
+    def ==(other)
+      return (
+        self.class  == other.class    \
+        && @short   == other.short    \
+        && @long    == other.long     \
+        && @argname == other.argname  \
+        && @argflag == other.argflag  \
+        && @desc    == other.desc     \
+        && @block   == other.block
+      )
+    end
+
     def arg_required?
-      return @argname == :required
+      return @argflag == :required
     end
 
     def arg_optional?
-      return @argname == :optional
+      return @argflag == :optional
     end
 
     def arg_nothing?
-      return @argname == nil
+      return @argflag == nil
     end
 
     def canonical_name
+      #; [!86hqr] returns long option name if it is provided.
+      #; [!y9xch] returns short option name if long option is not provided.
       return @long || @short
     end
 
-    def self.parse(defstr, desc)
+    def self.parse(defstr, desc, &block)
+      #; [!fdh36] can parse '-v, --version' (short + long).
+      #; [!jkmee] can parse '-v' (short)
+      #; [!uc2en] can parse '--version' (long).
+      #; [!sy157] can parse '-f, --file=FILE' (short + long + required-arg).
+      #; [!wrjqa] can parse '-f FILE' (short + required-arg).
+      #; [!ip99s] can parse '--file=FILE' (long + required-arg).
+      #; [!9pmv8] can parse '-i, --indent[=N]' (short + long + optional-arg).
+      #; [!ooo42] can parse '-i[N]' (short + optional-arg).
+      #; [!o93c7] can parse '--indent[=N]' (long + optional-arg).
+      #; [!gzuhx] can parse string with extra spaces.
       case defstr.strip()
       when /\A-(\w),\s*--(\w[-\w]*)(?:=(\S+)|\[=(\S+)\])?\z/ ; arr = [$1,  $2,  $3, $4]
       when /\A-(\w)(?:\s+(\S+)|\[(\S+)\])?\z/                ; arr = [$1,  nil, $2, $3]
       when /\A--(\w[-\w]*)(?:=(\S+)|\[=(\S+)\])?\z/          ; arr = [nil, $1,  $2, $3]
       else
+        #; [!1769n] raises error when invalid format.
         raise OptionDefinitionError.new("'#{defstr}': failed to parse option definition.")
       end
       short, long, arg_required, arg_optional = arr
       argname = arg_required || arg_optional
       argflag = arg_required ? :required \
               : arg_optional ? :optional : nil
-      return self.new(short, long, argname, argflag, desc)
+      return self.new(short, long, argname, argflag, desc, &block)
     end
 
     def option_string
+      #; [!pdaz3] builds option definition string.
       s = ""
       case
       when @short && @long ; s << "-#{@short}, --#{@long}"
@@ -91,6 +117,7 @@ module Benry::CLI
   class OptionParser
 
     def initialize(option_schemas)
+      #; [!bflls] takes array of option schema.
       @option_schemas = option_schemas.collect {|x|
         case x
         when OptionSchema ; x
@@ -106,13 +133,18 @@ module Benry::CLI
     end
 
     def parse_options(args)
+      #; [!5jfhv] returns command-line options as hash object.
+      #; [!06iq3] removes command-line options from args.
       option_values = {}
       while args[0] && args[0].start_with?('-')
         argstr = args.shift
+        #; [!31h46] stops parsing when '--' appears in args.
         if argstr == '--'
           break
+        #; [!w5dpy] can parse long options.
         elsif argstr.start_with?('--')
           parse_long_option(argstr, option_values)
+        #; [!mov8e] can parse short options.
         else
           parse_short_option(args, argstr, option_values)
         end
@@ -125,19 +157,25 @@ module Benry::CLI
     def parse_long_option(argstr, option_values)
       argstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/
       long, value = $1, $2
+      #; [!w67gl] raises error when long option is unknown.
       opt = @option_schemas.find {|x| x.long == long }  or
         raise err("--#{long}: unknown option.")
+      #; [!kyd1j] raises error when required argument of long option is missing.
       if opt.arg_required?
         value  or
           raise err("#{argstr}: argument required.")
+      #; [!wuyrh] uses true as default value of optional argument of long option.
       elsif opt.arg_optional?
         value ||= true
+      #; [!91b2j] raises error when long option takes no argument but specified.
       else
         value.nil?  or
           raise err("#{argstr}: unexpected argument.")
         value = true
       end
+      #; [!9td8b] invokes callback with long option value if callback exists.
       value = opt.block.call(value) if opt.block
+      #
       option_values[opt.canonical_name] = value
     end
 
@@ -146,22 +184,28 @@ module Benry::CLI
       i = 0
       while (i += 1) < n
         char = argstr[i]
+        #; [!wr58v] raises error when unknown short option specified.
         opt = @option_schemas.find {|x| x.short == char } or
           raise err("-#{char}: unknown option.")
+        #; [!jzdcr] raises error when requried argument of short option is missing.
         if opt.arg_required?
           value = argstr[(i+1)..-1]
           value = args.shift if value.empty?
           value  or
             raise err("-#{char}: argument required.")
           i = n
+        #; [!hnki9] uses true as default value of optional argument of short option.
         elsif opt.arg_optional?
           value = argstr[(i+1)..-1]
           value = true if value.empty?
           i = n
+        #; [!8gj65] uses true as value of short option which takes no argument.
         else
           value = true
         end
+        #; [!l6gss] invokes callback with short option value if exists.
         value = opt.block.call(value) if opt.block
+        #
         option_values[opt.canonical_name] = value
       end
     end
@@ -174,6 +218,7 @@ module Benry::CLI
     SUBCLASSES = []
 
     def self.inherited(subclass)
+      #; [!al5pr] provides @action and @option for subclass.
       subclass.class_eval do
         @__mappings = []
         @__defining = nil
@@ -190,13 +235,16 @@ module Benry::CLI
           option_schemas << OptionSchema.parse(defstr, desc)
         end
       end
+      #; [!4otr6] registers subclass.
       SUBCLASSES << subclass
     end
 
     def self.method_added(method_name)
+      #; [!syzvc] registers action with method.
       if @__defining
         @__defining[-1] = method_name
         @__mappings << @__defining
+        #; [!m7y8p] clears current action definition.
         @__defining = nil
       end
     end
@@ -217,7 +265,20 @@ module Benry::CLI
 
     attr_reader :full_name, :name, :desc, :option_schemas, :action_class, :action_method
 
+    def ==(other)
+      return (
+        self.class == other.class                   \
+        && @full_name      == other.full_name       \
+        && @name           == other.name            \
+        && @desc           == other.desc            \
+        && @option_schemas == other.option_schemas  \
+        && @action_class   == other.action_class    \
+        && @action_method  == other.action_method
+      )
+    end
+
     def help_message(command)
+      #; [!hjq5l] builds help message.
       meth = @action_class.new.method(@action_method)
       argstr = ""
       meth.parameters.each do |kind, name|
@@ -254,7 +315,8 @@ module Benry::CLI
 
   class Application
 
-    def self.extended(subclass=nil)
+    def self.inherited(subclass=nil)
+      #; [!b09pv] provides @option in subclass.
       subclass.class_eval do
         @option = proc do |defstr, desc, &block|
           option_schema = OptionSchema.parse(defstr, desc, &block)
@@ -273,6 +335,7 @@ module Benry::CLI
     private
 
     def accept(action_classes)
+      #; [!ue26k] builds action dictionary.
       action_dict = {}
       action_classes.each do |klass|
         prefix = klass.instance_variable_get('@prefix')
@@ -298,6 +361,8 @@ module Benry::CLI
         GLOBAL_OPTIONS.update(gopt_values)
       end
       ## global help
+      #; [!p5pr6] returns global help message when action is 'help'.
+      #; [!3hyvi] returns help message of action when action is 'help' with action name.
       action_full_name = args.shift || "help"
       if action_full_name == "help"
         if args[0]
@@ -307,26 +372,32 @@ module Benry::CLI
         end
       end
       ## action and options
+      #; [!mb92l] raises error when action name is unknown.
       action_info = @action_dict[action_full_name]  or
         raise err("#{action_full_name}: unknown action.")
       option_values = parse_options(args, action_info.option_schemas)
       ## show help
+      #; [!13m3q] returns help message if '-h' or '--help' specified to action.
       if option_values['help']
         return action_info.help_message(File.basename($0))
       end
       ## validation
+      #; [!yhry7] raises error when required argument is missing.
       obj = action_info.action_class.new()
       meth = obj.method(action_info.action_method)
       n_min = meth.parameters.count {|x| x[0] == :req }
       args.length >= n_min  or
         raise err("too few arguments (at least #{n_min} args expected).")
+      #; [!h5522] raises error when too much arguments specified.
+      #; [!hq8b0] not raise error when many argument specified but method has *args.
       unless meth.parameters.find {|x| x[0] == :rest }
         n_max = meth.parameters.count {|x| x[0] == :req || x[0] == :opt }
         args.length <= n_max  or
           raise err("too many arguments (at most #{n_max} args expected).")
       end
       ## do action
-      kwargs = option_values
+      #; [!qwd9x] passes command arguments and options as method arguments and options.
+      kwargs = Hash[option_values.map {|k, v| [k.intern, v] }]
       has_kwargs = meth.parameters.any? {|x| x[0] == :key }
       if has_kwargs
         ret = meth.call(*args, kwargs)
