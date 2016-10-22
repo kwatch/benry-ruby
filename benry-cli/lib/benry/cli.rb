@@ -76,7 +76,8 @@ module Benry::CLI
       #; [!ooo42] can parse '-i[N]' (short + optional-arg).
       #; [!o93c7] can parse '--indent[=N]' (long + optional-arg).
       #; [!gzuhx] can parse string with extra spaces.
-      case defstr.strip()
+      defstr = defstr.strip()
+      case defstr
       when /\A-(\w),\s*--(\w[-\w]*)(?:=(\S+)|\[=(\S+)\])?\z/ ; arr = [$1,  $2,  $3, $4]
       when /\A-(\w)(?:\s+(\S+)|\[(\S+)\])?\z/                ; arr = [$1,  nil, $2, $3]
       when /\A--(\w[-\w]*)(?:=(\S+)|\[=(\S+)\])?\z/          ; arr = [nil, $1,  $2, $3]
@@ -85,6 +86,12 @@ module Benry::CLI
         raise OptionDefinitionError.new("'#{defstr}': failed to parse option definition.")
       end
       short, long, arg_required, arg_optional = arr
+      #; [!j2wgf] raises error when '-i [N]' specified.
+      defstr !~ /\A-\w\s+\[/  or
+        raise OptionDefinitionError.new("'#{defstr}': failed to parse option definition"+\
+                                        " due to extra space before '['"+\
+                                        " (should be '#{defstr.sub(/\s+/, '')}').")
+      #
       argname = arg_required || arg_optional
       argflag = arg_required ? :required \
               : arg_optional ? :optional : nil

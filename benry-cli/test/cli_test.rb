@@ -176,6 +176,12 @@ describe Benry::CLI::OptionSchema do
                      "'-f, --file FILENAME': failed to parse option definition.")
     end
 
+    it "[!j2wgf] raises error when '-i [N]' specified." do
+      pr = proc { Benry::CLI::OptionSchema.parse("-i [N]", "indent (default 2)") }
+      ok {pr}.raise?(Benry::CLI::OptionDefinitionError,
+                     "'-i [N]': failed to parse option definition due to extra space before '[' (should be '-i[N]').")
+    end
+
   end
 
 
