@@ -535,6 +535,12 @@ describe Benry::CLI::Application do
           return ("aa=#{aa.inspect}, bb=#{bb.inspect}, cc=#{cc.inspect}, dd=#{dd.inspect}"+\
             ", args=#{args.inspect}, file=#{file.inspect}, indent=#{indent.inspect}")
         end
+        #
+        @action.(:hello3, "hello3")
+        @option.('-L, --debug-log-level=N', 'log level')
+        def do_hello3(debug_log_level: 1)
+          return "debug_log_level=#{debug_log_level.inspect}"
+        end
       end
     end
 
@@ -632,6 +638,15 @@ END
       #
       output = app.call('hello2', "-ffoo.txt", "x1", "x2", "x3", "x4", "x5", "x6")
       ok {output} == 'aa="x1", bb="x2", cc="x3", dd="x4", args=["x5", "x6"], file="foo.txt", indent=2'
+    end
+
+    it "[!rph9y] converts 'foo-bar' option name into :foo_bar keyword." do
+      cls = _argtest_action_class()
+      app = Benry::CLI::Application.new([cls])
+      pr = proc { app.call('hello3', "-L30") }
+      ok {pr}.NOT.raise?(Exception)
+      output = pr.call()
+      ok {output} == 'debug_log_level="30"'
     end
 
   end

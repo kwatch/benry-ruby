@@ -404,7 +404,8 @@ module Benry::CLI
       end
       ## do action
       #; [!qwd9x] passes command arguments and options as method arguments and options.
-      kwargs = Hash[option_values.map {|k, v| [k.intern, v] }]
+      #; [!rph9y] converts 'foo-bar' option name into :foo_bar keyword.
+      kwargs = Hash[option_values.map {|k, v| [k.gsub(/-/, '_').intern, v] }]
       has_kwargs = meth.parameters.any? {|x| x[0] == :key }
       if has_kwargs
         ret = meth.call(*args, kwargs)
