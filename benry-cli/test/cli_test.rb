@@ -330,6 +330,18 @@ describe Benry::CLI::OptionParser do
       ok {p2.parse_options(["--indent=99"])} == {"indent"=>99}
     end
 
+    it "[!nkqln] regards RuntimeError callback raised as long option error." do
+      arr = [
+        Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "") {|val|
+          val =~ /\A\d+\z/  or raise "positive integer expected."
+          val.to_i
+        }
+      ]
+      p2 = Benry::CLI::OptionParser.new(arr)
+      pr = proc { p2.parse_options(["--indent=9.9"]) }
+      ok {pr}.raise?(Benry::CLI::OptionError, "--indent=9.9: positive integer expected.")
+    end
+
     it "[!wr58v] raises error when unknown short option specified." do
       p = _option_parser()
       pr = proc { p.parse_options("-vx".split()) }
@@ -354,13 +366,35 @@ describe Benry::CLI::OptionParser do
 
     it "[!l6gss] invokes callback with short option value if exists." do
       p = _option_parser()
-      ok {p.parse_options("-i99".split())} == {"indent"=>"99"}
+      ok {p.parse_options(["-i99"])} == {"indent"=>"99"}
       #
       arr = [
         Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "") {|value| value.to_i }
       ]
       p2 = Benry::CLI::OptionParser.new(arr)
       ok {p2.parse_options(["-i99"])} == {"indent"=>99}
+    end
+
+    it "[!d4mgr] regards RuntimeError callback raised as short option error." do
+      arr = [
+        Benry::CLI::OptionSchema.parse("-L, --level=N", "") {|val|
+          val =~ /\A\d+\z/  or raise "positive integer expected."
+          val.to_i
+        }
+      ]
+      p1 = Benry::CLI::OptionParser.new(arr)
+      pr = proc { p1.parse_options(["-L9.9"]) }
+      ok {pr}.raise?(Benry::CLI::OptionError, "-L 9.9: positive integer expected.")
+      #
+      arr = [
+        Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "") {|val|
+          val =~ /\A\d+\z/  or raise "positive integer expected."
+          val.to_i
+        }
+      ]
+      p2 = Benry::CLI::OptionParser.new(arr)
+      pr = proc { p2.parse_options(["-i9.9"]) }
+      ok {pr}.raise?(Benry::CLI::OptionError, "-i9.9: positive integer expected.")
     end
 
   end
