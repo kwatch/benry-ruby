@@ -403,6 +403,18 @@ describe Benry::CLI::Action do
       end
     end
 
+    it "[!di9na] raises error when @option.() called without @action.()." do
+      pr = proc do
+        Class.new(Benry::CLI::Action) do
+          @option.('-v, --verbose', "verbose mode")
+          def hello(verbose)
+          end
+        end
+      end
+      ok {pr}.raise?(Benry::CLI::OptionDefinitionError,
+                     '@option.("-v, --verbose"): @action.() should be called prior to @option.().')
+    end
+
     it "[!4otr6] registers subclass." do
       ok {Benry::CLI::Action::SUBCLASSES}.include?(HelloAction)
       ok {Benry::CLI::Action::SUBCLASSES}.include?(HelloSubAction)

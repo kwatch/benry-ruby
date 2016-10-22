@@ -237,8 +237,9 @@ module Benry::CLI
         end
         #; [!ymtsg] allows block argument to @option.
         @option = proc do |defstr, desc, &block|
+          #; [!di9na] raises error when @option.() called without @action.().
           @__defining  or
-            raise ArgumentError.new("@option.(): @action.() should be called prior to @option.().")
+            raise OptionDefinitionError.new("@option.(#{defstr.inspect}): @action.() should be called prior to @option.().")
           option_schemas = @__defining[2]
           option_schemas << OptionSchema.parse(defstr, desc, &block)
         end
