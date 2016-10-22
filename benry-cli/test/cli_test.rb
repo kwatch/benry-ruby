@@ -384,6 +384,25 @@ describe Benry::CLI::Action do
       end
     end
 
+    it "[!ymtsg] allows block argument to @option." do
+      cls = Class.new(Benry::CLI::Action) do
+        @action.(:hello, "print hello")
+        @option.('-L, --level=N', 'level') {|val| val.to_i }
+        def hello(level: 1)
+          "level=#{level.inspect}"
+        end
+      end
+      cls.instance_exec(self) do |_|
+        arr = @__mappings[0]
+        _.ok {arr[0]} == :hello
+        _.ok {arr[1]} == "print hello"
+        _.ok {arr[2][1].short} == 'L'
+        _.ok {arr[2][1].long}  == 'level'
+        _.ok {arr[2][1].block}.is_a?(Proc)
+        _.ok {arr[2][1].block.call("123")} == 123
+      end
+    end
+
     it "[!4otr6] registers subclass." do
       ok {Benry::CLI::Action::SUBCLASSES}.include?(HelloAction)
       ok {Benry::CLI::Action::SUBCLASSES}.include?(HelloSubAction)

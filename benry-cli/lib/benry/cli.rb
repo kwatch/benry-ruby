@@ -235,11 +235,12 @@ module Benry::CLI
           method_name    = nil
           @__defining = [action_name, desc, option_schemas, method_name]
         end
-        @option = proc do |defstr, desc|
+        #; [!ymtsg] allows block argument to @option.
+        @option = proc do |defstr, desc, &block|
           @__defining  or
             raise ArgumentError.new("@option.(): @action.() should be called prior to @option.().")
           option_schemas = @__defining[2]
-          option_schemas << OptionSchema.parse(defstr, desc)
+          option_schemas << OptionSchema.parse(defstr, desc, &block)
         end
       end
       #; [!4otr6] registers subclass.
