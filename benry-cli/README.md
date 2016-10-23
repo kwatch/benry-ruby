@@ -22,8 +22,6 @@ Basic Example
 
 ex1.rb:
 ```ruby
-# -*- coding: utf-8 -*-
-
 require 'benry/cli'
 
 ##
@@ -49,16 +47,22 @@ class HelloAction < Benry::CLI::Action
 
 end
 
+VERSION = "1.0"
+
 def main()
   ##
-  ## Create application object with action classes.
-  ## If they are not specified, all subclasses of Benry::CLI::Action are used.
+  ## Create application object with version, desc and action classes.
+  ## Default values:
+  ##  * version: '0.0'
+  ##  * desc: nil
+  ##  * action_classes: nil (means all subclasses of Benry::CLI::Action)
   ##
   classes = [
     HelloAction,
   ]
-  app = Benry::CLI::Application.new(classes)
-  #app = Benry::CLI::Application.new()   # arg 'classes' is optional
+  app = Benry::CLI::Application.new(action_classes: classes, # or nil
+                                    version: VERSION,
+                                    desc: "example script")
   app.main()
 end
 
@@ -85,24 +89,21 @@ Goodbye, sekai!
 
 Help mesage:
 ```console
-$ ruby ex1.rb    # or: ruby ex1.rb help
-Usage:
-  ex1.rb [actions]
-
-Actions:
-  goodbye                   : print goodbye message
-  hello                     : print hello message
-
-(Use `ex1.rb help <ACTION>' to show help message of each action.)
-
-$ ruby ex1.rb hello --help   # or: ruby ex.rb help hello
-print hello message
+$ ruby ex1.rb --help   # or: ruby ex1.rb help
+example script
 
 Usage:
-  ex1.rb hello [options] [name]
+  ex1.rb [options] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
+      --version        : print version
+
+Actions:
+  goodbye              : print goodbye message
+  hello                : print hello message
+
+(Run `ex1.rb help <action>' to show help message of each action.)
 ```
 
 
@@ -111,8 +112,6 @@ Command-line Options
 
 ex2.rb:
 ```ruby
-# -*- coding: utf-8 -*-
-
 require 'benry/cli'
 
 class OptionTestAction < Benry::CLI::Action
@@ -120,7 +119,7 @@ class OptionTestAction < Benry::CLI::Action
   ##
   ## Define command-line options with @option.()
   ##
-  @action.(:hello, "print hello message")
+  @action.(:hello, "say hello")
   @option.('-q, --quiet'        , "quiet mode")       # no argument
   @option.('-f, --format=TYPE'  , "'text' or 'html'") # required arg
   @option.('-d, --debug[=LEVEL]', "debug level")      # optional arg
@@ -132,7 +131,7 @@ class OptionTestAction < Benry::CLI::Action
   ##
   ## Short-only version
   ##
-  @action.(:hello3, "print hello message")
+  @action.(:hello2, "say hello")
   @option.('-q'        , "quiet mode")       # no argument
   @option.('-f TYPE'   , "'text' or 'html'") # required arg
   @option.('-d[=LEVEL]', "debug level")      # optional arg
@@ -144,7 +143,7 @@ class OptionTestAction < Benry::CLI::Action
   ##
   ## Long-only version
   ##
-  @action.(:hello3, "print hello message")
+  @action.(:hello3, "say hello")
   @option.('--quiet'        , "quiet mode")       # no argument
   @option.('--format=TYPE'  , "'text' or 'html'") # required arg
   @option.('--debug[=LEVEL]', "debug level")      # optional arg
@@ -156,7 +155,7 @@ class OptionTestAction < Benry::CLI::Action
 end
 
 def main()
-  app = Benry::CLI::Application.new()
+  app = Benry::CLI::Application.new(version: '1.0')
   app.main()
 end
 
@@ -186,16 +185,19 @@ name="World", quiet=nil, format=nil, debug="2"
 Help message:
 ```console
 $ ruby ex2.rb hello -h
-print hello message
-
 Usage:
-  ex2.rb hello [options] [name]
+  ex2.rb [options] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
-  -q, --quiet          : quiet mode
-  -f, --format=TYPE    : 'text' or 'html'
-  -d, --debug[=LEVEL]  : debug level
+      --version        : print version
+
+Actions:
+  hello                : say hello
+  hello2               : say hello
+  hello3               : say hello
+
+(Run `ex2.rb help <action>' to show help message of each action.)
 ```
 
 
@@ -204,17 +206,15 @@ Validation and Type Conversion
 
 ex3.rb:
 ```ruby
-# -*- coding: utf-8 -*-
-
 require 'benry/cli'
 
 class ValidationTestAction < Benry::CLI::Action
 
   ##
-  ## Call @option.() with block parameter.
-  ## Block parameter will validate and convert option value.
+  ## @option.() can take a block argument which does both validation
+  ## and data conversion.
   ##
-  @action.(:hello, "print hello message")
+  @action.(:hello, "say hello")
   @option.('-L, --log-level=N', "log level (1~5)") {|val|
     val =~ /\A\d+\z/  or raise "positive integer expected."
     val.to_i   # convert string into integer
@@ -227,7 +227,7 @@ end
 
 
 if __FILE__ == $0
-  Benry::CLI::Application.new().main()
+  Benry::CLI::Application.new(version: '1.0').main()
 end
 ```
 
