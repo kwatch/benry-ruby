@@ -355,7 +355,7 @@ module Benry::CLI
       self._setup_app_class(subclass)
     end
 
-    def initialize(version='0.0', desc=nil, action_classes=nil)
+    def initialize(version: '0.0', desc: nil, action_classes: nil)
       @version     = version
       @desc        = desc
       @action_dict = accept(action_classes || Action::SUBCLASSES)
@@ -513,7 +513,7 @@ module Benry::CLI
         msg << "  %-20s : %s\n" % [action_full_name, action_info.desc]
       end
       msg << "\n"
-      msg << "(Use `#{command} help <action>' to show help message of each action.)\n"
+      msg << "(Run `#{command} help <action>' to show help message of each action.)\n"
       return msg
     end
 
