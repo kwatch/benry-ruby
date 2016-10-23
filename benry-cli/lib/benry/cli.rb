@@ -342,10 +342,17 @@ module Benry::CLI
       subclass.class_eval do
         @option = proc do |defstr, desc, &block|
           option_schema = OptionSchema.parse(defstr, desc, &block)
-          (@__gopt_schemas ||= []) << option_schema
+          @__gopt_schemas << option_schema
         end
+        #; [!8swia] global option '-h' and '--help' are enabled by default.
+        #; [!vh08n] global option '--version' is enabled by defaut.
+        @__gopt_schemas = [
+          OptionSchema.parse("-h, --help",    "print help message"),
+          OptionSchema.parse("    --version", "print version"),
+        ]
       end
     end
+    self.inherited(self)
 
     def initialize(action_classes=nil, desc: nil)
       @action_dict = accept(action_classes || Action::SUBCLASSES)
@@ -377,7 +384,8 @@ module Benry::CLI
     def call(*args)
       ## global options
       global_option_schemas = self.class.instance_variable_get('@__gopt_schemas')
-      handle_global_options(args, global_option_schemas)
+      output = handle_global_options(args, global_option_schemas)
+      return output if output
       ## global help
       #; [!p5pr6] returns global help message when action is 'help'.
       #; [!3hyvi] returns help message of action when action is 'help' with action name.
@@ -413,7 +421,7 @@ module Benry::CLI
         case ret
         when String
           output = ret
-          print output
+          puts output
           exit 0
         when Integer
           status = ret
@@ -431,6 +439,14 @@ module Benry::CLI
       GLOBAL_OPTIONS.clear()
       g_opts = parse_options(args, global_option_schemas)
       GLOBAL_OPTIONS.update(g_opts)
+      #; [!b8isy] returns help message when global option '-h' or '--help' is specified.
+      if g_opts['help']
+        return help_message(File.basename($0), nil)
+      end
+      #; [!4irzw] returns version string when global option '--version' is specified.
+      if g_opts['version']
+        return @version || '0.0'
+      end
     end
 
     def validate_args(action_obj, method_name, args)

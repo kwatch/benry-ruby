@@ -554,6 +554,22 @@ describe Benry::CLI::Application do
       end
     end
 
+    it "[!8swia] global option '-h' and '--help' are enabled by default." do
+      cls = Class.new(Benry::CLI::Application)
+      cls.instance_exec(self) do |_|
+        _.ok {@__gopt_schemas[0].short} == 'h'
+        _.ok {@__gopt_schemas[0].long}  == 'help'
+      end
+    end
+
+    it "[!vh08n] global option '--version' is enabled by defaut." do
+      cls = Class.new(Benry::CLI::Application)
+      cls.instance_exec(self) do |_|
+        _.ok {@__gopt_schemas[1].short} == nil
+        _.ok {@__gopt_schemas[1].long}  == 'version'
+      end
+    end
+
   end
 
 
@@ -607,6 +623,31 @@ describe Benry::CLI::Application do
           return "debug_log_level=#{debug_log_level.inspect}"
         end
       end
+    end
+
+    it "[!b8isy] returns help message when global option '-h' or '--help' is specified." do
+      expected = <<END
+Usage:
+  cli_test.rb [actions]
+
+Actions:
+  git:fork                  : create and switch to new branch
+  git:join                  : merge branch with --no-ff
+  git:switch                : switch git branch
+
+(Use `cli_test.rb help <ACTION>' to show help message of each action.)
+END
+      app = Benry::CLI::Application.new([GitAction])
+      output = app.call('--help')
+      ok {output} == expected
+      output = app.call('-h')
+      ok {output} == expected
+    end
+
+    it "[!4irzw] returns version string when global option '--version' is specified." do
+      app = Benry::CLI::Application.new([GitAction])
+      output = app.call('--version')
+      ok {output} == "0.0"
     end
 
     it "[!p5pr6] returns global help message when action is 'help'." do
