@@ -51,18 +51,16 @@ VERSION = "1.0"
 
 def main()
   ##
-  ## Create application object with version, desc and action classes.
-  ## Default values:
-  ##  * version: '0.0'
-  ##  * desc: nil
-  ##  * action_classes: nil (means all subclasses of Benry::CLI::Action)
+  ## Create application object with desription, version and action classes.
+  ## When 'action_classes' is nil, then all subclasses of Benry::CLI::Action
+  ## are used instead.
   ##
   classes = [
     HelloAction,
   ]
-  app = Benry::CLI::Application.new(action_classes: classes, # or nil
+  app = Benry::CLI::Application.new("example script",
                                     version: VERSION,
-                                    desc: "example script")
+                                    action_classes: classes)
   app.main()
 end
 
@@ -241,6 +239,44 @@ ERROR: -L abc: positive integer expected.
 Other Topics
 ------------
 
+
+### Argument Name in Help Message
+
+argname.rb:
+```ruby
+require 'benry/cli'
+
+class FooAction < Benry::CLI::Action
+
+  ##
+  ## * parameter 'file_name' will be 'file-name' in help message.
+  ## * parameter 'file_or_dir' will be 'file|dir' in help message.
+  ##
+  @action.(:homhom, "test")
+  def do_homhom(file_name, file_or_dir=nil)
+    # ...
+  end
+
+end
+
+if __FILE__ == $0
+  Benry::CLI::Application.new().main()
+end
+```
+
+Example:
+```console
+$ ruby argname.rb help homhom
+test
+
+Usage:
+  argname.rb homhom [options] <file-name> [<file|dir>]
+
+Options:
+  -h, --help           : print help message
+```
+
+
 ### Prefix of Action Name
 
 mygit.rb:
@@ -272,7 +308,7 @@ class GitAction < Benry::CLI::Action
 end
 
 if __FILE__ == $0
-  Benry::CLI::Application.new(desc: "git wrapper", version: '1.0').main()
+  Benry::CLI::Application.new("git wrapper", version: '1.0').main()
 end
 ```
 
