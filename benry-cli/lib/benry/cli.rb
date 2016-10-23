@@ -418,15 +418,7 @@ module Benry::CLI
           raise err("too many arguments (at most #{n_max} args expected).")
       end
       ## do action
-      #; [!qwd9x] passes command arguments and options as method arguments and options.
-      #; [!rph9y] converts 'foo-bar' option name into :foo_bar keyword.
-      kwargs = Hash[option_values.map {|k, v| [k.gsub(/-/, '_').intern, v] }]
-      has_kwargs = meth.parameters.any? {|x| x[0] == :key }
-      if has_kwargs
-        ret = meth.call(*args, kwargs)
-      else
-        ret = meth.call(*args)
-      end
+      ret = run_action(obj, action_info.action_method, args, option_values)
       return ret
     end
 
@@ -452,6 +444,19 @@ module Benry::CLI
     end
 
     protected
+
+    def run_action(action_obj, method_name, args, option_values)
+      #; [!rph9y] converts 'foo-bar' option name into :foo_bar keyword.
+      kwargs = Hash[option_values.map {|k, v| [k.gsub(/-/, '_').intern, v] }]
+      #; [!qwd9x] passes command arguments and options as method arguments and options.
+      method_obj = action_obj.method(method_name)
+      has_kwargs = method_obj.parameters.any? {|x| x[0] == :key }
+      if has_kwargs
+        return method_obj.call(*args, kwargs)
+      else
+        return method_obj.call(*args)
+      end
+    end
 
     def help_message(command)
       msg = ""
