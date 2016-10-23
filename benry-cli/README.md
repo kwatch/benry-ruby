@@ -238,6 +238,65 @@ ERROR: -L abc: positive integer expected.
 ```
 
 
+Other Topics
+------------
+
+### Prefix of Action Name
+
+mygit.rb:
+```ruby
+require 'benry/cli'
+
+class GitAction < Benry::CLI::Action
+
+  ##
+  ## add prefix 'git:' to each actions
+  ##
+  self.prefix = 'git'
+
+  @action.(:stage, "same as 'git add -p'")
+  def do_stage(*filenames)
+    system 'git', 'add', '-p', *filenames
+  end
+
+  @action.(:staged, "same as 'git diff --cached'")
+  def do_staged(*filenames)
+    system 'git', 'diff', '--cached', *filenames
+  end
+
+  @action.(:unstaged, "same as 'git reset HEAD'")
+  def do_unstage(*filenames)
+    system 'git', 'reset', 'HEAD', *filenames
+  end
+
+end
+
+if __FILE__ == $0
+  Benry::CLI::Application.new(desc: "git wrapper", version: '1.0').main()
+end
+```
+
+Example (prefix 'git:' is added to actions):
+```console
+$ ruby mygit.rb --help
+git wrapper
+
+Usage:
+  mygit.rb [options] <action> [<args>...]
+
+Options:
+  -h, --help           : print help message
+      --version        : print version
+
+Actions:
+  git:stage            : same as 'git add -p'
+  git:staged           : same as 'git diff --cached'
+  git:unstaged         : same as 'git reset HEAD'
+
+(Run `mygit.rb help <action>' to show help message of each action.)
+```
+
+
 License and Copyright
 ---------------------
 
