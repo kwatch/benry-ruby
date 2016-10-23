@@ -271,6 +271,14 @@ module Benry::CLI
       end
     end
 
+    def self.prefix
+      return @prefix
+    end
+
+    def self.prefix=(prefix)
+      @prefix = prefix
+    end
+
   end
 
 

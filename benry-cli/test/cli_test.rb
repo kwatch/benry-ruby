@@ -18,21 +18,20 @@ end
 
 class GitAction < Benry::CLI::Action
 
-  @prefix = 'git'
+  self.prefix = 'git'
+
   @action.('switch', 'switch git branch')
   @option.('-v, --verbose', "verbose mode")
   def do_git_switch(branch, verbose: false)
     puts "git checkout #{branch}"
   end
 
-  @prefix = 'git'
   @action.('fork', 'create and switch to new branch')
   @option.('-v, --verbose', "verbose mode")
   def do_git_fork(branch, verbose: false)
     puts "git checkout -b #{branch}"
   end
 
-  @prefix = 'git'
   @action.('join', 'merge branch with --no-ff')
   def do_git_join(branch)
     puts "git merge --no-ff #{branch}"
