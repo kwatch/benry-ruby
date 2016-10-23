@@ -355,10 +355,10 @@ module Benry::CLI
       self._setup_app_class(subclass)
     end
 
-    def initialize(action_classes=nil, desc: nil, version: '0.0')
-      @action_dict = accept(action_classes || Action::SUBCLASSES)
-      @desc        = desc
+    def initialize(version='0.0', desc=nil, action_classes=nil)
       @version     = version
+      @desc        = desc
+      @action_dict = accept(action_classes || Action::SUBCLASSES)
     end
 
     attr_reader :desc, :version

@@ -641,7 +641,7 @@ Actions:
 
 (Use `cli_test.rb help <action>' to show help message of each action.)
 END
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       output = app.call('--help')
       ok {output} == expected
       output = app.call('-h')
@@ -649,11 +649,11 @@ END
     end
 
     it "[!4irzw] returns version string when global option '--version' is specified." do
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       output = app.call('--version')
       ok {output} == "0.0"
       #
-      app = Benry::CLI::Application.new([GitAction], version: '1.2.3')
+      app = Benry::CLI::Application.new('1.2.3', nil, [GitAction])
       output = app.call('--version')
       ok {output} == "1.2.3"
     end
@@ -674,7 +674,7 @@ Actions:
 
 (Use `cli_test.rb help <action>' to show help message of each action.)
 END
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       output = app.call('help')
       ok {output} == expected
     end
@@ -690,13 +690,13 @@ Options:
   -h, --help           : print help message
   -v, --verbose        : verbose mode
 END
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       output = app.call('help', 'git:fork')
       ok {output} == expected
     end
 
     it "[!mb92l] raises error when action name is unknown." do
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       pr = proc { app.call('fork') }
       ok {pr}.raise?(Benry::CLI::OptionError, "fork: unknown action.")
     end
@@ -712,14 +712,14 @@ Options:
   -h, --help           : print help message
   -v, --verbose        : verbose mode
 END
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       output = app.call('git:fork', '--help')
       ok {output} == expected
     end
 
     it "[!yhry7] raises error when required argument is missing." do
       cls = _argtest_action_class()
-      app = Benry::CLI::Application.new([cls])
+      app = Benry::CLI::Application.new('0.0', nil, [cls])
       pr = proc { app.call('hello1') }
       ok {pr}.raise?(Benry::CLI::OptionError,
                      "too few arguments (at least 2 args expected).")
@@ -732,7 +732,7 @@ END
 
     it "[!h5522] raises error when too much arguments specified." do
       cls = _argtest_action_class()
-      app = Benry::CLI::Application.new([cls])
+      app = Benry::CLI::Application.new('0.0', nil, [cls])
       pr = proc { app.call('hello1', "x1", "x2", "x3", "x4", "x5") }
       ok {pr}.raise?(Benry::CLI::OptionError,
                      "too many arguments (at most 4 args expected).")
@@ -740,14 +740,14 @@ END
 
     it "[!hq8b0] not raise error when many argument specified but method has *args." do
       cls = _argtest_action_class()
-      app = Benry::CLI::Application.new([cls])
+      app = Benry::CLI::Application.new('0.0', nil, [cls])
       pr = proc { app.call('hello2', "x1", "x2", "x3", "x4", "x5", "x6") }
       ok {pr}.NOT.raise?(Exception)
     end
 
     it "[!qwd9x] passes command arguments and options as method arguments and options." do
       cls = _argtest_action_class()
-      app = Benry::CLI::Application.new([cls])
+      app = Benry::CLI::Application.new('0.0', nil, [cls])
       #
       output = app.call('hello1', "-ffoo.txt", "x1", "x2")
       ok {output} == 'aa="x1", bb="x2", cc=nil, dd=nil, file="foo.txt", indent=2'
@@ -760,7 +760,7 @@ END
 
     it "[!rph9y] converts 'foo-bar' option name into :foo_bar keyword." do
       cls = _argtest_action_class()
-      app = Benry::CLI::Application.new([cls])
+      app = Benry::CLI::Application.new('0.0', nil, [cls])
       pr = proc { app.call('hello3', "-L30") }
       ok {pr}.NOT.raise?(Exception)
       output = pr.call()
@@ -773,11 +773,11 @@ END
   describe '#help_message()' do
 
     it "[!1zpv4] adds command desc if it is specified at initializer." do
-      app = Benry::CLI::Application.new([GitAction], desc: "my git wrapper")
+      app = Benry::CLI::Application.new('0.0', "my git wrapper", [GitAction])
       s = app.help_message('mygit')
       ok {s} =~ /\Amy git wrapper\n\nUsage:/
       #
-      app = Benry::CLI::Application.new([GitAction])
+      app = Benry::CLI::Application.new('0.0', nil, [GitAction])
       s = app.help_message('mygit')
       ok {s} =~ /\AUsage:/
     end
