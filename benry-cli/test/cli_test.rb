@@ -648,6 +648,10 @@ END
       app = Benry::CLI::Application.new([GitAction])
       output = app.call('--version')
       ok {output} == "0.0"
+      #
+      app = Benry::CLI::Application.new([GitAction], version: '1.2.3')
+      output = app.call('--version')
+      ok {output} == "1.2.3"
     end
 
     it "[!p5pr6] returns global help message when action is 'help'." do
