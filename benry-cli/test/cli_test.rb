@@ -44,21 +44,6 @@ end
 describe Benry::CLI::OptionSchema do
 
 
-  describe '#canonical_name' do
-
-    it "[!86hqr] returns long option name if it is provided." do
-      x = Benry::CLI::OptionSchema.parse("-h, --help", "show help")
-      ok {x.canonical_name} == "help"
-    end
-
-    it "[!y9xch] returns short option name if long option is not provided." do
-      x = Benry::CLI::OptionSchema.parse("-h", "show help")
-      ok {x.canonical_name} == "h"
-    end
-
-  end
-
-
   describe '.parse()' do
 
     def _arg_should_be_nothing(x)

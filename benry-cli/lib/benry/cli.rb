@@ -60,12 +60,6 @@ module Benry::CLI
       return @argflag == nil
     end
 
-    def canonical_name
-      #; [!86hqr] returns long option name if it is provided.
-      #; [!y9xch] returns short option name if long option is not provided.
-      return @long || @short
-    end
-
     def self.parse(defstr, desc, &block)
       #; [!cy1ux] regards canonical name of '-f NAME #file' as 'file'.
       defstr = defstr.strip()
@@ -195,7 +189,7 @@ module Benry::CLI
         raise err("#{argstr}: #{ex.message}")
       end
       #
-      option_values[opt.canonical_name] = value
+      option_values[opt.name] = value
     end
 
     def parse_short_option(args, argstr, option_values)
@@ -232,7 +226,7 @@ module Benry::CLI
           raise err("-#{char}#{space}#{value}: #{ex.message}")
         end
         #
-        option_values[opt.canonical_name] = value
+        option_values[opt.name] = value
       end
     end
 
