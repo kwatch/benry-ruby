@@ -385,7 +385,8 @@ module Benry::CLI
     def call(*args)
       ## global options
       global_option_schemas = self.class.instance_variable_get('@global_option_schemas')
-      output = handle_global_options(args, global_option_schemas)
+      global_option_values = parse_options(args, global_option_schemas)
+      output = handle_global_options(args, global_option_values)
       return output if output
       ## global help
       #; [!p5pr6] returns global help message when action is 'help'.
@@ -435,9 +436,8 @@ module Benry::CLI
 
     protected
 
-    def handle_global_options(args, global_option_schemas)
-      return unless global_option_schemas
-      g_opts = parse_options(args, global_option_schemas)
+    def handle_global_options(args, global_option_values)
+      g_opts = global_option_values
       #; [!b8isy] returns help message when global option '-h' or '--help' is specified.
       if g_opts['help']
         return help_message(File.basename($0), nil)
