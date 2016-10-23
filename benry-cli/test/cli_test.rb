@@ -772,7 +772,7 @@ END
   describe '#help_message()' do
 
     it "[!1zpv4] adds command desc if it is specified at initializer." do
-      app = Benry::CLI::Application.new(desc: "my git wrapper", action_classes: [GitAction])
+      app = Benry::CLI::Application.new("my git wrapper", action_classes: [GitAction])
       s = app.help_message('mygit')
       ok {s} =~ /\Amy git wrapper\n\nUsage:/
       #

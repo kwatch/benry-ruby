@@ -363,9 +363,9 @@ module Benry::CLI
       self._setup_app_class(subclass)
     end
 
-    def initialize(version: '0.0', desc: nil, action_classes: nil)
-      @version     = version
+    def initialize(desc=nil, version: '0.0', action_classes: nil)
       @desc        = desc
+      @version     = version
       @action_dict = accept(action_classes || Action::SUBCLASSES)
     end
 
