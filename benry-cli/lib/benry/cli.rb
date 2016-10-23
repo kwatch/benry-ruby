@@ -357,8 +357,8 @@ module Benry::CLI
 
     def initialize(action_classes=nil, desc: nil, version: '0.0')
       @action_dict = accept(action_classes || Action::SUBCLASSES)
-      @desc = desc
-      @version = version
+      @desc        = desc
+      @version     = version
     end
 
     attr_reader :desc, :version
