@@ -557,16 +557,16 @@ describe Benry::CLI::Application do
     it "[!8swia] global option '-h' and '--help' are enabled by default." do
       cls = Class.new(Benry::CLI::Application)
       cls.instance_exec(self) do |_|
-        _.ok {@global_option_schemas[0].short} == 'h'
-        _.ok {@global_option_schemas[0].long}  == 'help'
+        _.ok {@_global_option_schemas[0].short} == 'h'
+        _.ok {@_global_option_schemas[0].long}  == 'help'
       end
     end
 
     it "[!vh08n] global option '--version' is enabled by defaut." do
       cls = Class.new(Benry::CLI::Application)
       cls.instance_exec(self) do |_|
-        _.ok {@global_option_schemas[1].short} == nil
-        _.ok {@global_option_schemas[1].long}  == 'version'
+        _.ok {@_global_option_schemas[1].short} == nil
+        _.ok {@_global_option_schemas[1].long}  == 'version'
       end
     end
 
