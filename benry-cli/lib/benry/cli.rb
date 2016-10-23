@@ -313,7 +313,8 @@ module Benry::CLI
       argstr = ""
       meth.parameters.each do |kind, name|
         #; [!7qmnz] replaces '_' in arg names with '-'.
-        name_str = name.to_s.gsub('_', '-')
+        #; [!s6p09] converts arg name 'file_or_dir' into 'file|dir'.
+        name_str = name.to_s.gsub('_or_', '|').gsub('_', '-')
         case kind
         when :req ; argstr << " <#{name_str}>"
         when :opt ; argstr << " [<#{name_str}>]"
@@ -329,7 +330,7 @@ module Benry::CLI
       msg << "\n"
       msg << "Options:\n"
       pairs = @option_schemas.collect {|opt| [opt.option_string, opt.desc] }
-      width = pairs.collect {|pair| pair[0].length }.max
+      width = pairs.collect {|pair| pair[0].length }.max || 0
       width = [width, 20].max
       width = [width, 35].min
       pairs.each do |option_string, desc|

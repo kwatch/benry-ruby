@@ -546,6 +546,18 @@ END
       ok {s} =~ "Usage:\n  script my:hom [options] <tmp-file-name> [<tmp-file-dir>]"
     end
 
+    it "[!s6p09] converts arg name 'file_or_dir' into 'file|dir'." do
+      schemas = []
+      cls = Class.new(Benry::CLI::Action) do
+        def do_something(file_or_directory, name_or_id=nil)
+        end
+      end
+      action_info = Benry::CLI::ActionInfo.new('my:hom', 'hom', 'do something',
+                                               schemas, cls, :do_something)
+      s = action_info.help_message("script")
+      ok {s} =~ "Usage:\n  script my:hom [options] <file|directory> [<name|id>]"
+    end
+
   end
 
 
