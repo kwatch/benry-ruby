@@ -24,7 +24,8 @@ module Benry::CLI
 
   class OptionSchema
 
-    def initialize(short, long, argname, argflag, desc, &block)
+    def initialize(name, short, long, argname, argflag, desc, &block)
+      @name     = name
       @short    = short
       @long     = long
       @argname  = argname
@@ -33,7 +34,7 @@ module Benry::CLI
       @block    = block
     end
 
-    attr_reader :short, :long, :argname, :argflag, :desc, :block
+    attr_reader :name, :short, :long, :argname, :argflag, :desc, :block
 
     def ==(other)
       return (
@@ -66,6 +67,10 @@ module Benry::CLI
     end
 
     def self.parse(defstr, desc, &block)
+      #; [!cy1ux] regards canonical name of '-f NAME #file' as 'file'.
+      defstr = defstr.strip()
+      defstr = defstr.sub(/\s+\#(\w+)\z/, '')
+      name = $1
       #; [!fdh36] can parse '-v, --version' (short + long).
       #; [!jkmee] can parse '-v' (short)
       #; [!uc2en] can parse '--version' (long).
@@ -76,7 +81,6 @@ module Benry::CLI
       #; [!ooo42] can parse '-i[N]' (short + optional-arg).
       #; [!o93c7] can parse '--indent[=N]' (long + optional-arg).
       #; [!gzuhx] can parse string with extra spaces.
-      defstr = defstr.strip()
       case defstr
       when /\A-(\w),\s*--(\w[-\w]*)(?:=(\S+)|\[=(\S+)\])?\z/ ; arr = [$1,  $2,  $3, $4]
       when /\A-(\w)(?:\s+(\S+)|\[(\S+)\])?\z/                ; arr = [$1,  nil, $2, $3]
@@ -91,11 +95,13 @@ module Benry::CLI
         raise OptionDefinitionError.new("'#{defstr}': failed to parse option definition"+\
                                         " due to extra space before '['"+\
                                         " (should be '#{defstr.sub(/\s+/, '')}').")
+      #; [!6f4xx] uses long name or short name as option name when option name is not specfied.
+      name = name || long || short
       #
       argname = arg_required || arg_optional
       argflag = arg_required ? :required \
               : arg_optional ? :optional : nil
-      return self.new(short, long, argname, argflag, desc, &block)
+      return self.new(name, short, long, argname, argflag, desc, &block)
     end
 
     def option_string

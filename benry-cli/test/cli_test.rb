@@ -169,6 +169,52 @@ describe Benry::CLI::OptionSchema do
       ok {x.argname} == "N"
     end
 
+    it "[!cy1ux] regards canonical name of '-f NAME #file' as 'file'." do
+      x = Benry::CLI::OptionSchema.parse("-v  #version", "print version")
+      ok {x.short}   == "v"
+      ok {x.long}    == nil
+      ok {x.name}    == "version"
+      ok {x.argname} == nil
+      x = Benry::CLI::OptionSchema.parse("-f FILENAME #file", "config file")
+      ok {x.short}   == "f"
+      ok {x.long}    == nil
+      ok {x.name}    == "file"
+      ok {x.argname} == "FILENAME"
+      x = Benry::CLI::OptionSchema.parse("-i[N]  #indent", "indent (default 2)")
+      ok {x.short}   == "i"
+      ok {x.long}    == nil
+      ok {x.name}    == "indent"
+      ok {x.argname} == "N"
+    end
+
+    it "[!6f4xx] uses long name or short name as option name when option name is not specfied." do
+      x = Benry::CLI::OptionSchema.parse("-v, --ver  #version", "")
+      ok {x.name}    == "version"
+      ok {x.short}   == "v"
+      ok {x.long}    == "ver"
+      x = Benry::CLI::OptionSchema.parse("-v  #version", "")
+      ok {x.name}    == "version"
+      ok {x.short}   == "v"
+      ok {x.long}    == nil
+      x = Benry::CLI::OptionSchema.parse("--ver  #version", "")
+      ok {x.name}    == "version"
+      ok {x.short}   == nil
+      ok {x.long}    == "ver"
+      #
+      x = Benry::CLI::OptionSchema.parse("-v, --ver", "")
+      ok {x.name}    == "ver"
+      ok {x.short}   == "v"
+      ok {x.long}    == "ver"
+      x = Benry::CLI::OptionSchema.parse("-v", "")
+      ok {x.name}    == "v"
+      ok {x.short}   == "v"
+      ok {x.long}    == nil
+      x = Benry::CLI::OptionSchema.parse("--ver", "")
+      ok {x.name}    == "ver"
+      ok {x.short}   == nil
+      ok {x.long}    == "ver"
+    end
+
     it "[!1769n] raises error when invalid format." do
       pr = proc { Benry::CLI::OptionSchema.parse("-f, --file FILENAME", "config file") }
       ok {pr}.raise?(Benry::CLI::OptionDefinitionError,
@@ -471,8 +517,8 @@ describe Benry::CLI::Action do
           [
             'hello',
             'print hello message',
-            [Benry::CLI::OptionSchema.new('h', 'help', nil, nil, 'print help message'),
-             Benry::CLI::OptionSchema.new('n', 'name', 'NAME', :required, 'user name')],
+            [Benry::CLI::OptionSchema.new('help', 'h', 'help', nil, nil, 'print help message'),
+             Benry::CLI::OptionSchema.new('name', 'n', 'name', 'NAME', :required, 'user name')],
             :do_hello,
           ],
         ]
