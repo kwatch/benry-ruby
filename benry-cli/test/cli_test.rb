@@ -628,14 +628,18 @@ describe Benry::CLI::Application do
     it "[!b8isy] returns help message when global option '-h' or '--help' is specified." do
       expected = <<END
 Usage:
-  cli_test.rb [actions]
+  cli_test.rb [options] <action> [<args>...]
+
+Options:
+  -h, --help                : print help message
+      --version             : print version
 
 Actions:
   git:fork                  : create and switch to new branch
   git:join                  : merge branch with --no-ff
   git:switch                : switch git branch
 
-(Use `cli_test.rb help <ACTION>' to show help message of each action.)
+(Use `cli_test.rb help <action>' to show help message of each action.)
 END
       app = Benry::CLI::Application.new([GitAction])
       output = app.call('--help')
@@ -657,14 +661,18 @@ END
     it "[!p5pr6] returns global help message when action is 'help'." do
       expected = <<END
 Usage:
-  cli_test.rb [actions]
+  cli_test.rb [options] <action> [<args>...]
+
+Options:
+  -h, --help                : print help message
+      --version             : print version
 
 Actions:
   git:fork                  : create and switch to new branch
   git:join                  : merge branch with --no-ff
   git:switch                : switch git branch
 
-(Use `cli_test.rb help <ACTION>' to show help message of each action.)
+(Use `cli_test.rb help <action>' to show help message of each action.)
 END
       app = Benry::CLI::Application.new([GitAction])
       output = app.call('help')
