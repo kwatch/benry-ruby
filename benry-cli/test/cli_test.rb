@@ -467,6 +467,26 @@ describe Benry::CLI::Action do
       end
     end
 
+    it "[!v76cf] can take symbol as kwarg name." do
+      cls = Class.new(Benry::CLI::Action) do
+        @action.(:hello, "print hello")
+        @option.(:level, '-L N', 'level number') {|val| val.to_i }
+        def hello(level: 1)
+          "level=#{level.inspect}"
+        end
+      end
+      cls.instance_exec(self) do |_|
+        arr = @__mappings[0]
+        _.ok {arr[0]} == :hello
+        _.ok {arr[1]} == "print hello"
+        _.ok {arr[2][1].name}  == 'level'
+        _.ok {arr[2][1].short} == 'L'
+        _.ok {arr[2][1].long}  == nil
+        _.ok {arr[2][1].block}.is_a?(Proc)
+        _.ok {arr[2][1].block.call("123")} == 123
+      end
+    end
+
     it "[!di9na] raises error when @option.() called without @action.()." do
       pr = proc do
         Class.new(Benry::CLI::Action) do

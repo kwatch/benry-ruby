@@ -60,11 +60,11 @@ module Benry::CLI
       return @argflag == nil
     end
 
-    def self.parse(defstr, desc, &block)
+    def self.parse(defstr, desc, name: nil, &block)
       #; [!cy1ux] regards canonical name of '-f NAME #file' as 'file'.
       defstr = defstr.strip()
       defstr = defstr.sub(/\s+\#(\w+)\z/, '')
-      name = $1
+      name ||= $1
       #; [!fdh36] can parse '-v, --version' (short + long).
       #; [!jkmee] can parse '-v' (short)
       #; [!uc2en] can parse '--version' (long).
@@ -95,7 +95,7 @@ module Benry::CLI
       argname = arg_required || arg_optional
       argflag = arg_required ? :required \
               : arg_optional ? :optional : nil
-      return self.new(name, short, long, argname, argflag, desc, &block)
+      return self.new(name.to_s, short, long, argname, argflag, desc, &block)
     end
 
     def option_string
@@ -249,12 +249,17 @@ module Benry::CLI
           @__defining = [action_name, desc, option_schemas, method_name]
         end
         #; [!ymtsg] allows block argument to @option.
-        @option = proc do |defstr, desc, &block|
+        @option = proc do |symbol, defstr, desc, &block|
+          #; [!v76cf] can take symbol as kwarg name.
+          if ! symbol.is_a?(Symbol)
+            defstr, desc = symbol, defstr
+            symbol = nil
+          end
           #; [!di9na] raises error when @option.() called without @action.().
           @__defining  or
             raise OptionDefinitionError.new("@option.(#{defstr.inspect}): @action.() should be called prior to @option.().")
           option_schemas = @__defining[2]
-          option_schemas << OptionSchema.parse(defstr, desc, &block)
+          option_schemas << OptionSchema.parse(defstr, desc, name: symbol, &block)
         end
       end
       #; [!4otr6] registers subclass.
