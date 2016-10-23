@@ -337,9 +337,9 @@ module Benry::CLI
 
   class Application
 
-    def self.inherited(subclass=nil)
-      #; [!b09pv] provides @option in subclass.
-      subclass.class_eval do
+    def self._setup_app_class(klass)  # :nodoc:
+      klass.class_eval do
+        #; [!b09pv] provides @option in subclass.
         @option = proc do |defstr, desc, &block|
           option_schema = OptionSchema.parse(defstr, desc, &block)
           @__gopt_schemas << option_schema
@@ -352,7 +352,12 @@ module Benry::CLI
         ]
       end
     end
-    self.inherited(self)
+
+    self._setup_app_class(self)
+
+    def self.inherited(subclass)   # :nodoc:
+      self._setup_app_class(subclass)
+    end
 
     def initialize(action_classes=nil, desc: nil)
       @action_dict = accept(action_classes || Action::SUBCLASSES)
