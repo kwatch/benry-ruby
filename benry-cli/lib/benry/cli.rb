@@ -339,17 +339,16 @@ module Benry::CLI
 
     def self._setup_app_class(klass)  # :nodoc:
       klass.class_eval do
-        #; [!b09pv] provides @option in subclass.
-        @option = proc do |defstr, desc, &block|
-          option_schema = OptionSchema.parse(defstr, desc, &block)
-          @global_option_schemas << option_schema
-        end
         #; [!8swia] global option '-h' and '--help' are enabled by default.
         #; [!vh08n] global option '--version' is enabled by defaut.
         @global_option_schemas = [
           OptionSchema.parse("-h, --help",    "print help message"),
           OptionSchema.parse("    --version", "print version"),
         ]
+        #; [!b09pv] provides @option in subclass.
+        @option = proc do |defstr, desc, &block|
+          @global_option_schemas << OptionSchema.parse(defstr, desc, &block)
+        end
       end
     end
 
