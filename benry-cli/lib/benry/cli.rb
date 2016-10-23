@@ -306,9 +306,9 @@ module Benry::CLI
       meth.parameters.each do |kind, name|
         name_str = name.to_s.gsub('_', '-')
         case kind
-        when :req ; argstr << " #{name_str}"
-        when :opt ; argstr << " [#{name_str}]"
-        when :rest; argstr << " [#{name_str}...]"
+        when :req ; argstr << " <#{name_str}>"
+        when :opt ; argstr << " [<#{name_str}>]"
+        when :rest; argstr << " [<#{name_str}>...]"
         end
       end
       msg = ""

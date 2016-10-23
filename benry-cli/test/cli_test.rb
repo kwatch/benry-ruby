@@ -524,7 +524,7 @@ describe Benry::CLI::ActionInfo do
 switch git branch
 
 Usage:
-  script-name git:switch [options] aa bb [cc] [dd] [args...]
+  script-name git:switch [options] <aa> <bb> [<cc>] [<dd>] [<args>...]
 
 Options:
   -v, --verbose        : verbose mode
@@ -684,7 +684,7 @@ END
 create and switch to new branch
 
 Usage:
-  cli_test.rb git:fork [options] branch
+  cli_test.rb git:fork [options] <branch>
 
 Options:
   -h, --help           : print help message
@@ -706,7 +706,7 @@ END
 create and switch to new branch
 
 Usage:
-  cli_test.rb git:fork [options] branch
+  cli_test.rb git:fork [options] <branch>
 
 Options:
   -h, --help           : print help message
