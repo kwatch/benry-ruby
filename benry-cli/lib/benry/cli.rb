@@ -342,8 +342,8 @@ module Benry::CLI
           OptionSchema.parse("-h, --help",    "print help message"),
           OptionSchema.parse("    --version", "print version"),
         ]
-        #; [!b09pv] provides @option in subclass.
-        @option = proc do |defstr, desc, &block|
+        #; [!b09pv] provides @global_option in subclass.
+        @global_option = proc do |defstr, desc, &block|
           @global_option_schemas << OptionSchema.parse(defstr, desc, &block)
         end
       end

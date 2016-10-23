@@ -546,11 +546,11 @@ describe Benry::CLI::Application do
 
   describe '.inherited()' do
 
-    it "[!b09pv] provides @option in subclass." do
+    it "[!b09pv] provides @global_option in subclass." do
       cls = Class.new(Benry::CLI::Application)
       cls.instance_exec(self) do |_|
-        _.ok {@option} != nil
-        _.ok {@option}.is_a?(Proc)
+        _.ok {@global_option} != nil
+        _.ok {@global_option}.is_a?(Proc)
       end
     end
 
