@@ -503,14 +503,14 @@ module Benry::CLI
       msg << "\n"
       msg << "Options:\n"
       self.class.instance_variable_get('@_global_option_schemas').each do |schema|
-        msg << "  %-25s : %s\n" % [schema.option_string, schema.desc]
+        msg << "  %-20s : %s\n" % [schema.option_string, schema.desc]
       end
       msg << "\n"
       msg << "Actions:\n"
-      #msg << "  %-25s : %s\n" % ["help", "show this help"]
+      #msg << "  %-20s : %s\n" % ["help", "show this help"]
       @action_dict.keys.sort.each do |action_full_name|
         action_info = @action_dict[action_full_name]
-        msg << "  %-25s : %s\n" % [action_full_name, action_info.desc]
+        msg << "  %-20s : %s\n" % [action_full_name, action_info.desc]
       end
       msg << "\n"
       msg << "(Use `#{command} help <action>' to show help message of each action.)\n"

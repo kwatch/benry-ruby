@@ -631,13 +631,13 @@ Usage:
   cli_test.rb [options] <action> [<args>...]
 
 Options:
-  -h, --help                : print help message
-      --version             : print version
+  -h, --help           : print help message
+      --version        : print version
 
 Actions:
-  git:fork                  : create and switch to new branch
-  git:join                  : merge branch with --no-ff
-  git:switch                : switch git branch
+  git:fork             : create and switch to new branch
+  git:join             : merge branch with --no-ff
+  git:switch           : switch git branch
 
 (Use `cli_test.rb help <action>' to show help message of each action.)
 END
@@ -664,13 +664,13 @@ Usage:
   cli_test.rb [options] <action> [<args>...]
 
 Options:
-  -h, --help                : print help message
-      --version             : print version
+  -h, --help           : print help message
+      --version        : print version
 
 Actions:
-  git:fork                  : create and switch to new branch
-  git:join                  : merge branch with --no-ff
-  git:switch                : switch git branch
+  git:fork             : create and switch to new branch
+  git:join             : merge branch with --no-ff
+  git:switch           : switch git branch
 
 (Use `cli_test.rb help <action>' to show help message of each action.)
 END
