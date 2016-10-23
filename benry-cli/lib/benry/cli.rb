@@ -387,11 +387,7 @@ module Benry::CLI
       #; [!3hyvi] returns help message of action when action is 'help' with action name.
       action_full_name = args.shift || "help"
       if action_full_name == "help"
-        if args[0]
-          return help_message_of_action(File.basename($0), args[0])
-        else
-          return help_message(File.basename($0))
-        end
+        return help_message(File.basename($0), args[0])
       end
       ## action and options
       #; [!mb92l] raises error when action name is unknown.
@@ -462,7 +458,13 @@ module Benry::CLI
       end
     end
 
-    def help_message(command)
+    def help_message(command, action_name=nil)
+      if action_name
+        action_info = @action_dict[action_name]  or
+          raise err("#{action_name}: no such action.")
+        return action_info.help_message(command)
+      end
+      #
       msg = ""
       if @desc
         #msg << "#{command}  -- #{@desc}\n"
@@ -481,12 +483,6 @@ module Benry::CLI
       msg << "\n"
       msg << "(Use `#{command} help <ACTION>' to show help message of each action.)\n"
       return msg
-    end
-
-    def help_message_of_action(command, action_name)
-      action_info = @action_dict[action_name]  or
-        raise err("#{action_name}: no such action.")
-      return action_info.help_message(command)
     end
 
     private
