@@ -342,11 +342,11 @@ module Benry::CLI
         #; [!b09pv] provides @option in subclass.
         @option = proc do |defstr, desc, &block|
           option_schema = OptionSchema.parse(defstr, desc, &block)
-          @__gopt_schemas << option_schema
+          @global_option_schemas << option_schema
         end
         #; [!8swia] global option '-h' and '--help' are enabled by default.
         #; [!vh08n] global option '--version' is enabled by defaut.
-        @__gopt_schemas = [
+        @global_option_schemas = [
           OptionSchema.parse("-h, --help",    "print help message"),
           OptionSchema.parse("    --version", "print version"),
         ]
@@ -388,7 +388,7 @@ module Benry::CLI
 
     def call(*args)
       ## global options
-      global_option_schemas = self.class.instance_variable_get('@__gopt_schemas')
+      global_option_schemas = self.class.instance_variable_get('@global_option_schemas')
       output = handle_global_options(args, global_option_schemas)
       return output if output
       ## global help
