@@ -332,9 +332,6 @@ module Benry::CLI
   end
 
 
-  GLOBAL_OPTIONS = {}
-
-
   class Application
 
     def self._setup_app_class(klass)  # :nodoc:
@@ -440,9 +437,7 @@ module Benry::CLI
 
     def handle_global_options(args, global_option_schemas)
       return unless global_option_schemas
-      GLOBAL_OPTIONS.clear()
       g_opts = parse_options(args, global_option_schemas)
-      GLOBAL_OPTIONS.update(g_opts)
       #; [!b8isy] returns help message when global option '-h' or '--help' is specified.
       if g_opts['help']
         return help_message(File.basename($0), nil)
