@@ -312,6 +312,7 @@ module Benry::CLI
       meth = @action_class.new.method(@action_method)
       argstr = ""
       meth.parameters.each do |kind, name|
+        #; [!7qmnz] replaces '_' in arg names with '-'.
         name_str = name.to_s.gsub('_', '-')
         case kind
         when :req ; argstr << " <#{name_str}>"

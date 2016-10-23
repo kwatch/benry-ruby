@@ -534,6 +534,18 @@ END
       ok {info.help_message('script-name')} == expected
     end
 
+    it "[!7qmnz] replaces '_' in arg names with '-'." do
+      schemas = []
+      cls = Class.new(Benry::CLI::Action) do
+        def do_something(tmp_file_name, tmp_file_dir='/tmp')
+        end
+      end
+      action_info = Benry::CLI::ActionInfo.new('my:hom', 'hom', 'do something',
+                                               schemas, cls, :do_something)
+      s = action_info.help_message("script")
+      ok {s} =~ "Usage:\n  script my:hom [options] <tmp-file-name> [<tmp-file-dir>]"
+    end
+
   end
 
 
