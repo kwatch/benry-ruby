@@ -404,19 +404,8 @@ module Benry::CLI
         return action_info.help_message(File.basename($0))
       end
       ## validation
-      #; [!yhry7] raises error when required argument is missing.
       obj = action_info.action_class.new()
-      meth = obj.method(action_info.action_method)
-      n_min = meth.parameters.count {|x| x[0] == :req }
-      args.length >= n_min  or
-        raise err("too few arguments (at least #{n_min} args expected).")
-      #; [!h5522] raises error when too much arguments specified.
-      #; [!hq8b0] not raise error when many argument specified but method has *args.
-      unless meth.parameters.find {|x| x[0] == :rest }
-        n_max = meth.parameters.count {|x| x[0] == :req || x[0] == :opt }
-        args.length <= n_max  or
-          raise err("too many arguments (at most #{n_max} args expected).")
-      end
+      validate_args(obj, action_info.action_method, args)
       ## do action
       ret = run_action(obj, action_info.action_method, args, option_values)
       return ret
@@ -444,6 +433,21 @@ module Benry::CLI
     end
 
     protected
+
+    def validate_args(action_obj, method_name, args)
+      #; [!yhry7] raises error when required argument is missing.
+      meth = action_obj.method(method_name)
+      n_min = meth.parameters.count {|x| x[0] == :req }
+      args.length >= n_min  or
+        raise err("too few arguments (at least #{n_min} args expected).")
+      #; [!h5522] raises error when too much arguments specified.
+      #; [!hq8b0] not raise error when many argument specified but method has *args.
+      unless meth.parameters.find {|x| x[0] == :rest }
+        n_max = meth.parameters.count {|x| x[0] == :req || x[0] == :opt }
+        args.length <= n_max  or
+          raise err("too many arguments (at most #{n_max} args expected).")
+      end
+    end
 
     def run_action(action_obj, method_name, args, option_values)
       #; [!rph9y] converts 'foo-bar' option name into :foo_bar keyword.
