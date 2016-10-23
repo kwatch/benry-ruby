@@ -357,7 +357,7 @@ module Benry::CLI
 
     def initialize(action_classes=nil, desc: nil)
       @action_dict = accept(action_classes || Action::SUBCLASSES)
-      @desc = nil
+      @desc = desc
     end
 
     attr_reader :desc
@@ -481,6 +481,8 @@ module Benry::CLI
       end
     end
 
+    public
+
     def help_message(command, action_name=nil)
       if action_name
         action_info = @action_dict[action_name]  or
@@ -489,6 +491,7 @@ module Benry::CLI
       end
       #
       msg = ""
+      #; [!1zpv4] adds command desc if it is specified at initializer.
       if @desc
         #msg << "#{command}  -- #{@desc}\n"
         #msg << "\n"
