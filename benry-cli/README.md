@@ -117,11 +117,23 @@ class OptionTestAction < Benry::CLI::Action
   ##
   ## Define command-line options with @option.()
   ##
-  @action.(:hello, "say hello")
+  @action.(:hello1, "say hello")
   @option.('-q, --quiet'        , "quiet mode")       # no argument
   @option.('-f, --format=TYPE'  , "'text' or 'html'") # required arg
   @option.('-d, --debug[=LEVEL]', "debug level")      # optional arg
-  def do_hello(name='World', quiet: nil, format: nil, debug: nil)
+  def do_hello1(name='World', quiet: nil, format: nil, debug: nil)
+    puts "name=%p, quiet=%p, format=%p, debug=%p" % \
+          [name, quiet, format, debug]
+  end
+
+  ##
+  ## Long-only version
+  ##
+  @action.(:hello2, "say hello")
+  @option.('--quiet'        , "quiet mode")       # no argument
+  @option.('--format=TYPE'  , "'text' or 'html'") # required arg
+  @option.('--debug[=LEVEL]', "debug level")      # optional arg
+  def do_hello2(name='World', quiet: nil, format: nil, debug: nil)
     puts "name=%p, quiet=%p, format=%p, debug=%p" % \
           [name, quiet, format, debug]
   end
@@ -129,24 +141,24 @@ class OptionTestAction < Benry::CLI::Action
   ##
   ## Short-only version
   ##
-  @action.(:hello2, "say hello")
+  @action.(:hello3, "say hello")
   @option.('-q'        , "quiet mode")       # no argument
   @option.('-f TYPE'   , "'text' or 'html'") # required arg
   @option.('-d[=LEVEL]', "debug level")      # optional arg
-  def do_hello2(name='World', q: nil, f: nil, d: nil)
+  def do_hello3(name='World', q: nil, f: nil, d: nil)
     puts "name=%p, q=%p, f=%p, d=%p" % \
           [name, q, f, d]
   end
 
   ##
-  ## Long-only version
+  ## Change keyword arg name without '--long' option
   ##
-  @action.(:hello3, "say hello")
-  @option.('--quiet'        , "quiet mode")       # no argument
-  @option.('--format=TYPE'  , "'text' or 'html'") # required arg
-  @option.('--debug[=LEVEL]', "debug level")      # optional arg
-  def do_hello3(name='World', quiet: nil, format: nil, debug: nil)
-    puts "name=%p, quiet=%p, format=%p, debug=%p" % \
+  @action.(:hello4,    "say hello")
+  @option.(:quiet,  '-q        ' , "quiet mode")       # no argument
+  @option.(:format, '-f TYPE   ' , "'text' or 'html'") # required arg
+  @option.(:debug,  '-d[=LEVEL]' , "debug level")      # optional arg
+  def do_hello4(name='World', quiet: nil, format: nil, debug: nil)
+    puts "name=%p, quit=%p, format=%p, debug=%p" % \
           [name, quiet, format, debug]
   end
 
@@ -191,9 +203,10 @@ Options:
       --version        : print version
 
 Actions:
-  hello                : say hello
+  hello1               : say hello
   hello2               : say hello
   hello3               : say hello
+  hello4               : say hello
 
 (Run `ex2.rb help <action>' to show help message of each action.)
 ```
