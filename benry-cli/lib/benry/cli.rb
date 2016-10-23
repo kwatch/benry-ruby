@@ -365,13 +365,14 @@ module Benry::CLI
       self._setup_app_class(subclass)
     end
 
-    def initialize(desc=nil, version: '0.0', action_classes: nil)
+    def initialize(desc=nil, version: '0.0', script_name: nil, action_classes: nil)
       @desc        = desc
       @version     = version
+      @script_name = script_name || File.basename($0)
       @action_dict = accept(action_classes || Action::SUBCLASSES)
     end
 
-    attr_reader :desc, :version
+    attr_reader :desc, :version, :script_name
 
     private
 
@@ -403,7 +404,7 @@ module Benry::CLI
       #; [!3hyvi] returns help message of action when action is 'help' with action name.
       action_full_name = args.shift || "help"
       if action_full_name == "help"
-        return help_message(File.basename($0), args[0])
+        return help_message(self.script_name, args[0])
       end
       ## action and options
       #; [!mb92l] raises error when action name is unknown.
@@ -413,7 +414,7 @@ module Benry::CLI
       ## show help
       #; [!13m3q] returns help message if '-h' or '--help' specified to action.
       if option_values['help']
-        return action_info.help_message(File.basename($0))
+        return action_info.help_message(self.script_name)
       end
       ## validation
       obj = action_info.action_class.new()
@@ -456,7 +457,7 @@ module Benry::CLI
       g_opts = global_option_values
       #; [!b8isy] returns help message when global option '-h' or '--help' is specified.
       if g_opts['help']
-        return help_message(File.basename($0), nil)
+        return help_message(self.script_name, nil)
       end
       #; [!4irzw] returns version string when global option '--version' is specified.
       if g_opts['version']
