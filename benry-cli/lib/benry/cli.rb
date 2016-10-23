@@ -377,11 +377,7 @@ module Benry::CLI
     def call(*args)
       ## global options
       global_option_schemas = self.class.instance_variable_get('@__gopt_schemas')
-      if global_option_schemas
-        GLOBAL_OPTIONS.clear()
-        gopt_values = parse_options(args, global_option_schemas)
-        GLOBAL_OPTIONS.update(gopt_values)
-      end
+      handle_global_options(args, global_option_schemas)
       ## global help
       #; [!p5pr6] returns global help message when action is 'help'.
       #; [!3hyvi] returns help message of action when action is 'help' with action name.
@@ -429,6 +425,13 @@ module Benry::CLI
     end
 
     protected
+
+    def handle_global_options(args, global_option_schemas)
+      return unless global_option_schemas
+      GLOBAL_OPTIONS.clear()
+      g_opts = parse_options(args, global_option_schemas)
+      GLOBAL_OPTIONS.update(g_opts)
+    end
 
     def validate_args(action_obj, method_name, args)
       #; [!yhry7] raises error when required argument is missing.
