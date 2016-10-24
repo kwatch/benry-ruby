@@ -359,6 +359,9 @@ module Benry::CLI
       msg << "\n"
       msg << "Options:\n"
       pairs = @option_schemas.collect {|opt| [opt.option_string, opt.desc] }
+      #; [!6m50d] don't show non-described options.
+      pairs = pairs.select {|optstr, desc| desc }
+      #
       width = pairs.collect {|pair| pair[0].length }.max || 0
       width = [width, 20].max
       width = [width, 35].min

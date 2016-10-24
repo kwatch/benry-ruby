@@ -688,6 +688,32 @@ END
       ok {s} =~ "Usage:\n  script my:hom [options] <file|directory> [<name|id>]"
     end
 
+    it "[!6m50d] don't show non-described options." do
+      schemas = [
+        Benry::CLI::OptionSchema.parse("-v, --verbose", "verbose mode"),
+        Benry::CLI::OptionSchema.parse("-f, --file=NAME", nil),   # hidden option
+        Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "indent (default 2)"),
+      ]
+      cls = Class.new(Benry::CLI::Action) do
+        def do_something(verbose: false, file: nil, indent: nil)
+        end
+      end
+      action_info = Benry::CLI::ActionInfo.new('foo', 'foo', 'Do something',
+                                               schemas, cls, :do_something)
+      s = action_info.help_message("script")
+      ok {s} == <<END
+Do something
+
+Usage:
+  script foo [options]
+
+Options:
+  -v, --verbose        : verbose mode
+  -i, --indent[=N]     : indent (default 2)
+END
+      ok {s}.NOT =~ /--file/
+    end
+
   end
 
 
