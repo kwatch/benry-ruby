@@ -187,28 +187,28 @@ module Benry::CLI
 
     def parse_long_option(argstr, option_values)
       argstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/
-      long, value = $1, $2
+      long, val = $1, $2
       #; [!w67gl] raises error when long option is unknown.
       opt = @option_schemas.find {|x| x.long == long }  or
         raise err("--#{long}: unknown option.")
       #; [!kyd1j] raises error when required argument of long option is missing.
       if opt.arg_required?
-        value  or
+        val  or
           raise err("#{argstr}: argument required.")
       #; [!wuyrh] uses true as default value of optional argument of long option.
       elsif opt.arg_optional?
-        value ||= true
+        val ||= true
       #; [!91b2j] raises error when long option takes no argument but specified.
       else
-        value.nil?  or
+        val.nil?  or
           raise err("#{argstr}: unexpected argument.")
-        value = true
+        val = true
       end
       #; [!9td8b] invokes callback with long option value if callback exists.
       #; [!1hak2] invokes callback with long option values as 2nd argument.
       begin
         if (pr = opt.callback)
-          value = pr.arity == 2 ? pr.call(value, option_values) : pr.call(value)
+          val = pr.arity == 2 ? pr.call(val, option_values) : pr.call(val)
         end
       rescue => ex
         #; [!nkqln] regards RuntimeError callback raised as long option error.
@@ -216,7 +216,7 @@ module Benry::CLI
         raise err("#{argstr}: #{ex.message}")
       end
       #
-      option_values[opt.name] = value
+      option_values[opt.name] = val
     end
 
     def parse_short_option(args, argstr, option_values)
@@ -229,34 +229,34 @@ module Benry::CLI
           raise err("-#{char}: unknown option.")
         #; [!jzdcr] raises error when requried argument of short option is missing.
         if opt.arg_required?
-          value = argstr[(i+1)..-1]
-          value = args.shift if value.empty?
-          value  or
+          val = argstr[(i+1)..-1]
+          val = args.shift if val.empty?
+          val  or
             raise err("-#{char}: argument required.")
           i = n
         #; [!hnki9] uses true as default value of optional argument of short option.
         elsif opt.arg_optional?
-          value = argstr[(i+1)..-1]
-          value = true if value.empty?
+          val = argstr[(i+1)..-1]
+          val = true if val.empty?
           i = n
         #; [!8gj65] uses true as value of short option which takes no argument.
         else
-          value = true
+          val = true
         end
         #; [!l6gss] invokes callback with short option value if exists.
         #; [!g4pld] invokes callback with short option values as 2nd argument.
         begin
           if (pr = opt.callback)
-            value = pr.arity == 2 ? pr.call(value, option_values) : pr.call(value)
+            val = pr.arity == 2 ? pr.call(val, option_values) : pr.call(val)
           end
         rescue => ex
           #; [!d4mgr] regards RuntimeError callback raised as short option error.
           raise unless ex.class == RuntimeError
           space = opt.arg_required? ? ' ' : ''
-          raise err("-#{char}#{space}#{value}: #{ex.message}")
+          raise err("-#{char}#{space}#{val}: #{ex.message}")
         end
         #
-        option_values[opt.name] = value
+        option_values[opt.name] = val
       end
     end
 
