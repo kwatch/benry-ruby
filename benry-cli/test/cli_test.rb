@@ -273,6 +273,39 @@ describe Benry::CLI::OptionParser do
   end
 
 
+  describe '#otpion()' do
+
+    it "[!s59ly] accepts option definition string and description." do
+      parser = Benry::CLI::OptionParser.new
+      parser.option('-v, --verbose', "set verbose mode")
+      parser.option('-f, --file=NAME', "config file")
+      parser.option('-i, --indent[=n]', "indentation (default 2)") {|val| val.to_i }
+      args = ["-vffoo.txt", "-i2", "x", "y"]
+      options = parser.parse_options(args)
+      ok {options} == {"verbose"=>true, "file"=>"foo.txt", "indent"=>2}
+      ok {args} == ["x", "y"]
+    end
+
+    it "[!2gfnh] recognizes first argument as option name if it is a symbol." do
+      parser = Benry::CLI::OptionParser.new
+      parser.option(:verbose, '-v     ', "set verbose mode")
+      parser.option(:file   , '-f NAME', "config file")
+      parser.option(:indent , '-i[=n] ', "indentation (default 2)")
+      args = ["-vffoo.txt", "-i", "x", "y"]
+      options = parser.parse_options(args)
+      ok {options} == {"verbose"=>true, "file"=>"foo.txt", "indent"=>true}
+      ok {args} == ["x", "y"]
+    end
+
+    it "[!fv5g4] return self in order to chain method call." do
+      parser = Benry::CLI::OptionParser.new
+      ret = parser.option('-v, --verbose', "set verbose mode")
+      ok {ret}.same?(parser)
+    end
+
+  end
+
+
   describe '#parse_options()' do
 
     it "[!5jfhv] returns command-line options as hash object." do

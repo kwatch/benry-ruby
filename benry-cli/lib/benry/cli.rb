@@ -123,7 +123,7 @@ module Benry::CLI
 
   class OptionParser
 
-    def initialize(option_schemas)
+    def initialize(option_schemas=[])
       #; [!bflls] takes array of option schema.
       @option_schemas = option_schemas.collect {|x|
         case x
@@ -133,6 +133,17 @@ module Benry::CLI
           raise OptionDefinitionError.new("#{x.inspect}: invalid option schema.")
         end
       }
+    end
+
+    def option(symbol, defstr=nil, desc=nil, &block)
+      #; [!s59ly] accepts option definition string and description.
+      #; [!2gfnh] recognizes first argument as option name if it is a symbol.
+      unless symbol.is_a?(Symbol)
+        symbol, defstr, desc = nil, symbol, defstr
+      end
+      @option_schemas << OptionSchema.parse(defstr, desc, name: symbol, &block)
+      #; [!fv5g4] return self in order to chain method call.
+      self
     end
 
     def err(msg)
