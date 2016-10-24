@@ -942,10 +942,12 @@ END
       app = Benry::CLI::Application.new(action_classes: [cls])
       pr = proc { app.run('hello1') }
       ok {pr}.raise?(Benry::CLI::OptionError,
-                     "too few arguments (at least 2 args expected).")
+                     "too few arguments (at least 2 args expected).\n" +\
+                     "(run `cli_test.rb help hello1' for details.)")
       pr = proc { app.run('hello1', "x") }
       ok {pr}.raise?(Benry::CLI::OptionError,
-                     "too few arguments (at least 2 args expected).")
+                     "too few arguments (at least 2 args expected).\n" +\
+                     "(run `cli_test.rb help hello1' for details.)")
       pr = proc { app.run('hello1', "x", "y") }
       ok {pr}.NOT.raise?(Exception)
     end
@@ -955,7 +957,8 @@ END
       app = Benry::CLI::Application.new(action_classes: [cls])
       pr = proc { app.run('hello1', "x1", "x2", "x3", "x4", "x5") }
       ok {pr}.raise?(Benry::CLI::OptionError,
-                     "too many arguments (at most 4 args expected).")
+                     "too many arguments (at most 4 args expected).\n" +\
+                     "(run `cli_test.rb help hello1' for details.)")
     end
 
     it "[!hq8b0] not raise error when many argument specified but method has *args." do

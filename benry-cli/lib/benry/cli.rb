@@ -461,7 +461,7 @@ module Benry::CLI
       ## validation
       obj = action_info.action_class.new()
       method_name = action_info.action_method
-      validate_args(obj, method_name, args)
+      validate_args(obj, method_name, args, action_full_name)
       ## do action
       ret = kick_action(obj, method_name, args, option_values)
       return ret
@@ -508,18 +508,20 @@ module Benry::CLI
       end
     end
 
-    def validate_args(action_obj, method_name, args)
+    def validate_args(action_obj, method_name, args, action_full_name)
       #; [!yhry7] raises error when required argument is missing.
       meth = action_obj.method(method_name)
       n_min = meth.parameters.count {|x| x[0] == :req }
       args.length >= n_min  or
-        raise err("too few arguments (at least #{n_min} args expected).")
+        raise err("too few arguments (at least #{n_min} args expected).\n" +\
+                  "(run `#{@script_name} help #{action_full_name}' for details.)")
       #; [!h5522] raises error when too much arguments specified.
       #; [!hq8b0] not raise error when many argument specified but method has *args.
       unless meth.parameters.find {|x| x[0] == :rest }
         n_max = meth.parameters.count {|x| x[0] == :req || x[0] == :opt }
         args.length <= n_max  or
-          raise err("too many arguments (at most #{n_max} args expected).")
+          raise err("too many arguments (at most #{n_max} args expected).\n" +\
+                    "(run `#{@script_name} help #{action_full_name}' for details.)")
       end
     end
 
