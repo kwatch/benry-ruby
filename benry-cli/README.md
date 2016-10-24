@@ -357,6 +357,29 @@ Actions:
 Of course, it is possible to specify prefix name with `@action.(:'git:stage')`.
 
 
+#### Parse Command Options without Application
+
+If you need just command-line option parser instead of application,
+use `Benry::CLI::OptionParser` class.
+
+parser.rb:
+```ruby
+require 'benry/cli'
+
+parser = Benry::CLI::OptionParser.new
+parser.option("-h, --help",       "print help")
+parser.option("-f, --file=FILE",  "load filename")
+parser.option("-i, --indent=N",   "indent") {|val|
+  val =~ /\A\d+\z/  or raise "integer expected."  # validation
+  val.to_i    # convertion (string -> integer)
+}
+args = ['-hftest.txt', '-i', '2', "x", "y"]
+options = parser.parse(args)
+puts options       #=> {"help"=>true, "file"=>"test.txt", "indent"=>2}
+puts args.inspect  #=> ["x", "y"]
+```
+
+
 License and Copyright
 ---------------------
 
