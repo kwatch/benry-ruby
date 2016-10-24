@@ -121,22 +121,6 @@ module Benry::CLI
   end
 
 
-  ##
-  ## Command-line option parser class.
-  ##
-  ## ex:
-  ##     parser = Benry::CLI::OptionParser.new
-  ##     parser.option("-h, --help",       "print help")
-  ##     parser.option("-f, --file=FILE",  "load filename")
-  ##     parser.option("-i, --indent=N",   "indent") {|val|
-  ##       val =~ /\A\d+\z/  or raise "integer expected."  # validation
-  ##       val.to_i    # convertion (string -> integer)
-  ##     }
-  ##     args = ['-hftest.txt', '-i', '2', "x", "y"]
-  ##     options = parser.parse(args)
-  ##     puts options       #=> {"help"=>true, "file"=>"test.txt", "indent"=>2}
-  ##     puts args.inspect  #=> ["x", "y"]
-  ##
   class OptionParser
 
     def initialize(option_schemas=[])
