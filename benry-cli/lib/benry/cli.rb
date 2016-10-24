@@ -165,8 +165,9 @@ module Benry::CLI
     def parse(args)
       #; [!5jfhv] returns command-line options as hash object.
       #; [!06iq3] removes command-line options from args.
+      #; [!j2fda] stops command-line parsing when '-' found in args.
       option_values = {}
-      while args[0] && args[0].start_with?('-')
+      while args[0] && args[0].start_with?('-') && args[0] != '-'
         argstr = args.shift
         #; [!31h46] stops parsing when '--' appears in args.
         if argstr == '--'

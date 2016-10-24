@@ -364,6 +364,14 @@ describe Benry::CLI::OptionParser do
       ok {args} == ["1", "2"]
     end
 
+    it "[!j2fda] stops command-line parsing when '-' found in args." do
+      p = _option_parser()
+      args = "-v - -f file.txt foo bar".split()
+      options = p.parse(args)
+      ok {options} == {'version'=>true}
+      ok {args} == ["-", "-f", "file.txt", "foo", "bar"]
+    end
+
     it "[!w5dpy] can parse long options." do
       p = _option_parser()
       args = "--version".split()
