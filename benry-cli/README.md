@@ -253,7 +253,12 @@ Other Topics
 ------------
 
 
-### Argument Name in Help Message
+### Name Conversion Rule in Help Message
+
+* Action name 'foo_bar' is printed as 'foo-bar' in help message.
+* Long option '--foo-bar' corresponds to 'foo_bar' keyword argument.
+* Argument 'foo_bar' is printed as 'foo-bar' in help message.
+* Argument 'foo_or_bar' is printed as 'foo|bar' in help message (!!).
 
 argname.rb:
 ```ruby
@@ -262,11 +267,12 @@ require 'benry/cli'
 class FooAction < Benry::CLI::Action
 
   ##
-  ## * parameter 'file_name' will be 'file-name' in help message.
-  ## * parameter 'file_or_dir' will be 'file|dir' in help message.
+  ## * 'file_name'   -> 'file-name'
+  ## * 'file_or_dir' -> 'file|dir'
   ##
-  @action.(:homhom, "test")
-  def do_homhom(file_name, file_or_dir=nil)
+  @action.(:bla_bla_bla, "test")
+  @option.('-v, --verbose-mode', "enable verbose mode")
+  def do_something(file_name, file_or_dir=nil, verbose_mode: nil)
     # ...
   end
 
@@ -279,18 +285,21 @@ end
 
 Example:
 ```console
-$ ruby argname.rb help homhom
+$ ruby argname.rb help bla-bla-bla
 test
 
 Usage:
-  argname.rb homhom [options] <file-name> [<file|dir>]
+  argname.rb bla-bla-bla [options] <file-name> [<file|dir>]
 
 Options:
   -h, --help           : print help message
+  -v, --verbose-mode   : enable verbose mode
 ```
 
 
 ### Prefix of Action Name
+
+`self.prefix = "..."` sets prefix name of action.
 
 mygit.rb:
 ```ruby
@@ -344,6 +353,8 @@ Actions:
 
 (Run `mygit.rb help <action>' to show help message of each action.)
 ```
+
+Of course, it is possible to specify prefix name with `@action.(:'git:stage')`.
 
 
 License and Copyright
