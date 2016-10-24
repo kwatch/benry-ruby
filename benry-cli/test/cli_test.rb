@@ -668,6 +668,25 @@ describe Benry::CLI::Application do
                             )
     end
 
+    it "[!x6rh1] registers action name replacing '_' with '-'." do
+      cls = Class.new(Benry::CLI::Action) do
+        @action.(:bla_bla_bla, "bla bla bla")
+        def do_xx()
+          return "OK"
+        end
+      end
+      app = Benry::CLI::Application.new
+      d = app.__send__(:accept, [cls])
+      ok {d}.is_a?(Hash)
+      ok {d.keys().sort} == ['bla-bla-bla']
+      #
+      app = Benry::CLI::Application.new(nil, action_classes: [cls])
+      output1 = app.call('--help')
+      ok {output1} =~ /Actions:\n  bla-bla-bla +: bla bla bla\n/
+      output2 = app.call('bla-bla-bla')
+      ok {output2} == "OK"
+    end
+
   end
 
 

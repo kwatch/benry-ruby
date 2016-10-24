@@ -390,6 +390,9 @@ module Benry::CLI
           action_name, desc, option_schemas, method_name = tuple
           action_name ||= method_name
           full_name = prefix ? "#{prefix}:#{action_name}" : action_name.to_s
+          #; [!x6rh1] registers action name replacing '_' with '-'.
+          full_name = full_name.gsub('_', '-')
+          #
           action_dict[full_name] = ActionInfo.new(full_name, action_name, desc,
                                             option_schemas, klass, method_name)
         end
