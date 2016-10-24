@@ -162,7 +162,7 @@ module Benry::CLI
       OptionError.new(msg)
     end
 
-    def parse_options(args)
+    def parse(args)
       #; [!5jfhv] returns command-line options as hash object.
       #; [!06iq3] removes command-line options from args.
       option_values = {}
@@ -562,7 +562,7 @@ module Benry::CLI
     private
 
     def parse_options(args, option_schemas)
-      return OptionParser.new(option_schemas).parse_options(args)
+      return OptionParser.new(option_schemas).parse(args)
     end
 
     def err(msg)

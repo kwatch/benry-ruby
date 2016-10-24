@@ -281,7 +281,7 @@ describe Benry::CLI::OptionParser do
       parser.option('-f, --file=NAME', "config file")
       parser.option('-i, --indent[=n]', "indentation (default 2)") {|val| val.to_i }
       args = ["-vffoo.txt", "-i2", "x", "y"]
-      options = parser.parse_options(args)
+      options = parser.parse(args)
       ok {options} == {"verbose"=>true, "file"=>"foo.txt", "indent"=>2}
       ok {args} == ["x", "y"]
     end
@@ -292,7 +292,7 @@ describe Benry::CLI::OptionParser do
       parser.option(:file   , '-f NAME', "config file")
       parser.option(:indent , '-i[=n] ', "indentation (default 2)")
       args = ["-vffoo.txt", "-i", "x", "y"]
-      options = parser.parse_options(args)
+      options = parser.parse(args)
       ok {options} == {"verbose"=>true, "file"=>"foo.txt", "indent"=>true}
       ok {args} == ["x", "y"]
     end
@@ -344,91 +344,91 @@ describe Benry::CLI::OptionParser do
   end
 
 
-  describe '#parse_options()' do
+  describe '#parse()' do
 
     it "[!5jfhv] returns command-line options as hash object." do
       p = _option_parser()
       args = "-vffile.txt foo bar".split()
-      ok {p.parse_options(args)} == {"version"=>true, "file"=>"file.txt"}
+      ok {p.parse(args)} == {"version"=>true, "file"=>"file.txt"}
       args = "--file=foo.txt --version --indent=2".split()
-      ok {p.parse_options(args)} == {"version"=>true, "file"=>"foo.txt", "indent"=>"2"}
+      ok {p.parse(args)} == {"version"=>true, "file"=>"foo.txt", "indent"=>"2"}
     end
 
     it "[!06iq3] removes command-line options from args." do
       p = _option_parser()
       args = "-vffile.txt foo bar".split()
-      p.parse_options(args)
+      p.parse(args)
       ok {args} == ["foo", "bar"]
       args = "--file=foo.txt --version --indent=2 1 2".split()
-      p.parse_options(args)
+      p.parse(args)
       ok {args} == ["1", "2"]
     end
 
     it "[!w5dpy] can parse long options." do
       p = _option_parser()
       args = "--version".split()
-      ok {p.parse_options(args)} == {"version"=>true}
+      ok {p.parse(args)} == {"version"=>true}
       args = "--file=foo.txt".split()
-      ok {p.parse_options(args)} == {"file"=>"foo.txt"}
+      ok {p.parse(args)} == {"file"=>"foo.txt"}
       args = "--indent".split()
-      ok {p.parse_options(args)} == {"indent"=>true}
+      ok {p.parse(args)} == {"indent"=>true}
       args = "--indent=99".split()
-      ok {p.parse_options(args)} == {"indent"=>"99"}
+      ok {p.parse(args)} == {"indent"=>"99"}
     end
 
     it "[!mov8e] can parse short options." do
       p = _option_parser()
       args = "-v".split()
-      ok {p.parse_options(args)} == {"version"=>true}
+      ok {p.parse(args)} == {"version"=>true}
       args = "-f foo.txt".split()
-      ok {p.parse_options(args)} == {"file"=>"foo.txt"}
+      ok {p.parse(args)} == {"file"=>"foo.txt"}
       args = "-i foo bar".split()
-      ok {p.parse_options(args)} == {"indent"=>true}
+      ok {p.parse(args)} == {"indent"=>true}
       args = "-i99 foo bar".split()
-      ok {p.parse_options(args)} == {"indent"=>"99"}
+      ok {p.parse(args)} == {"indent"=>"99"}
     end
 
     it "[!31h46] stops parsing when '--' appears in args." do
       p = _option_parser()
       args = "-v -- -ffile.txt foo bar".split()
-      ok {p.parse_options(args)} == {"version"=>true}
+      ok {p.parse(args)} == {"version"=>true}
       ok {args} == ["-ffile.txt", "foo", "bar"]
     end
 
     it "[!w67gl] raises error when long option is unknown." do
       p = _option_parser()
-      pr = proc { p.parse_options("-v --verbose".split()) }
+      pr = proc { p.parse("-v --verbose".split()) }
       ok {pr}.raise?(Benry::CLI::OptionError, "--verbose: unknown option.")
-      pr = proc { p.parse_options("-v --quiet=yes".split()) }
+      pr = proc { p.parse("-v --quiet=yes".split()) }
       ok {pr}.raise?(Benry::CLI::OptionError, "--quiet: unknown option.")
     end
 
     it "[!kyd1j] raises error when required argument of long option is missing." do
       p = _option_parser()
-      pr = proc { p.parse_options("-v --file".split()) }
+      pr = proc { p.parse("-v --file".split()) }
       ok {pr}.raise?(Benry::CLI::OptionError, "--file: argument required.")
     end
 
     it "[!wuyrh] uses true as default value of optional argument of long option." do
       p = _option_parser()
-      ok {p.parse_options("-v --indent".split())} == {"indent"=>true, "version"=>true}
+      ok {p.parse("-v --indent".split())} == {"indent"=>true, "version"=>true}
     end
 
     it "[!91b2j] raises error when long option takes no argument but specified." do
       p = _option_parser()
-      pr = proc { p.parse_options("-v --version=1.1".split()) }
+      pr = proc { p.parse("-v --version=1.1".split()) }
       ok {pr}.raise?(Benry::CLI::OptionError, "--version=1.1: unexpected argument.")
     end
 
     it "[!9td8b] invokes callback with long option value if callback exists." do
       p = _option_parser()
-      ok {p.parse_options(["--indent=99"])} == {"indent"=>"99"}
+      ok {p.parse(["--indent=99"])} == {"indent"=>"99"}
       #
       arr = [
         Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "") {|value| value.to_i }
       ]
       p2 = Benry::CLI::OptionParser.new(arr)
-      ok {p2.parse_options(["--indent=99"])} == {"indent"=>99}
+      ok {p2.parse(["--indent=99"])} == {"indent"=>99}
     end
 
     it "[!nkqln] regards RuntimeError callback raised as long option error." do
@@ -439,41 +439,41 @@ describe Benry::CLI::OptionParser do
         }
       ]
       p2 = Benry::CLI::OptionParser.new(arr)
-      pr = proc { p2.parse_options(["--indent=9.9"]) }
+      pr = proc { p2.parse(["--indent=9.9"]) }
       ok {pr}.raise?(Benry::CLI::OptionError, "--indent=9.9: positive integer expected.")
     end
 
     it "[!wr58v] raises error when unknown short option specified." do
       p = _option_parser()
-      pr = proc { p.parse_options("-vx".split()) }
+      pr = proc { p.parse("-vx".split()) }
       ok {pr}.raise?(Benry::CLI::OptionError, "-x: unknown option.")
     end
 
     it "[!jzdcr] raises error when requried argument of short option is missing." do
       p = _option_parser()
-      pr = proc { p.parse_options("-vf".split()) }
+      pr = proc { p.parse("-vf".split()) }
       ok {pr}.raise?(Benry::CLI::OptionError, "-f: argument required.")
     end
 
     it "[!hnki9] uses true as default value of optional argument of short option." do
       p = _option_parser()
-      ok {p.parse_options("-i".split())} == {"indent"=>true}
+      ok {p.parse("-i".split())} == {"indent"=>true}
     end
 
     it "[!8gj65] uses true as value of short option which takes no argument." do
       p = _option_parser()
-      ok {p.parse_options("-v".split())} == {"version"=>true}
+      ok {p.parse("-v".split())} == {"version"=>true}
     end
 
     it "[!l6gss] invokes callback with short option value if exists." do
       p = _option_parser()
-      ok {p.parse_options(["-i99"])} == {"indent"=>"99"}
+      ok {p.parse(["-i99"])} == {"indent"=>"99"}
       #
       arr = [
         Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "") {|value| value.to_i }
       ]
       p2 = Benry::CLI::OptionParser.new(arr)
-      ok {p2.parse_options(["-i99"])} == {"indent"=>99}
+      ok {p2.parse(["-i99"])} == {"indent"=>99}
     end
 
     it "[!d4mgr] regards RuntimeError callback raised as short option error." do
@@ -484,7 +484,7 @@ describe Benry::CLI::OptionParser do
         }
       ]
       p1 = Benry::CLI::OptionParser.new(arr)
-      pr = proc { p1.parse_options(["-L9.9"]) }
+      pr = proc { p1.parse(["-L9.9"]) }
       ok {pr}.raise?(Benry::CLI::OptionError, "-L 9.9: positive integer expected.")
       #
       arr = [
@@ -494,7 +494,7 @@ describe Benry::CLI::OptionParser do
         }
       ]
       p2 = Benry::CLI::OptionParser.new(arr)
-      pr = proc { p2.parse_options(["-i9.9"]) }
+      pr = proc { p2.parse(["-i9.9"]) }
       ok {pr}.raise?(Benry::CLI::OptionError, "-i9.9: positive integer expected.")
     end
 
