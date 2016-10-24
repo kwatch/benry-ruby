@@ -439,6 +439,17 @@ describe Benry::CLI::OptionParser do
       ok {p2.parse(["--indent=99"])} == {"indent"=>99}
     end
 
+    it "[!1hak2] invokes callback with long option values as 2nd argument." do
+      arr = [
+        Benry::CLI::OptionSchema.parse("--include=path", "") {|val, values|
+          (values['include'] || []) << val
+        }
+      ]
+      p = Benry::CLI::OptionParser.new(arr)
+      args = ["--include=/tmp", "--include=/var/tmp", "--include=/usr/tmp"]
+      ok {p.parse(args)} == {"include"=>["/tmp", "/var/tmp", "/usr/tmp"]}
+    end
+
     it "[!nkqln] regards RuntimeError callback raised as long option error." do
       arr = [
         Benry::CLI::OptionSchema.parse("-i, --indent[=N]", "") {|val|
@@ -482,6 +493,17 @@ describe Benry::CLI::OptionParser do
       ]
       p2 = Benry::CLI::OptionParser.new(arr)
       ok {p2.parse(["-i99"])} == {"indent"=>99}
+    end
+
+    it "[!g4pld] invokes callback with short option values as 2nd argument." do
+      arr = [
+        Benry::CLI::OptionSchema.parse("-I path  #include", "") {|val, values|
+          (values['include'] || []) << val
+        }
+      ]
+      p = Benry::CLI::OptionParser.new(arr)
+      args = ['-I', '/tmp', '-I', '/var/tmp', '-I/usr/tmp']
+      ok {p.parse(args)} == {'include'=>['/tmp', '/var/tmp', '/usr/tmp']}
     end
 
     it "[!d4mgr] regards RuntimeError callback raised as short option error." do

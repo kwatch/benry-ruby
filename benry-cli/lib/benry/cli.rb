@@ -205,8 +205,11 @@ module Benry::CLI
         value = true
       end
       #; [!9td8b] invokes callback with long option value if callback exists.
+      #; [!1hak2] invokes callback with long option values as 2nd argument.
       begin
-        value = opt.block.call(value) if opt.block
+        if (pr = opt.block)
+          value = pr.arity == 2 ? pr.call(value, option_values) : pr.call(value)
+        end
       rescue => ex
         #; [!nkqln] regards RuntimeError callback raised as long option error.
         raise unless ex.class == RuntimeError
@@ -241,8 +244,11 @@ module Benry::CLI
           value = true
         end
         #; [!l6gss] invokes callback with short option value if exists.
+        #; [!g4pld] invokes callback with short option values as 2nd argument.
         begin
-          value = opt.block.call(value) if opt.block
+          if (pr = opt.block)
+            value = pr.arity == 2 ? pr.call(value, option_values) : pr.call(value)
+          end
         rescue => ex
           #; [!d4mgr] regards RuntimeError callback raised as short option error.
           raise unless ex.class == RuntimeError
