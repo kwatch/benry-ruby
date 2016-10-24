@@ -24,17 +24,17 @@ module Benry::CLI
 
   class OptionSchema
 
-    def initialize(name, short, long, argname, argflag, desc, &block)
+    def initialize(name, short, long, argname, argflag, desc, &callback)
       @name     = name
       @short    = short
       @long     = long
       @argname  = argname
       @argflag  = argflag   # :required, :optional, or nil
       @desc     = desc
-      @block    = block
+      @callback = callback
     end
 
-    attr_reader :name, :short, :long, :argname, :argflag, :desc, :block
+    attr_reader :name, :short, :long, :argname, :argflag, :desc, :callback
 
     def ==(other)
       return (
@@ -44,7 +44,7 @@ module Benry::CLI
         && @argname == other.argname  \
         && @argflag == other.argflag  \
         && @desc    == other.desc     \
-        && @block   == other.block
+        && @callback == other.callback
       )
     end
 
@@ -60,7 +60,7 @@ module Benry::CLI
       return @argflag == nil
     end
 
-    def self.parse(defstr, desc, name: nil, &block)
+    def self.parse(defstr, desc, name: nil, &callback)
       #; [!cy1ux] regards canonical name of '-f NAME #file' as 'file'.
       defstr = defstr.strip()
       defstr = defstr.sub(/\s+\#(\w+)\z/, '')
@@ -95,7 +95,7 @@ module Benry::CLI
       argname = arg_required || arg_optional
       argflag = arg_required ? :required \
               : arg_optional ? :optional : nil
-      return self.new(name.to_s, short, long, argname, argflag, desc, &block)
+      return self.new(name.to_s, short, long, argname, argflag, desc, &callback)
     end
 
     def option_string
@@ -135,13 +135,13 @@ module Benry::CLI
       }
     end
 
-    def option(symbol, defstr=nil, desc=nil, &block)
+    def option(symbol, defstr=nil, desc=nil, &callback)
       #; [!s59ly] accepts option definition string and description.
       #; [!2gfnh] recognizes first argument as option name if it is a symbol.
       unless symbol.is_a?(Symbol)
         symbol, defstr, desc = nil, symbol, defstr
       end
-      @option_schemas << OptionSchema.parse(defstr, desc, name: symbol, &block)
+      @option_schemas << OptionSchema.parse(defstr, desc, name: symbol, &callback)
       #; [!fv5g4] return self in order to chain method call.
       self
     end
@@ -153,9 +153,9 @@ module Benry::CLI
       end
     end
 
-    def each_option_schema(&block)
+    def each_option_schema(&callback)
       #; [!ycgdm] yields each option schema.
-      @option_schemas.each(&block)
+      @option_schemas.each(&callback)
     end
 
     def err(msg)
@@ -207,7 +207,7 @@ module Benry::CLI
       #; [!9td8b] invokes callback with long option value if callback exists.
       #; [!1hak2] invokes callback with long option values as 2nd argument.
       begin
-        if (pr = opt.block)
+        if (pr = opt.callback)
           value = pr.arity == 2 ? pr.call(value, option_values) : pr.call(value)
         end
       rescue => ex
@@ -246,7 +246,7 @@ module Benry::CLI
         #; [!l6gss] invokes callback with short option value if exists.
         #; [!g4pld] invokes callback with short option values as 2nd argument.
         begin
-          if (pr = opt.block)
+          if (pr = opt.callback)
             value = pr.arity == 2 ? pr.call(value, option_values) : pr.call(value)
           end
         rescue => ex
@@ -279,7 +279,7 @@ module Benry::CLI
           @__defining = [action_name, desc, option_schemas, method_name]
         end
         #; [!ymtsg] allows block argument to @option.
-        @option = proc do |symbol, defstr, desc, &block|
+        @option = proc do |symbol, defstr, desc, &callback|
           #; [!v76cf] can take symbol as kwarg name.
           if ! symbol.is_a?(Symbol)
             defstr, desc = symbol, defstr
@@ -289,7 +289,7 @@ module Benry::CLI
           @__defining  or
             raise OptionDefinitionError.new("@option.(#{defstr.inspect}): @action.() should be called prior to @option.().")
           option_schemas = @__defining[2]
-          option_schemas << OptionSchema.parse(defstr, desc, name: symbol, &block)
+          option_schemas << OptionSchema.parse(defstr, desc, name: symbol, &callback)
         end
       end
       #; [!4otr6] registers subclass.
@@ -392,8 +392,8 @@ module Benry::CLI
           OptionSchema.parse("    --version", "print version"),
         ]
         #; [!b09pv] provides @global_option in subclass.
-        @global_option = proc do |defstr, desc, &block|
-          @_global_option_schemas << OptionSchema.parse(defstr, desc, &block)
+        @global_option = proc do |defstr, desc, &callback|
+          @_global_option_schemas << OptionSchema.parse(defstr, desc, &callback)
         end
       end
     end

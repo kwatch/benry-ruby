@@ -563,8 +563,8 @@ describe Benry::CLI::Action do
         _.ok {arr[1]} == "print hello"
         _.ok {arr[2][1].short} == 'L'
         _.ok {arr[2][1].long}  == 'level'
-        _.ok {arr[2][1].block}.is_a?(Proc)
-        _.ok {arr[2][1].block.call("123")} == 123
+        _.ok {arr[2][1].callback}.is_a?(Proc)
+        _.ok {arr[2][1].callback.call("123")} == 123
       end
     end
 
@@ -583,8 +583,8 @@ describe Benry::CLI::Action do
         _.ok {arr[2][1].name}  == 'level'
         _.ok {arr[2][1].short} == 'L'
         _.ok {arr[2][1].long}  == nil
-        _.ok {arr[2][1].block}.is_a?(Proc)
-        _.ok {arr[2][1].block.call("123")} == 123
+        _.ok {arr[2][1].callback}.is_a?(Proc)
+        _.ok {arr[2][1].callback.call("123")} == 123
       end
     end
 
