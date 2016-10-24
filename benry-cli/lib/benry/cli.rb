@@ -460,9 +460,10 @@ module Benry::CLI
       end
       ## validation
       obj = action_info.action_class.new()
-      validate_args(obj, action_info.action_method, args)
+      method_name = action_info.action_method
+      validate_args(obj, method_name, args)
       ## do action
-      ret = kick_action(obj, action_info.action_method, args, option_values)
+      ret = kick_action(obj, method_name, args, option_values)
       return ret
     end
 
