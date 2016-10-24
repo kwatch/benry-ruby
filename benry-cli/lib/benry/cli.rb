@@ -441,7 +441,7 @@ module Benry::CLI
 
     public
 
-    def call(*args)
+    def run(*args)
       ## global options
       gopt_values = parse_global_options(args)
       output = handle_global_options(args, gopt_values)
@@ -473,7 +473,7 @@ module Benry::CLI
 
     def main(argv=ARGV)
       begin
-        ret = call(*argv)
+        ret = run(*argv)
       rescue OptionError => ex
         $stderr.puts "ERROR: #{ex}"
         exit 1

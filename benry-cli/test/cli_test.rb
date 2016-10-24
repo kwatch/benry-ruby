@@ -752,16 +752,16 @@ describe Benry::CLI::Application do
       ok {d.keys().sort} == ['bla-bla-bla']
       #
       app = Benry::CLI::Application.new(nil, action_classes: [cls])
-      output1 = app.call('--help')
+      output1 = app.run('--help')
       ok {output1} =~ /Actions:\n  bla-bla-bla +: bla bla bla\n/
-      output2 = app.call('bla-bla-bla')
+      output2 = app.run('bla-bla-bla')
       ok {output2} == "OK"
     end
 
   end
 
 
-  describe '#call()' do
+  describe '#run()' do
 
     def _argtest_action_class
       return Class.new(Benry::CLI::Action) do
@@ -806,19 +806,19 @@ Actions:
 (Run `cli_test.rb help <action>' to show help message of each action.)
 END
       app = Benry::CLI::Application.new(action_classes: [GitAction])
-      output = app.call('--help')
+      output = app.run('--help')
       ok {output} == expected
-      output = app.call('-h')
+      output = app.run('-h')
       ok {output} == expected
     end
 
     it "[!4irzw] returns version string when global option '--version' is specified." do
       app = Benry::CLI::Application.new(action_classes: [GitAction])
-      output = app.call('--version')
+      output = app.run('--version')
       ok {output} == "0.0"
       #
       app = Benry::CLI::Application.new(version: '1.2.3', action_classes: [GitAction])
-      output = app.call('--version')
+      output = app.run('--version')
       ok {output} == "1.2.3"
     end
 
@@ -839,7 +839,7 @@ Actions:
 (Run `cli_test.rb help <action>' to show help message of each action.)
 END
       app = Benry::CLI::Application.new(action_classes: [GitAction])
-      output = app.call('help')
+      output = app.run('help')
       ok {output} == expected
     end
 
@@ -855,13 +855,13 @@ Options:
   -v, --verbose        : verbose mode
 END
       app = Benry::CLI::Application.new(action_classes: [GitAction])
-      output = app.call('help', 'git:fork')
+      output = app.run('help', 'git:fork')
       ok {output} == expected
     end
 
     it "[!mb92l] raises error when action name is unknown." do
       app = Benry::CLI::Application.new(action_classes: [GitAction])
-      pr = proc { app.call('fork') }
+      pr = proc { app.run('fork') }
       ok {pr}.raise?(Benry::CLI::OptionError, "fork: unknown action.")
     end
 
@@ -877,27 +877,27 @@ Options:
   -v, --verbose        : verbose mode
 END
       app = Benry::CLI::Application.new(action_classes: [GitAction])
-      output = app.call('git:fork', '--help')
+      output = app.run('git:fork', '--help')
       ok {output} == expected
     end
 
     it "[!yhry7] raises error when required argument is missing." do
       cls = _argtest_action_class()
       app = Benry::CLI::Application.new(action_classes: [cls])
-      pr = proc { app.call('hello1') }
+      pr = proc { app.run('hello1') }
       ok {pr}.raise?(Benry::CLI::OptionError,
                      "too few arguments (at least 2 args expected).")
-      pr = proc { app.call('hello1', "x") }
+      pr = proc { app.run('hello1', "x") }
       ok {pr}.raise?(Benry::CLI::OptionError,
                      "too few arguments (at least 2 args expected).")
-      pr = proc { app.call('hello1', "x", "y") }
+      pr = proc { app.run('hello1', "x", "y") }
       ok {pr}.NOT.raise?(Exception)
     end
 
     it "[!h5522] raises error when too much arguments specified." do
       cls = _argtest_action_class()
       app = Benry::CLI::Application.new(action_classes: [cls])
-      pr = proc { app.call('hello1', "x1", "x2", "x3", "x4", "x5") }
+      pr = proc { app.run('hello1', "x1", "x2", "x3", "x4", "x5") }
       ok {pr}.raise?(Benry::CLI::OptionError,
                      "too many arguments (at most 4 args expected).")
     end
@@ -905,7 +905,7 @@ END
     it "[!hq8b0] not raise error when many argument specified but method has *args." do
       cls = _argtest_action_class()
       app = Benry::CLI::Application.new(action_classes: [cls])
-      pr = proc { app.call('hello2', "x1", "x2", "x3", "x4", "x5", "x6") }
+      pr = proc { app.run('hello2', "x1", "x2", "x3", "x4", "x5", "x6") }
       ok {pr}.NOT.raise?(Exception)
     end
 
@@ -913,19 +913,19 @@ END
       cls = _argtest_action_class()
       app = Benry::CLI::Application.new(action_classes: [cls])
       #
-      output = app.call('hello1', "-ffoo.txt", "x1", "x2")
+      output = app.run('hello1', "-ffoo.txt", "x1", "x2")
       ok {output} == 'aa="x1", bb="x2", cc=nil, dd=nil, file="foo.txt", indent=2'
-      output = app.call('hello1', "-i", "x1", "x2", "x3")
+      output = app.run('hello1', "-i", "x1", "x2", "x3")
       ok {output} == 'aa="x1", bb="x2", cc="x3", dd=nil, file=nil, indent=true'
       #
-      output = app.call('hello2', "-ffoo.txt", "x1", "x2", "x3", "x4", "x5", "x6")
+      output = app.run('hello2', "-ffoo.txt", "x1", "x2", "x3", "x4", "x5", "x6")
       ok {output} == 'aa="x1", bb="x2", cc="x3", dd="x4", args=["x5", "x6"], file="foo.txt", indent=2'
     end
 
     it "[!rph9y] converts 'foo-bar' option name into :foo_bar keyword." do
       cls = _argtest_action_class()
       app = Benry::CLI::Application.new(action_classes: [cls])
-      pr = proc { app.call('hello3', "-L30") }
+      pr = proc { app.run('hello3', "-L30") }
       ok {pr}.NOT.raise?(Exception)
       output = pr.call()
       ok {output} == 'debug_log_level="30"'
