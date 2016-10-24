@@ -306,6 +306,44 @@ describe Benry::CLI::OptionParser do
   end
 
 
+  describe '#each_option_string()' do
+
+    it "[!luro4] yields each option string and description." do
+      parser = Benry::CLI::OptionParser.new(_option_schemas())
+      #
+      arr = []
+      parser.each_option_string do |optstr, desc|
+        arr << [optstr, desc]
+      end
+      ok {arr} == [
+        ['-v, --version'    , "print version"],
+        ['-f, --file=FILE'  , "config file"],
+        ['-i, --indent[=N]' , "indent (default 2)"],
+      ]
+    end
+
+  end
+
+
+  describe '#each_option_schema()' do
+
+    it "[!ycgdm] yields each option schema." do
+      parser = Benry::CLI::OptionParser.new(_option_schemas())
+      #
+      arr = []
+      parser.each_option_schema do |schema|
+        arr << [schema.option_string, schema.desc]
+      end
+      ok {arr} == [
+        ['-v, --version'    , "print version"],
+        ['-f, --file=FILE'  , "config file"],
+        ['-i, --indent[=N]' , "indent (default 2)"],
+      ]
+    end
+
+  end
+
+
   describe '#parse_options()' do
 
     it "[!5jfhv] returns command-line options as hash object." do

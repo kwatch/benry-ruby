@@ -146,6 +146,18 @@ module Benry::CLI
       self
     end
 
+    def each_option_string
+      #; [!luro4] yields each option string and description.
+      @option_schemas.each do |schema|
+        yield schema.option_string, schema.desc
+      end
+    end
+
+    def each_option_schema(&block)
+      #; [!ycgdm] yields each option schema.
+      @option_schemas.each(&block)
+    end
+
     def err(msg)
       OptionError.new(msg)
     end
