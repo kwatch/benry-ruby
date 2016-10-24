@@ -980,6 +980,20 @@ END
       ok {s} =~ /\AUsage:/
     end
 
+    it "[!m3mry] skips action name when description is not provided." do
+      cls = Class.new(Benry::CLI::Action) do
+        @action.(:test1, nil)
+        def do_test1; end
+        @action.(:test2, "")
+        def do_test2; end
+      end
+      app = Benry::CLI::Application.new(action_classes: [cls])
+      s = app.help_message('script')
+      ok {s} !~ /test1/
+      ok {s} =~ /test2/
+      ok {s} =~ /^Actions:\n  test2 +: +\n/
+    end
+
   end
 
 

@@ -557,7 +557,8 @@ module Benry::CLI
       #msg << "  %-20s : %s\n" % ["help", "show this help"]
       @action_dict.keys.sort.each do |action_full_name|
         action_info = @action_dict[action_full_name]
-        msg << "  %-20s : %s\n" % [action_full_name, action_info.desc]
+        #; [!m3mry] skips action name when description is not provided.
+        msg << "  %-20s : %s\n" % [action_full_name, action_info.desc] if action_info.desc
       end
       msg << "\n"
       msg << "(Run `#{command} help <action>' to show help message of each action.)\n"
