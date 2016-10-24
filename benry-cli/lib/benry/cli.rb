@@ -350,21 +350,22 @@ module Benry::CLI
         when :rest; argstr << " [<#{name_str}>...]"
         end
       end
+      #; [!6m50d] don't show non-described options.
+      pairs = @option_schemas.collect {|opt| [opt.option_string, opt.desc] }
+      pairs = pairs.select {|optstr, desc| desc }
+      #
+      width = pairs.collect {|pair| pair[0].length }.max || 0
+      width = [width, 20].max
+      width = [width, 35].min
+      #
       msg = ""
       #msg << "#{command} #{@full_name}  --  #{@desc}\n"
       msg << "#{@desc}\n"
       msg << "\n"
       msg << "Usage:\n"
       msg << "  #{command} #{@full_name} [options]#{argstr}\n"
-      msg << "\n"
-      msg << "Options:\n"
-      pairs = @option_schemas.collect {|opt| [opt.option_string, opt.desc] }
-      #; [!6m50d] don't show non-described options.
-      pairs = pairs.select {|optstr, desc| desc }
-      #
-      width = pairs.collect {|pair| pair[0].length }.max || 0
-      width = [width, 20].max
-      width = [width, 35].min
+      msg << "\n"            unless pairs.empty?
+      msg << "Options:\n"    unless pairs.empty?
       pairs.each do |option_string, desc|
         msg << "  %-#{width}s : %s\n" % [option_string, desc]
       end
