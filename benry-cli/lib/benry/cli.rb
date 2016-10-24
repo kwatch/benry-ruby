@@ -467,7 +467,7 @@ module Benry::CLI
       obj = action_info.action_class.new()
       validate_args(obj, action_info.action_method, args)
       ## do action
-      ret = run_action(obj, action_info.action_method, args, option_values)
+      ret = kick_action(obj, action_info.action_method, args, option_values)
       return ret
     end
 
@@ -527,7 +527,7 @@ module Benry::CLI
       end
     end
 
-    def run_action(action_obj, method_name, args, option_values)
+    def kick_action(action_obj, method_name, args, option_values)
       #; [!rph9y] converts 'foo-bar' option name into :foo_bar keyword.
       kwargs = Hash[option_values.map {|k, v| [k.gsub(/-/, '_').intern, v] }]
       #; [!qwd9x] passes command arguments and options as method arguments and options.
