@@ -257,18 +257,22 @@ Other Topics
 
 * Action name 'foo_bar' is printed as 'foo-bar' in help message.
 * Long option '--foo-bar' corresponds to 'foo_bar' keyword argument.
-* Argument 'foo_bar' is printed as 'foo-bar' in help message.
-* Argument 'foo_or_bar' is printed as 'foo|bar' in help message (!!).
+* Parameter 'foo_bar' is printed as '<foo-bar>' in help message.
+* Parameter 'foo_or_bar' is printed as '<foo|bar>' in help message (!!).
 
-argname.rb:
+ex-argname.rb:
 ```ruby
 require 'benry/cli'
 
 class FooAction < Benry::CLI::Action
 
   ##
-  ## * 'file_name'   -> 'file-name'
-  ## * 'file_or_dir' -> 'file|dir'
+  ##   parameter name   ->   in help message
+  ##  ----------------------------------------
+  ##    file_name       ->    <file-name>
+  ##    file_or_dir     ->    <file|dir>
+  ##    file_name=nil   ->    [<file-name>]
+  ##    *fil_namee      ->    [<file-name>...]
   ##
   @action.(:bla_bla_bla, "test")
   @option.('-v, --verbose-mode', "enable verbose mode")
@@ -285,7 +289,7 @@ end
 
 Example:
 ```console
-$ ruby argname.rb help bla-bla-bla
+$ ruby ex-argname.rb help bla-bla-bla
 test
 
 Usage:
@@ -357,12 +361,48 @@ Actions:
 Of course, it is possible to specify prefix name with `@action.(:'git:stage')`.
 
 
+#### Multiple-Value Option
+
+Validator callback can take option values as second argument.
+Using it, you can define options which can be specified more than once
+(such as `-I` option of gcc).
+
+ex-multival.rb:
+```ruby
+require 'benry/cli'
+
+class TestAction < Benry::CLI::Action
+
+  @action.(nil, "example of multi-value option")
+  @option.("-I, --include=path", "include path") {|val, opt|
+    opt['include'] ||= []
+    opt['include'] << val
+    opt['include']
+  }
+  def multival(include: nil)
+    p include
+  end
+
+end
+
+if __FILE__ == $0
+  Benry::CLI::Application.new("multi-value example", version: '1.0').main()
+end
+```
+
+Example:
+```console
+$ ruby ex-multival.rb multival -I /path1 -I /path2 -I /path3
+["/path1", "/path2", "/path3"]
+```
+
+
 #### Parse Command Options without Application
 
 If you need just command-line option parser instead of application,
 use `Benry::CLI::OptionParser` class.
 
-parser.rb:
+ex-parser.rb:
 ```ruby
 require 'benry/cli'
 
