@@ -51,9 +51,9 @@ task :package do
     next unless File.file?(file)
     File.open(file, 'rb+') do |f|
       s = f.read()
-      s = s.gsub(/\$Release:.*?\$/,   "$"+"Release: #{release} $")
-      s = s.gsub(/\$Copyright:.*?\$/, "$"+"Copyright: #{copyright} $")
-      s = s.gsub(/\$License:.*?\$/,   "$"+"License: #{license} $")
+      s = s.gsub(/\$Release\:.*?\$/,   "$"+"Release: #{release} $")
+      s = s.gsub(/\$Copyright\:.*?\$/, "$"+"Copyright: #{copyright} $")
+      s = s.gsub(/\$License\:.*?\$/,   "$"+"License: #{license} $")
       #
       f.rewind()
       f.truncate(0)
