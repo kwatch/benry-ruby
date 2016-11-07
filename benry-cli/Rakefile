@@ -87,6 +87,14 @@ end
 desc "remove build files"
 task :clean do
   rm_rf "build"
+  #
+  filenames = []
+  content = File.read('README.md')
+  content.scan(/^(\w[-\w]+.rb):\n```ruby\n(.*?)```/m) do
+    filename, code = $1, $2
+    filenames << filename
+  end
+  rm_f filenames
 end
 
 
