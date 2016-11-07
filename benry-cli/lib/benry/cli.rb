@@ -369,7 +369,7 @@ module Benry::CLI
       msg << "#{@desc}\n"
       msg << "\n"
       msg << "Usage:\n"
-      msg << "  #{command} #{@full_name} [options]#{argstr}\n"
+      msg << "  #{command} #{@full_name} [<options>]#{argstr}\n"
       msg << "\n"            unless pairs.empty?
       msg << "Options:\n"    unless pairs.empty?
       pairs.each do |option_string, desc|
@@ -555,7 +555,7 @@ module Benry::CLI
         msg << @desc << "\n\n"
       end
       msg << "Usage:\n"
-      msg << "  #{command} [options] <action> [<args>...]\n"
+      msg << "  #{command} [<options>] <action> [<args>...]\n"
       msg << "\n"
       msg << "Options:\n"
       self.class.instance_variable_get('@_global_option_schemas').each do |schema|

@@ -675,7 +675,7 @@ describe Benry::CLI::ActionInfo do
 switch git branch
 
 Usage:
-  script-name git:switch [options] <aa> <bb> [<cc>] [<dd>] [<args>...]
+  script-name git:switch [<options>] <aa> <bb> [<cc>] [<dd>] [<args>...]
 
 Options:
   -v, --verbose        : verbose mode
@@ -695,7 +695,7 @@ END
       action_info = Benry::CLI::ActionInfo.new('my:hom', 'hom', 'do something',
                                                schemas, cls, :do_something)
       s = action_info.help_message("script")
-      ok {s} =~ "Usage:\n  script my:hom [options] <tmp-file-name> [<tmp-file-dir>]"
+      ok {s} =~ "Usage:\n  script my:hom [<options>] <tmp-file-name> [<tmp-file-dir>]"
     end
 
     it "[!s6p09] converts arg name 'file_or_dir' into 'file|dir'." do
@@ -707,7 +707,7 @@ END
       action_info = Benry::CLI::ActionInfo.new('my:hom', 'hom', 'do something',
                                                schemas, cls, :do_something)
       s = action_info.help_message("script")
-      ok {s} =~ "Usage:\n  script my:hom [options] <file|directory> [<name|id>]"
+      ok {s} =~ "Usage:\n  script my:hom [<options>] <file|directory> [<name|id>]"
     end
 
     it "[!6m50d] don't show non-described options." do
@@ -727,7 +727,7 @@ END
 Do something
 
 Usage:
-  script foo [options]
+  script foo [<options>]
 
 Options:
   -v, --verbose        : verbose mode
@@ -848,7 +848,7 @@ describe Benry::CLI::Application do
     it "[!b8isy] returns help message when global option '-h' or '--help' is specified." do
       expected = <<END
 Usage:
-  cli_test.rb [options] <action> [<args>...]
+  cli_test.rb [<options>] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
@@ -881,7 +881,7 @@ END
     it "[!p5pr6] returns global help message when action is 'help'." do
       expected = <<END
 Usage:
-  cli_test.rb [options] <action> [<args>...]
+  cli_test.rb [<options>] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
@@ -904,7 +904,7 @@ END
 create and switch to new branch
 
 Usage:
-  cli_test.rb git:fork [options] <branch>
+  cli_test.rb git:fork [<options>] <branch>
 
 Options:
   -h, --help           : print help message
@@ -926,7 +926,7 @@ END
 create and switch to new branch
 
 Usage:
-  cli_test.rb git:fork [options] <branch>
+  cli_test.rb git:fork [<options>] <branch>
 
 Options:
   -h, --help           : print help message
