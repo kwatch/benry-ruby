@@ -91,7 +91,7 @@ $ ruby ex1.rb --help   # or: ruby ex1.rb help
 example script
 
 Usage:
-  ex1.rb [options] <action> [<args>...]
+  ex1.rb [<options>] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
@@ -196,7 +196,7 @@ Help message:
 ```console
 $ ruby ex2.rb hello -h
 Usage:
-  ex2.rb [options] <action> [<args>...]
+  ex2.rb [<options>] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
@@ -293,7 +293,7 @@ $ ruby ex-argname.rb help bla-bla-bla
 test
 
 Usage:
-  argname.rb bla-bla-bla [options] <file-name> [<file|dir>]
+  argname.rb bla-bla-bla [<options>] <file-name> [<file|dir>]
 
 Options:
   -h, --help           : print help message
@@ -344,7 +344,7 @@ $ ruby mygit.rb --help
 git wrapper
 
 Usage:
-  mygit.rb [options] <action> [<args>...]
+  mygit.rb [<options>] <action> [<args>...]
 
 Options:
   -h, --help           : print help message
