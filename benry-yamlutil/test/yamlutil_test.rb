@@ -11,8 +11,8 @@ require 'benry/yamlutil'
 describe Benry::YAMLUtil do
 
   classmap = {
-    "teams"    => Struct.new('Team',   'name', 'members'),
-    "members"  => Struct.new('Member', 'name', 'gender'),
+    "teams"    => Struct.new('Team',   'name', 'members', 'leader'),
+    "members"  => Struct.new('Member', 'name', 'gender', 'team'),
   }
 
   input_string = <<-'END'
@@ -91,6 +91,59 @@ describe Benry::YAMLUtil do
       ok {table.columns[0].pkey} == true        # merged
       ok {table.columns[0].name} == 'user_id'   # ovrerwritten
     end
+
+
+    input_string2 = <<-END
+      teams:
+        - &sos
+          name: SOS Brigade
+          leader:  *haruhi    # alias (appeared before anchor)
+          members:
+            - &haruhi         # anchor
+              {name: Haruhi, team: *sos}
+            - {name: Kyon  , team: *sos}
+    END
+
+    it "supports lazy alias feature with custom classes." do
+      input = input_string2
+      ydoc = nil
+      pr = proc { ydoc = Benry::YAMLUtil.load(input, classmap) }
+      ok {pr}.NOT.raise?(Exception)
+      ok {ydoc['teams'][0].leader.name}          == "Haruhi"
+      ok {ydoc['teams'][0].members[0].name}      == "Haruhi"
+      ok {ydoc['teams'][0].members[0].team.name} == "SOS Brigade"
+    end
+
+    it "supports lazy alias feature with Hash class." do
+      input = input_string2
+      ydoc = nil
+      pr = proc { ydoc = Benry::YAMLUtil.load(input) }
+      ok {pr}.NOT.raise?(Exception)
+      ok {ydoc['teams'][0]['leader']}                     .is_a?(Hash)
+      ok {ydoc['teams'][0]['members'][0]['team']}         .is_a?(Hash)
+      ok {ydoc['teams'][0]['leader']['name']}             == "Haruhi"
+      ok {ydoc['teams'][0]['members'][0]['name']}         == "Haruhi"
+      ok {ydoc['teams'][0]['members'][0]['team']['name']} == "SOS Brigade"
+    end
+
+    it "raises error when anchor is missing." do
+      input = input_string2.sub('*haruhi', '*harupin')
+      ydoc = nil
+      pr = proc { ydoc = Benry::YAMLUtil.load(input, classmap) }
+      ok {pr}.raise?(Psych::BadAlias, "Unknown alias: harupin")
+    end
+
+    it "raises error when merging anchor missing." do
+      input = <<-'END'
+      - <<: *a1
+      - &a1
+        name: AAA
+      END
+      ydoc = nil
+      pr = proc { ydoc = Benry::YAMLUtil.load(input, classmap) }
+      ok {pr}.raise?(Psych::BadAlias, "Anchor '&a1' should appear before '<<: *a1'")
+    end
+
 
   end
 

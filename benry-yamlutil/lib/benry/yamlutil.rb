@@ -29,6 +29,7 @@ module Benry
       def initialize(*args)
         super
         @key_path = []   # ex: [] -> ['teams'] -> ['teams', 'members']
+        @idx_path = []   # ex: [] -> ['teams'] -> ['teams', 0] -> ['teams', 0, 'members']
       end
 
       attr_reader :classmap
@@ -40,18 +41,49 @@ module Benry
         return super
       end
 
+      def visit_Psych_Nodes_Alias(o)
+        @st.fetch(o.anchor) {
+          lazy_alias = LazyAlias.new(o.anchor, @idx_path.dup)
+          (@lazy_aliases ||= []) << lazy_alias
+          lazy_alias
+        }
+      end
+
+      def visit_Psych_Nodes_Document(o)
+        ydoc = super
+        @lazy_aliases.each do |a|
+          val = @st.fetch(a.name) { raise Psych::BadAlias, "Unknown alias: #{a.name}" }
+          a.replace_self(ydoc, val)
+        end if @lazy_aliases
+        ydoc
+      end
+
       private
 
       def accept_key(kobj)
         key = accept(kobj)
         @key_path.push(key)
+        @idx_path.push(key)
         return key
       end
 
       def accept_value(vobj)
         val = accept(vobj)
         @key_path.pop()
+        @idx_path.pop()
         return val
+      end
+
+      def register_empty(o)
+        list = register(o, [])
+        path = @idx_path
+        path.push(nil)          # push dummy
+        o.children.each_with_index do |c, i|
+          path[-1] = i          # push index
+          list << accept(c)
+        end
+        path.pop()              # pop index
+        return list
       end
 
       def empty_mapping(o)
@@ -97,6 +129,28 @@ module Benry
         else
           other.each {|k, v| hash[k] = v }
         end
+      end
+
+    end
+
+
+    class LazyAlias    # :nodoc:
+
+      def initialize(name, key_path)
+        @name     = name
+        @key_path = key_path
+      end
+
+      attr_reader :name, :key_path
+
+      def replace_self(root, value)
+        d = root
+        key_path[0..-2].each {|k| d = d[k] }
+        d[key_path[-1]] = value
+      end
+
+      def each   # called from Visitor#merge_mapping()
+        raise Psych::BadAlias, "Anchor '&#{@name}' should appear before '<<: *#{@name}'"
       end
 
     end
