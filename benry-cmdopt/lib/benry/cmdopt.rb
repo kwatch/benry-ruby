@@ -23,11 +23,11 @@ module Benry
   ##     cmdopt.add(:version, "    --version", "print version")
   ##     ## parse
   ##     options = cmdopt.parse(ARGV) do |err|
-  ##       puts err.message
-  ##       exit(0)
+  ##       $stderr.puts "ERROR: #{err.message}"
+  ##       exit(1)
   ##     end
   ##     p options     # ex: {:help => true, :version => true}
-  ##     args = ARGV   # options are removed from ARGV
+  ##     p ARGV        # options are removed from ARGV
   ##     ## help
   ##     if options[:help]
   ##       puts "Usage: foobar [<options>] [<args>...]"
@@ -41,36 +41,44 @@ module Benry
   ##
   ## Command option parameter:
   ##     ## required
-  ##     schema.add(:file, "-f, --file=<FILE>", "filename")
-  ##     schema.add(:file, "    --file=<FILE>", "filename")
-  ##     schema.add(:file, "-f <FILE>"        , "filename")
+  ##     cmdopt.add(:file, "-f, --file=<FILE>", "filename")
+  ##     cmdopt.add(:file, "    --file=<FILE>", "filename")
+  ##     cmdopt.add(:file, "-f <FILE>"        , "filename")
   ##     ## optional
-  ##     schema.add(:file, "-f, --file[=<FILE>]", "filename")
-  ##     schema.add(:file, "    --file[=<FILE>]", "filename")
-  ##     schema.add(:file, "-f[<FILE>]"         , "filename")
+  ##     cmdopt.add(:file, "-f, --file[=<FILE>]", "filename")
+  ##     cmdopt.add(:file, "    --file[=<FILE>]", "filename")
+  ##     cmdopt.add(:file, "-f[<FILE>]"         , "filename")
   ##
   ## Validation:
-  ##     ## for example, parameter should be an integer
-  ##     schema.add(:indent , "-i <N>", "indent width", type: Integer)
-  ##     schema.add(:indent , "-i <N>", "indent width", pattern: /\A\d+\z/)
-  ##     schema.add(:indent , "-i <N>", "indent width", enum: [2, 4, 8])
-  ##     schema.add(:indent , "-i <N>", "indent width") {|val|
-  ##       val =~ /\A\d+\z/  or raise "integer expected."
-  ##       val.to_i
+  ##     ## type
+  ##     cmdopt.add(:indent , "-i <N>", "indent width", type: Integer)
+  ##     ## pattern
+  ##     cmdopt.add(:indent , "-i <N>", "indent width", pattern: /\A\d+\z/)
+  ##     ## enum
+  ##     cmdopt.add(:indent , "-i <N>", "indent width", enum: [2, 4, 8])
+  ##     ## callback
+  ##     cmdopt.add(:indent , "-i <N>", "indent width") {|val|
+  ##       val =~ /\A\d+\z/  or
+  ##         raise "integer expected."  # raise without exception class.
+  ##       val.to_i                     # convert argument value.
   ##     }
   ##
   ## Available types:
-  ##     * Integer   (/\A[-+]?\d+\z/)
-  ##     * Float     (/\A[-+]?(\d+\.\d*\|\.\d+)z/)
-  ##     * TrueClass (/\A(true|on|yes|false|off|no)\z/)
-  ##     * Date      (/\A\d\d\d\d-\d\d?-\d\d?\z/)
+  ##     * Integer   (`/\A[-+]?\d+\z/`)
+  ##     * Float     (`/\A[-+]?(\d+\.\d*\|\.\d+)z/`)
+  ##     * TrueClass (`/\A(true|on|yes|false|off|no)\z/`)
+  ##     * Date      (`/\A\d\d\d\d-\d\d?-\d\d?\z/`)
   ##
   ## Multiple parameters:
-  ##     schema.add(:lib , "-I <NAME>", "library names (multiple ok)") {|optdict, key, val|
+  ##     cmdopt.add(:lib , "-I <NAME>", "library names") {|optdict, key, val|
   ##       arr = optdict[key] || []
   ##       arr << val
   ##       arr
   ##     }
+  ##
+  ## Not support:
+  ##     * default value
+  ##     * `--no-xxx` style option
   ##
   module Cmdopt
 
