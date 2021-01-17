@@ -182,9 +182,23 @@ module Benry
         #; [!v7z4x] skips option help if help message is not specified.
         #; [!to1th] includes all option help when `all` is true.
         buf = []
-        width = space = nil
+        width = nil
         each_option_help do |opt, help|
-          buf << format % [opt, help] << "\n" if help || all
+          #buf << format % [opt, help] << "\n" if help || all
+          if help
+            #; [!848rm] supports multi-lines help message.
+            n = 0
+            help.each_line do |line|
+              if (n += 1) == 1
+                buf << format % [opt, line.chomp] << "\n"
+              else
+                width ||= (format % ['', '']).length
+                buf << (' ' * width) << line.chomp << "\n"
+              end
+            end
+          elsif all
+            buf << format % [opt, ''] << "\n"
+          end
         end
         return buf.join()
       end

@@ -274,6 +274,24 @@ END
 END
     end
 
+    it "[!848rm] supports multi-lines help message." do
+      sc = Benry::Cmdopt::Schema.new
+      sc.add(:mode, "-m, --mode=<MODE>", <<END)
+output mode
+  v, verbose: print many output
+  q, quiet:   print litte output
+  c, compact: print summary output
+END
+      actual = sc.build_option_help()
+      expected = <<END
+  -m, --mode=<MODE>    : output mode
+                           v, verbose: print many output
+                           q, quiet:   print litte output
+                           c, compact: print summary output
+END
+      ok {actual} == expected
+    end
+
   end
 
 
