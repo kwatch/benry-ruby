@@ -5,17 +5,178 @@ Benry::Cmdopt README
 
 Benry::Cmdopt is a command option parser library, like `optparse.rb`.
 
-Compared to `optparse.rb`:
-
-* Easy to use, easy to extend, easy to understand.
-* Not add `-h` nor `--help` automatically.
-* Not add `-v` nor `--version` automatically.
-* Not regard `-x` as short cut of `--xxx`.
-  (`optparser.rb` regards `-x` as short cut of `--xxx` automatically.)
-* Provides very simple feature to build custom help message.
-* Separates command option schema class from parser class.
+Compared to `optparse.rb`, Benry::Cmdopt is easy to use, easy to extend,
+and easy to understahnd.
 
 (Benry::Cmdopt requires Ruby >= 2.3)
+
+
+Why not `optparse.rb`?
+======================
+
+* Source code of `optparse.rb` is too large and complicated, because
+  `OptParse` class does everything about command option parsing.
+  File `optparse.rb` contains 1234 lines (without comments).
+  It is hard to customize or extend `OptionParser` class.
+
+  On the other hand, `benry/cmdopt.rb` consists of several classes
+  (schema class, parser class, and facade class).
+  Therefore it is easy to understand and extend these classes.
+  File `benry/cmdopt.rb` (v1.0.0) contains 355 lines (without comments).
+
+* `optparse.rb` regards `-x` as short cut of `--xxx` automatically
+  even if you have not defined `-x` option.
+  That is, short options which are not defined can be available.
+  This feature is hard coded in `OptionParser#parse_in_order()`
+  and hard to be disabled.
+
+  On the other hand, `benry/cmdopt.rb` doesn't behave this way.
+
+* `optparse.rb` can handle both `--name=val` and `--name val` styles.
+  The later style is ambiguous; you may wonder whether `val` is
+  an argument of `--name` option or `--name` takes no argument (and
+  `val` is command argument).
+  Therefore the `--name=val` style is better than `--name val` style.
+
+  `optparse.rb` cannot disable `--name val` style.
+  `benry/cmdopt.rb` supports only `--name=val` style.
+
+* `optparse.rb` enforces you to catch `OptionParser::ParseError` exception.
+  That is, you must know error class name.
+
+  `benry/cmdopt.rb` provides error handler without exception class name.
+  You don't need to know error class name.
+
+```ruby
+### optparse.rb
+require 'optparse'
+parser = OptionParser.new
+parser.on('-f', '--file=<FILE>', "filename")
+opts = {}
+begin
+  parser.parse!(ARGV, into: opts)
+rescue OptionParser::ParseError => ex   # specify error class
+  puts "ERROR: #{ex.message}"
+  exit 1
+end
+
+### benry/cmdopt.rb
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new
+cmdopt.add(:file, '-f, --file=<FILE>', "filename")
+opts = cmdopt.parse(ARGV) do |err|  # no need to specify error class
+  $stderr.puts "ERROR: #{err.message}"
+  exit 1
+end
+```
+
+* `optparse.rb` uses long option name as key of hash object, but
+  it doesn't provide the way to specify hash key of short-only option.
+
+  `benry/cmdopt.rb` can specify hash key of short-only option.
+
+```ruby
+### optparse.rb
+require 'optparse'
+parser = OptionParser.new
+parser.on('-f', '--file=<FILE>', "filename")
+parser.on('-m <MODE>', "verbose/quiet")
+#
+argv1 = ['-f', 'foo.txt']         # short option
+opts1 = {}
+parser.parse!(argv1, into: opts1)
+p opts1  #=> {:file=>"foo.txt"}   # hash key is long option name
+#
+argv2 = ['-m', 'verbose']         # short option
+opts2 = {}
+parser.parse!(argv2, into: opts2)
+p opts2  #=> {:m=>"foo.txt"}      # hash key is short option name
+
+### benry/cmdopt.rb
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new
+cmdopt.add(:filename, '-f, --file=<FILE>', "filename")
+cmdopt.add(:mode    , '-m <MODE>'        , "verbose/quiet")
+#
+opts1 = cmdopt.parse(['-f', 'foo.txt'])  # short option
+p opts1  #=> {:filename=>"foo.txt"}      # dedicated hash key
+#
+opts2 = cmdopt.parse(['-m', 'verbose'])  # short option
+p opts2  #=> {:mode=>"verbose"}          # dedicated hash key
+```
+
+* `optparse.rb` adds `-h` and `--help` options automatically, and
+  quits current process when `-h` or `--help` specified in terminal.
+  It is hard to remove these options.
+
+  On the other hand, `benry/cmdopt.rb` does not add these options.
+  benry/cmdopt.rb` does nothing extra.
+
+```ruby
+require 'optparse'
+parser = OptionParser.new
+## it is able to overwrite '-h' and/or '--help',
+## but how to remove or disable these options?
+opts = {}
+parser.on("-h <host>", "hostname") {|v| opts[:host] = v }
+parser.parse(['--help'])  # <== quot current process!!
+puts 'xxx'   #<== not printed because current process alreay terminated
+```
+
+* `optparse.rb` adds `-v` and `--version` options automatically, and
+  quits current process when `-v` or `--version` specified in terminal.
+  It is hard to remove these options.
+
+  On the other hand, `benry/cmdopt.rb` does not add these options.
+  benry/cmdopt.rb` does nothing extra.
+
+```ruby
+require 'optparse'
+parser = OptionParser.new
+## it is able to overwrite '-v' and/or '--version',
+## but how to remove or disable these options?
+opts = {}
+parser.on("-v", "verbose mode") { opts[:verbose] = true }
+parser.parse(['--version'])  # <== quot current process!!
+puts 'xxx'   #<== not printed because current process alreay terminated
+```
+
+* `optparse.rb` generates help message automatically, but it doesn't
+  contain `-h`, `--help`, `-v`, nor `--version`.
+  These options are available but not shown in help message. Strange.
+
+* `optparse.rb` generates help message with too wide option name
+  by default. You must specify proper width.
+
+  `benry/cmdopt.rb` calculates proper width automatically.
+  You don't need to specify proper width in many case.
+
+```ruby
+### optparse.rb
+require 'optparse'
+banner = "Usage: foo <options>"
+parser = OptionParser.new(banner)  # or OptionParser.new(banner, 20)
+opts = {}
+parser.on('-f', '--file=<FILE>', 'filename') {|v| opts[:file] = v }
+parser.on('-m <MODE>', 'verbose/quiet') {|v| opts[:mode] = v }
+puts parser.help
+### output
+# Usage: foo <options>
+#     -f, --file=<FILE>                filename
+#     -m <MODE>                        verbose/quiet
+
+### benry/cmdopt.rb
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new
+cmdopt.add(:file, '-f, --file=<FILE>', 'filename')
+cmdopt.add(:mode, '-m <MODE>', 'verbose/quiet')
+puts "Usage: foo <options>"
+puts cmdopt.build_option_help
+### output
+# Usage: foo <options>
+#   -f, --file=<FILE>    : filename
+#   -m <MODE>            : verbose/quiet
+```
 
 
 Usage
@@ -118,6 +279,7 @@ Not supported
 
 * default value
 * `--no-xxx` style option
+* bash/zsh completion
 
 
 Internal classes
