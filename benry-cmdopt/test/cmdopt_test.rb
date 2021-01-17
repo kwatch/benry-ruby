@@ -144,7 +144,11 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
     it "[!vq6eq] raises SchemaError when help message is missing." do
       sc = @schema
       pr = proc {
-        sc.add(:indent, "-i, --indent[=<WIDTH>]", type: Array)
+        begin
+          sc.add(:indent, "-i, --indent[=<WIDTH>]", type: Array)   # Ruby 2
+        rescue ArgumentError
+          sc.add(:indent, "-i, --indent[=<WIDTH>]", {type: Array}) # Ruby 3
+        end
       }
       ok {pr}.raise?(Benry::Cmdopt::SchemaError,
                      'add(:indent, "-i, --indent[=<WIDTH>]"): help message required as 3rd argument.')
