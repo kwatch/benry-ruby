@@ -69,6 +69,9 @@ cmdopt.add(:file, "    --file[=<FILE>]", "filename")
 cmdopt.add(:file, "-f[<FILE>]"         , "filename")
 ```
 
+Notice that `"--file <FILE>"` style is not supported.
+Please use `"--file=<FILE>"` style.
+
 
 Argument varidation
 -------------------
@@ -110,8 +113,8 @@ cmdopt.add(:lib , "-I <NAME>", "library names") {|optdict, key, val|
 ```
 
 
-Not support
------------
+Not supported
+-------------
 
 * default value
 * `--no-xxx` style option
