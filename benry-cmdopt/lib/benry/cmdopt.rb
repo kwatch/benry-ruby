@@ -83,6 +83,9 @@ module Benry
   module Cmdopt
 
 
+    VERSION = '$Release: 0.0.0 $'.split()[1]
+
+
     def self.new
       #; [!7kkqv] creates Facade object.
       return Facade.new
