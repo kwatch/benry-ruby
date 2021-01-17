@@ -19,8 +19,8 @@ module Benry
   ## Usage:
   ##     ## define
   ##     cmdopt = Benry::Cmdopt.new
-  ##     cmdopt.add(:help   , "-h, --help"   , "print help message")
-  ##     cmdopt.add(:version, "    --version", "print version")
+  ##     cmdopt.add(:help   , '-h, --help'   , "print help message")
+  ##     cmdopt.add(:version, '    --version', "print version")
   ##     ## parse
   ##     options = cmdopt.parse(ARGV) do |err|
   ##       $stderr.puts "ERROR: #{err.message}"
@@ -41,23 +41,23 @@ module Benry
   ##
   ## Command option parameter:
   ##     ## required
-  ##     cmdopt.add(:file, "-f, --file=<FILE>", "filename")
-  ##     cmdopt.add(:file, "    --file=<FILE>", "filename")
-  ##     cmdopt.add(:file, "-f <FILE>"        , "filename")
+  ##     cmdopt.add(:file, '-f, --file=<FILE>', "filename")
+  ##     cmdopt.add(:file, '    --file=<FILE>', "filename")
+  ##     cmdopt.add(:file, '-f <FILE>'        , "filename")
   ##     ## optional
-  ##     cmdopt.add(:file, "-f, --file[=<FILE>]", "filename")
-  ##     cmdopt.add(:file, "    --file[=<FILE>]", "filename")
-  ##     cmdopt.add(:file, "-f[<FILE>]"         , "filename")
+  ##     cmdopt.add(:file, '-f, --file[=<FILE>]', "filename")
+  ##     cmdopt.add(:file, '    --file[=<FILE>]', "filename")
+  ##     cmdopt.add(:file, '-f[<FILE>]'         , "filename")
   ##
   ## Validation:
   ##     ## type
-  ##     cmdopt.add(:indent , "-i <N>", "indent width", type: Integer)
+  ##     cmdopt.add(:indent , '-i <N>', "indent width", type: Integer)
   ##     ## pattern
-  ##     cmdopt.add(:indent , "-i <N>", "indent width", pattern: /\A\d+\z/)
+  ##     cmdopt.add(:indent , '-i <N>', "indent width", pattern: /\A\d+\z/)
   ##     ## enum
-  ##     cmdopt.add(:indent , "-i <N>", "indent width", enum: [2, 4, 8])
+  ##     cmdopt.add(:indent , '-i <N>', "indent width", enum: [2, 4, 8])
   ##     ## callback
-  ##     cmdopt.add(:indent , "-i <N>", "indent width") {|val|
+  ##     cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   ##       val =~ /\A\d+\z/  or
   ##         raise "integer expected."  # raise without exception class.
   ##       val.to_i                     # convert argument value.
@@ -70,15 +70,26 @@ module Benry
   ##     * Date      (`/\A\d\d\d\d-\d\d?-\d\d?\z/`)
   ##
   ## Multiple parameters:
-  ##     cmdopt.add(:lib , "-I <NAME>", "library names") {|optdict, key, val|
+  ##     cmdopt.add(:lib , '-I <NAME>', "library name") {|optdict, key, val|
   ##       arr = optdict[key] || []
   ##       arr << val
   ##       arr
   ##     }
   ##
-  ## Not support:
+  ## Hidden option:
+  ##     ### if help string is nil, that option is removed from help message.
+  ##     require 'benry/cmdopt'
+  ##     cmdopt = Benry::Cmdopt.new
+  ##     cmdopt.add(:verbose, '-v, --verbose', "verbose mode")
+  ##     cmdopt.add(:debug  , '-d[<LEVEL>]'  , nil, type: Integer) # hidden
+  ##     puts cmdopt.build_option_help()
+  ##     ### output ('-d' doesn't appear because help string is nil)
+  ##     #  -v, --verbose        : verbose mode
+  ##
+  ## Not supported:
   ##     * default value
   ##     * `--no-xxx` style option
+  ##     * bash/zsh completion
   ##
   module Cmdopt
 
