@@ -379,7 +379,7 @@ module Benry
       end
 
       def parse(argv, &error_handler)
-        optdict = {}
+        optdict = new_options_dict()
         while !argv.empty? && argv[0] =~ /\A-/
           optstr = argv.shift
           #; [!y04um] skips rest options when '--' found in argv.
@@ -407,7 +407,7 @@ module Benry
         return OptionError.new(msg)
       end
 
-      private
+      protected
 
       def parse_long_option(optstr, optdict, _argv)
         #; [!3i994] raises OptionError when invalid long option format.
@@ -474,9 +474,15 @@ module Benry
         end
       end
 
+      def new_options_dict()
+        #; [!vm6h0] returns new hash object.
+        return OPTIONS_CLASS.new
+      end
+
     end
 
 
+    OPTIONS_CLASS = Hash
     SCHEMA_CLASS = Schema
     PARSER_CLASS = Parser
 

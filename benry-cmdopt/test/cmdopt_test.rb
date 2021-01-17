@@ -635,6 +635,18 @@ class Benry::Cmdopt::Parser::Test < MiniTest::Test
   end
 
 
+  describe '#new_options_dict()' do
+
+    it "[!vm6h0] returns new hash object." do
+      parser = Benry::Cmdopt::Parser.new(new_sample_schema())
+      ret = parser.__send__(:new_options_dict)
+      ok {ret}.is_a?(Hash)
+      ok {ret} == {}
+    end
+
+  end
+
+
 end
 
 
