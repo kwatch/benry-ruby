@@ -225,7 +225,14 @@ module Benry
         return buf.join()
       end
 
-      def _default_format(min_width=20, max_width=35)
+      def _default_format(min_width=nil, max_width=35)
+        #; [!kl91t] sets option help min width to 10 when only single options which take no arg.
+        #; [!0koqb] sets option help min width to 20 when short option takes an arg.
+        #; [!kl91t] sets option help min width to 20 when any long otpion exists.
+        if min_width == nil
+          long_p = @items.any? {|x| x.help && (x.long || x.param) }
+          min_width = long_p ? 20 : 10
+        end
         #; [!hr45y] detects preffered option width.
         w = 0
         each_option_help do |opt, help|

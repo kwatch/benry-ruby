@@ -325,6 +325,30 @@ END
       ok {ret} == "  %-22s : %s"
     end
 
+    it "[!kl91t] sets option help min width to 10 when only single options which take no arg." do
+      sc = Benry::Cmdopt::Schema.new
+      sc.add(:help   , '-h', "help")
+      sc.add(:version, '-v', "version")
+      ret = sc.__send__(:_default_format, nil, 25)
+      ok {ret} == "  %-10s : %s"
+    end
+
+    it "[!0koqb] sets option help min width to 20 when short option takes an arg." do
+      sc = Benry::Cmdopt::Schema.new
+      sc.add(:help   , '-h', "help")
+      sc.add(:indent , '-i[<N>]', "indent")
+      ret = sc.__send__(:_default_format, nil, 25)
+      ok {ret} == "  %-20s : %s"
+    end
+
+    it "[!kl91t] sets option help min width to 20 when any long otpion exists." do
+      sc = Benry::Cmdopt::Schema.new
+      sc.add(:help   , '-h', "help")
+      sc.add(:version, '-v, --version', "version")
+      ret = sc.__send__(:_default_format, nil, 25)
+      ok {ret} == "  %-20s : %s"
+    end
+
   end
 
 
