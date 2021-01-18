@@ -33,7 +33,7 @@ module Benry
   ##       puts "Usage: foobar [<options>] [<args>...]"
   ##       puts ""
   ##       puts "Options:"
-  ##       puts cmdopt.build_option_help()
+  ##       puts cmdopt.option_help()
   ##       ## or
   ##       #format = "  %-20s : %s"
   ##       #cmdopt.each_option_help {|opt, help| puts format % [opt, help] }
@@ -82,7 +82,7 @@ module Benry
   ##     cmdopt = Benry::Cmdopt.new
   ##     cmdopt.add(:verbose, '-v, --verbose', "verbose mode")
   ##     cmdopt.add(:debug  , '-d[<LEVEL>]'  , nil, type: Integer) # hidden
-  ##     puts cmdopt.build_option_help()
+  ##     puts cmdopt.option_help()
   ##     ### output ('-d' doesn't appear because help string is nil)
   ##     #  -v, --verbose        : verbose mode
   ##
@@ -116,9 +116,9 @@ module Benry
         self
       end
 
-      def build_option_help(width_or_format=nil, all: false)
+      def option_help(width_or_format=nil, all: false)
         #; [!dm4p8] returns option help message.
-        return @schema.build_option_help(width_or_format, all: all)
+        return @schema.option_help(width_or_format, all: all)
       end
 
       def each_option_help(&block)
@@ -190,7 +190,7 @@ module Benry
         item
       end
 
-      def build_option_help(width_or_format=nil, all: false)
+      def option_help(width_or_format=nil, all: false)
         #; [!0aq0i] can take integer as width.
         #; [!pcsah] can take format string.
         #; [!dndpd] detects option width automatically when nothing specified.

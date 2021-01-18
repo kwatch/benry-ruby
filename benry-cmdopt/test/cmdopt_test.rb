@@ -213,7 +213,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
   end
 
 
-  describe '#build_option_help()' do
+  describe '#option_help()' do
 
     before do
       sc = Benry::Cmdopt::Schema.new
@@ -226,7 +226,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
     end
 
     it "[!0aq0i] can take integer as width." do
-      help = @schema.build_option_help(41)
+      help = @schema.option_help(41)
       ok {help} == <<END
   -h, --help                               : show help message.
       --version                            : print version
@@ -238,7 +238,7 @@ END
     end
 
     it "[!pcsah] can take format string." do
-      help = @schema.build_option_help("%-42s: %s")
+      help = @schema.option_help("%-42s: %s")
       ok {help} == <<END
 -h, --help                                : show help message.
     --version                             : print version
@@ -250,7 +250,7 @@ END
     end
 
     it "[!dndpd] detects option width automatically when nothing specified." do
-      help = @schema.build_option_help()
+      help = @schema.option_help()
       ok {help} == <<END
   -h, --help             : show help message.
       --version          : print version
@@ -262,12 +262,12 @@ END
     end
 
     it "[!v7z4x] skips option help if help message is not specified." do
-      help = @schema.build_option_help()
+      help = @schema.option_help()
       ok {help} !~ /debug/
     end
 
     it "[!to1th] includes all option help when `all` is true." do
-      help = @schema.build_option_help(nil, all: true)
+      help = @schema.option_help(nil, all: true)
       ok {help} =~ /debug/
       ok {help} == <<END
   -h, --help             : show help message.
@@ -286,7 +286,7 @@ output mode
   q, quiet:   print litte output
   c, compact: print summary output
 END
-      actual = sc.build_option_help()
+      actual = sc.option_help()
       expected = <<END
   -m, --mode=<MODE>    : output mode
                            v, verbose: print many output
@@ -839,7 +839,7 @@ class Benry::Cmdopt::Facade::Test < MiniTest::Test
   end
 
 
-  describe '#build_option_help()' do
+  describe '#option_help()' do
 
     before do
       @cmdopt = Benry::Cmdopt.new
@@ -849,7 +849,7 @@ class Benry::Cmdopt::Facade::Test < MiniTest::Test
     end
 
     it "[!dm4p8] returns option help message." do
-      help = @cmdopt.build_option_help()
+      help = @cmdopt.option_help()
       ok {help} == <<END
   -h, --help           : show help message
       --version        : print version
