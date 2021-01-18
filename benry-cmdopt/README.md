@@ -14,7 +14,7 @@ and easy to understahnd.
 Why not `optparse.rb`?
 ======================
 
-* Source code of `optparse.rb` is too large and complicated, because
+* Source code of `optparse.rb` is very large and complicated, because
   `OptParse` class does everything about command option parsing.
   It is hard to customize or extend `OptionParser` class.
 
@@ -23,7 +23,7 @@ Why not `optparse.rb`?
   Therefore it is easy to understand and extend these classes.
 
   File `optparse.rb` contains 1234 lines (without comments), while
-  `benry/cmdopt.rb` (v1.0.0) contains only 355 lines (without comments).
+  `benry/cmdopt.rb` (v1.1.0) contains only 361 lines (without comments).
 
 * `optparse.rb` regards `-x` as a short cut of `--xxx` automatically
   even if you have not defined `-x` option.
@@ -171,7 +171,7 @@ cmdopt = Benry::Cmdopt.new()
 cmdopt.add(:file, '-f, --file=<FILE>', "filename")
 cmdopt.add(:mode, '-m <MODE>'        , "verbose/quiet")
 puts "Usage: blabla <options>"
-puts cmdopt.build_option_help()
+puts cmdopt.option_help()
 ### output (calculated proper width)
 # Usage: blabla <options>
 #   -f, --file=<FILE>    : filename
@@ -207,7 +207,7 @@ if options[:help]
   puts "Usage: foobar [<options>] [<args>...]"
   puts ""
   puts "Options:"
-  puts cmdopt.build_option_help()
+  puts cmdopt.option_help()
   ## or
   #format = "  %-20s : %s"
   #cmdopt.each_option_help {|opt, help| puts format % [opt, help] }
@@ -285,7 +285,7 @@ require 'benry/cmdopt'
 cmdopt = Benry::Cmdopt.new
 cmdopt.add(:verbose, '-v, --verbose', "verbose mode")
 cmdopt.add(:debug  , '-d[<LEVEL>]'  , nil, type: Integer) # hidden
-puts cmdopt.build_option_help()
+puts cmdopt.option_help()
 ### output ('-d' is not included)
 #  -v, --verbose        : verbose mode
 ```
