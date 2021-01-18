@@ -301,17 +301,17 @@ module Benry
     class SchemaItem    # avoid Struct
 
       def initialize(key, optdef, short, long, param, help, optional: nil, type: nil, pattern: nil, enum: nil, &callback)
-        @key      = key
-        @optdef   = optdef
-        @short    = short
-        @long     = long
-        @param    = param
-        @help     = help
-        @optional = optional
-        @type     = type
-        @pattern  = pattern
-        @enum     = enum
-        @callback = callback
+        @key      = key       unless key.nil?
+        @optdef   = optdef    unless optdef.nil?
+        @short    = short     unless short.nil?
+        @long     = long      unless long.nil?
+        @param    = param     unless param.nil?
+        @help     = help      unless help.nil?
+        @optional = optional  unless optional.nil?
+        @type     = type      unless type.nil?
+        @pattern  = pattern   unless pattern.nil?
+        @enum     = enum      unless enum.nil?
+        @callback = callback  unless callback.nil?
       end
 
       attr_reader :key, :optdef, :short, :long, :param, :help, :optional, :type, :pattern, :enum, :callback
