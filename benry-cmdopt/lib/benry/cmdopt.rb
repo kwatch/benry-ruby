@@ -225,33 +225,6 @@ module Benry
         return buf.join()
       end
 
-      private
-
-      def _default_format(min_width=nil, max_width=35)
-        #; [!bmr7d] changes min_with according to options.
-        min_width ||= _preferred_option_width()
-        #; [!hr45y] detects preffered option width.
-        w = 0
-        each_option_help do |opt, help|
-          w = opt.length if w < opt.length
-        end
-        w = min_width if w < min_width
-        w = max_width if w > max_width
-        #; [!kkh9t] returns format string.
-        return "  %-#{w}s : %s"
-      end
-
-      def _preferred_option_width()
-        #; [!kl91t] shorten option help min width when only single options which take no arg.
-        #; [!0koqb] widen option help min width when any option takes an arg.
-        #; [!kl91t] widen option help min width when long option exists.
-        long_p  = @items.any? {|x| x.help &&  x.long &&  x.param }
-        short_p = @items.all? {|x| x.help && !x.long && !x.param }
-        return short_p ? 8 : long_p ? 20 : 14
-      end
-
-      public
-
       def each_option_help(&block)
         #; [!4b911] yields each optin definition str and help message.
         @items.each do |item|
@@ -297,6 +270,29 @@ module Benry
           raise error("#{optdef}: invalid option definition.")
         end
         return short, long, param1 || param2, !!param2
+      end
+
+      def _default_format(min_width=nil, max_width=35)
+        #; [!bmr7d] changes min_with according to options.
+        min_width ||= _preferred_option_width()
+        #; [!hr45y] detects preffered option width.
+        w = 0
+        each_option_help do |opt, help|
+          w = opt.length if w < opt.length
+        end
+        w = min_width if w < min_width
+        w = max_width if w > max_width
+        #; [!kkh9t] returns format string.
+        return "  %-#{w}s : %s"
+      end
+
+      def _preferred_option_width()
+        #; [!kl91t] shorten option help min width when only single options which take no arg.
+        #; [!0koqb] widen option help min width when any option takes an arg.
+        #; [!kl91t] widen option help min width when long option exists.
+        long_p  = @items.any? {|x| x.help &&  x.long &&  x.param }
+        short_p = @items.all? {|x| x.help && !x.long && !x.param }
+        return short_p ? 8 : long_p ? 20 : 14
       end
 
     end
