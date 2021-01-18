@@ -315,10 +315,7 @@ module Benry
       end
 
       attr_reader :key, :optdef, :short, :long, :param, :help, :optional, :type, :pattern, :enum, :callback
-
-      def optional_param?
-        @optional
-      end
+      alias optional_param? optional
 
       def validate_and_convert(val, optdict)
         #; [!h0s0o] raises RuntimeError when value not matched to pattern.
