@@ -325,28 +325,49 @@ END
       ok {ret} == "  %-22s : %s"
     end
 
-    it "[!kl91t] sets option help min width to 10 when only single options which take no arg." do
+    it "[!bmr7d] changes min_with according to options." do
       sc = Benry::Cmdopt::Schema.new
       sc.add(:help   , '-h', "help")
       sc.add(:version, '-v', "version")
-      ret = sc.__send__(:_default_format, nil, 25)
-      ok {ret} == "  %-10s : %s"
+      ok {sc.__send__(:_default_format, nil, 40)} == "  %-8s : %s"
+      #
+      sc.add(:file   , '-f <FILE>', "filename")
+      ok {sc.__send__(:_default_format, nil, 40)} == "  %-14s : %s"
+      #
+      sc.add(:force  , '--force', "forcedly")
+      ok {sc.__send__(:_default_format, nil, 40)} == "  %-14s : %s"
+      #
+      sc.add(:mode   , '-m, --mode=<MODE>', "verbose/quiet")
+      ok {sc.__send__(:_default_format, nil, 40)} == "  %-20s : %s"
     end
 
-    it "[!0koqb] sets option help min width to 20 when short option takes an arg." do
+  end
+
+
+  describe '#_preferred_option_width()' do
+
+    it "[!kl91t] shorten option help min width when only single options which take no arg." do
+      sc = Benry::Cmdopt::Schema.new
+      sc.add(:help   , '-h', "help")
+      sc.add(:version, '-v', "version")
+      ok {sc.__send__(:_preferred_option_width)} == 8
+    end
+
+    it "[!0koqb] widen option help min width when any option takes an arg." do
       sc = Benry::Cmdopt::Schema.new
       sc.add(:help   , '-h', "help")
       sc.add(:indent , '-i[<N>]', "indent")
-      ret = sc.__send__(:_default_format, nil, 25)
-      ok {ret} == "  %-20s : %s"
+      ok {sc.__send__(:_preferred_option_width)} == 14
     end
 
-    it "[!kl91t] sets option help min width to 20 when any long otpion exists." do
+    it "[!kl91t] widen option help min width when long option exists." do
       sc = Benry::Cmdopt::Schema.new
       sc.add(:help   , '-h', "help")
       sc.add(:version, '-v, --version', "version")
-      ret = sc.__send__(:_default_format, nil, 25)
-      ok {ret} == "  %-20s : %s"
+      ok {sc.__send__(:_preferred_option_width)} == 14
+      #
+      sc.add(:file, '--file=<FILE>', "filename")
+      ok {sc.__send__(:_preferred_option_width)} == 20
     end
 
   end
