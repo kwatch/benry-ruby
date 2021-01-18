@@ -196,7 +196,7 @@ module Benry
         #; [!dndpd] detects option width automatically when nothing specified.
         case width_or_format
         when nil    ; format = _default_format()
-        when Integer; format = "  %-#{width_or_format}s: %s"
+        when Integer; format = "  %-#{width_or_format}s : %s"
         when String ; format = width_or_format
         else
           raise ArgumentError.new("#{width_or_format.inspect}: width (integer) or format (string) expected.")

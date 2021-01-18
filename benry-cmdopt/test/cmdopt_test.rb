@@ -228,13 +228,13 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
     it "[!0aq0i] can take integer as width." do
       help = @schema.option_help(41)
       ok {help} == <<END
-  -h, --help                               : show help message.
-      --version                            : print version
-  -f, --file=<FILE>                        : filename
-  -i, --indent[=<WIDTH>]                   : enable indent
+  -h, --help                                : show help message.
+      --version                             : print version
+  -f, --file=<FILE>                         : filename
+  -i, --indent[=<WIDTH>]                    : enable indent
 END
       s = help.each_line.first.split(':')[0]
-      ok {s.length} == 41+2
+      ok {s.length} == 41+3
     end
 
     it "[!pcsah] can take format string." do
