@@ -113,6 +113,13 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
       ok {pr}.raise?(Benry::Cmdopt::SchemaError, msg)
     end
 
+    it "[!97sn0] raises SchemaError when ',' is missing between short and long options." do
+      sc = @schema
+      pr = proc { sc.add(:exec, '-x --exec=ARG', "exec") }
+      msg = "add(:exec, \"-x --exec=ARG\"): missing ',' between short option and long options."
+      ok {pr}.raise?(Benry::Cmdopt::SchemaError, msg)
+    end
+
     it "[!yht0v] keeps command option definitions." do
       sc = @schema
       sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width",

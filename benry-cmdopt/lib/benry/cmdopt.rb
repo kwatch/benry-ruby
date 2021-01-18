@@ -159,6 +159,10 @@ module Benry
         key || long  or
           raise error("add(#{key.inspect}, #{optdef.inspect}): long option required when option key (1st arg) not specified.")
         key ||= long.gsub(/-/, '_').intern
+        #; [!97sn0] raises SchemaError when ',' is missing between short and long options.
+        if long.nil? && param =~ /\A--/
+          raise error("add(#{key.inspect}, #{optdef.inspect}): missing ',' between short option and long options.")
+        end
         #; [!7xmr5] raises SchemaError when type is not registered.
         #; [!s2aaj] raises SchemaError when option has no params but type specified.
         if type
