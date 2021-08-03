@@ -42,6 +42,7 @@ How to release:
   $ git tag #{proj}-#{rel}
   $ git push
   $ git push --tags
+  $ rake clean
 END
 end unless Rake::Task.task_defined?(:guide)
 
