@@ -17,7 +17,7 @@ Benry-recorder is a tiny utility that can:
 END
   spec.license         = 'MIT'
   spec.files           = Dir[
-                           'README.md', 'MIT-LICENSE', #'CHANGES.md'
+                           'README.md', 'MIT-LICENSE', 'CHANGES.md'
                            'Rakefile.rb', 'benry-recorder.gemspec',
                            #'bin/*',
                            'lib/**/*.rb',
