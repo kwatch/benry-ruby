@@ -16,7 +16,10 @@ require 'rake/clean'
 CLEAN << "build"
 CLOBBER << Dir.glob("#{project}-*.gem")
 
-require './task/readme-task'
+begin
+  require './task/readme-task'
+rescue LoadError => exc
+end
 
 
 task :default => :help
@@ -38,6 +41,21 @@ task :test do
   #sh "ruby", "test/run_all.rb"
   #sh "oktest -ss test"
   sh "ruby -r oktest -e 'puts RUBY_VERSION;Oktest.main' -- test -ss"
+end
+
+$ruby_versions = %w[2.4.10 2.5.8 2.6.6 2.7.1 3.0.2]
+
+desc "do test for each Ruby version"
+task :'test:all' do
+  vs_home = ENV['VS_HOME']
+  if vs_home.nil? || vs_home.empty?
+    fail "$VS_HOME should be set."
+  end
+  $ruby_versions.each do |ver|
+    puts "======== Ruby #{ver} ========"
+    ruby = File.join(vs_home, "ruby/#{ver}/bin/ruby")
+    sh "#{ruby} -r oktest -e 'puts RUBY_VERSION;Oktest.main' -- test -sp"
+  end
 end
 
 
