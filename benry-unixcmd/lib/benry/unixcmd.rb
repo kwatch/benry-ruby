@@ -326,9 +326,10 @@ module Benry
         #; [!kqgdl] copy a directory recursively if '-r' option specified.
         #; [!ko4he] copy a file into new file if '-r' option not specifieid.
         #; [!ubthp] creates hard link instead of copy if '-l' option specified.
+        #; [!yu51t] error when copying supecial files such as character device.
         #FileUtils.cp_r src, dst, preserve: preserve, verbose: false if recursive
         #FileUtils.cp src, dst, preserve: preserve, verbose: false unless recursive
-        __cp_file(src, dst, preserve, hardlink)
+        __cp_file(cmd, src, dst, preserve, hardlink)
       #; [!z8xce] when `to:` keyword arg specified...
       else
         #; [!ms2sv] error when destination directory not exist.
@@ -352,16 +353,17 @@ module Benry
         #; [!654d2] copy files recursively if '-r' option specified.
         #; [!i5g8r] copy files non-recursively if '-r' option not specified.
         #; [!p7ah8] creates hard link instead of copy if '-l' option specified.
+        #; [!e90ii] error when copying supecial files such as character device.
         #FileUtils.cp_r filenames, dir, preserve: preserve, verbose: false if recursive
         #FileUtils.cp   filenames, dir, preserve: preserve, verbose: false unless recursive
         filenames.each do |fname|
           newfile = File.join(dir, File.basename(fname))
-          __cp_file(fname, newfile, preserve, hardlink)
+          __cp_file(cmd, fname, newfile, preserve, hardlink)
         end
       end
     end
 
-    def __cp_file(srcpath, dstpath, preserve, hardlink, bufsize=4096)   # :nodoc:
+    def __cp_file(cmd, srcpath, dstpath, preserve, hardlink, bufsize=4096)   # :nodoc:
       ftype = File.ftype(srcpath)
       case ftype
       when 'link'
@@ -382,7 +384,7 @@ module Benry
         Dir.open(srcpath) do |d|
           d.each do |x|
             next if x == '.' || x == '..'
-            __cp_file(File.join(srcpath, x), File.join(dstpath, x), preserve, hardlink, bufsize)
+            __cp_file(cmd, File.join(srcpath, x), File.join(dstpath, x), preserve, hardlink, bufsize)
           end
         end
         __cp_meta(srcpath, dstpath) if preserve

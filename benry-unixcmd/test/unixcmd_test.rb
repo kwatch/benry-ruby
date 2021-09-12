@@ -674,6 +674,12 @@ Oktest.scope do
             ok {File.identical?("foo1.txt", "foo9.txt")} == true
           end
         end
+        spec "[!yu51t] error when copying supecial files such as character device." do
+          sout, serr = capture_sio do
+            pr = proc { cp "/dev/null", "null" }
+            ok {pr}.raise?(ArgumentError, "cp: /dev/null: cannot copy special file.")
+          end
+        end
       end
 
       case_else "[!z8xce] when `to:` keyword arg specified..." do
@@ -793,6 +799,12 @@ Oktest.scope do
             cp :l, "foo*.txt", to: "d1"
             ok {File.identical?("foo1.txt", "d1/foo1.txt")} == true
             ok {File.identical?("foo2.txt", "d1/foo2.txt")} == true
+          end
+        end
+        spec "[!e90ii] error when copying supecial files such as character device." do
+          sout, serr = capture_sio do
+            pr = proc { cp "/dev/null", to: "d1" }
+            ok {pr}.raise?(ArgumentError, "cp: /dev/null: cannot copy characterSpecial file.")
           end
         end
       end
