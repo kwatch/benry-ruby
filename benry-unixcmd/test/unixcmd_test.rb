@@ -623,8 +623,10 @@ Oktest.scope do
             ctime1 = File.ctime("d1/bar.txt")
             mtime1 = File.mtime("d1/bar.txt")
             atime1 = File.atime("d1/bar.txt")
-            mtime2 = mtime1 - 900
-            atime2 = atime1 - 600
+            #mtime2 = mtime1 - 900
+            #atime2 = atime1 - 600
+            mtime2 = (x = mtime1 - 900; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
+            atime2 = (x = atime1 - 600; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
             #
             File.utime(atime2, mtime2, "d1/bar.txt")
             cp :p, "d1/bar.txt", "blabla.txt"
@@ -647,8 +649,10 @@ Oktest.scope do
             ctime1 = File.ctime("d1/bar.txt")
             mtime1 = File.mtime("d1/bar.txt")
             atime1 = File.atime("d1/bar.txt")
-            mtime2 = mtime1 - 900
-            atime2 = atime1 - 600
+            #mtime2 = mtime1 - 900
+            #atime2 = atime1 - 600
+            mtime2 = (x = mtime1 - 900; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
+            atime2 = (x = atime1 - 600; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
             #
             File.utime(atime2, mtime2, "d1/bar.txt")
             cp "d1/bar.txt", "blabla.txt"
@@ -749,8 +753,10 @@ Oktest.scope do
             ctime1 = File.ctime("d1/bar.txt")
             mtime1 = File.mtime("d1/bar.txt")
             atime1 = File.atime("d1/bar.txt")
-            mtime2 = mtime1 - 30
-            atime2 = atime1 - 90
+            #mtime2 = mtime1 - 30
+            #atime2 = atime1 - 90
+            mtime2 = (x = mtime1 - 900; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
+            atime2 = (x = atime1 - 600; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
             File.utime(atime2, mtime2, "d1/bar.txt")
             #
             dummy_dir("d9")

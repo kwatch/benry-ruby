@@ -395,10 +395,9 @@ module Benry
 
     def __cp_meta(src, dst)    # :nodoc:
       stat = File.stat(src)
-      File.utime(stat.atime, stat.mtime, dst)
-      #File.utime(File.atime(src), File.mtime(src), dst)
       File.chmod(stat.mode, dst)
       File.chown(stat.uid, stat.gid, dst)
+      File.utime(stat.atime, stat.mtime, dst)
     end
 
 
