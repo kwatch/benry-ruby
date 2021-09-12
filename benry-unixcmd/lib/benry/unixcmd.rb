@@ -904,9 +904,19 @@ module Benry
         __err "#{cmd}: #{owner}: invalid owner."
       end
       #; [!jyecc] converts user name into user id.
+      #; [!kt7mp] error when invalid user name specified.
+      begin
+        user_id = user ? __chown_uid(user) : nil
+      rescue ArgumentError
+        __err "#{cmd}: #{user}: unknown user name."
+      end
       #; [!f7ye0] converts group name into group id.
-      user_id  = user  ? __chown_uid(user)  : nil
-      group_id = group ? __chown_gid(group) : nil
+      #; [!szlsb] error when invalid group name specified.
+      begin
+        group_id = group ? __chown_gid(group) : nil
+      rescue ArgumentError
+        __err "#{cmd}: #{group}: unknown group name."
+      end
       return user_id, group_id if _debug
       #; [!138eh] expands file pattern.
       #; [!tvpey] error when file not exist.
@@ -926,26 +936,20 @@ module Benry
 
     def __chown_uid(user)    # :nodoc:
       require 'etc' unless defined?(::Etc)
-      user_id = case user
-        when nil       ; nil
-        when /\A\d+\z/ ; user.to_i
-        else           ; x = Etc.getpwnam(user)  or
-                           __err "#{cmd}: #{user}: unknown user name."
-                         x.uid
+      case user
+      when nil       ; return nil
+      when /\A\d+\z/ ; return user.to_i
+      else           ; return (x = Etc.getpwnam(user)) ? x.uid : nil  # ArgumentError
       end
-      return user_id
     end
 
     def __chown_gid(group)    # :nodoc:
       require 'etc' unless defined?(::Etc)
-      group_id = case group
-        when nil       ; nil
-        when /\A\d+\z/ ; group.to_i
-        else           ; x = Etc.getgrnam(group)  or
-                           __err "#{cmd}: #{group}: unknown group name."
-                         x.gid
+      case group
+      when nil       ; return nil
+      when /\A\d+\z/ ; return group.to_i
+      else           ; return (x = Etc.getgrnam(group)) ? x.gid : nil  # ArgumentError
       end
-      return group_id
     end
 
 

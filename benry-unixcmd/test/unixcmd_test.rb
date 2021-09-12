@@ -1755,11 +1755,23 @@ Oktest.scope do
           ok {uid} == uid
         end
       end
+      spec "[!kt7mp] error when invalid user name specified." do |usr, grp|
+        sout, serr = capture_sio do
+          pr = proc { chown "honyara", "foo*.txt" }
+          ok {pr}.raise?(ArgumentError, "chown: honyara: unknown user name.")
+        end
+      end
       spec "[!f7ye0] converts group name into group id." do |usr, grp, uid, gid|
         sout, serr = capture_sio do
           uid, gid = __chown("chown", ["#{usr}:#{grp}", "foo*.txt"], true)
           ok {uid} == uid
           ok {gid} == gid
+        end
+      end
+      spec "[!szlsb] error when invalid group name specified." do
+        sout, serr = capture_sio do
+          pr = proc { chown ":honyara", "foo*.txt" }
+          ok {pr}.raise?(ArgumentError, "chown: honyara: unknown group name.")
         end
       end
       spec "[!138eh] expands file pattern." do |usr, grp, uid|
