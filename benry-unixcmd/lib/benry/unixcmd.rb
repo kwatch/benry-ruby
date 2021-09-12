@@ -949,6 +949,66 @@ module Benry
     end
 
 
+    def store(*args, to:)
+      __store('store', args, false, to: to)
+    end
+
+    def store!(*args, to:)
+      __store('store!', args, true, to: to)
+    end
+
+    def __store(cmd, args, overwrite, to:)
+      #; [!9wr1o] error when `to:` keyword argument not specified.
+      ! to.nil?  or
+        __err "#{cmd}: 'to:' keyword argument required."
+      #; [!n43u2] echoback command and arguments.
+      optchars = __prepare(cmd, args, "pfl", to)
+      preserve = optchars.include?("p")
+      ignore   = optchars.include?("f")
+      hardlink = optchars.include?("l")
+      #; [!588e5] error when destination directory not exist.
+      #; [!lm43y] error when destination pattern matched to multiple filenames.
+      #; [!u5zoy] error when destination is not a directory.
+      dir = __glob_onedir(cmd, to)
+      #; [!g1duw] error when absolute path specified.
+      args.each do |arg|
+        #! File.absolute_path?(arg)  or   # Ruby >=  2.7
+        File.absolute_path(arg) != arg  or
+          __err "#{cmd}: #{arg}: absolute path not expected (only relative path expected)."
+      end
+      #; [!je1i2] error when file not exist but '-f' option not specified.
+      filenames = __glob_filenames(cmd, args, ignore)
+      #; [!5619q] (store) error when target file or directory already exists.
+      #; [!cw08t] (store!) overwrites existing files.
+      if ! overwrite
+        filenames.each do |fpath|
+          newpath = File.join(dir, fpath)
+          ! File.exist?(newpath)  or
+            __err "#{cmd}: #{newpath}: destination file or directory already exists."
+        end
+      end
+      #; [!4y4zy] copy files with keeping filepath.
+      #; [!f0n0y] copy timestamps if '-p' option specified.
+      #; [!w8oq6] creates hard links if '-l' option specified.
+      #; [!7n869] error when copying supecial files such as character device.
+      pathcache = {}
+      filenames.each do |fpath|
+        newpath = File.join(dir, fpath)
+        __mkpath(File.dirname(newpath), pathcache)
+        __cp_file(cmd, fpath, newpath, preserve, hardlink, bufsize=4096)
+      end
+    end
+
+    def __mkpath(dirpath, pathcache={})
+      if ! pathcache.include?(dirpath)
+        parent = File.dirname(dirpath)
+        __mkpath(parent, pathcache) unless parent == dirpath
+        Dir.mkdir(dirpath) unless File.exist?(dirpath)
+        pathcache[dirpath] = true
+      end
+    end
+
+
     def time(format=nil, &b)
       #; [!ddl3a] measures elapsed time of block and reports into stderr.
       pt1 = Process.times()

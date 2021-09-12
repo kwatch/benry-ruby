@@ -1804,6 +1804,116 @@ Oktest.scope do
     end
 
 
+    topic 'store()' do
+      spec "[!9wr1o] error when `to:` keyword argument not specified." do
+        sout, serr = capture_sio do
+          pr = proc { store "foo*.txt", "d1" }
+          ok {pr}.raise?(ArgumentError, /^missing keyword: :?to$/)
+        end
+      end
+      spec "[!n43u2] echoback command and arguments." do
+        sout, serr = capture_sio do
+          store "foo*.txt", to: "d1"
+        end
+        ok {sout} == "$ store foo*.txt d1\n"
+      end
+      spec "[!588e5] error when destination directory not exist." do
+        sout, serr = capture_sio do
+          pr = proc { store "foo*.txt", to: "d9" }
+          ok {pr}.raise?(ArgumentError, "store: d9: directory not found.")
+        end
+      end
+      spec "[!lm43y] error when destination pattern matched to multiple filenames." do
+        sout, serr = capture_sio do
+          pr = proc { store "d1", to: "foo*.txt" }
+          ok {pr}.raise?(ArgumentError, "store: foo*.txt: unexpectedly matched to multiple filenames (foo1.txt, foo2.txt).")
+        end
+      end
+      spec "[!u5zoy] error when destination is not a directory." do
+        sout, serr = capture_sio do
+          pr = proc { store "foo*.txt", to: "d1/bar.txt" }
+          ok {pr}.raise?(ArgumentError, "store: d1/bar.txt: Not a directory.")
+        end
+      end
+      spec "[!g1duw] error when absolute path specified." do
+        sout, serr = capture_sio do
+          pr = proc { store "/tmp", to: "d1" }
+          ok {pr}.raise?(ArgumentError, "store: /tmp: absolute path not expected (only relative path expected).")
+        end
+      end
+      spec "[!je1i2] error when file not exist but '-f' option not specified." do
+        sout, serr = capture_sio do
+          pr = proc { store "blabla*.txt", to: "d1"}
+          ok {pr}.raise?(ArgumentError, "store: blabla*.txt: file or directory not found (add '-f' option to ignore missing files).")
+        end
+      end
+      spec "[!5619q] (store) error when target file or directory already exists." do
+        sout, serr = capture_sio do
+          dummy_file "d1/foo2.txt", "dummy"
+          pr = proc { store "foo*.txt", to: "d1" }
+          ok {pr}.raise?(ArgumentError, "store: d1/foo2.txt: destination file or directory already exists.")
+        end
+      end
+      spec "[!4y4zy] copy files with keeping filepath." do
+        sout, serr = capture_sio do
+          dummy_dir("d9")
+          store "foo*.txt", "d1", to: "d9"
+          ok {"d9/foo1.txt"}.file_exist?
+          ok {"d9/foo2.txt"}.file_exist?
+          ok {"d9/d1/bar.txt"}.file_exist?
+          ok {"d9/d1/d2/baz.txt"}.file_exist?
+        end
+      end
+      spec "[!f0n0y] copy timestamps if '-p' option specified." do
+        sout, serr = capture_sio do
+          dummy_dir "d9"
+          atime1 = File.atime("d1/d2/baz.txt")
+          mtime1 = File.mtime("d1/d2/baz.txt")
+          atime2 = (x = atime1 - 600; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
+          mtime2 = (x = mtime1 - 900; Time.new(x.year, x.month, x.day, x.hour, x.min, x.sec))
+          File.utime(atime2, mtime2, "d1/d2/baz.txt")
+          store :p, "d1/**/*.txt", to: "d9"
+          ok {File.atime("d1/d2/baz.txt")} != atime1
+          ok {File.mtime("d1/d2/baz.txt")} != mtime1
+          ok {File.atime("d1/d2/baz.txt")} != atime2
+          ok {File.mtime("d1/d2/baz.txt")} == mtime2
+        end
+      end
+      spec "[!w8oq6] creates hard links if '-l' option specified." do
+        sout, serr = capture_sio do
+          dummy_dir "d9"
+          store :l, "foo*.txt", "d1/**/*.txt", to: "d9"
+          ok {File.identical?("foo1.txt", "d9/foo1.txt")} == true
+          ok {File.identical?("foo2.txt", "d9/foo2.txt")} == true
+          ok {File.identical?("d1/bar.txt", "d9/d1/bar.txt")} == true
+          ok {File.identical?("d1/d2/baz.txt", "d9/d1/d2/baz.txt")} == true
+        end
+      end
+      spec "[!7n869] error when copying supecial files such as character device." do
+        sout, serr = capture_sio do
+          dummy_dir "d9"
+          dir = File.join(Dir.pwd(), "d9")
+          Dir.chdir "/dev" do
+            pr = proc { store "./null", to: dir }
+            ok {pr}.raise?(ArgumentError, "store: ./null: cannot copy characterSpecial file.")
+          end
+        end
+      end
+    end
+
+    topic 'store!()' do
+      spec "[!cw08t] (store!) overwrites existing files." do
+        dummy_file "d1/foo2.txt", "dummy"
+        sout, serr = capture_sio do
+          store! "foo*.txt", to: "d1"
+          ok {"d1/foo2.txt"}.file_exist?
+          ok {File.read("d1/foo2.txt")} != "dummy"
+          ok {File.read("d1/foo2.txt")} == File.read("foo2.txt")
+        end
+      end
+    end
+
+
     topic 'time()' do
       spec "[!ddl3a] measures elapsed time of block and reports into stderr." do
         sout, serr = capture_sio do
