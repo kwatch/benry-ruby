@@ -127,6 +127,7 @@ $ cd -
 * `cp "x", "y", to: "dir"` copies `x` and `y` into `dir`.
 * `cp "x", "y", "dir"` will be error! (use `to: "dir"` instead.)
 * Glob patten such as `*`, `**`, `?`, and `{}` are available.
+* (See [FAQ](#faq) about `to:` keyword option.)
 
 <!--
 File: ex-cp1.rb
@@ -165,6 +166,7 @@ Options:
 * `mv "x", "y", to: "dir"` moves `x` and `y` into `dir`.
 * `mv "x", "y", "dir"` will be error! (use `to: "dir"` instead.)
 * Glob patten such as `*`, `**`, `?`, and `{}` are available.
+* (See [FAQ](#faq) about `to:` keyword option.)
 
 <!--
 File: ex-mv1.rb
@@ -295,6 +297,7 @@ Options:
 * `ln! :s, "x", "y"` overwrites existing symbolic link `y`.
 * `ln "files*.txt', to: "dir"` creates hard links into `dir`.
 * `ln "files*.txt', "dir"` will be error! (use `to: "dir"` instead.)
+* (See [FAQ](#faq) about `to:` keyword option.)
 
 <!--
 File: ex-ln1.rb
@@ -455,6 +458,33 @@ pwd()
 Options:
 
 * (no options)
+
+
+
+`store`
+-------
+
+* `store "x", "y", to: "dir", ` copies files under `x` and `y` to `dir` keeping file path.
+  For example, `x/foo/bar.rb` will be copied as `dir/x/foo/bar.rb`.
+* `store!` overwrites existing files while `store` doesn't.
+
+<!--
+File: ex-store1.rb
+-->
+
+```ruby
+require 'benry/unixcmd'
+include Benry::UnixCommand
+
+## copies files into builddir, keeping file path
+store "lib/**/*.rb", "test/**/*.rb", to: "builddir"
+```
+
+Options:
+
+* `store :p` -- preserves timestamps, permission, file owner and group.
+* `store :l` -- creates hard link instead of copying file.
+* `store :f` -- ignores non-existing files.
 
 
 
@@ -683,7 +713,7 @@ sh "date"
 
 Result:
 
-```ruby
+```terminal
 [localhost]$ ruby ex-prompt1.rb
 myname@localhost> date
 Wed Jan 15 20:23:07 UTC 2021
@@ -705,7 +735,6 @@ include Benry::UnixCommand
 def prompt()
   s = "myname@localhost>"
   "\e[0;31m#{s}\e[0m"    # red
-  #"\e[0;31m#{s}\e[0m"    # red
   #"\e[0;32m#{s}\e[0m"    # green
   #"\e[0;33m#{s}\e[0m"    # yellow
   #"\e[0;34m#{s}\e[0m"    # blue
