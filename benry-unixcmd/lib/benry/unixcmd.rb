@@ -77,15 +77,21 @@ module Benry
     def __sh(cmd, args, ignore_error, &b)
       #; [!rqe7a] echoback command and arguments.
       echoback(args.join(" ")) if __echoback?()
-      status = system(*args)
-      #; [!agntr] returns true if command succeeded.
-      #; [!wvria] yields block and returns it's result if block given.
+      result = system(*args)
+      #; [!agntr] returns process status if command succeeded.
+      #; [!clfig] yields block if command failed.
+      #; [!deu3e] not yield block if command succeeded.
+      #; [!chko8] block argument is process status.
+      #; [!0yy6r] (sh) not raise error if block result is truthy
       #; [!xsspi] (sh) raises error if command failed.
-      #; [!tbfii] (sh!) returns false if command failed.
-      return status           if status
-      return yield status, $? if block_given?()
-      return status           if ignore_error
-      ms = $?.methods.sort - Object.new.methods
+      #; [!tbfii] (sh!) returns process status if command failed.
+      stat = $?
+      return stat if result
+      if block_given?()
+        result = yield stat
+        return stat if result
+      end
+      return stat if ignore_error
       raise "Command failed with status (#{$?.exitstatus}): #{args.join(' ')}"
     end
 
