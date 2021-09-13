@@ -531,6 +531,9 @@ Options:
 * `sh "ls -al"` runs `ls -al` command.
 * `sh` raises error when command failed.
 * `sh!` ignores error even when command failed.
+* `sh` and `sh!` return Process::Status object regardless of command result.
+* `sh` and `sh!` can take a block argument as error handler called only when command failed.
+  If result of block argument is truthy, error will not be raised.
 
 <!--
 File: ex-sh1.rb
@@ -540,9 +543,16 @@ File: ex-sh1.rb
 require 'benry/unixcmd'
 include Benry::UnixCommand
 
-## run `ls -al` command
-sh "ls -al"     # may raise error when command failed
-sh! "ls -al"    # ignore error even when command filed
+## run `ls` command
+sh "ls foo.txt"     # may raise error when command failed
+sh! "ls foo.txt"    # ignore error even when command filed
+
+## error handling
+sh "ls /fooobarr" do |stat|  # block called only when command failed
+  p stats.class       #=> Process::Status
+  p stat.exitstatus   #=> 1 (non-zero)
+  true                # suppress raising error
+end
 ```
 
 Options:
