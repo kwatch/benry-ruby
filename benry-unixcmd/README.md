@@ -40,7 +40,7 @@ Table of Contents
   * <a href="#chown"><code>chown</code></a>
   * <a href="#pwd"><code>pwd</code></a>
   * <a href="#store"><code>store</code></a>
-  * <a href="#sh"><code>sh</code></a>
+  * <a href="#sys"><code>sys</code></a>
   * <a href="#capture2"><code>capture2</code></a>
   * <a href="#capture2e"><code>capture2e</code></a>
   * <a href="#capture3"><code>capture3</code></a>
@@ -525,18 +525,18 @@ Options:
 
 
 
-`sh`
-----
+`sys`
+-----
 
-* `sh "ls -al"` runs `ls -al` command.
-* `sh` raises error when command failed.
-* `sh!` ignores error even when command failed.
-* `sh` and `sh!` return Process::Status object regardless of command result.
-* `sh` and `sh!` can take a block argument as error handler called only when command failed.
+* `sys "ls -al"` runs `ls -al` command.
+* `sys` raises error when command failed.
+* `sys!` ignores error even when command failed.
+* `sys` and `sys!` return `Process::Status` object regardless of command result.
+* `sys` and `sys!` can take a block argument as error handler called only when command failed.
   If result of block argument is truthy, error will not be raised.
 
 <!--
-File: ex-sh1.rb
+File: ex-sys1.rb
 -->
 
 ```ruby
@@ -544,11 +544,11 @@ require 'benry/unixcmd'
 include Benry::UnixCommand
 
 ## run `ls` command
-sh "ls foo.txt"     # may raise error when command failed
-sh! "ls foo.txt"    # ignore error even when command filed
+sys "ls foo.txt"     # may raise error when command failed
+sys! "ls foo.txt"    # ignore error even when command filed
 
 ## error handling
-sh "ls /fooobarr" do |stat|  # block called only when command failed
+sys "ls /fooobarr" do |stat|  # block called only when command failed
   p stats.class       #=> Process::Status
   p stat.exitstatus   #=> 1 (non-zero)
   true                # suppress raising error

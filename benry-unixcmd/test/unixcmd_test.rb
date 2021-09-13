@@ -109,16 +109,16 @@ Oktest.scope do
     end
 
 
-    topic 'sh()' do
+    topic 'sys()' do
       spec "[!rqe7a] echoback command and arguments." do
         sout, serr = capture_sio do
-          sh "echo foo bar >/dev/null"
+          sys "echo foo bar >/dev/null"
         end
         ok {sout} == "$ echo foo bar >/dev/null\n"
       end
       spec "[!agntr] returns process status if command succeeded." do
         sout, serr = capture_sio do
-          ret = sh "echo foo bar >/dev/null"
+          ret = sys "echo foo bar >/dev/null"
           ok {ret}.is_a?(Process::Status)
           ok {ret.exitstatus} == 0
         end
@@ -126,7 +126,7 @@ Oktest.scope do
       spec "[!clfig] yields block if command failed." do
         sout, serr = capture_sio do
           called = false
-          stat = sh "false" do |stat|
+          stat = sys "false" do |stat|
             called = true
           end
           ok {called} == true
@@ -136,7 +136,7 @@ Oktest.scope do
       spec "[!deu3e] not yield block if command succeeded." do
         sout, serr = capture_sio do
           called = false
-          ret = sh "true" do |stat|
+          ret = sys "true" do |stat|
             called = true
           end
           ok {called} == false
@@ -146,7 +146,7 @@ Oktest.scope do
       spec "[!chko8] block argument is process status." do
         sout, serr = capture_sio do
           arg = nil
-          ret = sh "false" do |stat|
+          ret = sys "false" do |stat|
             arg = stat
             true
           end
@@ -154,26 +154,26 @@ Oktest.scope do
           ok {arg}.same?(ret)
         end
       end
-      spec "[!0yy6r] (sh) not raise error if block result is truthy" do
+      spec "[!0yy6r] (sys) not raise error if block result is truthy" do
         sout, serr = capture_sio do
-          pr = proc { sh "false" do true end }
+          pr = proc { sys "false" do true end }
           ok {pr}.NOT.raise?(ArgumentError)
-          pr = proc { sh "false" do false end }
+          pr = proc { sys "false" do false end }
           ok {pr}.raise?(RuntimeError, "Command failed with status (1): false")
         end
       end
-      spec "[!xsspi] (sh) raises error if command failed." do
+      spec "[!xsspi] (sys) raises error if command failed." do
         sout, serr = capture_sio do
-          pr = proc { sh "grep -q ^FOOBAR foo1.txt" }
+          pr = proc { sys "grep -q ^FOOBAR foo1.txt" }
           ok {pr}.raise?(RuntimeError, "Command failed with status (1): grep -q ^FOOBAR foo1.txt")
         end
       end
     end
 
-    topic 'sh!()' do
-      spec "[!tbfii] (sh!) returns process status if command failed." do
+    topic 'sys!()' do
+      spec "[!tbfii] (sys!) returns process status if command failed." do
         sout, serr = capture_sio do
-          ret = sh! "grep -q ^FOOBAR foo1.txt"
+          ret = sys! "grep -q ^FOOBAR foo1.txt"
           ok {ret}.is_a?(Process::Status)
           ok {ret.exitstatus} == 1
         end

@@ -66,15 +66,15 @@ module Benry
     end
 
 
-    def sh(*args, &b)
-      __sh('sh', args, false, &b)
+    def sys(*args, &b)
+      __sys('sh', args, false, &b)
     end
 
-    def sh!(*args, &b)
-      __sh('sh!', args, true, &b)
+    def sys!(*args, &b)
+      __sys('sh!', args, true, &b)
     end
 
-    def __sh(cmd, args, ignore_error, &b)
+    def __sys(cmd, args, ignore_error, &b)
       #; [!rqe7a] echoback command and arguments.
       echoback(args.join(" ")) if __echoback?()
       result = system(*args)
@@ -82,9 +82,9 @@ module Benry
       #; [!clfig] yields block if command failed.
       #; [!deu3e] not yield block if command succeeded.
       #; [!chko8] block argument is process status.
-      #; [!0yy6r] (sh) not raise error if block result is truthy
-      #; [!xsspi] (sh) raises error if command failed.
-      #; [!tbfii] (sh!) returns process status if command failed.
+      #; [!0yy6r] (sys) not raise error if block result is truthy
+      #; [!xsspi] (sys) raises error if command failed.
+      #; [!tbfii] (sys!) returns process status if command failed.
       stat = $?
       return stat if result
       if block_given?()
