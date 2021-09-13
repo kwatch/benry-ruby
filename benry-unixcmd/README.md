@@ -19,6 +19,43 @@ Features compared to FileUtils:
 (benry-unixcmd gem requires Ruby >= 2.3)
 
 
+Table of Contents
+=================
+
+<!-- TOC -->
+
+* <a href="#install">Install</a>
+* <a href="#command-reference">Command Reference</a>
+  * <a href="#echo"><code>echo</code></a>
+  * <a href="#echoback"><code>echoback</code></a>
+  * <a href="#cp"><code>cp</code></a>
+  * <a href="#mv"><code>mv</code></a>
+  * <a href="#rm"><code>rm</code></a>
+  * <a href="#mkdir"><code>mkdir</code></a>
+  * <a href="#rmdir"><code>rmdir</code></a>
+  * <a href="#ln"><code>ln</code></a>
+  * <a href="#atomic_symlink"><code>atomic_symlink!</code></a>
+  * <a href="#touch"><code>touch</code></a>
+  * <a href="#chmod"><code>chmod</code></a>
+  * <a href="#chown"><code>chown</code></a>
+  * <a href="#pwd"><code>pwd</code></a>
+  * <a href="#store"><code>store</code></a>
+  * <a href="#sh"><code>sh</code></a>
+  * <a href="#capture2"><code>capture2</code></a>
+  * <a href="#capture2e"><code>capture2e</code></a>
+  * <a href="#capture3"><code>capture3</code></a>
+  * <a href="#time"><code>time</code></a>
+* <a href="#faq">FAQ</a>
+  * <a href="#why-mv-or-cp-requires-to-option">Why <code>mv</code> or <code>cp</code> requires <code>to:</code> option?</a>
+  * <a href="#how-to-use-in-rakefile">How to use in Rakefile?</a>
+  * <a href="#how-to-change-prompt-string">How to change prompt string?</a>
+  * <a href="#how-to-make-prompt-colored">How to make prompt colored?</a>
+  * <a href="#how-to-disable-command-echoback">How to disable command echoback?</a>
+* <a href="#license-and-copyright">License and Copyright</a>
+
+<!-- /TOC -->
+
+
 
 Install
 =======
