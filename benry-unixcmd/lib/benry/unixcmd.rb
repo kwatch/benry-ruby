@@ -96,6 +96,29 @@ module Benry
     end
 
 
+    def ruby(*args, &b)
+      __ruby('ruby', args, false, &b)
+    end
+
+    def ruby!(*args, &b)
+      __ruby('ruby!', args, true, &b)
+    end
+
+    def __ruby(cmd, args, ignore_error, &b)
+      #; [!98qro] echoback command and args.
+      #; [!u5f5l] run ruby command.
+      #; [!2jano] returns process status object if ruby command succeeded.
+      #; [!69clt] (ruby) error when ruby command failed.
+      #; [!z1f03] (ruby!) ignores error even when ruby command failed.
+      ruby = RbConfig.ruby
+      if args.length == 1
+        __sys(cmd, ["#{ruby} #{args[0]}"], ignore_error, &b)
+      else
+        __sys(cmd, [ruby]+args, ignore_error, &b)
+      end
+    end
+
+
     def popen2( *args, **kws, &b); __popen(:popen2 , args, kws, &b); end   # :nodoc:
     def popen2e(*args, **kws, &b); __popen(:popen2e, args, kws, &b); end   # :nodoc:
     def popen3( *args, **kws, &b); __popen(:popen3 , args, kws, &b); end   # :nodoc:

@@ -181,6 +181,53 @@ Oktest.scope do
     end
 
 
+    topic 'ruby()' do
+      spec "[!98qro] echoback command and args." do
+        sout, serr = capture_sio do
+          ruby "-e", "x=0"
+        end
+        ok {sout} == "$ #{RbConfig.ruby} -e x=0\n"
+      end
+      spec "[!u5f5l] run ruby command." do
+        sout, serr = capture_sio do
+          ruby "-e 'File.write(\"out1\", \"ABC\")'"
+          ruby "-e", "File.write(\"out2\", \"XYZ\")"
+        end
+        ok {sout} == ("$ #{RbConfig.ruby} -e 'File.write(\"out1\", \"ABC\")'\n"\
+                      "$ #{RbConfig.ruby} -e File.write(\"out2\", \"XYZ\")\n")
+        ok {File.read("out1")} == "ABC"
+        ok {File.read("out2")} == "XYZ"
+      end
+      spec "[!2jano] returns process status object if ruby command succeeded." do
+        sout, serr = capture_sio do
+          ret = ruby "-e", "x = 1"
+          ok {ret}.is_a?(Process::Status)
+          ok {ret.exitstatus} == 0
+        end
+      end
+      spec "[!69clt] (ruby) error when ruby command failed." do
+        sout, serr = capture_sio do
+          pr = proc { ruby "-e '1/0' 2> err1" }
+          ok {pr}.raise?(RuntimeError, "Command failed with status (1): /opt/vs/ruby/3.0.2/bin/ruby -e '1/0' 2> err1")
+          ok {File.read("err1")} =~ /ZeroDivisionError/
+        end
+      end
+    end
+
+    topic 'ruby!()' do
+      spec "[!z1f03] (ruby!) ignores error even when ruby command failed." do
+        sout, serr = capture_sio do
+          ret = nil
+          pr = proc { ret = ruby! "-e '1/0' 2> err1" }
+          ok {pr}.NOT.raise?(RuntimeError)
+          ok {File.read("err1")} =~ /ZeroDivisionError/
+          ok {ret}.is_a?(Process::Status)
+          ok {ret.exitstatus} == 1
+        end
+      end
+    end
+
+
     topic 'popen2()', tag: 'open3' do
       spec "[!8que2] calls 'Open3.popen2()'." do
         expected = ("     1	AA\n"\
