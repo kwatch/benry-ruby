@@ -2003,6 +2003,119 @@ Oktest.scope do
     end
 
 
+    topic 'zip()' do
+      spec "[!zzvuk] requires 'zip' gem automatically." do
+        ok {defined?(::Zip)} == nil
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+        end
+        ok {defined?(::Zip)} != false
+        ok {defined?(::Zip)} == 'constant'
+      end
+      spec "[!zk1qt] echoback command and arguments." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+        end
+        ok {sout} == "$ zip foo.zip foo*.txt\n"
+      end
+      spec "[!lrnj7] zip filename required." do
+        sout, serr = capture_sio do
+          pr = proc { zip :r }
+          ok {pr}.raise?(ArgumentError, "zip: zip filename required.")
+        end
+      end
+      spec "[!umbal] error when zip file glob pattern matched to mutilple filenames." do
+        sout, serr = capture_sio do
+          dummy_file "foo1.zip"
+          dummy_file "foo2.zip"
+          pr = proc { zip! "foo*.zip", "foo*.txt" }
+          ok {pr}.raise?(ArgumentError, "zip: foo*.zip: matched to multiple filenames (foo1.zip, foo2.zip).")
+        end
+      end
+      spec "[!oqzna] (zip) raises error if zip file already exists." do
+        sout, serr = capture_sio do
+          dummy_file "foo.zip"
+          pr = proc { zip "foo.zip", "foo*.txt" }
+          ok {pr}.raise?(ArgumentError, "zip: foo.zip: already exists (to overwrite it, call `zip!` command instead of `zip` command).")
+        end
+      end
+      spec "[!uu8uz] expands glob pattern." do
+        sout, serr = capture_sio do
+          pr = proc { zip "foo.zip", "foo*.txt" }
+          ok {pr}.NOT.raise?(ArgumentError)
+        end
+      end
+      spec "[!nahxa] error if file not exist." do
+        sout, serr = capture_sio do
+          pr = proc { zip "foo.zip", "blabla*.txt" }
+          ok {pr}.raise?(ArgumentError, "zip: blabla*.txt: file or directory not found.")
+        end
+      end
+      spec "[!p8alf] creates zip file." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          ok {"foo.zip"}.file_exist?
+          unzip_cmd = capture2 "which unzip"
+          if ! unzip_cmd.strip.empty?
+            output = capture2 "#{unzip_cmd.strip} -l foo.zip"
+            ok {output} =~ /foo1\.txt/
+            ok {output} =~ /foo2\.txt/
+          end
+        end
+      end
+      spec "[!3sxmg] supports complession level (0~9)." do
+        sout, serr = capture_sio do
+          zip :'0', "foo0.zip", "foo*.txt"
+          ok {"foo0.zip"}.file_exist?
+          zip :'1', "foo1.zip", "foo*.txt"
+          ok {"foo1.zip"}.file_exist?
+          zip :'9', "foo9.zip", "foo*.txt"
+          ok {"foo9.zip"}.file_exist?
+        end
+      end
+      spec "[!bgdg7] adds files recursively into zip file if '-r' option specified." do
+        sout, serr = capture_sio do
+          zip :r, "foo.zip", "d1"
+          unzip_cmd = capture2 "which unzip"
+          if ! unzip_cmd.strip.empty?
+            output = capture2 "#{unzip_cmd.strip} -l foo.zip"
+            ok {output} =~ /d1\/bar\.txt/
+            ok {output} =~ /d1\/d2\/baz\.txt/
+          end
+        end
+      end
+      spec "[!jgt96] error when special file specified." do
+        sout, serr = capture_sio do
+          pr = proc { zip "foo.zip", "/dev/null" }
+          ok {pr}.raise?(ArgumentError, "zip: /dev/null: characterSpecial file not supported.")
+        end
+      end
+      spec "[!fvvn8] returns zip file object." do
+        sout, serr = capture_sio do
+          ret = zip "foo.zip", "foo*.txt"
+          ok {ret}.is_a?(Zip::File)
+        end
+      end
+    end
+
+    topic 'zip!()' do
+      spec "[!khbiq] zip filename can be glob pattern." do
+        sout, serr = capture_sio do
+          dummy_file "foo.zip"
+          pr = proc { zip! "*.zip", "foo*.txt" }
+          ok {pr}.NOT.raise?(ArgumentError)
+        end
+      end
+      spec "[!e995z] (zip!) removes zip file if exists." do
+        sout, serr = capture_sio do
+          dummy_file "foo.zip"
+          pr = proc { zip! "foo.zip", "foo*.txt" }
+          ok {pr}.NOT.raise?(ArgumentError)
+        end
+      end
+    end
+
+
     topic 'time()' do
       spec "[!ddl3a] measures elapsed time of block and reports into stderr." do
         sout, serr = capture_sio do

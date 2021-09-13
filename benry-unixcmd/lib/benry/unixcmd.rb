@@ -1042,6 +1042,74 @@ module Benry
     end
 
 
+    def zip(*args)
+      __zip('zip', args, false)
+    end
+
+    def zip!(*args)
+      __zip('zip', args, true)
+    end
+
+    def __zip(cmd, args, overwrite)
+      #; [!zzvuk] requires 'zip' gem automatically.
+      require 'zip' unless defined?(::Zip)
+      #; [!zk1qt] echoback command and arguments.
+      optchars = __prepare(cmd, args, "r0123456789", nil)
+      recursive = optchars.include?('r')
+      complevel = (optchars =~ /(\d)/ ? $1.to_i : nil)
+      #; [!lrnj7] zip filename required.
+      zip_filename = args.shift()  or
+        __err "#{cmd}: zip filename required."
+      #; [!khbiq] zip filename can be glob pattern.
+      #; [!umbal] error when zip file glob pattern matched to mutilple filenames.
+      arr = Dir.glob(zip_filename); n = arr.length
+      if    n < 1 ; nil
+      elsif n > 1 ; __err "#{cmd}: #{zip_filename}: matched to multiple filenames (#{arr.join(', ')})."
+      else        ; zip_filename = arr[0]
+      end
+      #; [!oqzna] (zip) raises error if zip file already exists.
+      ! File.exist?(zip_filename) || overwrite  or
+        __err "#{cmd}: #{zip_filename}: already exists (to overwrite it, call `#{cmd}!` command instead of `#{cmd}` command)."
+      #; [!uu8uz] expands glob pattern.
+      #; [!nahxa] error if file not exist.
+      filenames = __glob_filenames(cmd, args, false) do |arg, _|
+        __err "#{cmd}: #{arg}: file or directory not found."
+      end
+      #; [!e995z] (zip!) removes zip file if exists.
+      File.unlink(zip_filename) if File.exist?(zip_filename)
+      #; [!p8alf] creates zip file.
+      #; [!3sxmg] supports complession level (0~9).
+      zipf = ::Zip::File.open(zip_filename, create: true, compression_level: complevel) do |zf|
+        filenames.each do |fname|
+          __zip_add(cmd, zf, fname, recursive)
+        end
+        zf
+      end
+      #; [!fvvn8] returns zip file object.
+      return zipf
+    end
+
+    def __zip_add(cmd, zf, fpath, recursive)
+      ftype = File.ftype(fpath)
+      case ftype
+      when 'link'; zf.add(fpath, fpath)
+      when 'file'; zf.add(fpath, fpath)
+      when 'directory'
+        zf.add(fpath, fpath)
+        #; [!bgdg7] adds files recursively into zip file if '-r' option specified.
+        Dir.open(fpath) do |dir|
+          dir.each do |x|
+            next if x == '.' || x == '..'
+            __zip_add(cmd, zf, File.join(fpath, x), recursive)
+          end
+        end if recursive
+      else
+        #; [!jgt96] error when special file specified.
+        __err "#{cmd}: #{fpath}: #{ftype} file not supported."
+      end
+    end
+
+
     def time(format=nil, &b)
       #; [!ddl3a] measures elapsed time of block and reports into stderr.
       pt1 = Process.times()
