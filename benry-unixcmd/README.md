@@ -41,6 +41,7 @@ Table of Contents
   * <a href="#pwd"><code>pwd</code></a>
   * <a href="#store"><code>store</code></a>
   * <a href="#sys"><code>sys</code></a>
+  * <a href="#ruby"><code>ruby</code></a>
   * <a href="#capture2"><code>capture2</code></a>
   * <a href="#capture2e"><code>capture2e</code></a>
   * <a href="#capture3"><code>capture3</code></a>
@@ -553,6 +554,33 @@ sys "ls /fooobarr" do |stat|  # block called only when command failed
   p stat.exitstatus   #=> 1 (non-zero)
   true                # suppress raising error
 end
+```
+
+Options:
+
+* (no options)
+
+
+
+`ruby`
+------
+
+* `ruby "...."` is almost same as `sys "ruby ...."`.
+* `RbConfig.ruby` is used as ruby command path.
+* `ruby` raises error when ruby command failed.
+* `ruby!` ignores error even when ruby command failed.
+
+<!--
+File: ex-ruby1.rb
+-->
+
+```ruby
+require 'benry/unixcmd'
+include Benry::UnixCommand
+
+## run ruby command
+ruby "file1.rb"      # raise error when ruby command failed
+ruby! "file1.rb"     # ignore error even when ruby command filed
 ```
 
 Options:
