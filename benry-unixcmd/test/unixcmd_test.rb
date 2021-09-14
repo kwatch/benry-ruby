@@ -208,7 +208,7 @@ Oktest.scope do
       spec "[!69clt] (ruby) error when ruby command failed." do
         sout, serr = capture_sio do
           pr = proc { ruby "-e '1/0' 2> err1" }
-          ok {pr}.raise?(RuntimeError, "Command failed with status (1): /opt/vs/ruby/3.0.2/bin/ruby -e '1/0' 2> err1")
+          ok {pr}.raise?(RuntimeError, "Command failed with status (1): #{RbConfig.ruby} -e '1/0' 2> err1")
           ok {File.read("err1")} =~ /ZeroDivisionError/
         end
       end

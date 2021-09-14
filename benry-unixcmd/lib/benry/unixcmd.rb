@@ -252,13 +252,13 @@ module Benry
       #
       arr = Dir.glob(args[0]); n = arr.length
       if    n < 1 ; src = args[0]
-      elsif n > 1 ; __err "#{cmd}: #{args[0]}: unexpectedly matched to multiple files (#{arr.join(', ')})."
+      elsif n > 1 ; __err "#{cmd}: #{args[0]}: unexpectedly matched to multiple files (#{arr.sort.join(', ')})."
       else        ; src = arr[0]
       end
       #
       arr = Dir.glob(args[1]); n = arr.length
       if    n < 1 ; dst = args[1]
-      elsif n > 1 ; __err "#{cmd}: #{args[1]}: unexpectedly matched to multiple files (#{arr.join(', ')})."
+      elsif n > 1 ; __err "#{cmd}: #{args[1]}: unexpectedly matched to multiple files (#{arr.sort.join(', ')})."
       else        ; dst = arr[0]
       end
       #
@@ -268,7 +268,7 @@ module Benry
     def __glob_onedir(cmd, to)    # :nodoc:
       arr = Dir.glob(to); n = arr.length
       if    n < 1 ; __err "#{cmd}: #{to}: directory not found."
-      elsif n > 1 ; __err "#{cmd}: #{to}: unexpectedly matched to multiple filenames (#{arr.join(', ')})."
+      elsif n > 1 ; __err "#{cmd}: #{to}: unexpectedly matched to multiple filenames (#{arr.sort.join(', ')})."
       end
       dir = arr[0]
       File.directory?(dir)  or
@@ -1064,7 +1064,7 @@ module Benry
       #; [!umbal] error when zip file glob pattern matched to mutilple filenames.
       arr = Dir.glob(zip_filename); n = arr.length
       if    n < 1 ; nil
-      elsif n > 1 ; __err "#{cmd}: #{zip_filename}: matched to multiple filenames (#{arr.join(', ')})."
+      elsif n > 1 ; __err "#{cmd}: #{zip_filename}: matched to multiple filenames (#{arr.sort.join(', ')})."
       else        ; zip_filename = arr[0]
       end
       #; [!oqzna] (zip) raises error if zip file already exists.
@@ -1161,7 +1161,7 @@ module Benry
       #; [!esnke] error if zip file not found.
       arr = Dir.glob(zip_filename); n = arr.length
       if    n < 1 ; __err "#{cmd}: #{zip_filename}: zip file not found."
-      elsif n > 1 ; __err "#{cmd}: #{zip_filename}: matched to multiple filenames (#{arr.join(' ')})."
+      elsif n > 1 ; __err "#{cmd}: #{zip_filename}: matched to multiple filenames (#{arr.sort.join(' ')})."
       else        ; zip_filename = arr[0]
       end
       #
