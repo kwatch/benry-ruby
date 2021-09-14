@@ -2128,6 +2128,144 @@ Oktest.scope do
     end
 
 
+    topic 'unzip()' do
+      spec "[!eqx48] requires 'zip' gem automatically." do
+        skip_when defined?(::Zip) != nil, "zip gem already required."
+        ok {defined?(::Zip)} == nil
+        sout, serr = capture_sio do
+          begin
+            unzip "foo.zip"
+          rescue
+          end
+        end
+        ok {defined?(::Zip)} == 'constant'
+      end
+      spec "[!0tedi] extract zip file." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          rm "foo*.txt"
+          ok {"foo1.txt"}.not_exist?
+          ok {"foo2.txt"}.not_exist?
+          unzip "foo.zip"
+          ok {"foo1.txt"}.file_exist?
+          ok {"foo2.txt"}.file_exist?
+        end
+      end
+      spec "[!ednxk] echoback command and arguments." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          File.unlink("foo1.txt", "foo2.txt")
+          unzip "foo.zip"
+        end
+        ok {sout} == ("$ zip foo.zip foo*.txt\n"\
+                      "$ unzip foo.zip\n")
+      end
+      spec "[!1lul7] error if zip file not specified." do
+        sout, serr = capture_sio do
+          pr = proc { unzip() }
+          ok {pr}.raise?(ArgumentError, "unzip: zip filename required.")
+          pr = proc { unzip :d }
+          ok {pr}.raise?(ArgumentError, "unzip: zip filename required.")
+        end
+      end
+      spec "[!0yyg8] target directory should not exist, or be empty." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          mkdir "d8"
+          unzip :d, "d8", "foo.zip"   # empty dir
+          unzip :d, "d9", "foo.zip"   # non-existing dir
+        end
+      end
+      spec "[!1ls2h] error if target directory not empty." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          pr = proc { unzip :d, "d1", "foo.zip" }
+          ok {pr}.raise?(ArgumentError, "unzip: d1: directory not empty.")
+        end
+      end
+      spec "[!lb6r5] error if target directory is not a directory." do
+        sout, serr = capture_sio do
+          pr = proc { unzip :d, "foo1.txt", "foo2.txt" }
+          ok {pr}.raise?(ArgumentError, "unzip: foo1.txt: not a directory.")
+        end
+      end
+      spec "[!dzk7c] creates target directory if not exists." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          unzip :d, "d8/d9", "*.zip"
+          ok {"d8/d9/foo1.txt"}.file_exist?
+          ok {"d8/d9/foo2.txt"}.file_exist?
+        end
+      end
+      spec "[!o1ot5] expands glob pattern." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"; File.unlink("foo1.txt", "foo2.txt")
+          unzip "*.zip"
+          ok {"foo1.txt"}.file_exist?
+          ok {"foo2.txt"}.file_exist?
+        end
+      end
+      spec "[!92bh4] error if glob pattern matched to multiple filenames." do
+        sout, serr = capture_sio do
+          pr = proc { unzip "*.txt" }
+          ok {pr}.raise?(ArgumentError, "unzip: *.txt: matched to multiple filenames (foo1.txt foo2.txt).")
+        end
+      end
+      spec "[!esnke] error if zip file not found." do
+        sout, serr = capture_sio do
+          pr = proc { unzip "*.zip" }
+          ok {pr}.raise?(ArgumentError, "unzip: *.zip: zip file not found.")
+        end
+      end
+      spec "[!ekllx] (unzip) error when file already exists." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          pr = proc { unzip "foo.zip" }
+          ok {pr}.raise?(ArgumentError, "unzip: foo1.txt: file already exists (to overwrite it, call `unzip!` command instead of `unzip` command).")
+        end
+      end
+      spec "[!ikq5w] if filenames are specified, extracts files matched to them." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"; File.unlink("foo1.txt", "foo2.txt")
+          unzip "foo.zip", "*2.txt"
+          ok {"foo1.txt"}.not_exist?
+          ok {"foo2.txt"}.file_exist?
+        end
+      end
+      spec "[!dy4r4] if '-d' option specified, extracts files under target directory." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          unzip :d, "d9", "foo.zip"
+          ok {"d9/foo1.txt"}.file_exist?
+          ok {"d9/foo2.txt"}.file_exist?
+        end
+      end
+      spec "[!5u645] if '-d' option not specified, extracts files under current directory." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"; File.unlink("foo1.txt", "foo2.txt")
+          unzip "foo.zip"
+          ok {"foo1.txt"}.file_exist?
+          ok {"foo2.txt"}.file_exist?
+        end
+      end
+    end
+
+    topic 'unzip!()' do
+      spec "[!06nyv] (unzip!) overwrites existing files." do
+        sout, serr = capture_sio do
+          zip "foo.zip", "foo*.txt"
+          File.unlink("foo2.txt")
+          ok {"foo1.txt"}.file_exist?
+          ok {"foo2.txt"}.not_exist?
+          pr = proc { unzip! "foo.zip" }
+          ok {pr}.NOT.raise?(ArgumentError)
+          ok {"foo1.txt"}.file_exist?
+          ok {"foo2.txt"}.file_exist?
+        end
+      end
+    end
+
+
     topic 'time()' do
       spec "[!ddl3a] measures elapsed time of block and reports into stderr." do
         sout, serr = capture_sio do
@@ -2138,6 +2276,14 @@ Oktest.scope do
         end
         ok {sout} == "sleep 1...\n"
         ok {serr} =~ /\A\n        1\.\d\d\ds real       0\.\d\d\ds user       0\.\d\d\ds sys\n\z/
+      end
+      spec "[!sjf80] (unzip!) `Zip.on_exists_proc` should be recovered." do
+        sout, serr = capture_sio do
+          ok {Zip.on_exists_proc} == false
+          zip "foo.zip", "foo1.txt", "foo2.txt"
+          unzip! "foo.zip"
+          ok {Zip.on_exists_proc} == false
+        end
       end
     end
 

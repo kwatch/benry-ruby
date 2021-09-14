@@ -1117,6 +1117,89 @@ module Benry
     end
 
 
+    def unzip(*args)
+      __unzip('unzip', args, false)
+    end
+
+    def unzip!(*args)
+      __unzip('unzip!', args, true)
+    end
+
+    def __unzip(cmd, args, overwrite)
+      #; [!eqx48] requires 'zip' gem automatically.
+      require 'zip' unless defined?(::Zip)
+      #; [!ednxk] echoback command and arguments.
+      optchars = __prepare(cmd, args, "d", nil)
+      outdir   = optchars.include?('d') ? args.shift() : nil
+      #; [!1lul7] error if zip file not specified.
+      zip_filename = args.shift()  or
+        __err "#{cmd}: zip filename required."
+      #; [!0yyg8] target directory should not exist, or be empty.
+      if outdir
+        if ! File.exist?(outdir)
+          # pass
+        elsif File.directory?(outdir)
+          #; [!1ls2h] error if target directory not empty.
+          found = Dir.open(outdir) {|dir|
+            dir.find {|x| x != '.' && x != '..' }
+          }
+          ! found  or
+            __err "#{cmd}: #{outdir}: directory not empty."
+        else
+          #; [!lb6r5] error if target directory is not a directory.
+          __err "#{cmd}: #{outdir}: not a directory."
+        end
+      end
+      #; [!o1ot5] expands glob pattern.
+      #; [!92bh4] error if glob pattern matched to multiple filenames.
+      #; [!esnke] error if zip file not found.
+      arr = Dir.glob(zip_filename); n = arr.length
+      if    n < 1 ; __err "#{cmd}: #{zip_filename}: zip file not found."
+      elsif n > 1 ; __err "#{cmd}: #{zip_filename}: matched to multiple filenames (#{arr.join(' ')})."
+      else        ; zip_filename = arr[0]
+      end
+      #
+      filenames = args
+      filenames = nil if filenames.empty?
+      #; [!dzk7c] creates target directory if not exists.
+      __mkpath(outdir, {}) if outdir && ! File.exist?(outdir)
+      #
+      orig = ::Zip.on_exists_proc
+      begin
+        #; [!06nyv] (unzip!) overwrites existing files.
+        ::Zip.on_exists_proc = overwrite
+        extglob = File::FNM_EXTGLOB
+        #; [!ekllx] (unzip) error when file already exists.
+        ! overwrite and ::Zip::File.open(zip_filename) do |zf|
+          zf.each do |x|
+            next if filenames && ! filenames.find {|pat| File.fnmatch?(pat, x.name, extglob) }
+            next if x.directory?
+            fpath = outdir ? File.join(outdir, x.name) : x.name
+            ! File.exist?(fpath)  or
+              __err "#{cmd}: #{fpath}: file already exists (to overwrite it, call `#{cmd}!` command instead of `#{cmd}` command)."
+          end
+        end
+        #; [!0tedi] extract zip file.
+        ::Zip::File.open(zip_filename) do |zf|
+          zf.each do |x|
+            #; [!ikq5w] if filenames are specified, extracts files matched to them.
+            next if filenames && ! filenames.find {|pat| File.fnmatch?(pat, x.name, extglob) }
+            #; [!dy4r4] if '-d' option specified, extracts files under target directory.
+            if outdir
+              x.extract(File.join(outdir, x.name))
+            #; [!5u645] if '-d' option not specified, extracts files under current directory.
+            else
+              x.extract()
+            end
+          end
+        end
+      ensure
+        #; [!sjf80] (unzip!) `Zip.on_exists_proc` should be recovered.
+        ::Zip.on_exists_proc = orig
+      end
+    end
+
+
     def time(format=nil, &b)
       #; [!ddl3a] measures elapsed time of block and reports into stderr.
       pt1 = Process.times()
