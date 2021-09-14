@@ -14,9 +14,13 @@ Features compared to FileUtils:
 * implements `capture2`, `capture2e`, and `capture3` which calls
   `Popen3.capture2`, `Popen3.capture2`, and `Popen3.capture3` respectively.
 * supports `touch -r reffile`.
+* provides `sys` command which is similar to `sh` in Rake but different in details.
+* provides `zip` and `unzip` commands (requires `rubyzip` gem).
+* provides `store` command which copies files recursively into target directory, keeping file path.
 * provides `atomic_symlink!` command which switches symlink atomically.
 
 (benry-unixcmd gem requires Ruby >= 2.3)
+
 
 
 Table of Contents
@@ -45,6 +49,8 @@ Table of Contents
   * <a href="#capture2"><code>capture2</code></a>
   * <a href="#capture2e"><code>capture2e</code></a>
   * <a href="#capture3"><code>capture3</code></a>
+  * <a href="#zip"><code>zip</code></a>
+  * <a href="#unzip"><code>unzip</code></a>
   * <a href="#time"><code>time</code></a>
 * <a href="#faq">FAQ</a>
   * <a href="#why-mv-or-cp-requires-to-option">Why <code>mv</code> or <code>cp</code> requires <code>to:</code> option?</a>
@@ -673,6 +679,82 @@ output, error = capture3 "cat -n", stdin_data: input
 Options:
 
 * see [`Popen3.capture3()` manual page](https://docs.ruby-lang.org/en/master/Open3.html#method-c-capture3).
+
+
+
+`zip`
+-----
+
+* `zip "foo.zip", "file1", "file2"` creates new zip file `foo.zip`.
+* `zip :r, "foo.zip", "dir1"` adds files under `dir1` into zip file recursively.
+* `zip` will be error if zip file already exists.
+* `zip!` will overwrite existing zip file.
+* `zip :'0'` doesn't compress files.
+* `zip :'1'` compress files in best speed.
+* `zip :'9'` compress files in best compression level.
+* `zip` and `zip!` requires `rubyzip` gem. You must install it by yourself.
+* `zip` and `zip!` doesn't support absolute path.
+
+<!--
+File: ex-zip1.rb
+-->
+
+```ruby
+require 'benry/unixcmd'
+include Benry::UnixCommand
+
+## create zip file
+zip "foo.zip", "file*.txt"            # requires 'rubyzip' gem
+
+## create zip file, adding files under directory
+zip :r, "foo.zip", "dir1"
+
+## create high-compressed zip file
+zip :r9, "foo.zip", "dir1"
+```
+
+Options:
+
+* `zip :r` -- adds files under directory into zip file recursively.
+* `zip :'0'` -- not compress files.
+* `zip :'1'` -- compress files in best speed.
+* `zip :'9'` -- compress files in best compression level.
+
+
+
+`unzip`
+-------
+
+* `unzip "foo.zip"` extracts files in zip file into current directory.
+* `unzip :d, "dir1", "foo.zip"` extracts files under `dir1`.
+  Diretory `dir1` should not exist or should be empty.
+* `unzip "foo.zip"` will be error if extracting file already exists.
+* `unzip! "foo.zip"` will overwrite existing files.
+* `unzip "foo.txt", "file1", "file2"` extracts only `file1` and `file2`.
+* `zunip` and `unzip!` requires `rubyzip` gem. You must install it by yourself.
+* `unzip` and `unzip!` doesn't support absolute path.
+
+<!--
+File: ex-unzip1.zip
+-->
+
+```ruby
+require 'benry/unixcmd'
+include Benry::UnixCommand
+
+## extracts zip file
+unzip "foo.zip"                # requires 'rubyzip' gem
+
+## extracts files in zip file into the directory.
+unzip :d, "dir1", "foo.zip"    # 'dir1' should be empty, or should not exist
+
+## overwrites existing files.
+unzip! "foo.zip"
+```
+
+Options:
+
+* `unzip :d, "dir1"` -- extracts files into the directory.
 
 
 
