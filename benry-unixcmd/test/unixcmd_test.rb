@@ -1482,6 +1482,13 @@ Oktest.scope do
         ok {File.readlink("tmp.link")} == "foo2.txt"
         ok {sout} =~ /\A\$ ln -s foo2\.txt tmp\.link\.\d+ \&\& mv -Tf tmp\.link\.\d+ tmp.link\n\z/
       end
+      spec "[!lhomw] creates temporal symlink and rename it when symlink not exist." do
+        sout, serr = capture_sio do
+          atomic_symlink! "d1", "d1.link"
+        end
+        ok {File.readlink("d1.link")} == "d1"
+        ok {sout} =~ /\A\$ ln -s d1 d1\.link\.\d+ \&\& mv -Tf d1\.link\.\d+ d1\.link\n\z/
+      end
       spec "[!h75kp] error when destination is normal file or directory." do
         sout, serr = capture_sio do
           pr = proc { atomic_symlink! "foo1.txt", "foo2.txt" }
@@ -1489,14 +1496,6 @@ Oktest.scope do
           pr = proc { atomic_symlink! "foo1.txt", "d1" }
           ok {pr}.raise?(ArgumentError, "atomic_symlink!: d1: not a symbolic link.")
         end
-      end
-      spec "[!pjcmn] just creates new symbolic link when destination not exist." do
-        sout, serr = capture_sio do
-          ok {"tmp.link"}.NOT.symlink_exist?
-          atomic_symlink! "foo1.txt", "tmp.link"
-          ok {"tmp.link"}.symlink_exist?
-        end
-        ok {sout} == "$ ln -s foo1.txt tmp.link\n"
       end
     end
 

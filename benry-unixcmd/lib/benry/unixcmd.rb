@@ -739,18 +739,15 @@ module Benry
     def atomic_symlink!(src, dst)
       cmd = 'atomic_symlink!'
       #; [!gzp4a] creates temporal symlink and rename it when symlink already exists.
-      if File.symlink?(dst)
+      #; [!lhomw] creates temporal symlink and rename it when symlink not exist.
+      if File.symlink?(dst) || ! File.exist?(dst)
         tmp = "#{dst}.#{rand().to_s[2..5]}"
         echoback("ln -s #{src} #{tmp} && mv -Tf #{tmp} #{dst}") if __echoback?()
         File.symlink(src, tmp)
         File.rename(tmp, dst)
       #; [!h75kp] error when destination is normal file or directory.
-      elsif File.exist?(dst)
-        __err "#{cmd}: #{dst}: not a symbolic link."
-      #; [!pjcmn] just creates new symbolic link when destination not exist.
       else
-        echoback("ln -s #{src} #{dst}") if __echoback?()
-        File.symlink(src, dst)
+        __err "#{cmd}: #{dst}: not a symbolic link."
       end
     end
 
