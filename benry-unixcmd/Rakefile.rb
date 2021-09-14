@@ -54,7 +54,7 @@ task :'test:all' do
   $ruby_versions.each do |ver|
     puts "======== Ruby #{ver} ========"
     ruby = File.join(vs_home, "ruby/#{ver}/bin/ruby")
-    sh "#{ruby} -r oktest -e 'puts RUBY_VERSION;Oktest.main' -- test -sp"
+    sh "#{ruby} -r oktest -e 'puts RUBY_VERSION;Oktest.main' -- test -sp" do end
   end
 end
 
