@@ -597,6 +597,7 @@ module Benry
 
     def __rmdir(cmd, args)   # :nodoc:
       optchars = __prepare(cmd, args, "", nil)
+      _ = optchars           # avoid waring of `ruby -wc`
       #; [!bqhdd] error when argument not specified.
       ! args.empty?  or
         __err "#{cmd}: argument required."
