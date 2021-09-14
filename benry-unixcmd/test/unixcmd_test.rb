@@ -1480,7 +1480,7 @@ Oktest.scope do
           atomic_symlink! "foo2.txt", "tmp.link"
         end
         ok {File.readlink("tmp.link")} == "foo2.txt"
-        ok {sout} =~ /\A\$ ln -s foo2\.txt foo2\.txt\.\d+ \&\& mv -Tf foo2\.txt\.\d+ tmp.link\n\z/
+        ok {sout} =~ /\A\$ ln -s foo2\.txt tmp\.link\.\d+ \&\& mv -Tf tmp\.link\.\d+ tmp.link\n\z/
       end
       spec "[!h75kp] error when destination is normal file or directory." do
         sout, serr = capture_sio do

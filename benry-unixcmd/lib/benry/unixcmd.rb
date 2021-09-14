@@ -740,7 +740,7 @@ module Benry
       cmd = 'atomic_symlink!'
       #; [!gzp4a] creates temporal symlink and rename it when symlink already exists.
       if File.symlink?(dst)
-        tmp = "#{src}.#{rand().to_s[2..5]}"
+        tmp = "#{dst}.#{rand().to_s[2..5]}"
         echoback("ln -s #{src} #{tmp} && mv -Tf #{tmp} #{dst}") if __echoback?()
         File.symlink(src, tmp)
         File.rename(tmp, dst)
