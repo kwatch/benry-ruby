@@ -170,7 +170,7 @@ $ cd -
 * `cp! "x", "y"` is similar to above, but overwrites `y` even if it exists.
 * `cp "x", "y", to: "dir"` copies `x` and `y` into `dir`.
 * `cp "x", "y", "dir"` will be error! (use `to: "dir"` instead.)
-* Glob patten such as `*`, `**`, `?`, and `{}` are available.
+* Glob pattern such as `*`, `**`, `?`, and `{}` are available.
 * (See [FAQ](#faq) about `to:` keyword option.)
 
 <!--
@@ -247,8 +247,8 @@ Options:
 * `rm "x", "y"` removes file `x` and `y`.
 * `rm :r, "dir1"` removes directory recursively.
 * `rm "dir1"` will raise error because `:r` option not specified.
-* `rm foo*.txt` will raise error if `foo*.txt` not exists.
-* `rm :f foo*.txt` will not raise error even if `foo*.txt` not exists.
+* `rm "foo*.txt"` will raise error if `foo*.txt` not exists.
+* `rm :f, "foo*.txt"` will not raise error even if `foo*.txt` not exists.
 * Glob patten such as `*`, `**`, `?`, and `{}` are available.
 
 <!--
@@ -384,9 +384,9 @@ include Benry::UnixCommand
 atomic_symlink! "src-20200101", "src"
 
 ## the above is same as the following
-tmp = "src.#{rand().to_s[2..6]}"      # random name
-File.symlink("src-20200101", tmp)     # create symblink with random name
-File.rename(tmp, "src")               # rename symlink atomically
+tmplink = "src.#{rand().to_s[2..6]}"      # random name
+File.symlink("src-20200101", tmplink)     # create symblink with random name
+File.rename(tmplink, "src")               # rename symlink atomically
 ```
 
 Options:
@@ -420,14 +420,14 @@ Options:
 
 * `touch :a` -- updates only access time.
 * `touch :m` -- updates only modification time.
-* `touch :r reffile` -- uses timestamp of `reffile` instead of current timestamp.
+* `touch :r, "reffile"` -- uses timestamp of `reffile` instead of current timestamp.
 
 
 
 `chmod`
 -------
 
-* `chmod 0644 "x"` changes file permission.
+* `chmod 0644, "x"` changes file permission.
 * `chmod :R, "a+r", "dir"` changes permissions recursively.
 * Permission can be `0644` sytle, or `u+w` style.
 
