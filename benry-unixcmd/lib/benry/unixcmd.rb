@@ -1077,13 +1077,20 @@ module Benry
       end
       #; [!e995z] (zip!) removes zip file if exists.
       File.unlink(zip_filename) if File.exist?(zip_filename)
-      #; [!p8alf] creates zip file.
       #; [!3sxmg] supports complession level (0~9).
-      zipf = ::Zip::File.open(zip_filename, create: true, compression_level: complevel) do |zf|
-        filenames.each do |fname|
-          __zip_add(cmd, zf, fname, recursive)
+      orig = Zip.default_compression
+      Zip.default_compression = complevel if complevel
+      #; [!p8alf] creates zip file.
+      begin
+        zipf = ::Zip::File.open(zip_filename, create: true) do |zf|  # `compression_level: n` doesn't work. why?
+          filenames.each do |fname|
+            __zip_add(cmd, zf, fname, recursive)
+          end
+          zf
         end
-        zf
+      ensure
+        #; [!h7yxl] restores value of `Zip.default_compression`.
+        Zip.default_compression = orig if complevel
       end
       #; [!fvvn8] returns zip file object.
       return zipf

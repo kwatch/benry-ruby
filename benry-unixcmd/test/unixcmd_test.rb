@@ -2005,6 +2005,7 @@ Oktest.scope do
 
     topic 'zip()' do
       spec "[!zzvuk] requires 'zip' gem automatically." do
+        skip_when defined?(::Zip) != nil, "zip gem already required."
         ok {defined?(::Zip)} == nil
         sout, serr = capture_sio do
           zip "foo.zip", "foo*.txt"
@@ -2065,13 +2066,24 @@ Oktest.scope do
       end
       spec "[!3sxmg] supports complession level (0~9)." do
         sout, serr = capture_sio do
+          dummy_file "foo3.txt", "foobar"*10
           zip :'0', "foo0.zip", "foo*.txt"
           ok {"foo0.zip"}.file_exist?
           zip :'1', "foo1.zip", "foo*.txt"
           ok {"foo1.zip"}.file_exist?
           zip :'9', "foo9.zip", "foo*.txt"
           ok {"foo9.zip"}.file_exist?
+          #
+          ok {File.size("foo9.zip")} <= File.size("foo1.zip")
+          ok {File.size("foo1.zip")} <  File.size("foo0.zip")
         end
+      end
+      spec "[!h7yxl] restores value of `Zip.default_compression`." do
+        val = Zip.default_compression
+        sout, serr = capture_sio do
+          zip :'9', "foo9.zip", "foo*.txt"
+        end
+        ok {Zip.default_compression} == val
       end
       spec "[!bgdg7] adds files recursively into zip file if '-r' option specified." do
         sout, serr = capture_sio do
