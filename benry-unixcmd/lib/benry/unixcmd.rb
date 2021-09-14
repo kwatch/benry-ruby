@@ -1176,12 +1176,16 @@ module Benry
         ::Zip.on_exists_proc = overwrite
         extglob = File::FNM_EXTGLOB
         #; [!ekllx] (unzip) error when file already exists.
-        ! overwrite and ::Zip::File.open(zip_filename) do |zf|
+        ::Zip::File.open(zip_filename) do |zf|
           zf.each do |x|
             next if filenames && ! filenames.find {|pat| File.fnmatch?(pat, x.name, extglob) }
+            #; [!zg60i] error if file has absolute path.
+            outdir || File.absolute_path(x.name) != x.name  or
+              __err "#{cmd}: #{x.name}: cannot extract absolute path."
+            #
             next if x.directory?
             fpath = outdir ? File.join(outdir, x.name) : x.name
-            ! File.exist?(fpath)  or
+            overwrite || ! File.exist?(fpath)  or
               __err "#{cmd}: #{fpath}: file already exists (to overwrite it, call `#{cmd}!` command instead of `#{cmd}` command)."
           end
         end

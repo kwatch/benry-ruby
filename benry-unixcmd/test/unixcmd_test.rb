@@ -2233,6 +2233,9 @@ Oktest.scope do
           ok {pr}.raise?(ArgumentError, "unzip: foo1.txt: file already exists (to overwrite it, call `unzip!` command instead of `unzip` command).")
         end
       end
+      spec "[!zg60i] error if file has absolute path." do
+        skip_when true, "cannot create zip file containing absolute path."
+      end
       spec "[!ikq5w] if filenames are specified, extracts files matched to them." do
         sout, serr = capture_sio do
           zip "foo.zip", "foo*.txt"; File.unlink("foo1.txt", "foo2.txt")
