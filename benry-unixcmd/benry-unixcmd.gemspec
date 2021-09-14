@@ -20,6 +20,9 @@ Features compared to `fileutils.rb`:
 * implements `capture2`, `capture2e`, and `capture3` which calls
   `Popen3.capture2`, `Popen3.capture2`, and `Popen3.capture3` respectively.
 * supports `touch -r reffile`.
+* provides `sys` command which is similar to `sh` in Rake but different in details.
+* provides `zip` and `unzip` commands (requires `rubyzip` gem).
+* provides `store` command which copies files recursively into target directory, keeping file path.
 * provides `atomic_symlink!` command which switches symlink atomically.
 
 ```
@@ -36,15 +39,14 @@ END
                            #'bin/*',
                            'lib/**/*.rb',
                            'test/**/*.rb',
-			   'task/*.rb',
+                           'task/*.rb',
                          ]
   #spec.executables     = ['benry-unixcmd']
   #spec.bindir          = 'bin'
   spec.require_path    = 'lib'
-  #spec.test_files      = Dir['test/run_all.rb']
-  spec.test_files      = Dir['test/**/*_test.rb']
+  spec.test_files      = Dir['test/run_all.rb']
+  #spec.test_files      = Dir['test/**/*_test.rb']
   #spec.extra_rdoc_files = ['README.md', 'CHANGES.md']
 
-  #spec.add_development_dependency 'minitest'    , '~> 5.8'
-  #spec.add_development_dependency 'minitest-ok' , '~> 0.3'
+  spec.add_development_dependency 'oktest'    , '~> 1'
 end
