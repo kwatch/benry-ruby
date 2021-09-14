@@ -1075,6 +1075,12 @@ module Benry
       filenames = __glob_filenames(cmd, args, false) do |arg, _|
         __err "#{cmd}: #{arg}: file or directory not found."
       end
+      #; [!qsp7c] cannot specify absolute path.
+      filenames.each do |fname|
+        if File.absolute_path(fname) == fname   # Ruby >= 2.7: File.absolute_path?()
+          __err "#{cmd}: #{fname}: not support absolute path."
+        end
+      end
       #; [!e995z] (zip!) removes zip file if exists.
       File.unlink(zip_filename) if File.exist?(zip_filename)
       #; [!3sxmg] supports complession level (0~9).

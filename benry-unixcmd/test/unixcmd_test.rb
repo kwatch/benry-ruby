@@ -2052,6 +2052,12 @@ Oktest.scope do
           ok {pr}.raise?(ArgumentError, "zip: blabla*.txt: file or directory not found.")
         end
       end
+      spec "[!qsp7c] cannot specify absolute path." do
+        sout, serr = capture_sio do
+          pr = proc { zip "foo.zip", "/tmp" }
+          ok {pr}.raise?(ArgumentError, "zip: /tmp: not support absolute path.")
+        end
+      end
       spec "[!p8alf] creates zip file." do
         sout, serr = capture_sio do
           zip "foo.zip", "foo*.txt"
@@ -2098,8 +2104,11 @@ Oktest.scope do
       end
       spec "[!jgt96] error when special file specified." do
         sout, serr = capture_sio do
-          pr = proc { zip "foo.zip", "/dev/null" }
-          ok {pr}.raise?(ArgumentError, "zip: /dev/null: characterSpecial file not supported.")
+          here = Dir.pwd
+          Dir.chdir "/dev" do
+            pr = proc { zip File.join(here, "foo.zip"), "./null" }
+            ok {pr}.raise?(ArgumentError, "zip: ./null: characterSpecial file not supported.")
+          end
         end
       end
       spec "[!fvvn8] returns zip file object." do
