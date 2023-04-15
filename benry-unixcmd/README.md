@@ -770,7 +770,7 @@ require 'benry/unixcmd'
 include Benry::UnixCommand
 
 time do
-  sh "zip -qr9 dir1.zip dir1"
+  sys "zip -qr9 dir1.zip dir1"
 end
 ```
 
@@ -865,7 +865,7 @@ def prompt()                  # !!!!!
   "myname@localhost>"         # !!!!!
 end                           # !!!!!
 
-sh "date"
+sys "date"
 ```
 
 Result:
@@ -900,7 +900,7 @@ def prompt()
   #"\e[0;37m#{s}\e[0m"    # white
 end
 
-sh "date"
+sys "date"
 ```
 
 
@@ -916,7 +916,7 @@ include Benry::UnixCommand
 
 BENRY_ECHOBACK = false            # !!!!!
 
-sh "date"
+sys "date"
 ```
 
 Result:
