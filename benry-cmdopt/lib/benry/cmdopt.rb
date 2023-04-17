@@ -405,8 +405,12 @@ module Benry
 
       def parse(argv, &error_handler)
         optdict = new_options_dict()
-        while !argv.empty? && argv[0] =~ /\A-/
-          optstr = argv.shift
+        while !argv.empty?
+          if argv[0] =~ /\A-/
+            optstr = argv.shift
+          else
+            break
+          end
           #; [!y04um] skips rest options when '--' found in argv.
           if optstr == '--'
             break
