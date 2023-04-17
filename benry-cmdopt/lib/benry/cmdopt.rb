@@ -403,11 +403,17 @@ module Benry
         @schema = schema
       end
 
-      def parse(argv, &error_handler)
+      def parse(argv, parse_all=false, &error_handler)
         optdict = new_options_dict()
-        while !argv.empty?
-          if argv[0] =~ /\A-/
-            optstr = argv.shift
+        index = 0
+        while index < argv.length
+          if argv[index] =~ /\A-/
+            optstr = argv.delete_at(index)
+          #; [!q8356] parses options even after arguments when `parse_all=true`.
+          elsif parse_all
+            index += 1
+            next
+          #; [!ryra3] doesn't parse options after arguments when `parse_all=false`.
           else
             break
           end
@@ -419,7 +425,7 @@ module Benry
             parse_long_option(optstr, optdict, argv)
           else
             #; [!nwnjc] parses short options.
-            parse_short_options(optstr, optdict, argv)
+            parse_short_options(optstr, optdict, argv, index)
           end
         end
         #; [!3wmsy] returns command option values as a dict.
@@ -465,7 +471,7 @@ module Benry
         optdict[item.key] = val
       end
 
-      def parse_short_options(optstr, optdict, argv)
+      def parse_short_options(optstr, optdict, argv, index)
         n = optstr.length
         i = 0
         while (i += 1) < n
@@ -479,7 +485,7 @@ module Benry
           elsif !item.optional_param?
             #; [!utdbf] raises OptionError when argument required but not specified.
             #; [!f63hf] short option arg can be specified without space separator.
-            val = i+1 < n ? optstr[(i+1)..-1] : argv.shift  or
+            val = i+1 < n ? optstr[(i+1)..-1] : argv.delete_at(index)  or
               raise error("-#{char}: argument required.")
             i = n
           else
