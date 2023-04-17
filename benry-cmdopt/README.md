@@ -107,11 +107,11 @@ p opts  #=> {:quiet=>true}    # independent hash key of option name
 ```
 
 * `optparse.rb` adds `-h` and `--help` options automatically, and
-  terminates current process when `-v` or `--version` specified in terminal.
+  terminates current process when `-h` or `--help` specified in terminal.
   It is hard to remove these options.
 
   On the other hand, `benry/cmdopt.rb` does not add these options.
-  benry/cmdopt.rb` does nothing extra.
+  `benry/cmdopt.rb` does nothing extra.
 
 ```ruby
 require 'optparse'
@@ -129,7 +129,7 @@ puts 'xxx'   #<== not printed because current process alreay terminated
   It is hard to remove these options.
 
   On the other hand, `benry/cmdopt.rb` does not add these options.
-  benry/cmdopt.rb` does nothing extra.
+  `benry/cmdopt.rb` does nothing extra.
 
 ```ruby
 require 'optparse'
@@ -234,7 +234,7 @@ Notice that `"--file <FILE>"` style is not supported.
 Please use `"--file=<FILE>"` style.
 
 
-Argument varidation
+Argument validation
 -------------------
 
 ```ruby
