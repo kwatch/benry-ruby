@@ -156,7 +156,7 @@ puts 'xxx'   #<== not printed because current process alreay terminated
 ### optparse.rb
 require 'optparse'
 banner = "Usage: blabla <options>"
-parser = OptionParser.new(banner)  # or OptionParser.new(banner, 25)
+parser = OptionParser.new(banner)  # or: OptionParser.new(banner, 25)
 parser.on('-f', '--file=<FILE>', "filename")
 parser.on('-m <MODE>'          , "verbose/quiet")
 puts parser.help
@@ -208,7 +208,9 @@ if options[:help]
   puts ""
   puts "Options:"
   puts cmdopt.option_help()
-  ## or
+  ## or: puts cmdopt.option_help(20)              # width
+  ## or: puts cmdopt.option_help("  %-20s : %s")  # format
+  ## or:
   #format = "  %-20s : %s"
   #cmdopt.each_option_help {|opt, help| puts format % [opt, help] }
 end
@@ -243,7 +245,7 @@ cmdopt.add(:indent , '-i <N>', "indent width", type: Integer)
 ## pattern
 cmdopt.add(:indent , '-i <N>', "indent width", pattern: /\A\d+\z/)
 ## enum
-cmdopt.add(:indent , '-i <N>', "indent width", enum: [2, 4, 8])
+cmdopt.add(:indent , '-i <N>', "indent width", enum: ["2", "4", "8"])
 ## callback
 cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   val =~ /\A\d+\z/  or
@@ -266,10 +268,12 @@ Multiple parameters
 -------------------
 
 ```ruby
-cmdopt.add(:lib , '-I <NAME>', "library name") {|optdict, key, val|
-  arr = optdict[key] || []
+cmdopt.add(:lib , '-I <NAME>', "library name") {|options, key, val|
+  arr = options[key] || []
   arr << val
   arr
+  ## or:
+  #(options[key] || []) << val
 }
 ```
 
