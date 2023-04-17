@@ -403,7 +403,7 @@ module Benry
         @schema = schema
       end
 
-      def parse(argv, parse_all=false, &error_handler)
+      def parse(argv, parse_all=true, &error_handler)
         optdict = new_options_dict()
         index = 0
         while index < argv.length
