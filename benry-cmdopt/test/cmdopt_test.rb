@@ -973,7 +973,7 @@ END
       @cmdopt.add(:file, "-f, --file=<FILE>", "file") do |val|
         File.open(val) {|f| f.read }
       end
-      @cmdopt.add(:file, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
+      @cmdopt.add(:debug, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
     end
 
     it "[!areof] handles only OptionError when block given." do
@@ -995,6 +995,20 @@ END
     it "[!peuva] returns nil when OptionError handled." do
       ret = @cmdopt.parse(["-dx"]) {|err| 1 }
       ok {ret} == nil
+    end
+
+    it "[!za9at] parses options only before args when `parse_all=false`." do
+      argv = ["aaa", "-d3", "bbb"]
+      #
+      argv1 = argv.dup
+      opts1 = @cmdopt.parse(argv1)
+      ok {opts1} == {:debug=>3}
+      ok {argv1} == ["aaa", "bbb"]
+      #
+      argv2 = argv.dup
+      opts2 = @cmdopt.parse(argv2, false)
+      ok {opts2} == {}
+      ok {argv2} == ["aaa", "-d3", "bbb"]
     end
 
   end

@@ -127,13 +127,14 @@ module Benry
         self
       end
 
-      def parse(argv, &error_handler)
+      def parse(argv, parse_all=true, &error_handler)
         #; [!7gc2m] parses command options.
         #; [!no4xu] returns option values as dict.
         #; [!areof] handles only OptionError when block given.
         #; [!peuva] returns nil when OptionError handled.
+        #; [!za9at] parses options only before args when `parse_all=false`.
         parser = PARSER_CLASS.new(@schema)
-        return parser.parse(argv, &error_handler)
+        return parser.parse(argv, parse_all, &error_handler)
       end
 
     end
