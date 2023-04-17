@@ -14,8 +14,8 @@ END
   spec.license         = 'MIT'
   spec.files           = Dir[
                            'README.md', 'CHANGES.md', 'MIT-LICENSE',
-			   'Rakefile.rb', 'benry-cmdopt.gemspec',
-			   'bin/*',
+                           'Rakefile.rb', 'benry-cmdopt.gemspec',
+                           'bin/*',
                            'lib/**/*.rb',
                            'test/**/*.rb',
                          ]
