@@ -407,7 +407,8 @@ module Benry
         optdict = new_options_dict()
         index = 0
         while index < argv.length
-          if argv[index] =~ /\A-/
+          #; [!5s5b6] treats '-' as an argument, not an option.
+          if argv[index] =~ /\A-/ && argv[index] != "-"
             optstr = argv.delete_at(index)
           #; [!q8356] parses options even after arguments when `parse_all=true`.
           elsif parse_all

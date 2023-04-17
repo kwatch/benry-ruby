@@ -561,6 +561,13 @@ class Benry::Cmdopt::Parser::Test < MiniTest::Test
       ok {d} == {help: true, file: "foo.png", indent: 10}
     end
 
+    it "[!5s5b6] treats '-' as an argument, not an option." do
+      argv = ["-h", "-", "xxx", "yyy"]
+      d = @parser.parse(argv)
+      ok {d} == {help: true}
+      ok {argv} == ["-", "xxx", "yyy"]
+    end
+
     it "[!q8356] parses options even after arguments when `parse_all=true`." do
       argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
       d = @parser.parse(argv, true)
