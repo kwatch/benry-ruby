@@ -33,8 +33,10 @@ module Benry
   ##       puts "Usage: foobar [<options>] [<args>...]"
   ##       puts ""
   ##       puts "Options:"
-  ##       puts cmdopt.option_help()
-  ##       ## or
+  ##       puts cmdopt.to_s()
+  ##       ## or: puts cmdopt.to_s(20)              # width
+  ##       ## or: puts cmdopt.to_s("  %-20s : %s")  # format
+  ##       ## or:
   ##       #format = "  %-20s : %s"
   ##       #cmdopt.each_option_help {|opt, help| puts format % [opt, help] }
   ##     end
@@ -84,7 +86,7 @@ module Benry
   ##     cmdopt = Benry::Cmdopt.new
   ##     cmdopt.add(:verbose, '-v', "verbose mode")
   ##     cmdopt.add(:debug  , '-D', nil)   # hidden option (because help is nil)
-  ##     puts cmdopt.option_help()
+  ##     puts cmdopt.to_s()
   ##     ### output ('-D' doesn't appear because help string is nil)
   ##     #  -v             : verbose mode
   ##
