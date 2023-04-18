@@ -409,6 +409,18 @@ END
   end
 
 
+  describe '#to_s()' do
+
+    it "[!rrapd] '#to_s' is an alias to '#option_help()'." do
+      schema = Benry::Cmdopt::Schema.new
+      schema.add(:help   , "-h, --help"        , "show help message")
+      schema.add(:version, "    --version"     , "print version")
+      ok {schema.to_s} == schema.option_help()
+    end
+
+  end
+
+
   describe '#each_option_help()' do
 
     before do
@@ -1016,6 +1028,18 @@ class Benry::Cmdopt::Facade::Test < MiniTest::Test
       --version        : print version
   -f, --file=<FILE>    : filename
 END
+    end
+
+  end
+
+
+  describe '#to_s()' do
+
+    it "[!s61vo] '#to_s' is an alias to '#option_help()'." do
+      cmdopt = Benry::Cmdopt.new
+      cmdopt.add(:help   , "-h, --help"        , "show help message")
+      cmdopt.add(:version, "    --version"     , "print version")
+      ok {cmdopt.to_s} == cmdopt.option_help()
     end
 
   end

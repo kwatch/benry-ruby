@@ -130,6 +130,9 @@ module Benry
         return @schema.option_help(width_or_format, all: all)
       end
 
+      #; [!s61vo] '#to_s' is an alias to '#option_help()'.
+      alias to_s option_help
+
       def each_option_help(&block)
         #; [!bw9qx] yields each option definition string and help message.
         @schema.each_option_help(&block)
@@ -250,6 +253,9 @@ module Benry
         end
         return buf.join()
       end
+
+      #; [!rrapd] '#to_s' is an alias to '#option_help()'.
+      alias to_s option_help
 
       def each_option_help(&block)
         #; [!4b911] yields each optin definition str and help message.
