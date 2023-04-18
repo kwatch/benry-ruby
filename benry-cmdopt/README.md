@@ -232,8 +232,12 @@ cmdopt.add(:file, '    --file[=<FILE>]', "filename")
 cmdopt.add(:file, '-f[<FILE>]'         , "filename")
 ```
 
-Notice that `"--file <FILE>"` style is not supported.
-Please use `"--file=<FILE>"` style.
+Notice that `"--file <FILE>"` style is not supported for usability reason.
+Use `"--file=<FILE>"` style instead.
+
+(From a usability perspective, the former style should not be supported.
+ `optparse.rb` is wrong because it supports both styles
+ and doesn't provide the way to disable the former style.)
 
 
 Argument validation
@@ -287,11 +291,71 @@ in help message.
 ```ruby
 require 'benry/cmdopt'
 cmdopt = Benry::Cmdopt.new
-cmdopt.add(:verbose, '-v, --verbose', "verbose mode")
-cmdopt.add(:debug  , '-d[<LEVEL>]'  , nil, type: Integer) # hidden
+cmdopt.add(:verbose, '-v', "verbose mode")
+cmdopt.add(:debug  , '-D', nil)   # hidden option (because help is nil)
 puts cmdopt.option_help()
-### output ('-d' is not included)
-#  -v, --verbose        : verbose mode
+### output ('-D' doesn't appear because help string is nil)
+#  -v             : verbose mode
+```
+
+
+Global options with sub-commands
+--------------------------------
+
+`parse()` accepts boolean flag as second argument.
+
+* `parse(argv, true)` parses options even after arguments. This is the default.
+* `parse(argv, false)` parses options only before arguments.
+
+```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new()
+cmdopt.add(:help   , '-h', "print help message")
+cmdopt.add(:version, '-v', "print version")
+
+## `parse(argv, true)` (default)
+argv = ["-h", "xx", "-v", "yy"]
+options = cmdopt.parse(argv, true)    # !!!
+p options       #=> {:help=>true, :version=>true}
+p argv          #=> ["xx", "yy"]
+
+## `parse(argv, false)`
+argv = ["-h", "xx", "-v", "yy"]
+options = cmdopt.parse(argv, false)   # !!!
+p options       #=> {:help=>true}
+p argv          #=> ["xx", "-v", "yy"]
+```
+
+This is useful when parsing global options of sub-commands, like Git command.
+
+```ruby
+require 'benry/cmdopt'
+
+argv = ["-h", "commit", "xxx", "-m", "yyy"]
+
+## parse global options
+cmdopt = Benry::Cmdopt.new()
+cmdopt.add(:help, '-h', "print help message")
+global_opts = cmdopt.parse(argv, false)   # !!!false!!!
+p global_opts       #=> {:help=>true}
+p argv              #=> ["commit", "xxx", "-m", "yyy"]
+
+## get sub-command
+sub_command = argv.shift()
+p sub_command       #=> "commit"
+p argv              #=> ["xxx", "-m", "yyy"]
+
+## parse sub-command options
+cmdopt = Benry::Cmdopt.new()
+case sub_command
+when "commit"
+  cmdopt.add(:message, '-m <message>', "commit message")
+else
+  # ...
+end
+sub_opts = cmdopt.parse(argv, true)       # !!!true!!!
+p sub_opts          #=> {:message => "yyy"}
+p argv              #=> ["xxx"]
 ```
 
 
