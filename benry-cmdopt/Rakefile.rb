@@ -38,10 +38,15 @@ task :test do
 end
 
 
+def release_version_required(release)
+  release != "0.0.0"  or
+    raise "$RELEASE required but not specified."
+end
+
+
 desc "create package"
 task :package do
-  release != "0.0.0"  or
-    raise "specify $RELEASE"
+  release_version_required(release)
   ## copy
   dir = "build"
   rm_rf dir if File.exist?(dir)
@@ -78,9 +83,7 @@ end
 
 desc "upload gem file to rubygems.org"
 task :publish do
-  release != "0.0.0"  or
-    raise "specify $RELEASE"
-  #
+  release_version_required(release)
   gemfile = "#{project}-#{release}.gem"
   print "** Are you sure to publish #{gemfile}? [y/N]: "
   answer = $stdin.gets().strip()
