@@ -76,6 +76,35 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
   end
 
 
+  describe "#dup()" do
+
+    before do
+      @schema = Benry::Cmdopt::Schema.new
+      @schema.add(:help   , "-h" , "print help")
+    end
+
+    it "[!lxb0o] copies self object." do
+      this  = @schema
+      other = @schema.dup()
+      #
+      this_items  = this.instance_variable_get(:@items)
+      other_items = other.instance_variable_get(:@items)
+      ok {this_items} != nil
+      ok {other_items} != nil
+      ok {other_items} == this_items
+      ok {other_items.object_id} != this_items.object_id
+      #
+      this.add(:silent, "-s", "silent")
+      other.add(:quiet, "-q", "quiet")
+      ok {this.option_help()}  == ("  -h       : print help\n" +
+                                   "  -s       : silent\n")
+      ok {other.option_help()} == ("  -h       : print help\n" +
+                                   "  -q       : quiet\n")
+    end
+
+  end
+
+
   describe "#add()" do
 
     before do
@@ -901,6 +930,34 @@ end
 
 
 class Benry::Cmdopt::Facade::Test < MiniTest::Test
+
+
+  describe "#dup()" do
+
+    before do
+      @cmdopt = Benry::Cmdopt.new
+      @cmdopt.add(:help   , "-h" , "help message")
+    end
+
+    it "[!mf5cz] copies self object." do
+      this  = @cmdopt
+      other = @cmdopt.dup()
+      #
+      this_schema  = this.instance_variable_get(:@schema)
+      other_schema = other.instance_variable_get(:@schema)
+      ok {this_schema} != nil
+      ok {other_schema} != nil
+      ok {other_schema.object_id} != this_schema.object_id
+      #
+      this.add(:silent, "-s", "silent")
+      other.add(:quiet, "-q", "quiet")
+      ok {this.option_help()}  == ("  -h       : help message\n" +
+                                   "  -s       : silent\n")
+      ok {other.option_help()} == ("  -h       : help message\n" +
+                                   "  -q       : quiet\n")
+    end
+
+  end
 
 
   describe '#add()' do

@@ -111,6 +111,13 @@ module Benry
         @schema = SCHEMA_CLASS.new
       end
 
+      def dup()
+        #; [!mf5cz] copies self object.
+        other = self.class.new
+        other.instance_variable_set(:@schema, @schema.dup)
+        return other
+      end
+
       def add(key, optdef, help, type: nil, pattern: nil, enum: nil, &callback)
         #; [!vmb3r] defines command option.
         @schema.add(key, optdef, help, type: type, pattern: pattern, enum: enum, &callback)
@@ -146,6 +153,13 @@ module Benry
 
       def initialize()
         @items = []
+      end
+
+      def dup()
+        #; [!lxb0o] copies self object.
+        other = self.class.new
+        other.instance_variable_set(:@items, @items.dup)
+        return other
       end
 
       def add(key, optdef, help, type: nil, pattern: nil, enum: nil, &callback)
