@@ -1093,7 +1093,7 @@ END
   end
 
 
-  describe '#parse_options()' do
+  describe '#parse()' do
 
     before do
       @cmdopt = Benry::Cmdopt.new()
