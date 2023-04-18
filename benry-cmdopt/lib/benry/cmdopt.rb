@@ -55,7 +55,7 @@ module Benry
   ##     ## pattern
   ##     cmdopt.add(:indent , '-i <N>', "indent width", pattern: /\A\d+\z/)
   ##     ## enum
-  ##     cmdopt.add(:indent , '-i <N>', "indent width", enum: [2, 4, 8])
+  ##     cmdopt.add(:indent , '-i <N>', "indent width", enum: ["2", "4", "8"])
   ##     ## callback
   ##     cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   ##       val =~ /\A\d+\z/  or
@@ -74,17 +74,19 @@ module Benry
   ##       arr = optdict[key] || []
   ##       arr << val
   ##       arr
+  ##       ## or:
+  ##       #(options[key] || []) << val
   ##     }
   ##
   ## Hidden option:
   ##     ### if help string is nil, that option is removed from help message.
   ##     require 'benry/cmdopt'
   ##     cmdopt = Benry::Cmdopt.new
-  ##     cmdopt.add(:verbose, '-v, --verbose', "verbose mode")
-  ##     cmdopt.add(:debug  , '-d[<LEVEL>]'  , nil, type: Integer) # hidden
+  ##     cmdopt.add(:verbose, '-v', "verbose mode")
+  ##     cmdopt.add(:debug  , '-D', nil)   # hidden option (because help is nil)
   ##     puts cmdopt.option_help()
-  ##     ### output ('-d' doesn't appear because help string is nil)
-  ##     #  -v, --verbose        : verbose mode
+  ##     ### output ('-D' doesn't appear because help string is nil)
+  ##     #  -v             : verbose mode
   ##
   ## Not supported:
   ##     * default value
