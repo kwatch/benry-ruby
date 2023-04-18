@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.homepage        = 'https://github.com/kwatch/benry/tree/ruby/benry-cmdopt'
   spec.summary         = "Command option parser, like `optparse.rb`"
   spec.description     = <<-'END'
-Command option parser, like `optparse.rb`.
+Command option parser, much simpler and better than `optparse.rb`.
 END
   spec.license         = 'MIT'
   spec.files           = Dir[
