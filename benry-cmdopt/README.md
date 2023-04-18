@@ -25,7 +25,7 @@ Why not `optparse.rb`?
   File `optparse.rb` contains 1234 lines (without comments), while
   `benry/cmdopt.rb` (v1.1.0) contains only 361 lines (without comments).
 
-* `optparse.rb` regards `-x` as a short cut of `--xxx` automatically
+* `optparse.rb` regards `-x` and `--x` as a short cut of `--xxx` automatically
   even if you have not defined `-x` option.
   That is, short options which are not defined can be available unexpectedly.
   This feature is hard-coded in `OptionParser#parse_in_order()`
@@ -170,10 +170,10 @@ require 'benry/cmdopt'
 cmdopt = Benry::Cmdopt.new()
 cmdopt.add(:file, '-f, --file=<FILE>', "filename")
 cmdopt.add(:mode, '-m <MODE>'        , "verbose/quiet")
-puts "Usage: blabla <options>"
-puts cmdopt.option_help()
+puts "Usage: blabla [<options>]"
+puts cmdopt.to_s()
 ### output (calculated proper width)
-# Usage: blabla <options>
+# Usage: blabla [<options>]
 #   -f, --file=<FILE>    : filename
 #   -m <MODE>            : verbose/quiet
 ```
