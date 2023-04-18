@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ###
-### $Release$
-### $Copyright$
-### $License$
+### $Release: 0.0.0 $
+### $Copyright: copyright(c) 2021 kuwata-lab.com all rights reserved $
+### $License: MIT License $
 ###
 
 require 'date'
