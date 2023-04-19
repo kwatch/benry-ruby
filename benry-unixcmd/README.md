@@ -43,6 +43,8 @@ Table of Contents
   * <a href="#chmod"><code>chmod</code></a>
   * <a href="#chown"><code>chown</code></a>
   * <a href="#pwd"><code>pwd</code></a>
+  * <a href="#cd"><code>cd</code></a>
+  * <a href="#pushd"><code>pushd</code></a>
   * <a href="#store"><code>store</code></a>
   * <a href="#sys"><code>sys</code></a>
   * <a href="#ruby"><code>ruby</code></a>
@@ -84,7 +86,7 @@ output = capture2 "ls -al"   # run command and return output
 Result:
 
 ```terminal
-[localhost] ruby ex1.rb
+[localhost]$ ruby ex1.rb
 $ ls -al
 ```
 
@@ -172,6 +174,7 @@ $ cd -
 * `cp "x", "y", "dir"` will be error! (use `to: "dir"` instead.)
 * Glob pattern such as `*`, `**`, `?`, and `{}` are available.
 * (See [FAQ](#faq) about `to:` keyword option.)
+* If you want to copy files with keeping directory structure, use `store` instead of `cp`.
 
 <!--
 File: ex-cp1.rb
@@ -496,7 +499,108 @@ require 'benry/unixcmd'
 include Benry::UnixCommand
 
 ## prints current working directory
-pwd()
+pwd()            #=> /home/yourname (for example)
+```
+
+Options:
+
+* (no options)
+
+
+
+`cd`
+----
+
+* `cd` changes current working directory.
+* If block given, `cd` invokes block just after changing current directory,
+  and back to previous directory automatically.
+* Within block argument, echoback indentation is increased.
+* `chdir` is an alias to `cd`.
+
+File: ex-cd1.rb
+
+```ruby
+require 'benry/unixcmd'
+include Benry::UnixCommand
+
+## change directory, invoke block, and back to previous directory.
+pwd()           #=> /home/yourname (for example)
+cd "/tmp" do
+  pwd()         #=> /tmp
+end
+pwd()           #=> /home/yourname (for example)
+
+## just change directory
+cd "/tmp"
+pwd()           #=> /tmp
+```
+
+Result:
+
+```terminal
+[localhost]$ ruby ex-cd1.rb
+$ pwd
+/home/yourname
+$ cd /tmp
+$  pwd
+/tmp
+$ cd -
+$ pwd
+/home/yourname
+$ cd /tmp
+$ pwd
+/tmp
+```
+
+Options:
+
+* (no options)
+
+
+
+`pushd`
+-------
+
+* `pushd` changes current directory, invokes block, and back to previous directory.
+* `pushd` requires block argument. `cd` also takes block argument but it is an optional.
+* Within block argument, echoback indentation is increased.
+
+File: ex-pushd1.rb
+
+```ruby
+require 'benry/unixcmd'
+include Benry::UnixCommand
+
+## change directory, invoke block, and back to previous directory.
+pwd()           #=> /home/yourname (for example)
+pushd "/var" do
+  pwd()         #=> /var
+  pushd "tmp" do
+    pwd()       #=> /var/tmp
+  end
+  pwd()         #=> /var
+end
+pwd()           #=> /home/yourname (for example)
+```
+
+Result:
+
+```terminal
+[localhost]$ ruby ex-pushd1.rb
+$ pwd
+/home/yourname
+$ pushd /var
+$  pwd
+/var
+$  pushd tmp
+$   pwd
+/var/tmp
+$  popd    # back to /var
+$  pwd
+/var
+$ popd    # back to /home/yourname
+$ pwd
+/home/yourname
 ```
 
 Options:
@@ -522,6 +626,9 @@ include Benry::UnixCommand
 
 ## copies files into builddir, keeping file path
 store "lib/**/*.rb", "test/**/*.rb", to: "builddir"
+
+## `store()` is similar to unix `tar` command.
+##     $ tar cf - lib/**/*.rb test/**/*.rb | (cd builddir; tar xf -)
 ```
 
 Options:
