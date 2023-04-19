@@ -448,7 +448,7 @@ chmod :R, 0644, "dir"
 chmod :R, "a+r", "dir"
 ```
 
-Optionns:
+Options:
 
 * `chmod :R` -- changes permissions recursively.
 
@@ -476,7 +476,7 @@ chown "user1",        "file*.txt"     # change owner
 chown ":group1",      "file*.txt"     # change group
 ```
 
-Optionns:
+Options:
 
 * `chown :R` -- changes owner and/or group recursively.
 
