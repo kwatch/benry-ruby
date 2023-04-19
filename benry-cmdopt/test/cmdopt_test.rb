@@ -214,7 +214,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
         sc.add(:indent, "-x, --indent[=<WIDTH>]", "indent width", rexp: '\A\d+\z')
       }
       ok {pr}.raise?(Benry::Cmdopt::SchemaError,
-                     '"\\\\A\\\\d+\\\\z": regexp expected.')
+                     '"\\\\A\\\\d+\\\\z": regexp pattern expected.')
     end
 
     it "[!01fmt] raises SchmeaError when option has no params but pattern specified." do
@@ -223,7 +223,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
         sc.add(:indent, "-i, --indent", "indent width", rexp: /\A\d+\z/)
       }
       ok {pr}.raise?(Benry::Cmdopt::SchemaError,
-                     '/\A\d+\z/: pattern specified in spite of option has no params.')
+                     '/\A\d+\z/: regexp pattern specified in spite of option has no params.')
     end
 
     it "[!melyd] raises SchmeaError when enum is not a Array nor Set." do

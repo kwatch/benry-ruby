@@ -128,9 +128,9 @@ module Benry
         #; [!01fmt] raises SchmeaError when option has no params but pattern specified.
         if rexp
           rexp.is_a?(Regexp)  or
-            raise error("#{rexp.inspect}: regexp expected.")
+            raise error("#{rexp.inspect}: regexp pattern expected.")
           param  or
-            raise error("#{rexp.inspect}: pattern specified in spite of option has no params.")
+            raise error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
         end
         #; [!melyd] raises SchmeaError when enum is not a Array nor Set.
         #; [!xqed8] raises SchemaError when enum specified for no param option.
