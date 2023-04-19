@@ -244,11 +244,11 @@ Argument validation
 -------------------
 
 ```ruby
-## type
+## type (class)
 cmdopt.add(:indent , '-i <N>', "indent width", type: Integer)
-## pattern
-cmdopt.add(:indent , '-i <N>', "indent width", pattern: /\A\d+\z/)
-## enum
+## pattern (regular expression)
+cmdopt.add(:indent , '-i <N>', "indent width", rexp: /\A\d+\z/)
+## enum (Array or Set)
 cmdopt.add(:indent , '-i <N>', "indent width", enum: ["2", "4", "8"])
 ## callback
 cmdopt.add(:indent , '-i <N>', "indent width") {|val|
@@ -257,6 +257,9 @@ cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   val.to_i                     # convert argument value.
 }
 ```
+
+(For backward compatibilidy, keyword parameter `pattern:` is available
+ which is same as `rexp:`.)
 
 
 Available types
