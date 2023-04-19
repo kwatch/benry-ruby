@@ -69,7 +69,7 @@ namespace :readme do
     url = ENV['README_URL']  or abort "$README_URL required."
     htmlfile = "README.html"
     sh "curl -s -o #{htmlfile} #{url}"
-    rexp = /<h(\d)><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
+    rexp = /<h(\d) dir="auto"><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
     html_str = File.read(htmlfile, encoding: 'utf-8')
     buf = []
     html_str.scan(rexp) do
