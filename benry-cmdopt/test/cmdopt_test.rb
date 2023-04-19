@@ -123,7 +123,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
       ok {items[0].param} == '<WIDTH>'
       ok {items[0].optional} == false
       ok {items[0].type} == nil
-      ok {items[0].pattern} == nil
+      ok {items[0].rexp} == nil
       ok {items[0].enum} == nil
       ok {items[0].callback} == nil
     end
@@ -152,7 +152,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
     it "[!yht0v] keeps command option definitions." do
       sc = @schema
       sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width",
-                      type: Integer, pattern: /\A\d+\z/, enum: ['2', '4', '8']) {|v| v.to_i }
+                      type: Integer, rexp: /\A\d+\z/, enum: ['2', '4', '8']) {|v| v.to_i }
       items = sc.instance_eval { @items }
       ok {items.length} == 1
       ok {items[0]}.is_a?(Benry::Cmdopt::SchemaItem)
@@ -162,7 +162,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
       ok {items[0].param} == '<WIDTH>'
       ok {items[0].optional} == true
       ok {items[0].type} == Integer
-      ok {items[0].pattern} == /\A\d+\z/
+      ok {items[0].rexp} == /\A\d+\z/
       ok {items[0].enum} == ['2', '4', '8']
       ok {items[0].callback}.is_a?(Proc)
       ok {items[0].callback.arity} == 1
@@ -211,7 +211,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
     it "[!bi2fh] raises SchemaError when pattern is not a regexp." do
       sc = @schema
       pr = proc {
-        sc.add(:indent, "-x, --indent[=<WIDTH>]", "indent width", pattern: '\A\d+\z')
+        sc.add(:indent, "-x, --indent[=<WIDTH>]", "indent width", rexp: '\A\d+\z')
       }
       ok {pr}.raise?(Benry::Cmdopt::SchemaError,
                      '"\\\\A\\\\d+\\\\z": regexp expected.')
@@ -220,7 +220,7 @@ class Benry::Cmdopt::Schema::Test < MiniTest::Test
     it "[!01fmt] raises SchmeaError when option has no params but pattern specified." do
       sc = @schema
       pr = proc {
-        sc.add(:indent, "-i, --indent", "indent width", pattern: /\A\d+\z/)
+        sc.add(:indent, "-i, --indent", "indent width", rexp: /\A\d+\z/)
       }
       ok {pr}.raise?(Benry::Cmdopt::SchemaError,
                      '/\A\d+\z/: pattern specified in spite of option has no params.')
@@ -528,13 +528,13 @@ class Benry::Cmdopt::SchemaItem::Test < MiniTest::Test
   describe '#validate_and_convert()' do
 
     def new_item(key, optstr, short, long, param, help,
-                 optional: nil, type: nil, pattern: nil, enum: nil, &callback)
+                 optional: nil, type: nil, rexp: nil, enum: nil, &callback)
       return Benry::Cmdopt::SchemaItem.new(key, optstr, short, long, param, help,
-                 optional: optional, type: type, pattern: pattern, enum: enum, &callback)
+                 optional: optional, type: type, rexp: rexp, enum: enum, &callback)
     end
 
     it "[!h0s0o] raises RuntimeError when value not matched to pattern." do
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", "indent width", pattern: /\A\d+\z/)
+      x = new_item(:indent, "", "i", "indent", "<WIDTH>", "indent width", rexp: /\A\d+\z/)
       optdict = {}
       pr = proc { x.validate_and_convert("abc", optdict) }
       ok {pr}.raise?(RuntimeError, "pattern unmatched.")
