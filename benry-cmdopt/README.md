@@ -22,8 +22,8 @@ Why not `optparse.rb`?
   (schema class, parser class, and facade class).
   Therefore it is easy to understand and extend these classes.
 
-  File `optparse.rb` contains 1234 lines (without comments), while
-  `benry/cmdopt.rb` (v1.1.0) contains only 361 lines (without comments).
+  File `optparse.rb` (in Ruby 3.0) contains 1234 lines (except comments), while
+  `benry/cmdopt.rb` (v1.2.0) contains less than 400 lines (except comments).
 
 * `optparse.rb` regards `-x` and `--x` as a short cut of `--xxx` automatically
   even if you have not defined `-x` option.
@@ -271,8 +271,38 @@ Available types
 * Date      (`/\A\d\d\d\d-\d\d?-\d\d?\z/`)
 
 
-Multiple parameters
--------------------
+Boolean (on/off) option
+-----------------------
+
+Benry::Cmdopt doens't support `--no-xxx` style option.
+Use boolean option instead.
+
+ex3.rb:
+
+```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new()
+cmdopt.add(:foo, "--foo[=on|off]", "foo feature", type: TrueClass)  # !!!!
+## or:
+#cmdopt.add(:foo, "--foo=<on|off>", "foo feature", type: TrueClass)
+options = cmdopt.parse(ARGV)
+p options
+```
+
+Output example:
+
+```terminal
+$ ruby ex3.rb --foo           # enable
+{:foo=>true}
+$ ruby ex3.rb --foo=on        # enable
+{:foo=>true}
+$ ruby ex3.rb --foo=off       # disable
+{:foo=>false}
+```
+
+
+Multiple option
+---------------
 
 ```ruby
 cmdopt.add(:lib , '-I <NAME>', "library name") {|options, key, val|
@@ -288,15 +318,16 @@ cmdopt.add(:lib , '-I <NAME>', "library name") {|options, key, val|
 Hidden option
 -------------
 
-If help string of command otpion is nil, it will not included
-in help message.
+If description of command otpion is nil, help message will not include
+that option.
 
 ```ruby
 require 'benry/cmdopt'
 cmdopt = Benry::Cmdopt.new
 cmdopt.add(:verbose, '-v', "verbose mode")
-cmdopt.add(:debug  , '-D', nil)   # hidden option (because help is nil)
+cmdopt.add(:debug  , '-D', nil)   # hidden option (because description is nil)
 puts cmdopt.to_s()
+
 ### output ('-D' doesn't appear because help string is nil)
 #  -v             : verbose mode
 ```
@@ -406,6 +437,9 @@ cmdopt = Benry::Cmdopt.new()             # new facade object
 cmdopt.add(:help, '-h', "help message")  # same as schema.add(...)
 opts = cmdopt.parse(ARGV)                # same as parser.parse(...)
 ```
+
+Notice that `cmdopt.is_a?(Benry::Cmdopt)` results in false.
+Use `cmdopt.is_a?(Benry::Facade)` instead if necessary.
 
 
 License and Copyright
