@@ -427,6 +427,7 @@ END
       sc = Benry::Cmdopt::Schema.new
       sc.add(:help, "-h, --help", "show help message")
       sc.add(:version, "    --version", "print version")
+      sc.add(:debug  , "-D, --debug"  , nil)
       @schema = sc
     end
 
@@ -440,6 +441,18 @@ END
         ["-h, --help", "show help message"],
         ["    --version", "print version"],
       ]
+    end
+
+    it "[!cl8zy] when 'all' flag is false, not yield item which help is nil." do
+      helps = []
+      @schema.each_option_help(all: false) {|opt, help| helps << help }
+      ok {helps}.all? {|x| x != nil }
+    end
+
+    it "[!tc4bk] when 'all' flag is true, yields item which help is nil." do
+      helps = []
+      @schema.each_option_help(all: true) {|opt, help| helps << help }
+      ok {helps}.any? {|x| x == nil }
     end
 
     it "[!zbxyv] returns self." do

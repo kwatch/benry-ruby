@@ -162,7 +162,7 @@ module Benry
         #; [!to1th] includes all option help when `all` is true.
         buf = []
         width = nil
-        each_option_help do |opt, help|
+        each_option_help(all: all) do |opt, help|
           #buf << format % [opt, help] << "\n" if help || all
           if help
             #; [!848rm] supports multi-lines help message.
@@ -185,10 +185,12 @@ module Benry
       #; [!rrapd] '#to_s' is an alias to '#option_help()'.
       alias to_s option_help
 
-      def each_option_help(&block)
+      def each_option_help(all: false, &block)
         #; [!4b911] yields each optin definition str and help message.
         @items.each do |item|
-          yield item.optdef, item.help
+          #; [!cl8zy] when 'all' flag is false, not yield item which help is nil.
+          #; [!tc4bk] when 'all' flag is true, yields item which help is nil.
+          yield item.optdef, item.help if all || item.help
         end
         #; [!zbxyv] returns self.
         self
