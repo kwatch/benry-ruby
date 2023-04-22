@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 ###
 ### $Release: 0.0.0 $
