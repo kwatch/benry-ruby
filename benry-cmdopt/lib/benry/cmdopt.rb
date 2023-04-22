@@ -19,7 +19,7 @@ module Benry
   ##
   ## See: https://github.com/kwatch/benry-ruby/tree/ruby/benry-cmdopt
   ##
-  module Cmdopt
+  module CmdOpt
 
 
     VERSION = '$Release: 0.0.0 $'.split()[1]
@@ -500,6 +500,9 @@ module Benry
 
 
   end
+
+
+  Cmdopt = CmdOpt         # for backawrd compatibility
 
 
 end

@@ -6,6 +6,7 @@ CHANGES
 Release 1.2.0 (????-??-??)
 --------------------------
 
+* [change] rename 'Benry::Cmdopt' to 'Benry::CmdOpt', and the old name is still available for backward compatibility.
 * [change] `Parser#parse()` parses all options even after arguments.
 * [change] keyword parameter `pattern:` is renamed to `rexp:` (`pattern:` is also available for backward compatibilidy).
 * [enhance] `Parser#parse(argv, false)` parses options only before arguments.

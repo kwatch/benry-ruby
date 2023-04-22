@@ -1,14 +1,14 @@
-Benry::Cmdopt README
+Benry::CmdOpt README
 ====================
 
 ($Release: 0.0.0 $)
 
-Benry::Cmdopt is a command option parser library, like `optparse.rb`.
+Benry::CmdOpt is a command option parser library, like `optparse.rb`.
 
-Compared to `optparse.rb`, Benry::Cmdopt is easy to use, easy to extend,
+Compared to `optparse.rb`, Benry::CmdOpt is easy to use, easy to extend,
 and easy to understahnd.
 
-(Benry::Cmdopt requires Ruby >= 2.3)
+(Benry::CmdOpt requires Ruby >= 2.3)
 
 
 Why not `optparse.rb`?
@@ -65,7 +65,7 @@ end
 
 ### benry/cmdopt.rb
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 cmdopt.add(:file, '-f, --file=<FILE>', "filename")
 opts = cmdopt.parse(ARGV) do |err|  # error handling wihtout error class name
   $stderr.puts "ERROR: #{err.message}"
@@ -95,7 +95,7 @@ p opts  #=> {:q=>true}            # hash key is short option name
 
 ### benry/cmdopt.rb
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 cmdopt.add(:verbose, '-v, --verbose', "verbose mode") # short and long
 cmdopt.add(:quiet  , '-q'           , "quiet mode")   # short-only
 #
@@ -167,7 +167,7 @@ puts parser.help
 
 ### benry/cmdopt.rb
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new()
+cmdopt = Benry::CmdOpt.new()
 cmdopt.add(:file, '-f, --file=<FILE>', "filename")
 cmdopt.add(:mode, '-m <MODE>'        , "verbose/quiet")
 puts "Usage: blabla [<options>]"
@@ -190,7 +190,7 @@ Define, parse, and print help
 require 'benry/cmdopt'
 
 ## define
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 cmdopt.add(:help   , '-h, --help'   , "print help message")
 cmdopt.add(:version, '    --version', "print version")
 
@@ -274,14 +274,14 @@ Available types
 Boolean (on/off) option
 -----------------------
 
-Benry::Cmdopt doens't support `--no-xxx` style option.
+Benry::CmdOpt doens't support `--no-xxx` style option.
 Use boolean option instead.
 
 ex3.rb:
 
 ```ruby
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new()
+cmdopt = Benry::CmdOpt.new()
 cmdopt.add(:foo, "--foo[=on|off]", "foo feature", type: TrueClass)  # !!!!
 ## or:
 #cmdopt.add(:foo, "--foo=<on|off>", "foo feature", type: TrueClass)
@@ -304,11 +304,11 @@ $ ruby ex3.rb --foo=off       # disable
 Alternative value
 -----------------
 
-Benry::Cmdopt supports alternative value.
+Benry::CmdOpt supports alternative value.
 
 ```ruby
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 cmdopt.add(:help1, "-h", "help")
 cmdopt.add(:help2, "-H", "help", value: "HELP")   # !!!!!
 
@@ -321,7 +321,7 @@ This is useful for boolean option.
 
 ```ruby
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 cmdopt.add(:flag1, "--flag1[=<on|off>]", "f1", type: TrueClass)
 cmdopt.add(:flag2, "--flag2[=<on|off>]", "f2", type: TrueClass, value: false)  # !!!!
 
@@ -337,7 +337,7 @@ Multiple option
 
 ```ruby
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 
 cmdopt.add(:lib , '-I <NAME>', "library name") {|options, key, val|
   arr = options[key] || []
@@ -360,7 +360,7 @@ that option.
 
 ```ruby
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new
+cmdopt = Benry::CmdOpt.new
 cmdopt.add(:verbose, '-v', "verbose mode")
 cmdopt.add(:debug  , '-D', nil)   # hidden option (because description is nil)
 puts cmdopt.to_s()
@@ -380,7 +380,7 @@ Global options with sub-commands
 
 ```ruby
 require 'benry/cmdopt'
-cmdopt = Benry::Cmdopt.new()
+cmdopt = Benry::CmdOpt.new()
 cmdopt.add(:help   , '-h', "print help message")
 cmdopt.add(:version, '-v', "print version")
 
@@ -405,7 +405,7 @@ require 'benry/cmdopt'
 argv = ["-h", "commit", "xxx", "-m", "yyy"]
 
 ## parse global options
-cmdopt = Benry::Cmdopt.new()
+cmdopt = Benry::CmdOpt.new()
 cmdopt.add(:help, '-h', "print help message")
 global_opts = cmdopt.parse(argv, false)   # !!!false!!!
 p global_opts       #=> {:help=>true}
@@ -417,7 +417,7 @@ p sub_command       #=> "commit"
 p argv              #=> ["xxx", "-m", "yyy"]
 
 ## parse sub-command options
-cmdopt = Benry::Cmdopt.new()
+cmdopt = Benry::CmdOpt.new()
 case sub_command
 when "commit"
   cmdopt.add(:message, '-m <message>', "commit message")
@@ -441,21 +441,21 @@ Not supported
 Internal classes
 ================
 
-* `Benry::Cmdopt::Schema` -- command option schema.
-* `Benry::Cmdopt::Parser` -- command option parser.
-* `Benry::Cmdopt::Facade` -- facade object including schema and parser.
+* `Benry::CmdOpt::Schema` -- command option schema.
+* `Benry::CmdOpt::Parser` -- command option parser.
+* `Benry::CmdOpt::Facade` -- facade object including schema and parser.
 
 ```ruby
 require 'benry/cmdopt'
 
 ## define schema
-schema = Benry::Cmdopt::Schema.new
+schema = Benry::CmdOpt::Schema.new
 schema.add(:help  , '-h, --help'            , "show help message")
 schema.add(:file  , '-f, --file=<FILE>'     , "filename")
 schema.add(:indent, '-i, --indent[=<WIDTH>]', "enable indent", type: Integer)
 
 ## parse options
-parser = Benry::Cmdopt::Parser.new(schema)
+parser = Benry::CmdOpt::Parser.new(schema)
 argv = ['-hi2', '--file=blabla.txt', 'aaa', 'bbb']
 opts = parser.parse(argv) do |err|
   $stderr.puts "ERROR: #{err.message}"
@@ -465,17 +465,17 @@ p opts   #=> {:help=>true, :indent=>2, :file=>"blabla.txt"}
 p argv   #=> ["aaa", "bbb"]
 ```
 
-Notice that `Benry::Cmdopt.new()` returns facade object.
+Notice that `Benry::CmdOpt.new()` returns facade object.
 
 ```ruby
 require 'benry/cmdopt'
 
-cmdopt = Benry::Cmdopt.new()             # new facade object
+cmdopt = Benry::CmdOpt.new()             # new facade object
 cmdopt.add(:help, '-h', "help message")  # same as schema.add(...)
 opts = cmdopt.parse(ARGV)                # same as parser.parse(...)
 ```
 
-Notice that `cmdopt.is_a?(Benry::Cmdopt)` results in false.
+Notice that `cmdopt.is_a?(Benry::CmdOpt)` results in false.
 Use `cmdopt.is_a?(Benry::Facade)` instead if necessary.
 
 
