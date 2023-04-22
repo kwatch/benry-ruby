@@ -44,10 +44,11 @@ module Benry
         return other
       end
 
-      def add(key, optdef, help, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def add(key, optdef, help, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
-        @schema.add(key, optdef, help, type: type, rexp: rexp, enum: enum, value: value, &callback)
+        #; [!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args.
+        @schema.add(key, optdef, help, *rest, type: type, rexp: rexp, enum: enum, value: value, &callback)
         #; [!tu4k3] returns self.
         self
       end
@@ -97,8 +98,19 @@ module Benry
         return other
       end
 
-      def add(key, optdef, help, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def add(key, optdef, help, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
+        #; [!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args.
+        rest.each do |x|
+          case x
+          when Class      ; type ||= x
+          when Regexp     ; rexp ||= x
+          when Array, Set ; enum ||= x
+          else
+            #; [!e3emy] raises error when positional arg is not one of class, regexp, nor array.
+            raise error("#{x.inspect}: expected one of class, regexp, or array, but got #{x.class.name}.")
+          end
+        end
         #; [!rhhji] raises SchemaError when key is not a Symbol.
         key.nil? || key.is_a?(Symbol)  or
           raise error("add(#{key.inspect}): 1st arg should be a Symbol as an option key.")

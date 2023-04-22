@@ -168,6 +168,22 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {items[0].callback.arity} == 1
     end
 
+    it "[!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args." do
+      sc = @schema
+      sc.add(:key, "--optdef=xx", "desc", Integer, /\A\d+\z/, [2,4,8])
+      item = sc.each.first
+      ok {item.type} == Integer
+      ok {item.rexp} == /\A\d+\z/
+      ok {item.enum} == [2,4,8]
+    end
+
+    it "[!e3emy] raises error when positional arg is not one of class, regexp, nor array." do
+      sc = @schema
+      pr = proc { sc.add(:key, "--optdef=xx", "desc", "value") }
+      ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                     '"value": expected one of class, regexp, or array, but got String.')
+    end
+
     it "[!rhhji] raises SchemaError when key is not a Symbol." do
       sc = @schema
       pr = proc {
@@ -1029,6 +1045,17 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
       ok {items[0].short} == 'h'
       ok {items[0].long} == 'help'
       ok {items[0].help} == 'show help message'
+    end
+
+    it "[!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args." do
+      cmdopt = Benry::CmdOpt.new()
+      cmdopt.add(:key, "--optdef=xx", "desc", Integer, /\A\d+\z/, [2,4,8], value: "VALUE")
+      items = cmdopt.instance_eval { @schema.instance_variable_get('@items') }
+      item = items.first
+      ok {item.type} == Integer
+      ok {item.rexp} == /\A\d+\z/
+      ok {item.enum} == [2,4,8]
+      ok {item.value} == "VALUE"
     end
 
   end
