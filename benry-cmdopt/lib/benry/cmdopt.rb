@@ -308,6 +308,8 @@ module Benry
           val = n_args == 1 ? @callback.call(val) \
                             : @callback.call(optdict, @key, val)
         end
+        #; [!eafem] returns default value (if specified) instead of true value.
+        return @value if val == true && @value != nil
         #; [!x066l] returns new value.
         return val
       end

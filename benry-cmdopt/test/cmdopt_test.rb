@@ -528,9 +528,9 @@ class Benry::Cmdopt::SchemaItem::Test < MiniTest::Test
   describe '#validate_and_convert()' do
 
     def new_item(key, optstr, short, long, param, help,
-                 optional: nil, type: nil, rexp: nil, enum: nil, &callback)
+                 optional: nil, type: nil, rexp: nil, enum: nil, value: nil, &callback)
       return Benry::Cmdopt::SchemaItem.new(key, optstr, short, long, param, help,
-                 optional: optional, type: type, rexp: rexp, enum: enum, &callback)
+                 optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
     end
 
     it "[!h0s0o] raises RuntimeError when value not matched to pattern." do
@@ -590,6 +590,15 @@ class Benry::Cmdopt::SchemaItem::Test < MiniTest::Test
         val * 2
       }
       ok {x.validate_and_convert("123", {})} == 246
+    end
+
+    it "[!eafem] returns default value (if specified) instead of true value." do
+      x1 = new_item(:flag, "desc", "f", "flag", nil, nil, value: nil)
+      ok {x1.validate_and_convert(true, {})} == true
+      x2 = new_item(:flag, "desc", "f", "flag", nil, nil, value: "blabla")
+      ok {x2.validate_and_convert(true, {})} == "blabla"
+      x3 = new_item(:flag, "desc", "f", "flag", nil, nil, value: false)
+      ok {x3.validate_and_convert(true, {})} == false
     end
 
   end
