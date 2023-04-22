@@ -152,7 +152,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
     it "[!yht0v] keeps command option definitions." do
       sc = @schema
       sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width",
-                      type: Integer, rexp: /\A\d+\z/, enum: ['2', '4', '8']) {|v| v.to_i }
+                      type: Integer, rexp: /\A\d+\z/, enum: [2, 4, 8]) {|v| v.to_i }
       items = sc.instance_eval { @items }
       ok {items.length} == 1
       ok {items[0]}.is_a?(Benry::CmdOpt::SchemaItem)
@@ -163,7 +163,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {items[0].optional} == true
       ok {items[0].type} == Integer
       ok {items[0].rexp} == /\A\d+\z/
-      ok {items[0].enum} == ['2', '4', '8']
+      ok {items[0].enum} == [2, 4, 8]
       ok {items[0].callback}.is_a?(Proc)
       ok {items[0].callback.arity} == 1
     end
@@ -260,6 +260,15 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       }
       ok {pr}.raise?(Benry::CmdOpt::SchemaError,
                      "[2, 4, 8]: enum specified in spite of option has no params.")
+    end
+
+    it "[!zuthh] raises SchemaError when enum element value is not instance of type class." do
+      sc = @schema
+      pr = proc {
+        sc.add(:indent, "-i <N>", "enable indent", type: Integer, enum: ['2', '4', '8'])
+      }
+      ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                     '["2", "4", "8"]: enum element value should be instance of Class, but "2" is not.')
     end
 
   end

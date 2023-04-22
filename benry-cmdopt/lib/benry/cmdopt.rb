@@ -146,11 +146,16 @@ module Benry
         end
         #; [!melyd] raises SchmeaError when enum is not a Array nor Set.
         #; [!xqed8] raises SchemaError when enum specified for no param option.
+        #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
         if enum
           enum.is_a?(Array) || enum.is_a?(Set)  or
             raise error("#{enum.inspect}: array or set expected.")
           param  or
             raise error("#{enum.inspect}: enum specified in spite of option has no params.")
+          enum.each do |x|
+            x.is_a?(type)  or
+              raise error("#{enum.inspect}: enum element value should be instance of #{type.class.name}, but #{x.inspect} is not.")
+          end if type
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, short, long, param, help,
