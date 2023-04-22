@@ -44,10 +44,10 @@ module Benry
         return other
       end
 
-      def add(key, optdef, help, type: nil, rexp: nil, pattern: nil, enum: nil, &callback)
+      def add(key, optdef, help, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
-        @schema.add(key, optdef, help, type: type, rexp: rexp, enum: enum, &callback)
+        @schema.add(key, optdef, help, type: type, rexp: rexp, enum: enum, value: value, &callback)
         #; [!tu4k3] returns self.
         self
       end
@@ -97,7 +97,7 @@ module Benry
         return other
       end
 
-      def add(key, optdef, help, type: nil, rexp: nil, pattern: nil, enum: nil, &callback)
+      def add(key, optdef, help, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!rhhji] raises SchemaError when key is not a Symbol.
         key.nil? || key.is_a?(Symbol)  or
@@ -142,7 +142,7 @@ module Benry
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, short, long, param, help,
-                   optional: optional, type: type, rexp: rexp, enum: enum, &callback)
+                   optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
         @items << item
         item
       end
@@ -265,7 +265,7 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, short, long, param, help, optional: nil, type: nil, rexp: nil, pattern: nil, enum: nil, &callback)
+      def initialize(key, optdef, short, long, param, help, optional: nil, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
@@ -277,10 +277,11 @@ module Benry
         @type     = type      unless type.nil?
         @rexp     = rexp      unless rexp.nil?
         @enum     = enum      unless enum.nil?
+        @value    = value     unless value.nil?
         @callback = callback  unless callback.nil?
       end
 
-      attr_reader :key, :optdef, :short, :long, :param, :help, :optional, :type, :rexp, :enum, :callback
+      attr_reader :key, :optdef, :short, :long, :param, :help, :optional, :type, :rexp, :enum, :value, :callback
       alias optional_param? optional
       alias pattern rexp   # for backward compatibility
 
