@@ -301,10 +301,44 @@ $ ruby ex3.rb --foo=off       # disable
 ```
 
 
+Alternative value
+-----------------
+
+Benry::Cmdopt supports alternative value.
+
+```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new
+cmdopt.add(:help1, "-h", "help")
+cmdopt.add(:help2, "-H", "help", value: "HELP")   # !!!!!
+
+options = cmdopt.parse(["-h", "-H"])
+p options[:help1]   #=> true          # normal
+p options[:help2]   #=> "HELP"        # alternative value
+```
+
+This is useful for boolean option.
+
+```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new
+cmdopt.add(:flag1, "--flag1[=<on|off>]", "f1", type: TrueClass)
+cmdopt.add(:flag2, "--flag2[=<on|off>]", "f2", type: TrueClass, value: false)  # !!!!
+
+## when `--flag2` specified, got `false` value.
+options = cmdopt.parse(["--flag1", "--flag2"])
+p options[:flag1]   #=> true
+p options[:flag2]   #=> false (!!!!!)
+```
+
+
 Multiple option
 ---------------
 
 ```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::Cmdopt.new
+
 cmdopt.add(:lib , '-I <NAME>', "library name") {|options, key, val|
   arr = options[key] || []
   arr << val
@@ -312,6 +346,9 @@ cmdopt.add(:lib , '-I <NAME>', "library name") {|options, key, val|
   ## or:
   #(options[key] || []) << val
 }
+
+options = cmdopt.parse(["-I", "foo", "-I", "bar", "-Ibaz"])
+p options   #=> {:lib=>["foo", "bar", "baz"]}
 ```
 
 

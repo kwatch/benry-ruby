@@ -10,6 +10,7 @@ Release 1.2.0 (????-??-??)
 * [change] keyword parameter `pattern:` is renamed to `rexp:` (`pattern:` is also available for backward compatibilidy).
 * [enhance] `Parser#parse(argv, false)` parses options only before arguments.
 * [enhance] define `#to_s()` which is alias of `#option_help()`.
+* [enhance] `Facade#add()` and `Schema#add()` supports `value:` keyword arg for default value.
 * [bugfix] treat argument `-` as normal argument (in before release, `-` is ignored because treated as option).
 
 
