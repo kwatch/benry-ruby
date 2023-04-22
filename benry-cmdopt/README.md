@@ -11,6 +11,30 @@ and easy to understahnd.
 (Benry::CmdOpt requires Ruby >= 2.3)
 
 
+Table of Contents
+=================
+
+<!-- TOC -->
+
+* <a href="#why-not-optparserb">Why not `optparse.rb`?</a>
+* <a href="#install">Install</a>
+* <a href="#usage">Usage</a>
+  * <a href="#define-parse-and-print-help">Define, parse, and print help</a>
+  * <a href="#command-option-parameter">Command option parameter</a>
+  * <a href="#argument-validation">Argument validation</a>
+  * <a href="#available-types">Available types</a>
+  * <a href="#boolean-onoff-option">Boolean (on/off) option</a>
+  * <a href="#alternative-value">Alternative value</a>
+  * <a href="#multiple-option">Multiple option</a>
+  * <a href="#hidden-option">Hidden option</a>
+  * <a href="#global-options-with-sub-commands">Global options with sub-commands</a>
+  * <a href="#not-supported">Not supported</a>
+* <a href="#internal-classes">Internal classes</a>
+* <a href="#license-and-copyright">License and Copyright</a>
+
+<!-- /TOC -->
+
+
 Why not `optparse.rb`?
 ======================
 
@@ -176,6 +200,14 @@ puts cmdopt.to_s()
 # Usage: blabla [<options>]
 #   -f, --file=<FILE>    : filename
 #   -m <MODE>            : verbose/quiet
+```
+
+
+Install
+=======
+
+```
+$ gem install benry-cmdopt
 ```
 
 
