@@ -118,7 +118,7 @@ module Benry
         desc.nil? || desc.is_a?(String)  or
           raise error("add(#{key.inspect}, #{optdef.inspect}): help message required as 3rd argument.")
         #; [!7hi2d] takes command option definition string.
-        short, long, param, optional = parse_optdef(optdef)
+        short, long, param, required = parse_optdef(optdef)
         #; [!p9924] option key is omittable only when long option specified.
         #; [!jtp7z] raises SchemaError when key is nil and no long option.
         key || long  or
@@ -159,7 +159,7 @@ module Benry
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, short, long, param, desc,
-                   optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
+                   required: required, type: type, rexp: rexp, enum: enum, value: value, &callback)
         @items << item
         item
       end
@@ -253,7 +253,8 @@ module Benry
         else
           raise error("#{optdef}: invalid option definition.")
         end
-        return short, long, param1 || param2, !!param2
+        required = param1 ? true : param2 ? false : nil
+        return short, long, param1 || param2, required
       end
 
       def _default_format(min_width=nil, max_width=35)
@@ -284,7 +285,7 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, short, long, param, desc, optional: nil, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def initialize(key, optdef, short, long, param, desc, required: nil, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
@@ -292,7 +293,7 @@ module Benry
         @long     = long      unless long.nil?
         @param    = param     unless param.nil?
         @desc     = desc      unless desc.nil?
-        @optional = optional  unless optional.nil?
+        @required = required  unless required.nil?
         @type     = type      unless type.nil?
         @rexp     = rexp      unless rexp.nil?
         @enum     = enum      unless enum.nil?
@@ -300,8 +301,7 @@ module Benry
         @callback = callback  unless callback.nil?
       end
 
-      attr_reader :key, :optdef, :short, :long, :param, :desc, :optional, :type, :rexp, :enum, :value, :callback
-      alias optional? optional
+      attr_reader :key, :optdef, :short, :long, :param, :desc, :type, :rexp, :enum, :value, :callback
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
@@ -310,7 +310,16 @@ module Benry
         #; [!uwbgc] returns false if argument is optional.
         #; [!togcx] returns true if argument is required.
         return nil   if ! @param
-        return false if @optional
+        return true  if @required
+        return false
+      end
+
+      def optional?
+        #; [!ebkg7] returns nil if option takes no arguments.
+        #; [!eh6bs] returns false if argument is required.
+        #; [!xecx2] returns true if argument is optional.
+        return nil   if ! @param
+        return false if @required
         return true
       end
 
@@ -319,8 +328,8 @@ module Benry
         #; [!owpba] returns :optional if argument is optional.
         #; [!s8gxl] returns :required if argument is required.
         return :none     if ! @param
-        return :optional if @optional
-        return :required
+        return :required if @required
+        return :optional
       end
 
       def validate_and_convert(val, optdict)
@@ -461,7 +470,7 @@ module Benry
         #; [!qyq8n] raises optionError when an argument specified for no arg long option.
         if item.optional?
           # do nothing
-        elsif item.param
+        elsif item.required?
           val  or raise error("#{optstr}: argument required.")
         else
           val.nil?  or raise error("#{optstr}: unexpected argument.")

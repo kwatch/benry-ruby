@@ -37,31 +37,31 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
     it "[!qw0ac] parses command option definition string." do
       sc = @schema
       tuple = sc.__send__(:parse_optdef, "-h, --help")
-      ok {tuple} == ['h', 'help', nil, false]
+      ok {tuple} == ['h', 'help', nil, nil]
       tuple = sc.__send__(:parse_optdef, "-h")
-      ok {tuple} == ['h', nil, nil, false]
+      ok {tuple} == ['h', nil, nil, nil]
       tuple = sc.__send__(:parse_optdef, "--help")
-      ok {tuple} == [nil, 'help', nil, false]
+      ok {tuple} == [nil, 'help', nil, nil]
     end
 
     it "[!ae733] parses command option definition which has a required param." do
       sc = @schema
       tuple = sc.__send__(:parse_optdef, "-f, --file=<FILE>")
-      ok {tuple} == ['f', 'file', '<FILE>', false]
+      ok {tuple} == ['f', 'file', '<FILE>', true]
       tuple = sc.__send__(:parse_optdef, "-f <FILE>")
-      ok {tuple} == ['f', nil, '<FILE>', false]
+      ok {tuple} == ['f', nil, '<FILE>', true]
       tuple = sc.__send__(:parse_optdef, "--file=<FILE>")
-      ok {tuple} == [nil, 'file', '<FILE>', false]
+      ok {tuple} == [nil, 'file', '<FILE>', true]
     end
 
     it "[!4h05c] parses command option definition which has an optional param." do
       sc = @schema
       tuple = sc.__send__(:parse_optdef, "-i, --indent[=<WIDTH>]")
-      ok {tuple} == ['i', 'indent', '<WIDTH>', true]
+      ok {tuple} == ['i', 'indent', '<WIDTH>', false]
       tuple = sc.__send__(:parse_optdef, "-i[<WIDTH>]")
-      ok {tuple} == ['i', nil, '<WIDTH>', true]
+      ok {tuple} == ['i', nil, '<WIDTH>', false]
       tuple = sc.__send__(:parse_optdef, "--indent[=<WIDTH>]")
-      ok {tuple} == [nil, 'indent', '<WIDTH>', true]
+      ok {tuple} == [nil, 'indent', '<WIDTH>', false]
     end
 
     it "[!b7jo3] raises SchemaError when command option definition is invalid." do
@@ -121,7 +121,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {items[0].short} == 'i'
       ok {items[0].long} == 'indent'
       ok {items[0].param} == '<WIDTH>'
-      ok {items[0].optional} == false
+      ok {items[0].required?} == true
       ok {items[0].type} == nil
       ok {items[0].rexp} == nil
       ok {items[0].enum} == nil
@@ -160,7 +160,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {items[0].short} == 'i'
       ok {items[0].long} == 'indent'
       ok {items[0].param} == '<WIDTH>'
-      ok {items[0].optional} == true
+      ok {items[0].required?} == false
       ok {items[0].type} == Integer
       ok {items[0].rexp} == /\A\d+\z/
       ok {items[0].enum} == [2, 4, 8]
@@ -573,14 +573,37 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
     it "[!uwbgc] returns false if argument is optional." do
       item = Benry::CmdOpt::SchemaItem.new(:indent, "-i, --indent[=<width>]",
-                 "i", "indent", "<width>", "indent width", optional: true)
+                 "i", "indent", "<width>", "indent width", required: false)
       ok {item.required?} == false
     end
 
     it "[!togcx] returns true if argument is required." do
       item = Benry::CmdOpt::SchemaItem.new(:file, "-f, --file=<file>",
-                 "f", "file", "<file>", "filename", optional: false)
+                 "f", "file", "<file>", "filename", required: true)
       ok {item.required?} == true
+    end
+
+  end
+
+
+  describe '#optional?' do
+
+    it "[!ebkg7] returns nil if option takes no arguments." do
+      item = Benry::CmdOpt::SchemaItem.new(:help, "-h, --help",
+                 "h", "help", nil, "help msg")
+      ok {item.optional?} == nil
+    end
+
+    it "[!eh6bs] returns false if argument is required." do
+      item = Benry::CmdOpt::SchemaItem.new(:file, "-f, --file=<file>",
+                 "f", "file", "<file>", "filename", required: true)
+      ok {item.optional?} == false
+    end
+
+    it "[!xecx2] returns true if argument is optional." do
+      item = Benry::CmdOpt::SchemaItem.new(:indent, "-i, --indent[=<width>]",
+                 "i", "indent", "<width>", "indent width", required: false)
+      ok {item.optional?} == true
     end
 
   end
@@ -596,13 +619,13 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
     it "[!owpba] returns :optional if argument is optional." do
       item = Benry::CmdOpt::SchemaItem.new(:indent, "-i, --indent[=<width>]",
-                 "i", "indent", "<width>", "indent width", optional: true)
+                 "i", "indent", "<width>", "indent width", required: false)
       ok {item.requireness()} == :optional
     end
 
     it "[!s8gxl] returns :required if argument is required." do
       item = Benry::CmdOpt::SchemaItem.new(:file, "-f, --file=<file>",
-                 "f", "file", "<file>", "filename", optional: false)
+                 "f", "file", "<file>", "filename", required: true)
       ok {item.requireness()} == :required
     end
 
@@ -612,9 +635,9 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
   describe '#validate_and_convert()' do
 
     def new_item(key, optstr, short, long, param, desc,
-                 optional: nil, type: nil, rexp: nil, enum: nil, value: nil, &callback)
+                 required: nil, type: nil, rexp: nil, enum: nil, value: nil, &callback)
       return Benry::CmdOpt::SchemaItem.new(key, optstr, short, long, param, desc,
-                 optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
+                 required: required, type: type, rexp: rexp, enum: enum, value: value, &callback)
     end
 
     it "[!h0s0o] raises RuntimeError when value not matched to pattern." do
