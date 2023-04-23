@@ -305,6 +305,15 @@ module Benry
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
+      def requireness()
+        #; [!kmo28] returns :none if option takes no arguments.
+        #; [!owpba] returns :optional if option takes an optional argument.
+        #; [!s8gxl] returns :required if option takes a required argument.
+        return :none     if ! @param
+        return :optional if @optional
+        return :required
+      end
+
       def validate_and_convert(val, optdict)
         #; [!h0s0o] raises RuntimeError when value not matched to pattern.
         if @rexp && val != true
