@@ -656,6 +656,29 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
   end
 
 
+  describe '#hidden?()' do
+
+    it "[!h0uxs] returns true if desc is nil." do
+      desc = nil
+      item = Benry::CmdOpt::SchemaItem.new(:debug, "-D", desc, "D", nil, nil, nil)
+      ok {item.hidden?} == true
+    end
+
+    it "[!su00g] returns true if key starts with '_'." do
+      desc = "debug mode"
+      item = Benry::CmdOpt::SchemaItem.new(:_debug, "-D", desc, "D", nil, nil, nil)
+      ok {item.hidden?} == true
+    end
+
+    it "[!28vzx] returns false if else." do
+      desc = "debug mode"
+      item = Benry::CmdOpt::SchemaItem.new(:debug, "-D", desc, "D", nil, nil, nil)
+      ok {item.hidden?} == false
+    end
+
+  end
+
+
   describe '#validate_and_convert()' do
 
     def new_item(key, optstr, desc, short, long, param, required,

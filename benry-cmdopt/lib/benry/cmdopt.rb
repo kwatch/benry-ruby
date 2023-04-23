@@ -335,6 +335,13 @@ module Benry
         return :optional
       end
 
+      def hidden?()
+        #; [!h0uxs] returns true if desc is nil.
+        #; [!su00g] returns true if key starts with '_'.
+        #; [!28vzx] returns false if else.
+        return @desc == nil || @key.to_s.start_with?('_')
+      end
+
       def validate_and_convert(val, optdict)
         #; [!h0s0o] raises RuntimeError when value not matched to pattern.
         if @rexp && val != true
