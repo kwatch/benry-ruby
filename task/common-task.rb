@@ -52,27 +52,52 @@ END
 end unless Rake::Task.task_defined?(:guide)
 
 
+unless respond_to?(:run_test, true)
+  def run_test(ruby=nil, &b)
+    files = File.exist?("test/run_all.rb") \
+          ? ["test/run_all.rb"] \
+          : Dir.glob("test/**/*_test.rb")
+    if ruby
+      sh(ruby, *files, &b)
+    else
+      ruby(*files, &b)
+    end
+  end
+end
+
+
 desc "do test"
 task :test do
-  ruby "test/run_all.rb"
+  run_test()
 end unless Rake::Task.task_defined?(:test)
 
 
-if ENV['VS_HOME'] && $ruby_versions
+unless Rake::Task.task_defined?(:'test:all')
   desc "do test for different ruby versions"
   task :'test:all' do
-    vs_home = ENV['VS_HOME'].split(/:/).first
+    ENV['VS_HOME']  or
+      abort "[ERROR] rake test:all: $VS_HOME required."
+    defined?(RUBY_VERSIONS)  or
+      abort "[ERROR] rake test:all: RUBY_VERSIONS required."
+    vs_home = ENV['VS_HOME'].split(/[:;]/).first
     ENV['TC_QUIET'] = "Y" if File.exist?("test/tc.rb")
+    header = proc {|s| "\033[0;36m=============== #{s} ===============\033[0m" }
+    error  = proc {|s| "\033[0;31m** #{s}\033[0m" }
     comp = proc {|x, y| x.to_s.split('.').map(&:to_i) <=> y.to_s.split('.').map(&:to_i) }
-    $ruby_versions.each do |ver|
+    RUBY_VERSIONS.each do |ver|
       dir = Dir.glob("#{vs_home}/ruby/#{ver}.*").sort_by(&comp).last
-      next unless dir
-      puts "==== ruby #{ver} (#{dir}) ===="
-      sh "#{dir}/bin/ruby test/run_all.rb" do |ok, res|
-        $stderr.puts "** test failed" unless ok
+      puts ""
+      unless dir
+        puts header.(ver)
+        $stderr.puts error.("ruby #{ver} not found")
+        next
+      end
+      puts header.("#{ver} (#{dir})")
+      run_test("#{dir}/bin/ruby") do |ok, res|
+        $stderr.puts error.("test failed") unless ok
       end
     end
-  end unless Rake::Task.task_defined?(:'test:all')
+  end
 end
 
 
