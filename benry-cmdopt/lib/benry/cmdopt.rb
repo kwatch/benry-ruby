@@ -447,7 +447,7 @@ module Benry
             parse_long_option(optstr, optdict)
           else
             #; [!nwnjc] parses short options.
-            parse_short_options(optstr, optdict, argv, index)
+            parse_short_options(optstr, optdict) { argv.delete_at(index) }
           end
         end
         #; [!3wmsy] returns command option values as a dict.
@@ -493,7 +493,7 @@ module Benry
         optdict[item.key] = val
       end
 
-      def parse_short_options(optstr, optdict, argv, index)
+      def parse_short_options(optstr, optdict, &block)
         n = optstr.length
         i = 0
         while (i += 1) < n
@@ -507,7 +507,7 @@ module Benry
           elsif item.required?     # argument required
             #; [!utdbf] raises OptionError when argument required but not specified.
             #; [!f63hf] short option arg can be specified without space separator.
-            val = i+1 < n ? optstr[(i+1)..-1] : argv.delete_at(index)  or
+            val = i+1 < n ? optstr[(i+1)..-1] : yield  or
               raise error("-#{char}: argument required.")
             i = n
           else                     # optional argument
