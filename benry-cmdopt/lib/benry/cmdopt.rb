@@ -305,6 +305,15 @@ module Benry
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
+      def required?
+        #; [!svxny] returns nil if option takes no arguments.
+        #; [!uwbgc] returns false if option takes an optional argument.
+        #; [!togcx] returns true if option takes a required argument.
+        return nil   if ! @param
+        return false if @optional
+        return true
+      end
+
       def requireness()
         #; [!kmo28] returns :none if option takes no arguments.
         #; [!owpba] returns :optional if option takes an optional argument.

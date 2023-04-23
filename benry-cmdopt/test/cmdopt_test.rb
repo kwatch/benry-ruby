@@ -563,14 +563,30 @@ end
 class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
 
+  describe '#required?' do
+
+    it "[!svxny] returns nil if option takes no arguments." do
+      item = Benry::CmdOpt::SchemaItem.new(:help, "-h, --help",
+                 "h", "help", nil, "help msg")
+      ok {item.required?} == nil
+    end
+
+    it "[!uwbgc] returns false if option takes an optional argument." do
+      item = Benry::CmdOpt::SchemaItem.new(:indent, "-i, --indent[=<width>]",
+                 "i", "indent", "<width>", "indent width", optional: true)
+      ok {item.required?} == false
+    end
+
+    it "[!togcx] returns true if option takes a required argument." do
+      item = Benry::CmdOpt::SchemaItem.new(:file, "-f, --file=<file>",
+                 "f", "file", "<file>", "filename", optional: false)
+      ok {item.required?} == true
+    end
+
+  end
+
 
   describe '#requireness()' do
-
-    def new_item(key, optstr, short, long, param, desc,
-                 optional: nil, type: nil, rexp: nil, enum: nil, value: nil, &callback)
-      return Benry::CmdOpt::SchemaItem.new(key, optstr, short, long, param, desc,
-                 optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
-    end
 
     it "[!kmo28] returns :none if option takes no arguments." do
       item = Benry::CmdOpt::SchemaItem.new(:help, "-h, --help",
