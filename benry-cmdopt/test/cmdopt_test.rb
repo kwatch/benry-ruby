@@ -446,7 +446,7 @@ END
   end
 
 
-  describe '#each_option_help()' do
+  describe '#each_option_and_desc()' do
 
     before do
       sc = Benry::CmdOpt::Schema.new
@@ -459,7 +459,7 @@ END
     it "[!4b911] yields each optin definition str and help message." do
       sc = @schema
       arr = []
-      sc.each_option_help do |opt, desc|
+      sc.each_option_and_desc do |opt, desc|
         arr << [opt, desc]
       end
       ok {arr} == [
@@ -470,19 +470,19 @@ END
 
     it "[!cl8zy] when 'all' flag is false, not yield item which help is nil." do
       descs = []
-      @schema.each_option_help(all: false) {|opt, desc| descs << desc }
+      @schema.each_option_and_desc(all: false) {|opt, desc| descs << desc }
       ok {descs}.all? {|x| x != nil }
     end
 
     it "[!tc4bk] when 'all' flag is true, yields item which help is nil." do
       descs = []
-      @schema.each_option_help(all: true) {|opt, desc| descs << desc }
+      @schema.each_option_and_desc(all: true) {|opt, desc| descs << desc }
       ok {descs}.any? {|x| x == nil }
     end
 
     it "[!zbxyv] returns self." do
       sc = @schema
-      ret = sc.each_option_help { nil }
+      ret = sc.each_option_and_desc { nil }
       ok {ret}.same? sc
     end
 
@@ -1172,7 +1172,7 @@ END
   end
 
 
-  describe '#each_option_help()' do
+  describe '#each_option_and_desc()' do
 
     before do
       @cmdopt = Benry::CmdOpt.new
@@ -1184,7 +1184,7 @@ END
     it "[!bw9qx] yields each option definition string and help message." do
       cmdopt = @cmdopt
       pairs = []
-      cmdopt.each_option_help do |opt, desc|
+      cmdopt.each_option_and_desc do |opt, desc|
         pairs << [opt, desc]
       end
       ok {pairs} == [

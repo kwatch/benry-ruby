@@ -61,11 +61,12 @@ module Benry
       #; [!s61vo] '#to_s' is an alias to '#option_help()'.
       alias to_s option_help
 
-      def each_option_help(&block)
+      def each_option_and_desc(&block)
         #; [!bw9qx] yields each option definition string and help message.
-        @schema.each_option_help(&block)
+        @schema.each_option_and_desc(&block)
         self
       end
+      alias each_option_help each_option_and_desc   # for backward compatibility
 
       def each(&block)   # :nodoc:
         #; [!knh44] yields each option item.
@@ -179,7 +180,7 @@ module Benry
         #; [!to1th] includes all option help when `all` is true.
         sb = []
         width = nil
-        each_option_help(all: all) do |opt, desc|
+        each_option_and_desc(all: all) do |opt, desc|
           #sb << format % [opt, desc] << "\n" if desc || all
           if desc
             #; [!848rm] supports multi-lines help message.
@@ -202,7 +203,7 @@ module Benry
       #; [!rrapd] '#to_s' is an alias to '#option_help()'.
       alias to_s option_help
 
-      def each_option_help(all: false, &block)
+      def each_option_and_desc(all: false, &block)
         #; [!4b911] yields each optin definition str and help message.
         @items.each do |item|
           #; [!cl8zy] when 'all' flag is false, not yield item which help is nil.
@@ -212,6 +213,7 @@ module Benry
         #; [!zbxyv] returns self.
         self
       end
+      alias each_option_help each_option_and_desc   # for backward compatibility
 
       def each(&block)   # :nodoc:
         #; [!y4k1c] yields each option item.
