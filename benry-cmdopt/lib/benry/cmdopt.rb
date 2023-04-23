@@ -307,8 +307,8 @@ module Benry
 
       def required?
         #; [!svxny] returns nil if option takes no arguments.
-        #; [!uwbgc] returns false if option takes an optional argument.
-        #; [!togcx] returns true if option takes a required argument.
+        #; [!uwbgc] returns false if argument is optional.
+        #; [!togcx] returns true if argument is required.
         return nil   if ! @param
         return false if @optional
         return true
@@ -316,8 +316,8 @@ module Benry
 
       def requireness()
         #; [!kmo28] returns :none if option takes no arguments.
-        #; [!owpba] returns :optional if option takes an optional argument.
-        #; [!s8gxl] returns :required if option takes a required argument.
+        #; [!owpba] returns :optional if argument is optional.
+        #; [!s8gxl] returns :required if argument is required.
         return :none     if ! @param
         return :optional if @optional
         return :required
