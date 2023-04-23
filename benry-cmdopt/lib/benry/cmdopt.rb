@@ -99,6 +99,16 @@ module Benry
         return other
       end
 
+      def copy_from(other, except: [])
+        #; [!6six3] copy schema items from others.
+        #; [!vt88s] copy schema items except items specified by 'except:' kwarg.
+        except = [except].flatten()
+        other.each do |item|
+          @items << item unless except.include?(item.key)
+        end
+        self
+      end
+
       def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args.

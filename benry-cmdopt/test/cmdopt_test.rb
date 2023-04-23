@@ -105,6 +105,38 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
   end
 
 
+  describe '#copy_from()' do
+
+    before do
+      @schema1 = Benry::CmdOpt::Schema.new
+      @schema1.add(:help, "-h" , "print help")
+      @schema2 = Benry::CmdOpt::Schema.new
+      @schema2.add(:version, "-v" , "print version")
+      @schema2.add(:debug  , "-D" , "debug mode")
+    end
+
+    it "[!6six3] copy schema items from others." do
+      @schema1.copy_from(@schema2)
+      tuples = @schema1.each.collect {|x| [x.key, x.optdef, x.desc] }
+      ok {tuples} == [
+        [:help   , "-h", "print help"],
+        [:version, "-v", "print version"],
+        [:debug  , "-D", "debug mode"],
+      ]
+    end
+
+    it "[!vt88s] copy schema items except items specified by 'except:' kwarg." do
+      @schema1.copy_from(@schema2, except: [:debug])
+      tuples = @schema1.each.collect {|x| [x.key, x.optdef, x.desc] }
+      ok {tuples} == [
+        [:help,    "-h", "print help"],
+        [:version, "-v", "print version"],
+      ]
+    end
+
+  end
+
+
   describe "#add()" do
 
     before do
