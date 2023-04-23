@@ -177,26 +177,26 @@ module Benry
         end
         #; [!v7z4x] skips option help if help message is not specified.
         #; [!to1th] includes all option help when `all` is true.
-        buf = []
+        sb = []
         width = nil
         each_option_help(all: all) do |opt, desc|
-          #buf << format % [opt, desc] << "\n" if desc || all
+          #sb << format % [opt, desc] << "\n" if desc || all
           if desc
             #; [!848rm] supports multi-lines help message.
             n = 0
             desc.each_line do |line|
               if (n += 1) == 1
-                buf << format % [opt, line.chomp] << "\n"
+                sb << format % [opt, line.chomp] << "\n"
               else
                 width ||= (format % ['', '']).length
-                buf << (' ' * width) << line.chomp << "\n"
+                sb << (' ' * width) << line.chomp << "\n"
               end
             end
           elsif all
-            buf << format % [opt, ''] << "\n"
+            sb << format % [opt, ''] << "\n"
           end
         end
-        return buf.join()
+        return sb.join()
       end
 
       #; [!rrapd] '#to_s' is an alias to '#option_help()'.
@@ -254,7 +254,7 @@ module Benry
           raise error("#{optdef}: invalid option definition.")
         end
         required = param1 ? true : param2 ? false : nil
-        return short, long, param1 || param2, required
+        return short, long, (param1 || param2), required
       end
 
       def _default_format(min_width=nil, max_width=35)
@@ -309,18 +309,14 @@ module Benry
         #; [!svxny] returns nil if option takes no arguments.
         #; [!uwbgc] returns false if argument is optional.
         #; [!togcx] returns true if argument is required.
-        return nil   if ! @param
-        return true  if @required
-        return false
+        return ! @param ? nil : !! @required
       end
 
       def optional?
         #; [!ebkg7] returns nil if option takes no arguments.
         #; [!eh6bs] returns false if argument is required.
         #; [!xecx2] returns true if argument is optional.
-        return nil   if ! @param
-        return false if @required
-        return true
+        return ! @param ? nil : ! @required
       end
 
       def requireness()
@@ -387,10 +383,8 @@ module Benry
         #; [!3n810] converts 'false'/'off'/'no' into false.
         #; [!h8ayh] raises error when failed to convert value into true nor false.
         case val
-        when /\A(?:true|on|yes)\z/i
-          true
-        when /\A(?:false|off|no)\z/i
-          false
+        when /\A(?:true|on|yes)\z/i  ; true
+        when /\A(?:false|off|no)\z/i ; false
         else
           raise "boolean expected."
         end
