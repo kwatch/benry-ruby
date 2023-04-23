@@ -44,11 +44,11 @@ module Benry
         return other
       end
 
-      def add(key, optdef, help, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
         #; [!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args.
-        @schema.add(key, optdef, help, *rest, type: type, rexp: rexp, enum: enum, value: value, &callback)
+        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, &callback)
         #; [!tu4k3] returns self.
         self
       end
@@ -98,7 +98,7 @@ module Benry
         return other
       end
 
-      def add(key, optdef, help, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args.
         rest.each do |x|
@@ -115,7 +115,7 @@ module Benry
         key.nil? || key.is_a?(Symbol)  or
           raise error("add(#{key.inspect}): 1st arg should be a Symbol as an option key.")
         #; [!vq6eq] raises SchemaError when help message is missing."
-        help.nil? || help.is_a?(String)  or
+        desc.nil? || desc.is_a?(String)  or
           raise error("add(#{key.inspect}, #{optdef.inspect}): help message required as 3rd argument.")
         #; [!7hi2d] takes command option definition string.
         short, long, param, optional = parse_optdef(optdef)
@@ -158,7 +158,7 @@ module Benry
           end if type
         end
         #; [!yht0v] keeps command option definitions.
-        item = SchemaItem.new(key, optdef, short, long, param, help,
+        item = SchemaItem.new(key, optdef, short, long, param, desc,
                    optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
         @items << item
         item
@@ -179,12 +179,12 @@ module Benry
         #; [!to1th] includes all option help when `all` is true.
         buf = []
         width = nil
-        each_option_help(all: all) do |opt, help|
-          #buf << format % [opt, help] << "\n" if help || all
-          if help
+        each_option_help(all: all) do |opt, desc|
+          #buf << format % [opt, desc] << "\n" if desc || all
+          if desc
             #; [!848rm] supports multi-lines help message.
             n = 0
-            help.each_line do |line|
+            desc.each_line do |line|
               if (n += 1) == 1
                 buf << format % [opt, line.chomp] << "\n"
               else
@@ -207,7 +207,7 @@ module Benry
         @items.each do |item|
           #; [!cl8zy] when 'all' flag is false, not yield item which help is nil.
           #; [!tc4bk] when 'all' flag is true, yields item which help is nil.
-          yield item.optdef, item.help if all || item.help
+          yield item.optdef, item.desc if all || item.desc
         end
         #; [!zbxyv] returns self.
         self
@@ -261,7 +261,7 @@ module Benry
         min_width ||= _preferred_option_width()
         #; [!hr45y] detects preffered option width.
         w = 0
-        each_option_help do |opt, help|
+        each_option_help do |opt, _|
           w = opt.length if w < opt.length
         end
         w = min_width if w < min_width
@@ -274,8 +274,8 @@ module Benry
         #; [!kl91t] shorten option help min width when only single options which take no arg.
         #; [!0koqb] widen option help min width when any option takes an arg.
         #; [!kl91t] widen option help min width when long option exists.
-        long_p  = @items.any? {|x| x.help &&  x.long &&  x.param }
-        short_p = @items.all? {|x| x.help && !x.long && !x.param }
+        long_p  = @items.any? {|x| x.desc &&  x.long &&  x.param }
+        short_p = @items.all? {|x| x.desc && !x.long && !x.param }
         return short_p ? 8 : long_p ? 20 : 14
       end
 
@@ -284,14 +284,14 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, short, long, param, help, optional: nil, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def initialize(key, optdef, short, long, param, desc, optional: nil, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
         @short    = short     unless short.nil?
         @long     = long      unless long.nil?
         @param    = param     unless param.nil?
-        @help     = help      unless help.nil?
+        @desc     = desc      unless desc.nil?
         @optional = optional  unless optional.nil?
         @type     = type      unless type.nil?
         @rexp     = rexp      unless rexp.nil?
@@ -300,9 +300,10 @@ module Benry
         @callback = callback  unless callback.nil?
       end
 
-      attr_reader :key, :optdef, :short, :long, :param, :help, :optional, :type, :rexp, :enum, :value, :callback
+      attr_reader :key, :optdef, :short, :long, :param, :desc, :optional, :type, :rexp, :enum, :value, :callback
       alias optional_param? optional
       alias pattern rexp   # for backward compatibility
+      alias help desc      # for backward compatibility
 
       def validate_and_convert(val, optdict)
         #; [!h0s0o] raises RuntimeError when value not matched to pattern.

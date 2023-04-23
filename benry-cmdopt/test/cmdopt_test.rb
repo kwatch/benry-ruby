@@ -287,50 +287,50 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
     end
 
     it "[!0aq0i] can take integer as width." do
-      help = @schema.option_help(41)
-      ok {help} == <<END
+      helpmsg = @schema.option_help(41)
+      ok {helpmsg} == <<END
   -h, --help                                : show help message.
       --version                             : print version
   -f, --file=<FILE>                         : filename
   -i, --indent[=<WIDTH>]                    : enable indent
 END
-      s = help.each_line.first.split(':')[0]
+      s = helpmsg.each_line.first.split(':')[0]
       ok {s.length} == 41+3
     end
 
     it "[!pcsah] can take format string." do
-      help = @schema.option_help("%-42s: %s")
-      ok {help} == <<END
+      helpmsg = @schema.option_help("%-42s: %s")
+      ok {helpmsg} == <<END
 -h, --help                                : show help message.
     --version                             : print version
 -f, --file=<FILE>                         : filename
 -i, --indent[=<WIDTH>]                    : enable indent
 END
-      s = help.each_line.first.split(':')[0]
+      s = helpmsg.each_line.first.split(':')[0]
       ok {s.length} == 42+0
     end
 
     it "[!dndpd] detects option width automatically when nothing specified." do
-      help = @schema.option_help()
-      ok {help} == <<END
+      helpmsg = @schema.option_help()
+      ok {helpmsg} == <<END
   -h, --help             : show help message.
       --version          : print version
   -f, --file=<FILE>      : filename
   -i, --indent[=<WIDTH>] : enable indent
 END
-      s = help.each_line.to_a.last.split(':')[0]
+      s = helpmsg.each_line.to_a.last.split(':')[0]
       ok {s.length} == 25
     end
 
     it "[!v7z4x] skips option help if help message is not specified." do
-      help = @schema.option_help()
-      ok {help} !~ /debug/
+      helpmsg = @schema.option_help()
+      ok {helpmsg} !~ /debug/
     end
 
     it "[!to1th] includes all option help when `all` is true." do
-      help = @schema.option_help(nil, all: true)
-      ok {help} =~ /debug/
-      ok {help} == <<END
+      helpmsg = @schema.option_help(nil, all: true)
+      ok {helpmsg} =~ /debug/
+      ok {helpmsg} == <<END
   -h, --help             : show help message.
       --version          : print version
   -f, --file=<FILE>      : filename
@@ -459,8 +459,8 @@ END
     it "[!4b911] yields each optin definition str and help message." do
       sc = @schema
       arr = []
-      sc.each_option_help do |opt, help|
-        arr << [opt, help]
+      sc.each_option_help do |opt, desc|
+        arr << [opt, desc]
       end
       ok {arr} == [
         ["-h, --help", "show help message"],
@@ -469,15 +469,15 @@ END
     end
 
     it "[!cl8zy] when 'all' flag is false, not yield item which help is nil." do
-      helps = []
-      @schema.each_option_help(all: false) {|opt, help| helps << help }
-      ok {helps}.all? {|x| x != nil }
+      descs = []
+      @schema.each_option_help(all: false) {|opt, desc| descs << desc }
+      ok {descs}.all? {|x| x != nil }
     end
 
     it "[!tc4bk] when 'all' flag is true, yields item which help is nil." do
-      helps = []
-      @schema.each_option_help(all: true) {|opt, help| helps << help }
-      ok {helps}.any? {|x| x == nil }
+      descs = []
+      @schema.each_option_help(all: true) {|opt, desc| descs << desc }
+      ok {descs}.any? {|x| x == nil }
     end
 
     it "[!zbxyv] returns self." do
@@ -565,9 +565,9 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
   describe '#validate_and_convert()' do
 
-    def new_item(key, optstr, short, long, param, help,
+    def new_item(key, optstr, short, long, param, desc,
                  optional: nil, type: nil, rexp: nil, enum: nil, value: nil, &callback)
-      return Benry::CmdOpt::SchemaItem.new(key, optstr, short, long, param, help,
+      return Benry::CmdOpt::SchemaItem.new(key, optstr, short, long, param, desc,
                  optional: optional, type: type, rexp: rexp, enum: enum, value: value, &callback)
     end
 
@@ -1053,7 +1053,7 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
       ok {items[0].key} == :help
       ok {items[0].short} == 'h'
       ok {items[0].long} == 'help'
-      ok {items[0].help} == 'show help message'
+      ok {items[0].desc} == 'show help message'
     end
 
     it "[!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args." do
@@ -1080,8 +1080,8 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
     end
 
     it "[!dm4p8] returns option help message." do
-      help = @cmdopt.option_help()
-      ok {help} == <<END
+      helpmsg = @cmdopt.option_help()
+      ok {helpmsg} == <<END
   -h, --help           : show help message
       --version        : print version
   -f, --file=<FILE>    : filename
@@ -1115,8 +1115,8 @@ END
     it "[!bw9qx] yields each option definition string and help message." do
       cmdopt = @cmdopt
       pairs = []
-      cmdopt.each_option_help do |opt, help|
-        pairs << [opt, help]
+      cmdopt.each_option_help do |opt, desc|
+        pairs << [opt, desc]
       end
       ok {pairs} == [
         ["-h, --help", "show help message"],
