@@ -636,26 +636,6 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
   end
 
 
-  describe '#optional?' do
-
-    it "[!ebkg7] returns nil if option takes no arguments." do
-      item, _, _ = ITEMS
-      ok {item.optional?} == nil
-    end
-
-    it "[!eh6bs] returns false if argument is required." do
-      _, item, _ = ITEMS
-      ok {item.optional?} == false
-    end
-
-    it "[!xecx2] returns true if argument is optional." do
-      _, _, item = ITEMS
-      ok {item.optional?} == true
-    end
-
-  end
-
-
   describe '#arg_requireness()' do
 
     it "[!kmo28] returns :none if option takes no arguments." do

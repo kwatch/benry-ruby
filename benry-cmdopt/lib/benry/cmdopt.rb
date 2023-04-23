@@ -326,13 +326,6 @@ module Benry
         return ! @param ? nil : !! @required
       end
 
-      def optional?
-        #; [!ebkg7] returns nil if option takes no arguments.
-        #; [!eh6bs] returns false if argument is required.
-        #; [!xecx2] returns true if argument is optional.
-        return ! @param ? nil : ! @required
-      end
-
       def arg_requireness()
         #; [!kmo28] returns :none if option takes no arguments.
         #; [!owpba] returns :optional if argument is optional.
@@ -529,7 +522,7 @@ module Benry
             if val == true
               raise error("-#{char}: #{ex.message}")
             else
-              s = item.optional? ? '' : ' '
+              s = item.required? ? ' ' : ''
               raise error("-#{char}#{s}#{val}: #{ex.message}")
             end
           end
