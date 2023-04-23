@@ -595,12 +595,12 @@ end
 class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
   ITEMS = [
-    Benry::CmdOpt::SchemaItem.new(:help, "-h, --help",
-                                  "h", "help", nil, "help msg", required: nil),
-    Benry::CmdOpt::SchemaItem.new(:file, "-f, --file=<file>",
-                                  "f", "file", "<file>", "filename", required: true),
-    Benry::CmdOpt::SchemaItem.new(:indent, "-i, --indent[=<N>]",
-                                  "i", "indent", "<N>", "indent width", required: false),
+    Benry::CmdOpt::SchemaItem.new(:help, "-h, --help", "help msg",
+                                  "h", "help", nil, nil),
+    Benry::CmdOpt::SchemaItem.new(:file, "-f, --file=<file>", "filename",
+                                  "f", "file", "<file>", true),
+    Benry::CmdOpt::SchemaItem.new(:indent, "-i, --indent[=<N>]", "indent width",
+                                  "i", "indent", "<N>", false),
   ]
 
 
@@ -666,28 +666,28 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
   describe '#validate_and_convert()' do
 
-    def new_item(key, optstr, short, long, param, desc,
-                 required: nil, type: nil, rexp: nil, enum: nil, value: nil, &callback)
-      return Benry::CmdOpt::SchemaItem.new(key, optstr, short, long, param, desc,
-                 required: required, type: type, rexp: rexp, enum: enum, value: value, &callback)
+    def new_item(key, optstr, desc, short, long, param, required,
+                 type: nil, rexp: nil, enum: nil, value: nil, &callback)
+      return Benry::CmdOpt::SchemaItem.new(key, optstr, desc, short, long, param, required,
+                 type: type, rexp: rexp, enum: enum, value: value, &callback)
     end
 
     it "[!h0s0o] raises RuntimeError when value not matched to pattern." do
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", "indent width", rexp: /\A\d+\z/)
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, rexp: /\A\d+\z/)
       optdict = {}
       pr = proc { x.validate_and_convert("abc", optdict) }
       ok {pr}.raise?(RuntimeError, "pattern unmatched.")
     end
 
     it "[!5jrdf] raises RuntimeError when value not in enum." do
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", "indent width", enum: ['2', '4', '8'])
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, enum: ['2', '4', '8'])
       optdict = {}
       pr = proc { x.validate_and_convert("10", optdict) }
       ok {pr}.raise?(RuntimeError, "expected one of 2/4/8.")
     end
 
     it "[!j4fuz] calls type-specific callback when type specified." do
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", "indent width", type: Integer)
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, type: Integer)
       optdict = {}
       pr = proc { x.validate_and_convert("abc", optdict) }
       ok {pr}.raise?(RuntimeError, "integer expected.")
@@ -695,7 +695,7 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
     it "[!jn9z3] calls callback when callback specified." do
       called = false
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", "indent width") {|va|
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false) {|va|
         called = true
       }
       optdict = {}
@@ -705,7 +705,7 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
     it "[!iqalh] calls callback with different number of args according to arity." do
       args1 = nil
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", nil) {|val|
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false) {|val|
         args1 = val
       }
       optdict = {}
@@ -713,7 +713,7 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
       ok {args1} == "123"
       #
       args2 = nil
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", nil) {|optdict, key, val|
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false) {|optdict, key, val|
         args2 = [optdict, key, val]
       }
       optdict = {}
@@ -722,21 +722,21 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
     end
 
     it "[!x066l] returns new value." do
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", nil, type: Integer)
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, type: Integer)
       ok {x.validate_and_convert("123", {})} == 123
       #
-      x = new_item(:indent, "", "i", "indent", "<WIDTH>", nil, type: Integer) {|val|
+      x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, type: Integer) {|val|
         val * 2
       }
       ok {x.validate_and_convert("123", {})} == 246
     end
 
     it "[!eafem] returns default value (if specified) instead of true value." do
-      x1 = new_item(:flag, "desc", "f", "flag", nil, nil, value: nil)
+      x1 = new_item(:flag, "", "desc", "f", "flag", nil, true, value: nil)
       ok {x1.validate_and_convert(true, {})} == true
-      x2 = new_item(:flag, "desc", "f", "flag", nil, nil, value: "blabla")
+      x2 = new_item(:flag, "", "desc", "f", "flag", nil, true, value: "blabla")
       ok {x2.validate_and_convert(true, {})} == "blabla"
-      x3 = new_item(:flag, "desc", "f", "flag", nil, nil, value: false)
+      x3 = new_item(:flag, "", "desc", "f", "flag", nil, true, value: false)
       ok {x3.validate_and_convert(true, {})} == false
     end
 

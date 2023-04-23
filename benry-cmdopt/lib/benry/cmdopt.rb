@@ -169,8 +169,8 @@ module Benry
           end if type
         end
         #; [!yht0v] keeps command option definitions.
-        item = SchemaItem.new(key, optdef, short, long, param, desc,
-                   required: required, type: type, rexp: rexp, enum: enum, value: value, &callback)
+        item = SchemaItem.new(key, optdef, desc, short, long, param, required,
+                   type: type, rexp: rexp, enum: enum, value: value, &callback)
         @items << item
         item
       end
@@ -297,14 +297,14 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, short, long, param, desc, required: nil, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
+        @desc     = desc      unless desc.nil?
         @short    = short     unless short.nil?
         @long     = long      unless long.nil?
         @param    = param     unless param.nil?
-        @desc     = desc      unless desc.nil?
         @required = required  unless required.nil?
         @type     = type      unless type.nil?
         @rexp     = rexp      unless rexp.nil?
@@ -313,7 +313,7 @@ module Benry
         @callback = callback  unless callback.nil?
       end
 
-      attr_reader :key, :optdef, :short, :long, :param, :desc, :type, :rexp, :enum, :value, :callback
+      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :value, :callback
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
