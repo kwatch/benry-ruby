@@ -476,12 +476,15 @@ module Benry
           raise error("#{optstr}: unknown long option.")
         #; [!2jd9w] raises OptionError when no arguments specified for arg required long option.
         #; [!qyq8n] raises optionError when an argument specified for no arg long option.
-        if ! item.param            # no arguments
-          val.nil?  or raise error("#{optstr}: unexpected argument.")
-        elsif item.required?       # argument required
+        case item.arg_requireness()
+        when :none         # no arguments
+          val == nil  or raise error("#{optstr}: unexpected argument.")
+        when :required     # argument required
           val  or raise error("#{optstr}: argument required.")
-        else                       # optional argument
+        when :optional     # optonal argument
           # do nothing
+        else
+          raise "** internal error"
         end
         #; [!o596x] validates argument value.
         val ||= true
@@ -502,19 +505,22 @@ module Benry
           item = @schema.find_short_option(char)  or
             raise error("-#{char}: unknown option.")
           #
-          if ! item.param          # no arguments
+          case item.arg_requireness()
+          when :none         # no arguments
             val = true
-          elsif item.required?     # argument required
+          when :required     # argument required
             #; [!utdbf] raises OptionError when argument required but not specified.
             #; [!f63hf] short option arg can be specified without space separator.
             val = i+1 < n ? optstr[(i+1)..-1] : yield  or
               raise error("-#{char}: argument required.")
             i = n
-          else                     # optional argument
+          when :optional     # optonal argument
             #; [!yjq6b] optional arg should be specified without space separator.
             #; [!wape4] otpional arg can be omit.
             val = i+1 < n ? optstr[(i+1)..-1] : true
             i = n
+          else
+            raise "** internal error"
           end
           #; [!yu0kc] validates short option argument.
           begin
