@@ -311,6 +311,8 @@ module Benry
         @enum     = enum      unless enum.nil?
         @value    = value     unless value.nil?
         @callback = callback  unless callback.nil?
+        #; [!nn4cp] freezes enum object.
+        @enum.freeze() if @enum
       end
 
       attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :value, :callback

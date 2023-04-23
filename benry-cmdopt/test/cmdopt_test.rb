@@ -604,6 +604,18 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
   ]
 
 
+  describe '#initialize()' do
+
+    it "[!nn4cp] freezes enum object." do
+      item = Benry::CmdOpt::SchemaItem.new(:foo, "--foo", "desc", nil, "foo", "<val>",
+                                           true, enum: ["x", "y", "z"])
+      ok {item.enum} == ["x", "y", "z"]
+      ok {item.enum}.frozen?
+    end
+
+  end
+
+
   describe '#required?' do
 
     it "[!svxny] returns nil if option takes no arguments." do
