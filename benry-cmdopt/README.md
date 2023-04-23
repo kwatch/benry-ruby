@@ -46,8 +46,8 @@ Why not `optparse.rb`?
   (schema class, parser class, and facade class).
   Therefore it is easy to understand and extend these classes.
 
-  File `optparse.rb` (in Ruby 3.0) contains 1234 lines (except comments), while
-  `benry/cmdopt.rb` (v1.2.0) contains less than 400 lines (except comments).
+  File `optparse.rb` (in Ruby 3.0) contains 1061 lines (except comments and blanks),
+  while `benry/cmdopt.rb` (v2.0) contains 373 lines (except both, too).
 
 * `optparse.rb` regards `-x` and `--x` as a short cut of `--xxx` automatically
   even if you have not defined `-x` option.
@@ -387,18 +387,37 @@ p options   #=> {:lib=>["foo", "bar", "baz"]}
 Hidden option
 -------------
 
-If description of command otpion is nil, help message will not include
-that option.
+Benry::CmdOpt regards the following options as hidden.
+
+* Key name starts with `_` (for example `:_debug`).
+* Or description is nil.
+
+The former is better than the latter, because even hidden option should have its own description.
+
+These hidden options are not included in help message.
 
 ```ruby
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:verbose, '-v', "verbose mode")
-cmdopt.add(:debug  , '-D', nil)   # hidden option (because description is nil)
+cmdopt.add(:help , '-h', "help message")
+cmdopt.add(:debug, '-D', nil)       # hidden (because description is nil)
+cmdopt.add(:_log , '-L', "logging") # hidden (because key starts with '_')
 puts cmdopt.to_s()
 
-### output ('-D' doesn't appear because help string is nil)
-#  -v             : verbose mode
+### output (neither '-D' nor '-L' is shown because hidden options)
+#  -h             : help message
+```
+
+To show all options including hidden ones, add `all: true` to `cmdopt.to_s()`.
+
+```ruby
+...(snip)...
+puts cmdopt.to_s(all: true)   # or: cmdopt.to_s(nil, all: true)
+
+### output
+#  -h             : help message
+#  -D             :
+#  -L             : logging
 ```
 
 
