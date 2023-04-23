@@ -301,7 +301,7 @@ module Benry
       end
 
       attr_reader :key, :optdef, :short, :long, :param, :desc, :optional, :type, :rexp, :enum, :value, :callback
-      alias optional_param? optional
+      alias optional? optional
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
@@ -459,7 +459,7 @@ module Benry
           raise error("#{optstr}: unknown long option.")
         #; [!2jd9w] raises OptionError when no arguments specified for arg required long option.
         #; [!qyq8n] raises optionError when an argument specified for no arg long option.
-        if item.optional_param?
+        if item.optional?
           # do nothing
         elsif item.param
           val  or raise error("#{optstr}: argument required.")
@@ -487,7 +487,7 @@ module Benry
           #
           if !item.param
             val = true
-          elsif !item.optional_param?
+          elsif !item.optional?
             #; [!utdbf] raises OptionError when argument required but not specified.
             #; [!f63hf] short option arg can be specified without space separator.
             val = i+1 < n ? optstr[(i+1)..-1] : argv.delete_at(index)  or
@@ -506,7 +506,7 @@ module Benry
             if val == true
               raise error("-#{char}: #{ex.message}")
             else
-              s = item.optional_param? ? '' : ' '
+              s = item.optional? ? '' : ' '
               raise error("-#{char}#{s}#{val}: #{ex.message}")
             end
           end
