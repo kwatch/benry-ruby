@@ -333,7 +333,7 @@ module Benry
         return ! @param ? nil : ! @required
       end
 
-      def requireness()
+      def arg_requireness()
         #; [!kmo28] returns :none if option takes no arguments.
         #; [!owpba] returns :optional if argument is optional.
         #; [!s8gxl] returns :required if argument is required.

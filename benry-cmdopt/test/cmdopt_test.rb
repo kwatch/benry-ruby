@@ -656,21 +656,21 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
   end
 
 
-  describe '#requireness()' do
+  describe '#arg_requireness()' do
 
     it "[!kmo28] returns :none if option takes no arguments." do
       item, _, _ = ITEMS
-      ok {item.requireness()} == :none
+      ok {item.arg_requireness()} == :none
     end
 
     it "[!s8gxl] returns :required if argument is required." do
       _, item, _ = ITEMS
-      ok {item.requireness()} == :required
+      ok {item.arg_requireness()} == :required
     end
 
     it "[!owpba] returns :optional if argument is optional." do
       _, _, item = ITEMS
-      ok {item.requireness()} == :optional
+      ok {item.arg_requireness()} == :optional
     end
 
   end
