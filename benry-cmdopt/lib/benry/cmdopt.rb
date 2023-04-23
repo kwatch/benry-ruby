@@ -522,8 +522,8 @@ module Benry
             if val == true
               raise error("-#{char}: #{ex.message}")
             else
-              s = item.required? ? ' ' : ''
-              raise error("-#{char}#{s}#{val}: #{ex.message}")
+              sp = item.required? ? ' ' : ''
+              raise error("-#{char}#{sp}#{val}: #{ex.message}")
             end
           end
           optdict[item.key] = val
