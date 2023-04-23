@@ -436,7 +436,7 @@ module Benry
             break
           elsif optstr =~ /\A--/
             #; [!uh7j8] parses long options.
-            parse_long_option(optstr, optdict, argv)
+            parse_long_option(optstr, optdict)
           else
             #; [!nwnjc] parses short options.
             parse_short_options(optstr, optdict, argv, index)
@@ -458,7 +458,7 @@ module Benry
 
       protected
 
-      def parse_long_option(optstr, optdict, _argv)
+      def parse_long_option(optstr, optdict)
         #; [!3i994] raises OptionError when invalid long option format.
         optstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/  or
           raise error("#{optstr}: invalid long option.")
@@ -468,12 +468,12 @@ module Benry
           raise error("#{optstr}: unknown long option.")
         #; [!2jd9w] raises OptionError when no arguments specified for arg required long option.
         #; [!qyq8n] raises optionError when an argument specified for no arg long option.
-        if item.optional?
-          # do nothing
-        elsif item.required?
-          val  or raise error("#{optstr}: argument required.")
-        else
+        if ! item.param            # no arguments
           val.nil?  or raise error("#{optstr}: unexpected argument.")
+        elsif item.required?       # argument required
+          val  or raise error("#{optstr}: argument required.")
+        else                       # optional argument
+          # do nothing
         end
         #; [!o596x] validates argument value.
         val ||= true
@@ -494,15 +494,15 @@ module Benry
           item = @schema.find_short_option(char)  or
             raise error("-#{char}: unknown option.")
           #
-          if !item.param
+          if ! item.param          # no arguments
             val = true
-          elsif !item.optional?
+          elsif item.required?     # argument required
             #; [!utdbf] raises OptionError when argument required but not specified.
             #; [!f63hf] short option arg can be specified without space separator.
             val = i+1 < n ? optstr[(i+1)..-1] : argv.delete_at(index)  or
               raise error("-#{char}: argument required.")
             i = n
-          else
+          else                     # optional argument
             #; [!yjq6b] optional arg should be specified without space separator.
             #; [!wape4] otpional arg can be omit.
             val = i+1 < n ? optstr[(i+1)..-1] : true
