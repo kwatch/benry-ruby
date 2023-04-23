@@ -216,9 +216,9 @@ module Benry
       def each_option_and_desc(all: false, &block)
         #; [!4b911] yields each optin definition str and help message.
         @items.each do |item|
-          #; [!cl8zy] when 'all' flag is false, not yield item which help is nil.
-          #; [!tc4bk] when 'all' flag is true, yields item which help is nil.
-          yield item.optdef, item.desc if all || item.desc
+          #; [!cl8zy] when 'all' flag is false, not yield hidden items.
+          #; [!tc4bk] when 'all' flag is true, yields even hidden items.
+          yield item.optdef, item.desc if all || ! item.hidden?
         end
         #; [!zbxyv] returns self.
         self

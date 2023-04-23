@@ -484,38 +484,43 @@ END
       sc = Benry::CmdOpt::Schema.new
       sc.add(:help, "-h, --help", "show help message")
       sc.add(:version, "    --version", "print version")
-      sc.add(:debug  , "-D, --debug"  , nil)
+      sc.add(:debug  , "-d, --debug"  , nil)            # hidden
+      sc.add(:_DEBUG , "-D, --DEBUG"  , "debug mode")   # hidden
       @schema = sc
     end
 
     it "[!4b911] yields each optin definition str and help message." do
-      sc = @schema
-      arr = []
-      sc.each_option_and_desc do |opt, desc|
-        arr << [opt, desc]
-      end
-      ok {arr} == [
-        ["-h, --help", "show help message"],
-        ["    --version", "print version"],
+      pairs = []
+      @schema.each_option_and_desc {|opt, desc| pairs << [opt, desc] }
+      ok {pairs} == [
+        ["-h, --help"    , "show help message"],  # not hiddden
+        ["    --version" , "print version"],      # not hidden
       ]
     end
 
-    it "[!cl8zy] when 'all' flag is false, not yield item which help is nil." do
-      descs = []
-      @schema.each_option_and_desc(all: false) {|opt, desc| descs << desc }
-      ok {descs}.all? {|x| x != nil }
+    it "[!cl8zy] when 'all' flag is false, not yield hidden items." do
+      pairs = []
+      @schema.each_option_and_desc(all: false) {|opt, desc| pairs << [opt, desc] }
+      ok {pairs} == [
+        ["-h, --help"    , "show help message"],  # not hiddden
+        ["    --version" , "print version"],      # not hidden
+      ]
     end
 
-    it "[!tc4bk] when 'all' flag is true, yields item which help is nil." do
-      descs = []
-      @schema.each_option_and_desc(all: true) {|opt, desc| descs << desc }
-      ok {descs}.any? {|x| x == nil }
+    it "[!tc4bk] when 'all' flag is true, yields even hidden items." do
+      pairs = []
+      @schema.each_option_and_desc(all: true) {|opt, desc| pairs << [opt, desc] }
+      ok {pairs} == [
+        ["-h, --help"    , "show help message"],  # not hiddden
+        ["    --version" , "print version"],      # not hidden
+        ["-d, --debug"   , nil],                  # hidden
+        ["-D, --DEBUG"   , "debug mode"],         # hidden
+      ]
     end
 
     it "[!zbxyv] returns self." do
-      sc = @schema
-      ret = sc.each_option_and_desc { nil }
-      ok {ret}.same? sc
+      ret = @schema.each_option_and_desc { nil }
+      ok {ret}.same? @schema
     end
 
   end
