@@ -144,30 +144,33 @@ module Benry
         if long.nil? && param =~ /\A--/
           raise error("add(#{key.inspect}, #{optdef.inspect}): missing ',' between short option and long options.")
         end
-        #; [!7xmr5] raises SchemaError when type is not registered.
-        #; [!s2aaj] raises SchemaError when option has no params but type specified.
+        #
         if type
+          #; [!7xmr5] raises SchemaError when type is not registered.
           PARAM_TYPES.key?(type)  or
             raise error("#{type.inspect}: unregistered type.")
+          #; [!s2aaj] raises SchemaError when option has no params but type specified.
           param  or
             raise error("#{type.inspect}: type specified in spite of option has no params.")
         end
-        #; [!bi2fh] raises SchemaError when pattern is not a regexp.
-        #; [!01fmt] raises SchmeaError when option has no params but pattern specified.
+        #
         if rexp
+          #; [!bi2fh] raises SchemaError when pattern is not a regexp.
           rexp.is_a?(Regexp)  or
             raise error("#{rexp.inspect}: regexp pattern expected.")
+          #; [!01fmt] raises SchmeaError when option has no params but pattern specified.
           param  or
             raise error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
         end
-        #; [!melyd] raises SchmeaError when enum is not a Array nor Set.
-        #; [!xqed8] raises SchemaError when enum specified for no param option.
-        #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
+        #
         if enum
+          #; [!melyd] raises SchmeaError when enum is not a Array nor Set.
           enum.is_a?(Array) || enum.is_a?(Set)  or
             raise error("#{enum.inspect}: array or set expected.")
+          #; [!xqed8] raises SchemaError when enum specified for no param option.
           param  or
             raise error("#{enum.inspect}: enum specified in spite of option has no params.")
+          #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
           enum.each do |x|
             x.is_a?(type)  or
               raise error("#{enum.inspect}: enum element value should be instance of #{type.class.name}, but #{x.inspect} is not.")
@@ -196,19 +199,19 @@ module Benry
         sb = []
         width = nil
         each_option_and_desc(all: all) do |opt, desc|
-          #sb << format % [opt, desc] << "\n" if desc || all
           if desc
             #; [!848rm] supports multi-lines help message.
-            n = 0
+            is_first = true
             desc.each_line do |line|
-              if (n += 1) == 1
+              if is_first
                 sb << format % [opt, line.chomp] << "\n"
+                is_first = false
               else
                 width ||= (format % ['', '']).length
                 sb << (' ' * width) << line.chomp << "\n"
               end
             end
-          elsif all
+          else
             sb << format % [opt, ''] << "\n"
           end
         end
@@ -222,11 +225,9 @@ module Benry
         #; [!03sux] returns enumerator object if block not given.
         return to_enum(:each_option_and_desc, all: all) unless block_given?()
         #; [!4b911] yields each optin definition str and help message.
-        @items.each do |item|
-          #; [!cl8zy] when 'all' flag is false, not yield hidden items.
-          #; [!tc4bk] when 'all' flag is true, yields even hidden items.
-          yield item.optdef, item.desc if all || ! item.hidden?
-        end
+        #; [!cl8zy] when 'all' flag is false, not yield hidden items.
+        #; [!tc4bk] when 'all' flag is true, yields even hidden items.
+        each(all: all) {|item| yield item.optdef, item.desc }
         #; [!zbxyv] returns self.
         self
       end
