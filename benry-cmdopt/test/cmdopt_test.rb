@@ -1325,29 +1325,6 @@ END
   end
 
 
-  describe '#each()' do
-
-    before do
-      @cmdopt = Benry::CmdOpt.new
-      @cmdopt.add(:help   , "-h, --help"   , "help message")
-      @cmdopt.add(:version, "    --version", "print version")
-    end
-
-    it "[!knh44] yields each option item." do
-      items = []
-      @cmdopt.each {|x| items << x }
-      ok {items.length} == 2
-      ok {items[0]}.is_a?(Benry::CmdOpt::SchemaItem)
-      ok {items[1]}.is_a?(Benry::CmdOpt::SchemaItem)
-      ok {items[0].key} == :help
-      ok {items[1].key} == :version
-      keys = @cmdopt.each.collect {|x| x.key }
-      ok {keys} == [:help, :version]
-    end
-
-  end
-
-
   describe '#parse()' do
 
     before do

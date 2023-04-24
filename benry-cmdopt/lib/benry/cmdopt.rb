@@ -71,11 +71,6 @@ module Benry
       end
       alias each_option_help each_option_and_desc   # for backward compatibility
 
-      def each(&block)   # :nodoc:
-        #; [!knh44] yields each option item.
-        @schema.each(&block)
-      end
-
       def parse(argv, parse_all=true, &error_handler)
         #; [!7gc2m] parses command options.
         #; [!no4xu] returns option values as dict.
