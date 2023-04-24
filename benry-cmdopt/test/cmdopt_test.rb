@@ -396,6 +396,16 @@ END
       ok {actual} == expected
     end
 
+    it "[!a4qe4] option should not be hidden if description is empty string." do
+      sc = Benry::CmdOpt::Schema.new
+      sc.add(:debug , "-D", nil)       # hidden
+      sc.add(:_trace, "-T", "trace")   # hidden
+      sc.add(:what  , "-W", "")        # NOT hidden!
+      ok {sc.option_help()} == <<END
+  -W             : 
+END
+    end
+
   end
 
 

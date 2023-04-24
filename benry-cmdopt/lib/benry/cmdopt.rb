@@ -198,7 +198,8 @@ module Benry
         sb = []
         width = nil
         each_option_and_desc(all: all) do |opt, desc|
-          desc ||= "\n"
+          #; [!a4qe4] option should not be hidden if description is empty string.
+          desc = "\n" if desc.nil? || desc.empty?
           #; [!848rm] supports multi-lines help message.
           is_first = true
           desc.each_line do |line|
