@@ -139,6 +139,7 @@ module Benry
         #; [!jtp7z] raises SchemaError when key is nil and no long option.
         key || long  or
           raise error("add(#{key.inspect}, #{optdef.inspect}): long option required when option key (1st arg) not specified.")
+        #; [!rpl98] when long option is 'foo-bar' then key name is ':foo_bar'.
         key ||= long.gsub(/-/, '_').intern
         #; [!97sn0] raises SchemaError when ',' is missing between short and long options.
         if long.nil? && param =~ /\A--/

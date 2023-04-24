@@ -174,6 +174,13 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {pr}.raise?(Benry::CmdOpt::SchemaError, msg)
     end
 
+    it "[!rpl98] when long option is 'foo-bar' then key name is ':foo_bar'." do
+      sc = @schema
+      sc.add(nil, "--foo-bar", nil)
+      items = sc.instance_eval { @items }
+      ok {items[0].key} == :foo_bar
+    end
+
     it "[!97sn0] raises SchemaError when ',' is missing between short and long options." do
       sc = @schema
       pr = proc { sc.add(:exec, '-x --exec=ARG', "exec") }
