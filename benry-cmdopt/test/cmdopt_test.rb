@@ -518,6 +518,17 @@ END
       ]
     end
 
+    it "[!03sux] returns enumerator object if block not given." do
+      ## when 'all: true'
+      xs = @schema.each_option_and_desc(all: true)
+      ok {xs}.is_a?(Enumerator)
+      ok {xs.collect {|x, _| x }} == ["-h, --help", "    --version", "-d, --debug", "-D, --DEBUG"]
+      ## when 'all: false'
+      xs = @schema.each_option_and_desc(all: false)
+      ok {xs}.is_a?(Enumerator)
+      ok {xs.collect {|x, _| x }} == ["-h, --help", "    --version"]
+    end
+
     it "[!zbxyv] returns self." do
       ret = @schema.each_option_and_desc { nil }
       ok {ret}.same? @schema
@@ -1284,6 +1295,17 @@ END
         ["-h, --help"   , "show help message"],
         ["    --version", "print version"],
       ]
+    end
+
+    it "[!wght5] returns enumerator object if block not given." do
+      ## when 'all: true'
+      xs = @cmdopt.each_option_and_desc(all: true)
+      ok {xs}.is_a?(Enumerator)
+      ok {xs.collect {|x, _| x }} == ["-h, --help", "    --version", "-D", "-T"]
+      ## when 'all: false'
+      xs = @cmdopt.each_option_and_desc(all: false)
+      ok {xs}.is_a?(Enumerator)
+      ok {xs.collect {|x, _| x }} == ["-h, --help", "    --version"]
     end
 
   end

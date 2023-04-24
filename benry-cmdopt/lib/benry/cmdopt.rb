@@ -62,6 +62,8 @@ module Benry
       alias to_s option_help
 
       def each_option_and_desc(all: false, &block)
+        #; [!wght5] returns enumerator object if block not given.
+        return @schema.each_option_and_desc(all: all) unless block_given?()
         #; [!bw9qx] yields each option definition string and help message.
         #; [!kunfw] yields all items (including hidden items) if `all: true` specified.
         @schema.each_option_and_desc(all: all, &block)
@@ -217,6 +219,8 @@ module Benry
       alias to_s option_help
 
       def each_option_and_desc(all: false, &block)
+        #; [!03sux] returns enumerator object if block not given.
+        return to_enum(:each_option_and_desc, all: all) unless block_given?()
         #; [!4b911] yields each optin definition str and help message.
         @items.each do |item|
           #; [!cl8zy] when 'all' flag is false, not yield hidden items.
