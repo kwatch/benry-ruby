@@ -224,9 +224,11 @@ module Benry
         #; [!03sux] returns enumerator object if block not given.
         return to_enum(:each_option_and_desc, all: all) unless block_given?()
         #; [!4b911] yields each optin definition str and help message.
-        #; [!cl8zy] when 'all' flag is false, not yield hidden items.
-        #; [!tc4bk] when 'all' flag is true, yields even hidden items.
-        each(all: all) {|item| yield item.optdef, item.desc }
+        @items.each do |item|
+          #; [!cl8zy] when 'all' flag is false, not yield hidden items.
+          #; [!tc4bk] when 'all' flag is true, yields even hidden items.
+          yield item.optdef, item.desc if all || ! item.hidden?
+        end
         #; [!zbxyv] returns self.
         self
       end
