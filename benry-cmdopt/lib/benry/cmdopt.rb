@@ -74,7 +74,6 @@ module Benry
       def each(all: false, &block)   # :nodoc:
         #; [!knh44] yields each option item.
         #; [!6g3jd] yields all items (including hidden items) if `all: true` specified.
-        #; [!56al3] returns enumerator object if block not given.
         @schema.each(all: all, &block)
       end
 
@@ -235,8 +234,6 @@ module Benry
       alias each_option_help each_option_and_desc   # for backward compatibility
 
       def each(all: false, &block)   # :nodoc:
-        #; [!tkfsd] returns enumerator object if block not given.
-        return to_enum(:each, all: all) unless block_given?()
         #; [!y4k1c] yields each option item.
         #; [!4qcly] yields all items (including hidden items) if 'all: true' specified.
         @items.each do |item|
