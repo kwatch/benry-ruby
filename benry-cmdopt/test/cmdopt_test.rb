@@ -550,8 +550,6 @@ END
       @schema = Benry::CmdOpt::Schema.new
       @schema.add(:help   , "-h, --help"   , "help message")
       @schema.add(:version, "    --version", "print version")
-      @schema.add(:debug  , "-D"           , nil)       # hidden option
-      @schema.add(:_trace , "-T"           , "trace")   # hidden option
     end
 
     it "[!y4k1c] yields each option item." do
@@ -564,21 +562,6 @@ END
       ok {items[1].key} == :version
       keys = @schema.each.collect {|x| x.key }
       ok {keys} == [:help, :version]
-    end
-
-    it "[!4qcly] yields all items (including hidden items) if 'all: true' specified." do
-      ## when `all: true`
-      items = []
-      @schema.each(all: true) {|x| items << x }
-      ok {items.length} == 4
-      ok {items}.all? {|x| x.is_a?(Benry::CmdOpt::SchemaItem) }
-      ok {items.collect(&:key)} == [:help, :version, :debug, :_trace]
-      ## when `all: false`
-      items = []
-      @schema.each(all: false) {|x| items << x }
-      ok {items.length} == 2
-      ok {items}.all? {|x| x.is_a?(Benry::CmdOpt::SchemaItem) }
-      ok {items.collect(&:key)} == [:help, :version]
     end
 
   end
@@ -1317,8 +1300,6 @@ END
       @cmdopt = Benry::CmdOpt.new
       @cmdopt.add(:help   , "-h, --help"   , "help message")
       @cmdopt.add(:version, "    --version", "print version")
-      @cmdopt.add(:debug  , "-D"           , nil)        # hidden option
-      @cmdopt.add(:_trace , "-T"           , "trace")    # hidden option
     end
 
     it "[!knh44] yields each option item." do
@@ -1331,21 +1312,6 @@ END
       ok {items[1].key} == :version
       keys = @cmdopt.each.collect {|x| x.key }
       ok {keys} == [:help, :version]
-    end
-
-    it "[!6g3jd] yields all items (including hidden items) if `all: true` specified." do
-      ## when `all: true`
-      items = []
-      @cmdopt.each(all: true) {|x| items << x }
-      ok {items.length} == 4
-      ok {items}.all? {|x| x.is_a?(Benry::CmdOpt::SchemaItem) }
-      ok {items.collect(&:key)} == [:help, :version, :debug, :_trace]
-      ## when `all: false`
-      items = []
-      @cmdopt.each(all: false) {|x| items << x }
-      ok {items.length} == 2
-      ok {items}.all? {|x| x.is_a?(Benry::CmdOpt::SchemaItem) }
-      ok {items.collect(&:key)} == [:help, :version]
     end
 
   end

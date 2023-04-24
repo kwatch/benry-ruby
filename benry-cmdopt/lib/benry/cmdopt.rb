@@ -71,10 +71,9 @@ module Benry
       end
       alias each_option_help each_option_and_desc   # for backward compatibility
 
-      def each(all: false, &block)   # :nodoc:
+      def each(&block)   # :nodoc:
         #; [!knh44] yields each option item.
-        #; [!6g3jd] yields all items (including hidden items) if `all: true` specified.
-        @schema.each(all: all, &block)
+        @schema.each(&block)
       end
 
       def parse(argv, parse_all=true, &error_handler)
@@ -233,13 +232,9 @@ module Benry
       end
       alias each_option_help each_option_and_desc   # for backward compatibility
 
-      def each(all: false, &block)   # :nodoc:
+      def each(&block)   # :nodoc:
         #; [!y4k1c] yields each option item.
-        #; [!4qcly] yields all items (including hidden items) if 'all: true' specified.
-        @items.each do |item|
-          yield item if all || ! item.hidden?
-        end
-        nil
+        @items.each(&block)
       end
 
       def find_short_option(short)
