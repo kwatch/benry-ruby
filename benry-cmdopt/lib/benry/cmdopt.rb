@@ -237,6 +237,13 @@ module Benry
         @items.each(&block)
       end
 
+      def empty?(all: true)
+        #; [!um8am] returns false if any item exists, else returns true.
+        #; [!icvm1] ignores hidden items if 'all: false' kwarg specified.
+        @items.each {|item| return false if all || ! item.hidden? }
+        return true
+      end
+
       def find_short_option(short)
         #; [!b4js1] returns option definition matched to short name.
         #; [!s4d1y] returns nil when nothing found.

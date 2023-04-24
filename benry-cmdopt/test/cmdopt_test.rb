@@ -577,6 +577,27 @@ END
   end
 
 
+  describe '#empty?()' do
+
+    it "[!um8am] returns false if any item exists, else returns true." do
+      schema = Benry::CmdOpt::Schema.new
+      ok {schema.empty?()} == true
+      schema.add(:help   , "-h, --help"   , "help message")
+      ok {schema.empty?()} == false
+    end
+
+    it "[!icvm1] ignores hidden items if 'all: false' kwarg specified." do
+      schema = Benry::CmdOpt::Schema.new
+      schema.add(:debug , "-D", nil)
+      schema.add(:_trace, "-T", "trace")
+      ok {schema.empty?()} == false
+      ok {schema.empty?(all: true)} == false
+      ok {schema.empty?(all: false)} == true
+    end
+
+  end
+
+
   describe '#find_short_option()' do
 
     before do
