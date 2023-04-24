@@ -198,20 +198,17 @@ module Benry
         sb = []
         width = nil
         each_option_and_desc(all: all) do |opt, desc|
-          if desc
-            #; [!848rm] supports multi-lines help message.
-            is_first = true
-            desc.each_line do |line|
-              if is_first
-                sb << format % [opt, line.chomp] << "\n"
-                is_first = false
-              else
-                width ||= (format % ['', '']).length
-                sb << (' ' * width) << line.chomp << "\n"
-              end
+          desc ||= "\n"
+          #; [!848rm] supports multi-lines help message.
+          is_first = true
+          desc.each_line do |line|
+            if is_first
+              sb << format % [opt, line.chomp] << "\n"
+              is_first = false
+            else
+              width ||= (format % ['', '']).length
+              sb << (' ' * width) << line.chomp << "\n"
             end
-          else
-            sb << format % [opt, ''] << "\n"
           end
         end
         return sb.join()
