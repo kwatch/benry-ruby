@@ -37,6 +37,8 @@ module Benry
         @schema = SCHEMA_CLASS.new
       end
 
+      attr_reader :schema
+
       def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
