@@ -1184,34 +1184,6 @@ end
 class Benry::CmdOpt::Facade::Test < MiniTest::Test
 
 
-  describe "#dup()" do
-
-    before do
-      @cmdopt = Benry::CmdOpt.new
-      @cmdopt.add(:help   , "-h" , "help message")
-    end
-
-    it "[!mf5cz] copies self object." do
-      this  = @cmdopt
-      other = @cmdopt.dup()
-      #
-      this_schema  = this.instance_variable_get(:@schema)
-      other_schema = other.instance_variable_get(:@schema)
-      ok {this_schema} != nil
-      ok {other_schema} != nil
-      ok {other_schema.object_id} != this_schema.object_id
-      #
-      this.add(:silent, "-s", "silent")
-      other.add(:quiet, "-q", "quiet")
-      ok {this.option_help()}  == ("  -h       : help message\n" +
-                                   "  -s       : silent\n")
-      ok {other.option_help()} == ("  -h       : help message\n" +
-                                   "  -q       : quiet\n")
-    end
-
-  end
-
-
   describe '#add()' do
 
     it "[!vmb3r] defines command option." do

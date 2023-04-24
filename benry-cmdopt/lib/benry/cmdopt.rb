@@ -37,13 +37,6 @@ module Benry
         @schema = SCHEMA_CLASS.new
       end
 
-      def dup()
-        #; [!mf5cz] copies self object.
-        other = self.class.new
-        other.instance_variable_set(:@schema, @schema.dup)
-        return other
-      end
-
       def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
