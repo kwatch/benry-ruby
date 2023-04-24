@@ -563,6 +563,13 @@ END
       ok {items.collect(&:key)} == [:help, :version]
     end
 
+    it "[!tkfsd] returns enumerator object if block not given." do
+      ## when `all: true`
+      ok {@schema.each(all: true).collect(&:key)} == [:help, :version, :debug, :_trace]
+      ## when `all: false`
+      ok {@schema.each(all: false).collect(&:key)} == [:help, :version]
+    end
+
   end
 
 
@@ -1301,6 +1308,13 @@ END
       ok {items.length} == 2
       ok {items}.all? {|x| x.is_a?(Benry::CmdOpt::SchemaItem) }
       ok {items.collect(&:key)} == [:help, :version]
+    end
+
+    it "[!56al3] returns enumerator object if block not given." do
+      ## when `all: true`
+      ok {@cmdopt.each(all: true).collect(&:key)} == [:help, :version, :debug, :_trace]
+      ## when `all: false`
+      ok {@cmdopt.each(all: false).collect(&:key)} == [:help, :version]
     end
 
   end
