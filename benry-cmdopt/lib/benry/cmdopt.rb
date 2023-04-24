@@ -61,9 +61,10 @@ module Benry
       #; [!s61vo] '#to_s' is an alias to '#option_help()'.
       alias to_s option_help
 
-      def each_option_and_desc(&block)
+      def each_option_and_desc(all: false, &block)
         #; [!bw9qx] yields each option definition string and help message.
-        @schema.each_option_and_desc(&block)
+        #; [!kunfw] yields all items (including hidden items) if `all: true` specified.
+        @schema.each_option_and_desc(all: all, &block)
         self
       end
       alias each_option_help each_option_and_desc   # for backward compatibility

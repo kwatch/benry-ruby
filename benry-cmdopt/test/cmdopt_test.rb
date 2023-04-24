@@ -1254,19 +1254,35 @@ END
       @cmdopt = Benry::CmdOpt.new
       @cmdopt.add(:help   , "-h, --help"        , "show help message")
       @cmdopt.add(:version, "    --version"     , "print version")
-      @cmdopt.add(:file   , "-f, --file=<FILE>" , "filename")
+      @cmdopt.add(:debug  , "-D"                , nil)       # hidden option
+      @cmdopt.add(:_trace , "-T"                , "trace")   # hidden option
     end
 
     it "[!bw9qx] yields each option definition string and help message." do
-      cmdopt = @cmdopt
       pairs = []
-      cmdopt.each_option_and_desc do |opt, desc|
-        pairs << [opt, desc]
-      end
+      @cmdopt.each_option_and_desc {|opt, desc| pairs << [opt, desc] }
       ok {pairs} == [
-        ["-h, --help", "show help message"],
+        ["-h, --help"   , "show help message"],
         ["    --version", "print version"],
-        ["-f, --file=<FILE>", "filename"],
+      ]
+    end
+
+    it "[!kunfw] yields all items (including hidden items) if `all: true` specified." do
+      ## when 'all: true'
+      pairs = []
+      @cmdopt.each_option_and_desc(all: true) {|opt, desc| pairs << [opt, desc] }
+      ok {pairs} == [
+        ["-h, --help"   , "show help message"],
+        ["    --version", "print version"],
+        ["-D"           , nil],
+        ["-T"           , "trace"],
+      ]
+      ## when 'all: false'
+      pairs = []
+      @cmdopt.each_option_and_desc(all: false) {|opt, desc| pairs << [opt, desc] }
+      ok {pairs} == [
+        ["-h, --help"   , "show help message"],
+        ["    --version", "print version"],
       ]
     end
 
