@@ -442,16 +442,16 @@ module Benry::CmdApp
     FORMAT_HEADING    = "\e[34m%s\e[0m"            # blue
     #FORMAT_HEADING   = "\e[33;4m%s\e[0m"          # yellow, underline
 
-    def initialize(desc: nil, name: nil, command: nil, version: nil,
+    def initialize(desc, version=nil, name: nil, command: nil,
                    detail: nil, postamble: nil,
                    default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
       @desc         = desc           # ex: "sample command"
+      @version      = version        # ex: "1.0.0"
       @name         = name    || ::File.basename($0)   # ex: "MyApp"
       @command      = command || ::File.basename($0)   # ex: "myapp"
-      @version      = version        # ex: "1.0.0"
       @detail       = detail         # ex: "See https://example.org/doc/ for details.\n"
       @postamble    = postamble      # ex: "(Tips: `cmd -h <action>` prints help of action.)\n"
       @default_action = default_action  # default action name
@@ -464,7 +464,7 @@ module Benry::CmdApp
       @format_heading = format_heading || FORMAT_HEADING
     end
 
-    attr_accessor :desc, :name, :command, :version, :detail, :postamble
+    attr_accessor :desc, :version, :name, :command, :detail, :postamble
     attr_accessor :default_action, :default_help
     attr_accessor :option_help, :option_all, :option_debug
     attr_accessor :format_help, :format_usage, :format_heading

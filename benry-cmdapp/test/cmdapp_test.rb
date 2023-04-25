@@ -482,7 +482,7 @@ END
     it "[!f33dt] headers are colored only when $stdout is a TTY." do
       schema = new_schema()
       metadata = new_metadata(schema)
-      config = Benry::CmdApp::Config.new()
+      config = Benry::CmdApp::Config.new("test")
       bkup = $cmdapp_config
       $cmdapp_config = nil
       begin
@@ -1041,7 +1041,7 @@ describe Benry::CmdApp::Config do
   describe '#initialize()' do
 
     it "[!uve4e] sets command name automatically if not provided." do
-      c = Benry::CmdApp::Config.new()
+      c = Benry::CmdApp::Config.new("test")
       ok {c.command} != nil
       ok {c.command} == File.basename($0)
     end
@@ -1083,7 +1083,7 @@ describe Benry::CmdApp::Application do
   end
 
   before do
-    @config = Benry::CmdApp::Config.new(desc: "test app", version: "1.0.0",
+    @config = Benry::CmdApp::Config.new("test app", "1.0.0",
                                         name: "TestApp", command: "testapp",
                                         option_all: true, option_debug: true)
     @app = Benry::CmdApp::Application.new(@config)
@@ -1099,7 +1099,7 @@ describe Benry::CmdApp::Application do
   describe '#initialize()' do
 
     it "[!jkprn] creates option schema object according to config." do
-      c = Benry::CmdApp::Config.new(version: "1.0.0", option_debug: true)
+      c = Benry::CmdApp::Config.new("test", "1.0.0", option_debug: true)
       app = Benry::CmdApp::Application.new(c)
       schema = app.instance_variable_get('@schema')
       ok {schema}.is_a?(Benry::CmdOpt::Schema)
@@ -1349,8 +1349,8 @@ END
 
   describe '#do_create_global_option_schema()' do
 
-    def new_gschema(**kwargs)
-      config = Benry::CmdApp::Config.new(**kwargs)
+    def new_gschema(desc="", version=nil, **kwargs)
+      config = Benry::CmdApp::Config.new(desc, version, **kwargs)
       app = Benry::CmdApp::Application.new(config)
       x = app.instance_eval { do_create_global_option_schema(config) }
       return x
@@ -1371,10 +1371,10 @@ END
     end
 
     it "[!mbtw0] adds '-V, --version' option if 'config.version' is set." do
-      x = new_gschema(version: "0.0.0")
+      x = new_gschema("", "0.0.0")
       ok {x.find_long_option("version")} != nil
       ok {x.find_short_option("V")}      != nil
-      x = new_gschema(version: nil)
+      x = new_gschema("", nil)
       ok {x.find_long_option("version")} == nil
       ok {x.find_short_option("V")}      == nil
     end
