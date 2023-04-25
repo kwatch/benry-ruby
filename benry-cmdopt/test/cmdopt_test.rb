@@ -338,6 +338,54 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
 
     end
 
+    describe "[!a0g52] when 'value:' specified..." do
+
+      it "[!435t6] raises SchemaError when 'value:' is specified on argument-required option." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag=<on|off>", "flag", type: TrueClass, value: true)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "true: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
+      end
+
+      it "[!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag[=<on|off>]", "flag", type: TrueClass, value: 0)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "0: value should be true or false when `type: TrueClass` specified.")
+      end
+
+      it "[!c6i2o] raises SchemaError when value is not a kind of type." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag[=<on|off>]", "flag", type: Integer, value: false)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "type mismatched between `type: Integer` and `value: false`.")
+      end
+
+      it "[!lnhp6] not raise error when type is not specified." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag[=<on|off>]", "flag", value: false)
+        }
+        ok {pr}.NOT.raise?(Exception)
+      end
+
+      it "[!6xb8o] value should be included in enum values." do
+        sc = @schema
+        pr = proc {
+          sc.add(:lang, "--lang[=<en|fr|it>]", "language", enum: ["en", "fr", "it"], value: "ja")
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "ja: value should be included in enum values, but not.")
+      end
+
+    end
+
   end
 
 
@@ -1228,13 +1276,13 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
 
     it "[!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args." do
       cmdopt = Benry::CmdOpt.new()
-      cmdopt.add(:key, "--optdef=xx", "desc", Integer, /\A\d+\z/, [2,4,8], value: "VALUE")
+      cmdopt.add(:key, "--optdef[=xx]", "desc", Integer, /\A\d+\z/, [2,4,8], value: 4)
       items = cmdopt.instance_eval { @schema.instance_variable_get('@items') }
       item = items.first
       ok {item.type} == Integer
       ok {item.rexp} == /\A\d+\z/
       ok {item.enum} == [2,4,8]
-      ok {item.value} == "VALUE"
+      ok {item.value} == 4
     end
 
   end

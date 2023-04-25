@@ -167,6 +167,28 @@ module Benry
               raise error("#{enum.inspect}: enum element value should be instance of #{type.class.name}, but #{x.inspect} is not.")
           end if type
         end
+        #; [!a0g52] when 'value:' specified...
+        if value != nil
+          #; [!435t6] raises SchemaError when 'value:' is specified on argument-required option.
+          ! required  or
+            raise error("#{value.inspect}: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
+          if type == TrueClass
+            #; [!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false.
+            value == true || value == false  or
+              raise error("#{value.inspect}: value should be true or false when `type: TrueClass` specified.")
+          elsif type
+            #; [!c6i2o] raises SchemaError when value is not a kind of type.
+            value.is_a?(type)  or
+              raise error("type mismatched between `type: #{type.name}` and `value: #{value.inspect}`.")
+          else
+            #; [!lnhp6] not raise error when type is not specified.
+          end
+          if enum
+            #; [!6xb8o] value should be included in enum values.
+            enum.include?(value)  or
+              raise error("#{value}: value should be included in enum values, but not.")
+          end
+        end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, desc, short, long, param, required,
                    type: type, rexp: rexp, enum: enum, value: value, &callback)
