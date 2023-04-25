@@ -1041,9 +1041,9 @@ describe Benry::CmdApp::Config do
   describe '#initialize()' do
 
     it "[!uve4e] sets command name automatically if not provided." do
-      c = Benry::CmdApp::Config.new("test")
-      ok {c.command} != nil
-      ok {c.command} == File.basename($0)
+      config = Benry::CmdApp::Config.new("test")
+      ok {config.app_command} != nil
+      ok {config.app_command} == File.basename($0)
     end
 
   end
@@ -1084,7 +1084,7 @@ describe Benry::CmdApp::Application do
 
   before do
     @config = Benry::CmdApp::Config.new("test app", "1.0.0",
-                                        name: "TestApp", command: "testapp",
+                                        app_name: "TestApp", app_command: "testapp",
                                         option_all: true, option_debug: true)
     @app = Benry::CmdApp::Application.new(@config)
   end
@@ -1370,7 +1370,7 @@ END
       ok {x.find_short_option("h")}   == nil
     end
 
-    it "[!mbtw0] adds '-V, --version' option if 'config.version' is set." do
+    it "[!mbtw0] adds '-V, --version' option if 'config.app_version' is set." do
       x = new_gschema("", "0.0.0")
       ok {x.find_long_option("version")} != nil
       ok {x.find_short_option("V")}      != nil
@@ -1730,29 +1730,29 @@ END
     end
 
     it "[!34y8e] includes application name specified by config." do
-      @config.name = "MyGreatApp"
+      @config.app_name = "MyGreatApp"
       msg = without_tty { @app.help_message() }
       ok {msg} =~ /^MyGreatApp \(1\.0\.0\) -- test app$/
     end
 
     it "[!744lx] includes application description specified by config." do
-      @config.desc = "my great app"
+      @config.app_desc = "my great app"
       msg = without_tty { @app.help_message() }
       ok {msg} =~ /^TestApp \(1\.0\.0\) -- my great app$/
     end
 
     it "[!d1xz4] includes version number if specified by config." do
-      @config.version = "1.2.3"
+      @config.app_version = "1.2.3"
       msg = without_tty { @app.help_message() }
       ok {msg} =~ /^TestApp \(1\.2\.3\) -- test app$/
       #
-      @config.version = nil
+      @config.app_version = nil
       msg = without_tty { @app.help_message() }
       ok {msg} =~ /^TestApp -- test app$/
     end
 
     it "[!775jb] includes detail text if specified by config." do
-      @config.detail = "See https://example.com/doc.html"
+      @config.app_detail = "See https://example.com/doc.html"
       msg = without_tty { @app.help_message() }
       ok {msg}.start_with?(<<END)
 TestApp (1.0.0) -- test app
@@ -1762,7 +1762,7 @@ See https://example.com/doc.html
 Usage:
 END
       #
-      @config.detail = nil
+      @config.app_detail = nil
       msg = without_tty { @app.help_message() }
       ok {msg}.start_with?(<<END)
 TestApp (1.0.0) -- test app
@@ -1772,8 +1772,8 @@ END
     end
 
     it "[!o176w] includes command name specified by config." do
-      @config.name = "GreatCommand"
-      @config.command = "greatcmd"
+      @config.app_name = "GreatCommand"
+      @config.app_command = "greatcmd"
       msg = without_tty { @app.help_message() }
       ok {msg}.start_with?(<<END)
 GreatCommand (1.0.0) -- test app
@@ -1791,7 +1791,7 @@ END
     end
 
     it "[!proa4] includes description of global options." do
-      @config.version = "1.0.0"
+      @config.app_version = "1.0.0"
       @config.option_debug = true
       app = Benry::CmdApp::Application.new(@config)
       msg = without_tty { app.help_message() }
@@ -1805,7 +1805,7 @@ Options:
 Actions:
 END
       #
-      @config.version = nil
+      @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       msg = without_tty { app.help_message() }
@@ -1819,7 +1819,7 @@ END
     end
 
     it "[!icmd7] colorizes options when stdout is a tty." do
-      @config.version = nil
+      @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       msg = with_tty { app.help_message() }
@@ -1833,7 +1833,7 @@ END
     end
 
     it "[!in3kf] ignores private (hidden) options." do
-      @config.version = nil
+      @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
@@ -1850,7 +1850,7 @@ END
     end
 
     it "[!ywarr] not ignore private (hidden) options if 'all' flag is true." do
-      @config.version = nil
+      @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
@@ -1870,7 +1870,7 @@ END
     it "[!bm71g] ignores 'Options:' section if no options exist." do
       @config.option_help = false
       @config.option_all = false
-      @config.version = nil
+      @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
@@ -1937,7 +1937,7 @@ END
     end
 
     it "[!i04hh] includes postamble text if specified by config." do
-      @config.postamble = "Home:\n  https://example.com/\n"
+      @config.app_postamble = "Home:\n  https://example.com/\n"
       msg = without_tty { @app.help_message() }
       ok {msg}.end_with?(<<"END")
 Home:
@@ -1946,7 +1946,7 @@ END
     end
 
     it "[!d35wp] deletes escape sequence from postamble when stdout is not a tty." do
-      @config.postamble = "\e[34mHome:\e[0m\n  https://example.com/"
+      @config.app_postamble = "\e[34mHome:\e[0m\n  https://example.com/"
       msg = without_tty { @app.help_message() }
       ok {msg}.end_with?(<<"END")
 Home:
@@ -1960,7 +1960,7 @@ END
     end
 
     it "[!ckagw] adds '\n' at end of preamble text if it doesn't end with '\n'." do
-      @config.postamble = "\e[34mEND\e[0m"
+      @config.app_postamble = "\e[34mEND\e[0m"
       msg = without_tty { @app.help_message() }
       ok {msg}.end_with?("\nEND\n")
       msg = with_tty { @app.help_message() }

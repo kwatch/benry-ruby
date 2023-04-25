@@ -442,18 +442,18 @@ module Benry::CmdApp
     FORMAT_HEADING    = "\e[34m%s\e[0m"            # blue
     #FORMAT_HEADING   = "\e[33;4m%s\e[0m"          # yellow, underline
 
-    def initialize(desc, version=nil, name: nil, command: nil,
-                   detail: nil, postamble: nil,
+    def initialize(app_desc, app_version=nil, app_name: nil, app_command: nil,
+                   app_detail: nil, app_postamble: nil,
                    default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
-      @desc         = desc           # ex: "sample application"
-      @version      = version        # ex: "1.0.0"
-      @name         = name    || ::File.basename($0)   # ex: "MyApp"
-      @command      = command || ::File.basename($0)   # ex: "myapp"
-      @detail       = detail         # ex: "See https://.... for details.\n"
-      @postamble    = postamble      # ex: "(Tips: ....)\n"
+      @app_desc       = app_desc           # ex: "sample application"
+      @app_version    = app_version        # ex: "1.0.0"
+      @app_name       = app_name    || ::File.basename($0)   # ex: "MyApp"
+      @app_command    = app_command || ::File.basename($0)   # ex: "myapp"
+      @app_detail     = app_detail         # ex: "See https://.... for details.\n"
+      @app_postamble  = app_postamble      # ex: "(Tips: ....)\n"
       @default_action = default_action  # default action name
       @default_help = default_help   # print help message if action not specified
       @option_help  = option_help    # '-h' and '--help' are disabled when false
@@ -464,7 +464,7 @@ module Benry::CmdApp
       @format_heading = format_heading || FORMAT_HEADING
     end
 
-    attr_accessor :desc, :version, :name, :command, :detail, :postamble
+    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail, :app_postamble
     attr_accessor :default_action, :default_help
     attr_accessor :option_help, :option_all, :option_debug
     attr_accessor :format_help, :format_usage, :format_heading
@@ -542,8 +542,8 @@ module Benry::CmdApp
       schema = SCHEMA_CLASS.new
       #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
       schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
-      #; [!mbtw0] adds '-V, --version' option if 'config.version' is set.
-      schema.add(:version, "-V, --version", "print version")      if c.version
+      #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
+      schema.add(:version, "-V, --version", "print version")      if c.app_version
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
       schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
@@ -573,7 +573,7 @@ module Benry::CmdApp
       end
       #; [!fslsy] prints version if '-V' or '--version' specified.
       if global_opts[:version]
-        puts @config.version
+        puts @config.app_version
         return true
       end
       #
@@ -609,7 +609,7 @@ module Benry::CmdApp
         return nil
       #; [!hs589] error when action nor default action not specified.
       else
-        raise CommandError.new("#{c.command}: action name required (run `#{c.command} -h` for details).")
+        raise CommandError.new("#{c.app_command}: action name required (run `#{c.app_command} -h` for details).")
       end
       return metadata
     end
@@ -647,7 +647,7 @@ module Benry::CmdApp
         #; [!cgxkb] error if action for help option not found.
         metadata = Index.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: action not found.")
-        puts metadata.help_message(@config.command, all)
+        puts metadata.help_message(@config.app_command, all)
       #; [!nv0x3] prints help message of command if action name not provided.
       else
         puts help_message(all)
@@ -687,13 +687,13 @@ module Benry::CmdApp
       #; [!d1xz4] includes version number if specified by config.
       c = @config
       sb = []
-      v = c.version ? " (#{c.version})" : ""
-      sb << "#{c.name}#{v} -- #{c.desc}\n"
+      v = c.app_version ? " (#{c.app_version})" : ""
+      sb << "#{c.app_name}#{v} -- #{c.app_desc}\n"
       #; [!775jb] includes detail text if specified by config.
-      if c.detail
+      if c.app_detail
         sb << "\n"
-        sb << c.detail
-        sb << "\n" unless c.detail.end_with?("\n")
+        sb << c.app_detail
+        sb << "\n" unless c.app_detail.end_with?("\n")
       end
       return sb.join()
     end
@@ -706,7 +706,7 @@ module Benry::CmdApp
       #; [!o176w] includes command name specified by config.
       sb = []
       sb << "#{_heading('Usage:')}\n"
-      sb << (format % [c.command, "[<options>] [<action> [<arguments>...]]"]) << "\n"
+      sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"]) << "\n"
       return sb.join()
     end
 
@@ -750,7 +750,7 @@ module Benry::CmdApp
 
     def _help_message__postamble(all=false)
       #; [!i04hh] includes postamble text if specified by config.
-      s = @config.postamble
+      s = @config.app_postamble
       if s
         #; [!d35wp] deletes escape sequence from postamble when stdout is not a tty.
         s = Util.del_escape_seq(s) unless Util.colorize?
