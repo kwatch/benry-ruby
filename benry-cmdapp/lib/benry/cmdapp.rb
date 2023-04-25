@@ -547,7 +547,7 @@ module Benry::CmdApp
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
       schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
-      schema.add(:debug  , "-D, --debug"  , "set $DEBUG to true") if c.option_debug
+      schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
       return schema
     end
 
@@ -560,7 +560,7 @@ module Benry::CmdApp
 
     def do_handle_global_options(args)
       global_opts = @global_options
-      #; [!ywl1a] sets $DEBUG to true if '-D' or '--debug' specified.
+      #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
       if global_opts[:debug]
         do_toggle_switch(:debug, global_opts[:debug])
         ## not return
@@ -583,7 +583,7 @@ module Benry::CmdApp
     def do_toggle_switch(key, val)
       case key
       when :debug
-        $DEBUG = true
+        $DEBUG_MODE = true     # or $DEBUG = true
       else
         # do nothing
       end

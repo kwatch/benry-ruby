@@ -1110,7 +1110,7 @@ describe Benry::CmdApp::Application do
       ok {schema.option_help()} == <<END
   -h, --help     : print help message (of action if action specified)
   -V, --version  : print version
-  -D, --debug    : set $DEBUG to true
+  -D, --debug    : set $DEBUG_MODE to true
 END
     end
 
@@ -1175,7 +1175,7 @@ END
       #
       @action.("test debug option")
       def test_debugopt(help: false)
-        puts "$DEBUG=#{$DEBUG}"
+        puts "$DEBUG_MODE=#{$DEBUG_MODE}"
       end
       #
       @action.("arity test")
@@ -1413,15 +1413,15 @@ END
 
   describe '#do_handle_global_options()' do
 
-    it "[!ywl1a] sets $DEBUG to true if '-D' or '--debug' specified." do
-      bkup = $DEBUG
-      $DEBUG = false
+    it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
+      bkup = $DEBUG_MODE
+      $DEBUG_MODE = false
       begin
         sout, serr = capture_io { @app.run("--debug", "test-debugopt") }
         ok {serr} == ""
-        ok {sout} == "$DEBUG=true\n"
+        ok {sout} == "$DEBUG_MODE=true\n"
       ensure
-        $DEBUG = bkup
+        $DEBUG_MODE = bkup
       end
     end
 
@@ -1436,7 +1436,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG to true
+  -D, --debug        : set $DEBUG_MODE to true
 
 Actions:
 END
@@ -1606,7 +1606,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG to true
+  -D, --debug        : set $DEBUG_MODE to true
 
 Actions:
 END
@@ -1698,7 +1698,7 @@ TestApp (1.0.0) -- test app
   \e[1m-h, --help        \e[0m : print help message (of action if action specified)
   \e[1m-V, --version     \e[0m : print version
   \e[1m-a, --all         \e[0m : list all actions/options including private (hidden) ones
-  \e[1m-D, --debug       \e[0m : set $DEBUG to true
+  \e[1m-D, --debug       \e[0m : set $DEBUG_MODE to true
 
 \e[34mActions:\e[0m
   \e[1mya:ya             \e[0m : greeting #2
@@ -1716,7 +1716,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG to true
+  -D, --debug        : set $DEBUG_MODE to true
 
 Actions:
   ya:ya              : greeting #2
@@ -1800,7 +1800,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG to true
+  -D, --debug        : set $DEBUG_MODE to true
 
 Actions:
 END
