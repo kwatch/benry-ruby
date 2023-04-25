@@ -139,7 +139,9 @@ module Benry
           PARAM_TYPES.key?(type)  or
             raise error("#{type.inspect}: unregistered type.")
           #; [!s2aaj] raises SchemaError when option has no params but type specified.
-          param  or
+          #; [!sz8x2] not raise error when no params but value specified.
+          #; [!70ogf] not raise error when no params but TrueClass specified.
+          param || value != nil || type == TrueClass  or
             raise error("#{type.inspect}: type specified in spite of option has no params.")
         end
         #

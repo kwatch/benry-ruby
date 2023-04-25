@@ -263,6 +263,22 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
                      "Integer: type specified in spite of option has no params.")
     end
 
+    it "[!sz8x2] not raise error when no params but value specified." do
+      sc = @schema
+      pr = proc {
+        sc.add(:indent, "-i, --indent", "indent width", type: Integer, value: 0)
+      }
+      ok {pr}.NOT.raise?(Exception)
+    end
+
+    it "[!70ogf] not raise error when no params but TrueClass specified." do
+      sc = @schema
+      pr = proc {
+        sc.add(:indent, "-i, --indent", "indent width", type: TrueClass)
+      }
+      ok {pr}.NOT.raise?(Exception)
+    end
+
     it "[!bi2fh] raises SchemaError when pattern is not a regexp." do
       sc = @schema
       pr = proc {
