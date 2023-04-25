@@ -445,7 +445,7 @@ module Benry::CmdApp
     def initialize(desc: nil, name: nil, command: nil, version: nil,
                    detail: nil, postamble: nil,
                    default: nil, default_help: false,
-                   help_option: true, all_option: false, debug_option: false,
+                   option_help: true, option_all: false, option_debug: false,
                    help_format: nil, usage_format: nil, heading_format: nil)
       #; [!uve4e] sets command name automatically if not provided.
       @desc         = desc           # ex: "sample command"
@@ -456,9 +456,9 @@ module Benry::CmdApp
       @postamble    = postamble      # ex: "(Tips: `cmd -h <action>` prints help of action.)\n"
       @default      = default        # default action name
       @default_help = default_help   # print help message if action not specified
-      @help_option  = help_option    # '-h' and '--help' are disabled when false
-      @all_option   = all_option     # '-a' and '--all' are disabled when false
-      @debug_option = debug_option   # '-D' and '--debug' are enable when true
+      @option_help  = option_help    # '-h' and '--help' are disabled when false
+      @option_all   = option_all     # '-a' and '--all' are disabled when false
+      @option_debug = option_debug   # '-D' and '--debug' are enable when true
       @help_format  = help_format  || HELP_FORMAT
       @usage_format = usage_format || USAGE_FORMAT
       @heading_format = heading_format || HEADING_FORMAT
@@ -466,7 +466,7 @@ module Benry::CmdApp
 
     attr_accessor :desc, :name, :command, :version, :detail, :postamble
     attr_accessor :default, :default_help
-    attr_accessor :help_option, :all_option, :debug_option
+    attr_accessor :option_help, :option_all, :option_debug
     attr_accessor :help_format, :usage_format, :heading_format
 
   end
@@ -540,14 +540,14 @@ module Benry::CmdApp
       c = config
       #; [!enuxy] creates schema object.
       schema = SCHEMA_CLASS.new
-      #; [!tq2ol] adds '-h, --help' option if 'config.help_option' is set.
-      schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.help_option
+      #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
+      schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
       #; [!mbtw0] adds '-V, --version' option if 'config.version' is set.
       schema.add(:version, "-V, --version", "print version")      if c.version
-      #; [!f5do6] adds '-a, --all' option if 'config.all_option' is set.
-      schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.all_option
-      #; [!29wfy] adds '-D, --debug' option if 'config.debug_option' is set.
-      schema.add(:debug  , "-D, --debug"  , "set $DEBUG to true") if c.debug_option
+      #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
+      schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
+      #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
+      schema.add(:debug  , "-D, --debug"  , "set $DEBUG to true") if c.option_debug
       return schema
     end
 

@@ -1085,7 +1085,7 @@ describe Benry::CmdApp::Application do
   before do
     @config = Benry::CmdApp::Config.new(desc: "test app", version: "1.0.0",
                                         name: "TestApp", command: "testapp",
-                                        all_option: true, debug_option: true)
+                                        option_all: true, option_debug: true)
     @app = Benry::CmdApp::Application.new(@config)
   end
 
@@ -1099,7 +1099,7 @@ describe Benry::CmdApp::Application do
   describe '#initialize()' do
 
     it "[!jkprn] creates option schema object according to config." do
-      c = Benry::CmdApp::Config.new(version: "1.0.0", debug_option: true)
+      c = Benry::CmdApp::Config.new(version: "1.0.0", option_debug: true)
       app = Benry::CmdApp::Application.new(c)
       schema = app.instance_variable_get('@schema')
       ok {schema}.is_a?(Benry::CmdOpt::Schema)
@@ -1361,11 +1361,11 @@ END
       ok {x}.is_a?(Benry::CmdOpt::Schema)
     end
 
-    it "[!tq2ol] adds '-h, --help' option if 'config.help_option' is set." do
-      x = new_gschema(help_option: true)
+    it "[!tq2ol] adds '-h, --help' option if 'config.option_help' is set." do
+      x = new_gschema(option_help: true)
       ok {x.find_long_option("help")} != nil
       ok {x.find_short_option("h")}   != nil
-      x = new_gschema(help_option: false)
+      x = new_gschema(option_help: false)
       ok {x.find_long_option("help")} == nil
       ok {x.find_short_option("h")}   == nil
     end
@@ -1379,20 +1379,20 @@ END
       ok {x.find_short_option("V")}      == nil
     end
 
-    it "[!f5do6] adds '-a, --all' option if 'config.all_option' is set." do
-      x = new_gschema(all_option: true)
+    it "[!f5do6] adds '-a, --all' option if 'config.option_all' is set." do
+      x = new_gschema(option_all: true)
       ok {x.find_long_option("all")} != nil
       ok {x.find_short_option("a")}  != nil
-      x = new_gschema(all_option: false)
+      x = new_gschema(option_all: false)
       ok {x.find_long_option("all")} == nil
       ok {x.find_short_option("a")}  == nil
     end
 
-    it "[!29wfy] adds '-D, --debug' option if 'config.debug_option' is set." do
-      x = new_gschema(debug_option: true)
+    it "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
+      x = new_gschema(option_debug: true)
       ok {x.find_long_option("debug")} != nil
       ok {x.find_short_option("D")}    != nil
-      x = new_gschema(debug_option: false)
+      x = new_gschema(option_debug: false)
       ok {x.find_long_option("debug")} == nil
       ok {x.find_short_option("D")}    == nil
     end
@@ -1792,7 +1792,7 @@ END
 
     it "[!proa4] includes description of global options." do
       @config.version = "1.0.0"
-      @config.debug_option = true
+      @config.option_debug = true
       app = Benry::CmdApp::Application.new(@config)
       msg = without_tty { app.help_message() }
       ok {msg}.include?(<<END)
@@ -1806,7 +1806,7 @@ Actions:
 END
       #
       @config.version = nil
-      @config.debug_option = false
+      @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       msg = without_tty { app.help_message() }
       ok {msg}.include?(<<END)
@@ -1820,7 +1820,7 @@ END
 
     it "[!icmd7] colorizes options when stdout is a tty." do
       @config.version = nil
-      @config.debug_option = false
+      @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       msg = with_tty { app.help_message() }
       ok {msg}.include?(<<"END")
@@ -1834,7 +1834,7 @@ END
 
     it "[!in3kf] ignores private (hidden) options." do
       @config.version = nil
-      @config.debug_option = false
+      @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
       schema.add(:_log, "-L", "private option")
@@ -1851,7 +1851,7 @@ END
 
     it "[!ywarr] not ignore private (hidden) options if 'all' flag is true." do
       @config.version = nil
-      @config.debug_option = false
+      @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
       schema.add(:_log, "-L", "private option")
@@ -1868,10 +1868,10 @@ END
     end
 
     it "[!bm71g] ignores 'Options:' section if no options exist." do
-      @config.help_option = false
-      @config.all_option = false
+      @config.option_help = false
+      @config.option_all = false
       @config.version = nil
-      @config.debug_option = false
+      @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
       schema.add(:_log, "-L", "private option")
