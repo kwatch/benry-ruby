@@ -562,7 +562,7 @@ module Benry::CmdApp
       global_opts = @global_options
       #; [!ywl1a] sets $DEBUG to true if '-D' or '--debug' specified.
       if global_opts[:debug]
-        do_enable_debug_mode()
+        do_toggle_switch(:debug, global_opts[:debug])
         ## not return
       end
       #; [!xvj6s] prints help message if '-h' or '--help' specified.
@@ -580,8 +580,13 @@ module Benry::CmdApp
       return false
     end
 
-    def do_enable_debug_mode()
-      $DEBUG = true
+    def do_toggle_switch(key, val)
+      case key
+      when :debug
+        $DEBUG = true
+      else
+        # do nothing
+      end
     end
 
     def do_callback(args)
