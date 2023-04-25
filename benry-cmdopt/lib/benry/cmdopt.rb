@@ -133,7 +133,7 @@ module Benry
         if long.nil? && param =~ /\A--/
           raise error("add(#{key.inspect}, #{optdef.inspect}): missing ',' between short option and long options.")
         end
-        #
+        #; [!wy2iv] when 'type:' specified...
         if type
           #; [!7xmr5] raises SchemaError when type is not registered.
           PARAM_TYPES.key?(type)  or
@@ -144,7 +144,7 @@ module Benry
           param || value != nil || type == TrueClass  or
             raise error("#{type.inspect}: type specified in spite of option has no params.")
         end
-        #
+        #; [!6y8s2] when 'rexp:' specified...
         if rexp
           #; [!bi2fh] raises SchemaError when pattern is not a regexp.
           rexp.is_a?(Regexp)  or
@@ -153,7 +153,7 @@ module Benry
           param  or
             raise error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
         end
-        #
+        #; [!5nrvq] when 'enum:' specified...
         if enum
           #; [!melyd] raises SchmeaError when enum is not a Array nor Set.
           enum.is_a?(Array) || enum.is_a?(Set)  or
