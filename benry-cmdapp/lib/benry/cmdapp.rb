@@ -448,12 +448,12 @@ module Benry::CmdApp
                    option_help: true, option_all: false, option_debug: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
-      @desc         = desc           # ex: "sample command"
+      @desc         = desc           # ex: "sample application"
       @version      = version        # ex: "1.0.0"
       @name         = name    || ::File.basename($0)   # ex: "MyApp"
       @command      = command || ::File.basename($0)   # ex: "myapp"
-      @detail       = detail         # ex: "See https://example.org/doc/ for details.\n"
-      @postamble    = postamble      # ex: "(Tips: `cmd -h <action>` prints help of action.)\n"
+      @detail       = detail         # ex: "See https://.... for details.\n"
+      @postamble    = postamble      # ex: "(Tips: ....)\n"
       @default_action = default_action  # default action name
       @default_help = default_help   # print help message if action not specified
       @option_help  = option_help    # '-h' and '--help' are disabled when false
