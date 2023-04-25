@@ -1282,14 +1282,14 @@ END
     end
 
     it "[!v5k56] runs default action if action not specified." do
-      @config.default = "sayhello"
+      @config.default_action = "sayhello"
       sout, serr = capture_io { @app.run() }
       ok {serr} == ""
       ok {sout} == "Hello, world!\n"
     end
 
     it "[!o5i3w] reports error when default action not found." do
-      @config.default = "xxx-zzz"
+      @config.default_action = "xxx-zzz"
       pr = proc { @app.run() }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "xxx-zzz: unknown default action.")
@@ -1307,7 +1307,7 @@ END
     end
 
     it "[!n60o0] reports error when action nor default action not specified." do
-      @config.default = nil
+      @config.default_action = nil
       pr = proc { @app.run() }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "testapp: action name required (run `testapp -h` for details).")
@@ -1490,28 +1490,28 @@ END
     end
 
     it "[!gucj7] if no action specified, finds default action instead." do
-      @app.config.default = "sayhello"
+      @app.config.default_action = "sayhello"
       x = @app.__send__(:do_find_action, [])
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "sayhello"
     end
 
     it "[!388rs] error when default action not found." do
-      @app.config.default = "hiyo"
+      @app.config.default_action = "hiyo"
       pr = proc { @app.__send__(:do_find_action, []) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "hiyo: unknown default action.")
     end
 
     it "[!drmls] returns nil if no action specified but 'config.default_help' is set." do
-      @app.config.default = nil
+      @app.config.default_action = nil
       @app.config.default_help = true
       x = @app.__send__(:do_find_action, [])
       ok {x} == nil
     end
 
     it "[!hs589] error when action nor default action not specified." do
-      @app.config.default = nil
+      @app.config.default_action = nil
       @app.config.default_help = false
       pr = proc { @app.__send__(:do_find_action, []) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
@@ -1900,11 +1900,11 @@ END
     end
 
     it "[!df13s] includes default action name if specified by config." do
-      @config.default = nil
+      @config.default_action = nil
       msg = without_tty { @app.help_message() }
       ok {msg} =~ /^Actions:$/
       #
-      @config.default = "yo-yo"
+      @config.default_action = "yo-yo"
       msg = without_tty { @app.help_message() }
       ok {msg} =~ /^Actions: \(default: yo-yo\)$/
     end

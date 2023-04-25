@@ -444,7 +444,7 @@ module Benry::CmdApp
 
     def initialize(desc: nil, name: nil, command: nil, version: nil,
                    detail: nil, postamble: nil,
-                   default: nil, default_help: false,
+                   default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
@@ -454,7 +454,7 @@ module Benry::CmdApp
       @version      = version        # ex: "1.0.0"
       @detail       = detail         # ex: "See https://example.org/doc/ for details.\n"
       @postamble    = postamble      # ex: "(Tips: `cmd -h <action>` prints help of action.)\n"
-      @default      = default        # default action name
+      @default_action = default_action  # default action name
       @default_help = default_help   # print help message if action not specified
       @option_help  = option_help    # '-h' and '--help' are disabled when false
       @option_all   = option_all     # '-a' and '--all' are disabled when false
@@ -465,7 +465,7 @@ module Benry::CmdApp
     end
 
     attr_accessor :desc, :name, :command, :version, :detail, :postamble
-    attr_accessor :default, :default_help
+    attr_accessor :default_action, :default_help
     attr_accessor :option_help, :option_all, :option_debug
     attr_accessor :format_help, :format_usage, :format_heading
 
@@ -598,8 +598,8 @@ module Benry::CmdApp
         metadata = Index.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: unknown action.")
       #; [!gucj7] if no action specified, finds default action instead.
-      elsif c.default
-        action_name = c.default
+      elsif c.default_action
+        action_name = c.default_action
         #; [!388rs] error when default action not found.
         metadata = Index.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: unknown default action.")
@@ -736,7 +736,7 @@ module Benry::CmdApp
       sb = []
       sb << _heading("Actions:")
       #; [!df13s] includes default action name if specified by config.
-      sb << " (default: #{c.default})" if c.default
+      sb << " (default: #{c.default_action})" if c.default_action
       sb << "\n"
       #; [!jat15] includes action names ordered by name.
       include_alias = true
