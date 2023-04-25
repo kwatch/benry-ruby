@@ -203,7 +203,7 @@ module Benry::CmdApp
     def _help_message__usage(command, all=false)
       #; [!4xsc1] colorizes usage string when stdout is a tty.
       config = $cmdapp_config
-      format = config ? config.usage_format : Config::USAGE_FORMAT
+      format = config ? config.format_usage : Config::FORMAT_USAGE
       format = Util.del_escape_seq(format) unless Util.colorize?
       #; [!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist.
       #; [!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified.
@@ -217,7 +217,7 @@ module Benry::CmdApp
 
     def _help_message__options(command, all=false)
       config = $cmdapp_config
-      format = config ? config.help_format : Config::HELP_FORMAT
+      format = config ? config.format_help : Config::FORMAT_HELP
       #; [!45rha] options are colorized when stdout is a tty.
       format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
@@ -247,7 +247,7 @@ module Benry::CmdApp
     def _heading(str)
       #; [!f33dt] headers are colored only when $stdout is a TTY.
       config = $cmdapp_config
-      format = config ? config.heading_format : Config::HEADING_FORMAT
+      format = config ? config.format_heading : Config::FORMAT_HEADING
       format = Util.del_escape_seq(format) unless Util.colorize?
       return format % str
     end
@@ -428,25 +428,25 @@ module Benry::CmdApp
 
   class Config  #< BasicObject
 
-    #HELP_FORMAT      = "  %-18s : %s"
-    HELP_FORMAT       = "  \e[1m%-18s\e[0m : %s"   # bold
-    #HELP_FORMAT      = "  \e[34m%-18s\e[0m : %s"  # blue
+    #FORMAT_HELP      = "  %-18s : %s"
+    FORMAT_HELP       = "  \e[1m%-18s\e[0m : %s"   # bold
+    #FORMAT_HELP      = "  \e[34m%-18s\e[0m : %s"  # blue
 
-    #USAGE_FORMAT     = "  $ %s %s"
-    USAGE_FORMAT      = "  $ \e[1m%s\e[0m %s"      # bold
-    #USAGE_FORMAT     = "  $ \e[34m%s\e[0m %s"     # blue
+    #FORMAT_USAGE     = "  $ %s %s"
+    FORMAT_USAGE      = "  $ \e[1m%s\e[0m %s"      # bold
+    #FORMAT_USAGE     = "  $ \e[34m%s\e[0m %s"     # blue
 
-    #HEADING_FORMAT   = "%s"
-    #HEADING_FORMAT   = "\e[1m%s\e[0m"             # bold
-    #HEADING_FORMAT   = "\e[1;4m%s\e[0m"           # bold, underline
-    HEADING_FORMAT    = "\e[34m%s\e[0m"            # blue
-    #HEADING_FORMAT   = "\e[33;4m%s\e[0m"          # yellow, underline
+    #FORMAT_HEADING   = "%s"
+    #FORMAT_HEADING   = "\e[1m%s\e[0m"             # bold
+    #FORMAT_HEADING   = "\e[1;4m%s\e[0m"           # bold, underline
+    FORMAT_HEADING    = "\e[34m%s\e[0m"            # blue
+    #FORMAT_HEADING   = "\e[33;4m%s\e[0m"          # yellow, underline
 
     def initialize(desc: nil, name: nil, command: nil, version: nil,
                    detail: nil, postamble: nil,
                    default: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
-                   help_format: nil, usage_format: nil, heading_format: nil)
+                   format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
       @desc         = desc           # ex: "sample command"
       @name         = name    || ::File.basename($0)   # ex: "MyApp"
@@ -459,15 +459,15 @@ module Benry::CmdApp
       @option_help  = option_help    # '-h' and '--help' are disabled when false
       @option_all   = option_all     # '-a' and '--all' are disabled when false
       @option_debug = option_debug   # '-D' and '--debug' are enable when true
-      @help_format  = help_format  || HELP_FORMAT
-      @usage_format = usage_format || USAGE_FORMAT
-      @heading_format = heading_format || HEADING_FORMAT
+      @format_help  = format_help  || FORMAT_HELP
+      @format_usage = format_usage || FORMAT_USAGE
+      @format_heading = format_heading || FORMAT_HEADING
     end
 
     attr_accessor :desc, :name, :command, :version, :detail, :postamble
     attr_accessor :default, :default_help
     attr_accessor :option_help, :option_all, :option_debug
-    attr_accessor :help_format, :usage_format, :heading_format
+    attr_accessor :format_help, :format_usage, :format_heading
 
   end
 
@@ -668,7 +668,7 @@ module Benry::CmdApp
 
     def help_message(all=false, format=nil)
       #; [!rvpdb] returns help message.
-      format ||= @config.help_format
+      format ||= @config.format_help
       sb = []
       sb << _help_message__preamble(all)
       sb << _help_message__usage(all)
@@ -701,7 +701,7 @@ module Benry::CmdApp
     def _help_message__usage(all=false)
       #; [!f3qap] colorizes usage string when stdout is a tty.
       c = @config
-      format = c.usage_format
+      format = c.format_usage
       format = Util.del_escape_seq(format) unless Util.colorize?
       #; [!o176w] includes command name specified by config.
       sb = []
@@ -711,7 +711,7 @@ module Benry::CmdApp
     end
 
     def _help_message__options(all=false, format=nil)
-      format ||= @config.help_format
+      format ||= @config.format_help
       #; [!icmd7] colorizes options when stdout is a tty.
       format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
@@ -729,7 +729,7 @@ module Benry::CmdApp
 
     def _help_message__actions(all=false, format=nil)
       c = @config
-      format ||= c.help_format
+      format ||= c.format_help
       #; [!ysqpm] colorizes action names when stdout is a tty.
       format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
@@ -763,7 +763,7 @@ module Benry::CmdApp
     def _heading(str)
       #; [!r636j] heading title is colored when $stdout is a TTY.
       return str unless Util.colorize?
-      return @config.heading_format % str
+      return @config.format_heading % str
     end
 
   end
