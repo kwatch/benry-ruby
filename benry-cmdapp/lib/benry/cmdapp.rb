@@ -116,19 +116,23 @@ module Benry::CmdApp
 
   class ActionMetadata
 
-    def initialize(name, klass, method, desc, schema, hidden: false, detail: nil, postamble: nil)
+    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil)
       @name   = name
       @klass  = klass
       @method = method
       @schema = schema
-      @hidden = hidden
       @desc   = desc
       @detail = detail       if detail != nil
       @postamble = postamble if postamble != nil
     end
 
-    attr_reader :name, :method, :klass, :schema, :hidden, :desc, :detail, :postamble
-    alias hidden? hidden
+    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble
+
+    def hidden?()
+      #; [!kp10p] returns true when action method is private.
+      #; [!nw322] returns false when action method is not private.
+      return ! @klass.method_defined?(@method)
+    end
 
     def parse_options(argv, all=true)
       #; [!ab3j8] parses argv and returns options.
@@ -369,10 +373,8 @@ module Benry::CmdApp
       schema = @__option__ || SCHEMA_CLASS.new
       @__action__ = @__option__ = nil
       #; [!n8tem] creates ActionMetadata object if '@__action__' is not nil.
-      #; [!re3wb] creates hidden action if method is private.
       name = __method2action(method)
-      hidden = ! self.method_defined?(method)
-      metadata = ActionMetadata.new(name, self, method, desc, schema, hidden: hidden, **kws)
+      metadata = ActionMetadata.new(name, self, method, desc, schema, **kws)
       #; [!4pbsc] raises error if keyword param for option not exist in method.
       errmsg = metadata.validate_method_params()
       errmsg == nil  or

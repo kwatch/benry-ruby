@@ -277,6 +277,36 @@ describe Benry::CmdApp::ActionMetadata do
   end
 
 
+  describe '#hidden?()' do
+
+    class HiddenTestAction < Benry::CmdApp::Action
+      @action.("public")
+      def pphidden1(); puts __method__; end
+      #
+      @action.("private")
+      def pphidden2(); puts __method__; end
+      private :pphidden2
+      #
+      private
+      @action.("private")
+      def pphidden3(); puts __method__; end
+    end
+
+    it "[!kp10p] returns true when action method is private." do
+      ameta = Benry::CmdApp::Index::ACTIONS["pphidden3"]
+      ok {ameta.hidden?} == true
+      ameta = Benry::CmdApp::Index::ACTIONS["pphidden2"]
+      ok {ameta.hidden?} == true
+    end
+
+    it "[!nw322] returns false when action method is not private." do
+      ameta = Benry::CmdApp::Index::ACTIONS["pphidden1"]
+      ok {ameta.hidden?} == false
+    end
+
+  end
+
+
   describe '#parse_options()' do
 
     it "[!ab3j8] parses argv and returns options." do
@@ -852,23 +882,6 @@ describe Benry::CmdApp::Action do
       ok {x.hidden?}   == false
       ok {x.detail}    == "XXX"
       ok {x.postamble} == "YYY"
-    end
-
-    it "[!re3wb] creates hidden action if method is private." do
-      new_names, x = defined_actions() do
-        class Added4Test < Benry::CmdApp::Action
-          prefix "added4"
-          private   # !!!!
-          @action.("test", detail: "XXX", postamble: "YYY")
-          def hello4(); end
-        end
-      end
-      ok {new_names} == ["added4:hello4"]
-      ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
-      ok {x.name}      == "added4:hello4"
-      ok {x.klass}     == Added4Test
-      ok {x.method}    == :hello4
-      ok {x.hidden?}   == true   # !!!!
     end
 
     it "[!4pbsc] raises error if keyword param for option not exist in method." do
