@@ -449,21 +449,21 @@ module Benry::CmdApp
                    option_verbose: false, option_quiet: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
-      @app_desc       = app_desc           # ex: "sample application"
-      @app_version    = app_version        # ex: "1.0.0"
+      @app_desc       = app_desc        # ex: "sample application"
+      @app_version    = app_version     # ex: "1.0.0"
       @app_name       = app_name    || ::File.basename($0)   # ex: "MyApp"
       @app_command    = app_command || ::File.basename($0)   # ex: "myapp"
-      @app_detail     = app_detail         # ex: "See https://.... for details.\n"
-      @app_postamble  = app_postamble      # ex: "(Tips: ....)\n"
+      @app_detail     = app_detail      # ex: "See https://.... for details.\n"
+      @app_postamble  = app_postamble   # ex: "(Tips: ....)\n"
       @default_action = default_action  # default action name
-      @default_help = default_help   # print help message if action not specified
-      @option_help  = option_help    # '-h' and '--help' are disabled when false
-      @option_all   = option_all     # '-a' and '--all' are disabled when false
-      @option_verbose = option_verbose # '-v' and '--verbose' are enabled when true
-      @option_quiet   = option_quiet   # '-q' and '--quiet' are enabled when true
-      @option_debug = option_debug   # '-D' and '--debug' are enable when true
-      @format_help  = format_help  || FORMAT_HELP
-      @format_usage = format_usage || FORMAT_USAGE
+      @default_help   = default_help    # print help message if action not specified
+      @option_help    = option_help     # '-h' and '--help' are enabled when true
+      @option_all     = option_all      # '-a' and '--all' are enable when true
+      @option_verbose = option_verbose  # '-v' and '--verbose' are enabled when true
+      @option_quiet   = option_quiet    # '-q' and '--quiet' are enabled when true
+      @option_debug   = option_debug    # '-D' and '--debug' are enable when true
+      @format_help    = format_help    || FORMAT_HELP
+      @format_usage   = format_usage   || FORMAT_USAGE
       @format_heading = format_heading || FORMAT_HEADING
     end
 
