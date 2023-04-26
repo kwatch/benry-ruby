@@ -77,6 +77,18 @@ describe Benry::CmdApp::Util do
 
   describe '.colorize?()' do
 
+    it "[!801y1] returns $COLOR_MODE value if it is not nil." do
+      bkup = $COLOR_MODE
+      begin
+        $COLOR_MODE = true
+        ok {Benry::CmdApp::Util.colorize?()} == true
+        $COLOR_MODE = false
+        ok {Benry::CmdApp::Util.colorize?()} == false
+      ensure
+        $COLOR_MODE = bkup
+      end
+    end
+
     it "[!0harg] returns true if stdout is a tty." do
       capture_io {
         def $stdout.tty?; true; end
@@ -1126,6 +1138,13 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("q")}  == nil
     end
 
+    it "[!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set." do
+      x = new_gschema(option_color: true)
+      ok {x.find_long_option("color")} != nil
+      x = new_gschema(option_quiet: false)
+      ok {x.find_long_option("color")} == nil
+    end
+
     it "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
       x = new_gschema(option_debug: true)
       ok {x.find_long_option("debug")} != nil
@@ -1523,6 +1542,7 @@ END
         option_all:     true,
         option_verbose: true,
         option_quiet:   true,
+        option_color:   true,
         option_debug:   true,
       }
       config = Benry::CmdApp::Config.new("test app", "1.0.0", **kws)
@@ -1560,6 +1580,21 @@ END
       end
     end
 
+    it "[!2zvf9] sets $COLOR_MODE to true/false according to '--color' option." do
+      app = new_app()
+      bkup = $COLOR_MODE
+      begin
+        [["--color", true], ["--color=on", true], ["--color=off", false]].each do |opt, val|
+          $COLOR_MODE = !val
+          sout, serr = capture_io { app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$COLOR_MODE} == val
+        end
+      ensure
+        $COLOR_MODE = bkup
+      end
+    end
+
     it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
       app = new_app()
       bkup = $DEBUG_MODE
@@ -1588,6 +1623,7 @@ Options:
   -a, --all          : list all actions/options including private (hidden) ones
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
+  --color[=<on|off>] : enable/disable color
   -D, --debug        : set $DEBUG_MODE to true
 
 Actions:
@@ -1974,6 +2010,28 @@ END
     it "[!rvpdb] returns help message." do
       msg = without_tty { @builder.build_help_message() }
       ok {msg} == expected_mono
+    end
+
+    def _with_color_mode(val, &b)
+      bkup = $COLOR_MODE
+      $COLOR_MODE = val
+      yield
+    ensure
+      $COLOR_MODE = bkup
+    end
+
+    it "[!hvenw] builds colorized help message if `--color=on` specified." do
+      _with_color_mode(true) do
+        msg = without_tty { @builder.build_help_message() }
+        ok {msg} == expected_color
+      end
+    end
+
+    it "[!s62iq] builds mono-color help message if `--color=off` specified." do
+      _with_color_mode(false) do
+        msg = with_tty { @builder.build_help_message() }
+        ok {msg} == expected_mono
+      end
     end
 
     it "[!34y8e] includes application name specified by config." do

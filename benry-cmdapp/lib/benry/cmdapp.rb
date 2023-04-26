@@ -63,6 +63,8 @@ module Benry::CmdApp
     end
 
     def colorize?()
+      #; [!801y1] returns $COLOR_MODE value if it is not nil.
+      return $COLOR_MODE if $COLOR_MODE != nil
       #; [!0harg] returns true if stdout is a tty.
       #; [!u1j1x] returns false if stdout is not a tty.
       return $stdout.tty?
@@ -448,7 +450,7 @@ module Benry::CmdApp
                    app_detail: nil, app_postamble: nil,
                    default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
-                   option_verbose: false, option_quiet: false,
+                   option_verbose: false, option_quiet: false, option_color: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
       @app_desc       = app_desc        # ex: "sample application"
@@ -463,6 +465,7 @@ module Benry::CmdApp
       @option_all     = option_all      # '-a' and '--all' are enable when true
       @option_verbose = option_verbose  # '-v' and '--verbose' are enabled when true
       @option_quiet   = option_quiet    # '-q' and '--quiet' are enabled when true
+      @option_color   = option_color    # '--color[=<on|off>]' enabled when true
       @option_debug   = option_debug    # '-D' and '--debug' are enable when true
       @format_help    = format_help    || FORMAT_HELP
       @format_usage   = format_usage   || FORMAT_USAGE
@@ -471,7 +474,8 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail, :app_postamble
     attr_accessor :default_action, :default_help
-    attr_accessor :option_help, :option_all, :option_verbose, :option_quiet, :option_debug
+    attr_accessor :option_help, :option_all, :option_debug
+    attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :format_help, :format_usage, :format_heading
 
   end
@@ -493,6 +497,8 @@ module Benry::CmdApp
       schema.add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
       #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.
       schema.add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
+      #; [!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set.
+      schema.add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass) if c.option_color
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
       schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
       return schema
@@ -589,8 +595,9 @@ module Benry::CmdApp
       global_opts = @global_options
       #; [!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified.
       #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
+      #; [!2zvf9] sets $COLOR_MODE to true/false according to '--color' option.
       #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
-      [:verbose, :quiet, :debug].each do |key|
+      [:verbose, :quiet, :color, :debug].each do |key|
         do_set_global_switch(key, global_opts[key])
         ## not return
       end
@@ -614,6 +621,7 @@ module Benry::CmdApp
       case key
       when :quiet   ; $QUIET_MODE   = val
       when :verbose ; $VERBOSE_MODE = val
+      when :color   ; $COLOR_MODE   = val
       when :debug   ; $DEBUG_MODE   = val   # or $DEBUG = val
       else          ; # do nothing
       end
@@ -722,6 +730,8 @@ module Benry::CmdApp
 
     def build_help_message(all=false, format=nil)
       #; [!rvpdb] returns help message.
+      #; [!hvenw] builds colorized help message if `--color=on` specified.
+      #; [!s62iq] builds mono-color help message if `--color=off` specified.
       format ||= @config.format_help
       sb = []
       sb << build_preamble(all)
