@@ -446,6 +446,7 @@ module Benry::CmdApp
                    app_detail: nil, app_postamble: nil,
                    default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
+                   option_verbose: false, option_quiet: false,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
       @app_desc       = app_desc           # ex: "sample application"
@@ -458,6 +459,8 @@ module Benry::CmdApp
       @default_help = default_help   # print help message if action not specified
       @option_help  = option_help    # '-h' and '--help' are disabled when false
       @option_all   = option_all     # '-a' and '--all' are disabled when false
+      @option_verbose = option_verbose # '-v' and '--verbose' are enabled when true
+      @option_quiet   = option_quiet   # '-q' and '--quiet' are enabled when true
       @option_debug = option_debug   # '-D' and '--debug' are enable when true
       @format_help  = format_help  || FORMAT_HELP
       @format_usage = format_usage || FORMAT_USAGE
@@ -466,7 +469,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail, :app_postamble
     attr_accessor :default_action, :default_help
-    attr_accessor :option_help, :option_all, :option_debug
+    attr_accessor :option_help, :option_all, :option_verbose, :option_quiet, :option_debug
     attr_accessor :format_help, :format_usage, :format_heading
 
   end
@@ -546,6 +549,10 @@ module Benry::CmdApp
       schema.add(:version, "-V, --version", "print version")      if c.app_version
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
       schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
+      #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
+      schema.add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
+      #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.
+      schema.add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
       schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
       return schema
@@ -560,9 +567,11 @@ module Benry::CmdApp
 
     def do_handle_global_options(args)
       global_opts = @global_options
+      #; [!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified.
+      #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
       #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
-      if global_opts[:debug]
-        do_toggle_switch(:debug, global_opts[:debug])
+      [:verbose, :quiet, :debug].each do |key|
+        do_set_global_switch(key, global_opts[key])
         ## not return
       end
       #; [!xvj6s] prints help message if '-h' or '--help' specified.
@@ -580,12 +589,13 @@ module Benry::CmdApp
       return false
     end
 
-    def do_toggle_switch(key, val)
+    def do_set_global_switch(key, val)
+      #; [!go9kk] sets global variable according to key.
       case key
-      when :debug
-        $DEBUG_MODE = true     # or $DEBUG = true
-      else
-        # do nothing
+      when :quiet   ; $QUIET_MODE   = val
+      when :verbose ; $VERBOSE_MODE = val
+      when :debug   ; $DEBUG_MODE   = val   # or $DEBUG = val
+      else          ; # do nothing
       end
     end
 

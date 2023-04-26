@@ -1388,6 +1388,24 @@ END
       ok {x.find_short_option("a")}  == nil
     end
 
+    it "[!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set." do
+      x = new_gschema(option_verbose: true)
+      ok {x.find_long_option("verbose")} != nil
+      ok {x.find_short_option("v")}  != nil
+      x = new_gschema(option_verbose: false)
+      ok {x.find_long_option("verbose")} == nil
+      ok {x.find_short_option("v")}  == nil
+    end
+
+    it "[!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set." do
+      x = new_gschema(option_quiet: true)
+      ok {x.find_long_option("quiet")} != nil
+      ok {x.find_short_option("q")}  != nil
+      x = new_gschema(option_quiet: false)
+      ok {x.find_long_option("quiet")} == nil
+      ok {x.find_short_option("q")}  == nil
+    end
+
     it "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
       x = new_gschema(option_debug: true)
       ok {x.find_long_option("debug")} != nil
@@ -1413,13 +1431,60 @@ END
 
   describe '#do_handle_global_options()' do
 
-    it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
-      bkup = $DEBUG_MODE
-      $DEBUG_MODE = false
+    def new_app()
+      kws = {
+        app_name:       "TestApp",
+        app_command:    "testapp",
+        option_all:     true,
+        option_verbose: true,
+        option_quiet:   true,
+        option_debug:   true,
+      }
+      config = Benry::CmdApp::Config.new("test app", "1.0.0", **kws)
+      return Benry::CmdApp::Application.new(config)
+    end
+
+
+    it "[!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified." do
+      app = new_app()
+      bkup = $VERBOSE_MODE
       begin
-        sout, serr = capture_io { @app.run("--debug", "test-debugopt") }
-        ok {serr} == ""
-        ok {sout} == "$DEBUG_MODE=true\n"
+        ["-v", "--verbose"].each do |opt|
+          $VERBOSE_MODE = false
+          sout, serr = capture_io { app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$VERBOSE_MODE} == true
+        end
+      ensure
+        $VERBOSE_MODE = bkup
+      end
+    end
+
+    it "[!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified." do
+      app = new_app()
+      bkup = $QUIET_MODE
+      begin
+        ["-q", "--quiet"].each do |opt|
+          $QUIET_MODE = false
+          sout, serr = capture_io { app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$QUIET_MODE} == true
+        end
+      ensure
+        $QUIET_MODE = bkup
+      end
+    end
+
+    it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
+      app = new_app()
+      bkup = $DEBUG_MODE
+      begin
+        ["-D", "--debug"].each do |opt|
+          $DEBUG_MODE = false
+          sout, serr = capture_io { app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {sout} == "$DEBUG_MODE=true\n"
+        end
       ensure
         $DEBUG_MODE = bkup
       end
@@ -1436,12 +1501,15 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
   -D, --debug        : set $DEBUG_MODE to true
 
 Actions:
 END
+      app = new_app()
       ["-h", "--help"].each do |opt|
-        sout, serr = capture_io { @app.run(opt) }
+        sout, serr = capture_io { app.run(opt) }
         ok {serr} == ""
         ok {sout}.start_with?(expected)
       end
@@ -1457,18 +1525,44 @@ Usage:
 Options:
   -l, --lang=<en|fr|it> : language
 END
+      app = new_app()
       ["-h", "--help"].each do |opt|
-        sout, serr = capture_io { @app.run(opt, "sayhello") }
+        sout, serr = capture_io { app.run(opt, "sayhello") }
         ok {serr} == ""
         ok {sout} == expected
       end
     end
 
     it "[!fslsy] prints version if '-V' or '--version' specified." do
+      app = new_app()
       ["-V", "--version"].each do |opt|
-        sout, serr = capture_io { @app.run(opt, "xxx") }
+        sout, serr = capture_io { app.run(opt, "xxx") }
         ok {serr} == ""
         ok {sout} == "1.0.0\n"
+      end
+    end
+
+  end
+
+
+  describe '#do_set_global_switch()' do
+
+    it "[!go9kk] sets global variable according to key." do
+      bkup = [$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]
+      begin
+        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = nil, nil, nil
+        @app.__send__(:do_set_global_switch, :verbose, true)
+        ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]} == [true, nil, nil]
+        #
+        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = nil, nil, nil
+        @app.__send__(:do_set_global_switch, :quiet, true)
+        ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]} == [nil, true, nil]
+        #
+        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = nil, nil, nil
+        @app.__send__(:do_set_global_switch, :debug, true)
+        ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]} == [nil, nil, true]
+      ensure
+        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = bkup
       end
     end
 
