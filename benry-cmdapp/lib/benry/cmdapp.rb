@@ -213,8 +213,10 @@ module Benry::CmdApp
       format = Util.del_escape_seq(format) unless Util.colorize?
       #; [!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist.
       #; [!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified.
+      #; [!ou3md] not add extra whiespace when no arguments of command.
       s = _build_argstr().strip()
       s = "[<options>] " + s unless Util.schema_empty?(@schema, all)
+      s = s.rstrip()
       sb = []
       sb << "#{_heading('Usage:')}\n"
       sb << (format % ["#{command} #{@name}", s]) << "\n"

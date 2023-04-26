@@ -262,6 +262,12 @@ describe Benry::CmdApp::ActionMetadata do
       puts "user=#{user.inspect}, users=#{users.inspect}"
     end
 
+    @action.("no arguments")
+    @option.(:lang, "-l, --lang=<en|fr|it>", "language")
+    def halo3(lang: "en")
+      puts "lang=#{lang}"
+    end
+
     def args1(aa, bb, xx: nil); end                   # required arg
     def args2(aa, bb=nil, cc=nil, xx: nil); end       # optional arg
     def args3(aa, bb=nil, cc=nil, *dd, xx: nil); end  # variable arg
@@ -283,8 +289,8 @@ describe Benry::CmdApp::ActionMetadata do
     return schema
   end
 
-  def new_metadata(schema, **kwargs)
-    metadata = Benry::CmdApp::ActionMetadata.new("halo1", MetadataTestAction, :halo1, "greeting", schema, **kwargs)
+  def new_metadata(schema, meth=:halo1, **kwargs)
+    metadata = Benry::CmdApp::ActionMetadata.new(meth.to_s, MetadataTestAction, meth, "greeting", schema, **kwargs)
     return metadata
   end
 
@@ -456,6 +462,13 @@ END
       msg = without_tty { new_metadata(schema).help_message("testapp") }
       ok {msg} =~ /^  \$ testapp halo1 \[<user>\]\n/
       ok {msg} =~ /^Usage:\n  \$ testapp halo1 \[<user>\]$/
+    end
+
+    it "[!ou3md] not add extra whiespace when no arguments of command." do
+      schema = new_schema(lang: true)
+      msg = without_tty { new_metadata(schema, :halo3).help_message("testapp") }
+      ok {msg} =~ /^  \$ testapp halo3 \[<options>\]\n/
+      ok {msg} =~ /^Usage:\n  \$ testapp halo3 \[<options>\]$/
     end
 
     it "[!g2ju5] adds 'Options:' section." do
