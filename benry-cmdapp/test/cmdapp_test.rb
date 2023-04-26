@@ -1347,12 +1347,11 @@ END
   end
 
 
-  describe '#do_create_global_option_schema()' do
+  describe '.create_global_option_schema()' do
 
     def new_gschema(desc="", version=nil, **kwargs)
       config = Benry::CmdApp::Config.new(desc, version, **kwargs)
-      app = Benry::CmdApp::Application.new(config)
-      x = app.instance_eval { do_create_global_option_schema(config) }
+      x = Benry::CmdApp::Application.create_global_option_schema(config)
       return x
     end
 
@@ -1413,6 +1412,23 @@ END
       x = new_gschema(option_debug: false)
       ok {x.find_long_option("debug")} == nil
       ok {x.find_short_option("D")}    == nil
+    end
+
+  end
+
+
+  describe '#do_create_global_option_schema()' do
+
+    it "[!u3zdg] creates global option schema object according to config." do
+      config = Benry::CmdApp::Config.new("test app", "1.0.0",
+                                         option_all: true, option_quiet: true)
+      app = Benry::CmdApp::Application.new(config)
+      x = app.__send__(:do_create_global_option_schema, config)
+      ok {x}.is_a?(Benry::CmdOpt::Schema)
+      ok {x.find_long_option("all")}     != nil
+      ok {x.find_long_option("quiet")}   != nil
+      ok {x.find_long_option("verbose")} == nil
+      ok {x.find_long_option("debug")}   == nil
     end
 
   end

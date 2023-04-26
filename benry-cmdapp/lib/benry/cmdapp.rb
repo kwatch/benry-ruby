@@ -537,9 +537,7 @@ module Benry::CmdApp
       do_teardown(exc)
     end
 
-    protected
-
-    def do_create_global_option_schema(config)
+    def self.create_global_option_schema(config)
       c = config
       #; [!enuxy] creates schema object.
       schema = SCHEMA_CLASS.new
@@ -556,6 +554,13 @@ module Benry::CmdApp
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
       schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
       return schema
+    end
+
+    protected
+
+    def do_create_global_option_schema(config)
+      #; [!u3zdg] creates global option schema object according to config.
+      return self.class.create_global_option_schema(config)
     end
 
     def do_parse_global_options(args)
