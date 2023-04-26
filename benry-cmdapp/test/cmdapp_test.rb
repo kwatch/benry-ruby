@@ -225,7 +225,7 @@ describe Benry::CmdApp::Index do
 end
 
 
-describe Benry::CmdApp::ActionMetadata do
+module ActionMetadataTestingHelper
 
   def without_tty(&block)
     result = nil
@@ -242,6 +242,22 @@ describe Benry::CmdApp::ActionMetadata do
     return result
   end
 
+  def new_schema(lang: true)
+    schema = Benry::Cmdopt::Schema.new
+    schema.add(:lang, "-l, --lang=<en|fr|it>", "language") if lang
+    return schema
+  end
+
+  def new_metadata(schema, meth=:halo1, **kwargs)
+    metadata = Benry::CmdApp::ActionMetadata.new(meth.to_s, MetadataTestAction, meth, "greeting", schema, **kwargs)
+    return metadata
+  end
+
+end
+
+
+describe Benry::CmdApp::ActionMetadata do
+  include ActionMetadataTestingHelper
 
   class MetadataTestAction < Benry::CmdApp::Action
 
@@ -281,17 +297,6 @@ describe Benry::CmdApp::ActionMetadata do
     schema = Benry::Cmdopt::Schema.new
     schema.add(:lang, "-l, --lang=<en|fr|it>", "language")
     @metadata = Benry::CmdApp::ActionMetadata.new("halo1", MetadataTestAction, :halo1, "greeting", schema)
-  end
-
-  def new_schema(lang: true)
-    schema = Benry::Cmdopt::Schema.new
-    schema.add(:lang, "-l, --lang=<en|fr|it>", "language") if lang
-    return schema
-  end
-
-  def new_metadata(schema, meth=:halo1, **kwargs)
-    metadata = Benry::CmdApp::ActionMetadata.new(meth.to_s, MetadataTestAction, meth, "greeting", schema, **kwargs)
-    return metadata
   end
 
 
@@ -417,6 +422,18 @@ Options:
   -l, --lang=<en|fr|it> : language
 END
     end
+
+  end
+
+
+end
+
+
+describe Benry::CmdApp::ActionHelpMessageBuilder do
+  include ActionMetadataTestingHelper
+
+
+  describe '#build_help_message()' do
 
     it "[!pqoup] adds detail text into help if specified." do
       expected = <<END

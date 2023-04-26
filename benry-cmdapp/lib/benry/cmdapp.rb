@@ -184,29 +184,43 @@ module Benry::CmdApp
 
     def help_message(command, all=false)
       #; [!i7siu] returns help message of action.
+      builder = ACTION_HELP_MESSAGE_BUILDER_CLASS.new(self)
+      return builder.build_help_message(command, all)
+    end
+
+  end
+
+
+  class ActionHelpMessageBuilder
+
+    def initialize(action_metadata)
+      @am = action_metadata
+    end
+
+    def build_help_message(command, all=false)
       sb = []
-      sb << _help_message__preamble(command, all)
-      sb << _help_message__usage(command, all)
-      sb << _help_message__options(command, all)
-      sb << _help_message__postamble(command, all)
+      sb << build_preamble(command, all)
+      sb << build_usage(command, all)
+      sb << build_options(command, all)
+      sb << build_postamble(command, all)
       return sb.reject {|x| x.nil? || x.empty? }.join("\n")
     end
 
-    private
+    protected
 
-    def _help_message__preamble(command, all=false)
+    def build_preamble(command, all=false)
       #; [!pqoup] adds detail text into help if specified.
       sb = []
-      sb << "#{command} #{@name} -- #{@desc}\n"
-      if @detail
+      sb << "#{command} #{@am.name} -- #{@am.desc}\n"
+      if @am.detail
         sb << "\n"
-        sb << @detail
-        sb << "\n" unless @detail.end_with?("\n")
+        sb << @am.detail
+        sb << "\n" unless @am.detail.end_with?("\n")
       end
       return sb.join()
     end
 
-    def _help_message__usage(command, all=false)
+    def build_usage(command, all=false)
       #; [!4xsc1] colorizes usage string when stdout is a tty.
       config = $cmdapp_config
       format = config ? config.format_usage : Config::FORMAT_USAGE
@@ -214,16 +228,16 @@ module Benry::CmdApp
       #; [!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist.
       #; [!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified.
       #; [!ou3md] not add extra whiespace when no arguments of command.
-      s = _build_argstr().strip()
-      s = "[<options>] " + s unless Util.schema_empty?(@schema, all)
+      s = build_argstr().strip()
+      s = "[<options>] " + s unless Util.schema_empty?(@am.schema, all)
       s = s.rstrip()
       sb = []
-      sb << "#{_heading('Usage:')}\n"
-      sb << (format % ["#{command} #{@name}", s]) << "\n"
+      sb << "#{heading('Usage:')}\n"
+      sb << (format % ["#{command} #{@am.name}", s]) << "\n"
       return sb.join()
     end
 
-    def _help_message__options(command, all=false)
+    def build_options(command, all=false)
       config = $cmdapp_config
       format = config ? config.format_help : Config::FORMAT_HELP
       #; [!45rha] options are colorized when stdout is a tty.
@@ -233,16 +247,16 @@ module Benry::CmdApp
       #; [!pvu56] ignores 'Options:' section when no options exist.
       #; [!hghuj] ignores 'Options:' section when only hidden options speicified.
       sb = []
-      @schema.each do |item|
+      @am.schema.each do |item|
         sb << format % [item.optdef, item.desc] if all || ! item.hidden?
       end
       return nil if sb.empty?
-      return _heading('Options:') + "\n" + sb.join()
+      return heading('Options:') + "\n" + sb.join()
     end
 
-    def _help_message__postamble(command, all=false)
+    def build_postamble(command, all=false)
       #; [!0p2gt] adds postamble text if specified.
-      s = @postamble
+      s = @am.postamble
       if s
         #; [!37487] deletes escape sequence from postamble when stdout is not a tty.
         s = Util.del_escape_seq(s) unless Util.colorize?
@@ -252,7 +266,7 @@ module Benry::CmdApp
       return s
     end
 
-    def _heading(str)
+    def heading(str)
       #; [!f33dt] headers are colored only when $stdout is a TTY.
       config = $cmdapp_config
       format = config ? config.format_heading : Config::FORMAT_HEADING
@@ -260,14 +274,16 @@ module Benry::CmdApp
       return format % str
     end
 
-    def _build_argstr()
+    private
+
+    def build_argstr()
       #; [!x0z89] required arg is represented as '<arg>'.
       #; [!md7ly] optional arg is represented as '[<arg>]'.
       #; [!xugkz] variable args are represented as '[<arg>...]'.
-      method_obj = @klass.instance_method(@method)
+      method_obj = @am.klass.instance_method(@am.method)
       sb = []; n = 0
       method_obj.parameters.each do |kind, param|
-        arg = _param2arg(param)
+        arg = param2arg(param)
         case kind
         when :req     ; sb <<  " <#{arg}>"
         when :opt     ; sb << " [<#{arg}>"    ; n += 1
@@ -281,7 +297,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def _param2arg(param)
+    def param2arg(param)
       #; [!eou4h] converts arg name 'xx_or_yy_or_zz' into 'xx|yy|zz'.
       #; [!naoft] converts arg name '_xx_yy_zz' into '_xx-yy-zz'.
       s = param.to_s
@@ -291,6 +307,9 @@ module Benry::CmdApp
     end
 
   end
+
+
+  ACTION_HELP_MESSAGE_BUILDER_CLASS = ActionHelpMessageBuilder
 
 
   class Action
