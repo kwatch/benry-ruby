@@ -258,6 +258,12 @@ module Benry
         return true
       end
 
+      def get(key)
+        #; [!3wjfp] finds option item object by key.
+        #; [!0spll] returns nil if key not found.
+        return @items.find {|item| item.key == key }
+      end
+
       def find_short_option(short)
         #; [!b4js1] returns option definition matched to short name.
         #; [!s4d1y] returns nil when nothing found.

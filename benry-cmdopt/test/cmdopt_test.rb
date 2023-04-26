@@ -674,6 +674,28 @@ END
   end
 
 
+  describe '#get()' do
+
+    before do
+      @schema = Benry::CmdOpt::Schema.new
+      @schema.add(:help   , "-h, --help"   , "help message")
+      @schema.add(:version, "    --version", "print version")
+    end
+
+    it "[!3wjfp] finds option item object by key." do
+      item = @schema.get(:help)
+      ok {item.key} == :help
+      item = @schema.get(:version)
+      ok {item.key} == :version
+    end
+
+    it "[!0spll] returns nil if key not found." do
+      ok {@schema.get(:debug)} == nil
+    end
+
+  end
+
+
   describe '#find_short_option()' do
 
     before do
