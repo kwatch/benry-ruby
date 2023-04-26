@@ -501,14 +501,15 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, schema=nil)
+    def initialize(config, schema=nil, help_builder=nil)
       @config = config
       #; [!jkprn] creates option schema object according to config.
       @schema = schema || do_create_global_option_schema(config)
+      @help_builder = help_builder || do_create_help_message_builder(@config, @schema)
       @global_options = nil
     end
 
-    attr_reader :config, :schema
+    attr_reader :config, :schema, :help_builder
 
     def main(argv=ARGV)
       begin
@@ -566,6 +567,11 @@ module Benry::CmdApp
     def do_create_global_option_schema(config)
       #; [!u3zdg] creates global option schema object according to config.
       return GlobalOptionSchema.create(config)
+    end
+
+    def do_create_help_message_builder(config, schema)
+      #; [!pk5da] creates help message builder object.
+      return HelpMessageBuilder.new(config, schema)
     end
 
     def do_parse_global_options(args)
@@ -692,21 +698,36 @@ module Benry::CmdApp
     public
 
     def help_message(all=false, format=nil)
+      #; [!owg9y] returns help message.
+      return @help_builder.build_help_message(all, format)
+    end
+
+  end
+
+
+  class HelpMessageBuilder
+
+    def initialize(config, schema)
+      @config = config
+      @schema = schema
+    end
+
+    def build_help_message(all=false, format=nil)
       #; [!rvpdb] returns help message.
       format ||= @config.format_help
       sb = []
-      sb << _help_message__preamble(all)
-      sb << _help_message__usage(all)
-      sb << _help_message__options(all, format)
-      sb << _help_message__actions(all, format)
-      #sb << _help_message__aliases(all, format)
-      sb << _help_message__postamble(all)
+      sb << build_preamble(all)
+      sb << build_usage(all)
+      sb << build_options(all, format)
+      sb << build_actions(all, format)
+      #sb << build_aliases(all, format)
+      sb << build_postamble(all)
       return sb.reject {|s| s.nil? || s.empty? }.join("\n")
     end
 
-    private
+    protected
 
-    def _help_message__preamble(all=false)
+    def build_preamble(all=false)
       #; [!34y8e] includes application name specified by config.
       #; [!744lx] includes application description specified by config.
       #; [!d1xz4] includes version number if specified by config.
@@ -723,7 +744,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def _help_message__usage(all=false)
+    def build_usage(all=false)
       #; [!f3qap] colorizes usage string when stdout is a tty.
       c = @config
       format = c.format_usage
@@ -735,7 +756,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def _help_message__options(all=false, format=nil)
+    def build_options(all=false, format=nil)
       format ||= @config.format_help
       #; [!icmd7] colorizes options when stdout is a tty.
       format = Util.del_escape_seq(format) unless Util.colorize?
@@ -752,7 +773,7 @@ module Benry::CmdApp
       return _heading('Options:') + "\n" + sb.join()
     end
 
-    def _help_message__actions(all=false, format=nil)
+    def build_actions(all=false, format=nil)
       c = @config
       format ||= c.format_help
       #; [!ysqpm] colorizes action names when stdout is a tty.
@@ -773,7 +794,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def _help_message__postamble(all=false)
+    def build_postamble(all=false)
       #; [!i04hh] includes postamble text if specified by config.
       s = @config.app_postamble
       if s
