@@ -536,12 +536,12 @@ module Benry::CmdApp
       #; [!pyotc] sets global options to '@global_options'.
       @global_options = do_parse_global_options(args)
       #; [!5iczl] skip actions if help option or version option specified.
-      done = do_handle_global_options(args)
-      return if done
+      result = do_handle_global_options(args)
+      return if result == :SKIP
       #; [!w584g] calls callback method.
-      #; [!pbug7] skip actions if callback method returns truthy value.
-      done = do_callback(args)
-      return if done
+      #; [!pbug7] skip actions if callback method returns `:SKIP` value.
+      result = do_callback(args)
+      return if result == :SKIP
       #; [!agfdi] reports error when action not found.
       #; [!o5i3w] reports error when default action not found.
       #; [!n60o0] reports error when action nor default action not specified.
@@ -596,15 +596,15 @@ module Benry::CmdApp
       if global_opts[:help]
         #; [!lpoz7] prints help message of action if action name specified with help option.
         do_print_help_message(args)
-        return true
+        return :SKIP
       end
       #; [!fslsy] prints version if '-V' or '--version' specified.
       if global_opts[:version]
         puts @config.app_version
-        return true
+        return :SKIP
       end
       #
-      return false
+      return nil
     end
 
     def do_set_global_switch(key, val)
@@ -619,7 +619,7 @@ module Benry::CmdApp
 
     def do_callback(args)
       ## do nothing (intended to be overridden in subclass)
-      return false
+      return nil
     end
 
     def do_find_action(args)

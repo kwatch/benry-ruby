@@ -1304,7 +1304,7 @@ END
 
     it "[!5iczl] skip actions if help option or version option specified." do
       def @app.do_callback(args)
-        @_called = args
+        @_called = args.dup
       end
       capture_io { @app.run("--help") }
       ok {@app.instance_variable_get('@_called')} == nil
@@ -1316,21 +1316,21 @@ END
 
     it "[!w584g] calls callback method." do
       def @app.do_callback(args)
-        @_called = args
+        @_called = args.dup
       end
       ok {@app.instance_variable_get('@_called')} == nil
       capture_io { @app.run("sayhello") }
       ok {@app.instance_variable_get('@_called')} == ["sayhello"]
     end
 
-    it "[!pbug7] skip actions if callback method returns truthy value." do
+    it "[!pbug7] skip actions if callback method returns `:SKIP` value." do
       def @app.do_callback(args)
-        @_called1 = args
-        return true
+        @_called1 = args.dup
+        return :SKIP
       end
       def @app.do_find_action(args)
         super
-        @_called2 = args
+        @_called2 = args.dup
       end
       ok {@app.instance_variable_get('@_called1')} == nil
       ok {@app.instance_variable_get('@_called2')} == nil
@@ -1342,13 +1342,13 @@ END
     it "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
       def @app.do_find_action(args)
         ret = super
-        @_args1 = args
+        @_args1 = args.dup
         @_result = ret
         ret
       end
       def @app.do_run_action(metadata, args)
         ret = super
-        @_args2 = args
+        @_args2 = args.dup
         ret
       end
       @app.config.default_help = true
