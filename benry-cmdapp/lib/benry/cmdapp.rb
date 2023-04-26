@@ -753,7 +753,7 @@ module Benry::CmdApp
       format = Util.del_escape_seq(format) unless Util.colorize?
       #; [!o176w] includes command name specified by config.
       sb = []
-      sb << "#{_heading('Usage:')}\n"
+      sb << "#{heading('Usage:')}\n"
       sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"]) << "\n"
       return sb.join()
     end
@@ -772,7 +772,7 @@ module Benry::CmdApp
       #; [!bm71g] ignores 'Options:' section if no options exist.
       return nil if sb.empty?
       #; [!proa4] includes description of global options.
-      return _heading('Options:') + "\n" + sb.join()
+      return heading('Options:') + "\n" + sb.join()
     end
 
     def build_actions(all=false, format=nil)
@@ -782,7 +782,7 @@ module Benry::CmdApp
       format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
       sb = []
-      sb << _heading("Actions:")
+      sb << heading("Actions:")
       #; [!df13s] includes default action name if specified by config.
       sb << " (default: #{c.default_action})" if c.default_action
       sb << "\n"
@@ -808,7 +808,7 @@ module Benry::CmdApp
       return s
     end
 
-    def _heading(str)
+    def heading(str)
       #; [!r636j] heading title is colored when $stdout is a TTY.
       return str unless Util.colorize?
       return @config.format_heading % str
