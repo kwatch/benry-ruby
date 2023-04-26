@@ -513,9 +513,10 @@ module Benry
         optstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/  or
           raise error("#{optstr}: invalid long option.")
         name = $1; val = $2
-        #; [!er7h4] raises OptionError when unknown long option.
+        #; [!er7h4] default behavior is to raise OptionError when unknown long option.
+        #; [!1ab42] invokes error handler method when unknown long option.
         item = @schema.find_long_option(name)  or
-          raise error("#{optstr}: unknown long option.")
+          return handle_unknown_long_option(optstr, name, val)
         #; [!2jd9w] raises OptionError when no arguments specified for arg required long option.
         #; [!qyq8n] raises optionError when an argument specified for no arg long option.
         case item.arg_requireness()
@@ -582,6 +583,10 @@ module Benry
       def new_options_dict()
         #; [!vm6h0] returns new hash object.
         return OPTIONS_CLASS.new
+      end
+
+      def handle_unknown_long_option(optstr, name, val)
+        raise error("#{optstr}: unknown long option.")
       end
 
     end

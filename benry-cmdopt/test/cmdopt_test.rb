@@ -1040,7 +1040,20 @@ class Benry::CmdOpt::Parser::Test < MiniTest::Test
       ok {pr}.raise?(Benry::CmdOpt::OptionError, "--f/o/o: invalid long option.")
     end
 
-    it "[!er7h4] raises OptionError when unknown long option." do
+    it "[!1ab42] invokes error handler method when unknown long option." do
+      def @parser.handle_unknown_long_option(optstr, name, val)
+        (@_called_ ||= []) << [optstr, name, val]
+      end
+      ret = @parser.parse(["--xx=XX", "--yy=YY", "--zz"])
+      ok {ret} == {}
+      ok {@parser.instance_variable_get('@_called_')} == [
+        ["--xx=XX", "xx", "XX"],
+        ["--yy=YY", "yy", "YY"],
+        ["--zz"   , "zz", nil],
+      ]
+    end
+
+    it "[!er7h4] default behavior is to raise OptionError when unknown long option." do
       argv = ["--foo"]
       pr = proc { @parser.parse(argv) }
       ok {pr}.raise?(Benry::CmdOpt::OptionError, "--foo: unknown long option.")
@@ -1131,6 +1144,19 @@ class Benry::CmdOpt::Parser::Test < MiniTest::Test
       ret = parser.__send__(:new_options_dict)
       ok {ret}.is_a?(Hash)
       ok {ret} == {}
+    end
+
+  end
+
+
+  describe '#handle_unknown_long_option()' do
+
+    it "[!0q78a] raises OptionError." do
+      parser = Benry::CmdOpt::Parser.new(new_sample_schema())
+      pr = proc {
+        parser.__send__(:handle_unknown_long_option, "--xx=XX", "xx", "XX")
+      }
+      ok {pr}.raise?(Benry::CmdOpt::OptionError, "--xx=XX: unknown long option.")
     end
 
   end
