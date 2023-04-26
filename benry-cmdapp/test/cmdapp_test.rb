@@ -311,15 +311,15 @@ describe Benry::CmdApp::ActionMetadata do
 
     class HiddenTestAction < Benry::CmdApp::Action
       @action.("public")
-      def pphidden1(); puts __method__; end
+      def pphidden1(); puts __method__(); end
       #
       @action.("private")
-      def pphidden2(); puts __method__; end
+      def pphidden2(); puts __method__(); end
       private :pphidden2
       #
       private
       @action.("private")
-      def pphidden3(); puts __method__; end
+      def pphidden3(); puts __method__(); end
     end
 
     it "[!kp10p] returns true when action method is private." do
