@@ -2018,6 +2018,30 @@ Usage:
 END
     end
 
+    it "[!t3tbi] adds '\n' before detail text only when app desc specified." do
+      @config.app_desc   = nil
+      @config.app_detail = "See https://..."
+      msg = without_tty { @builder.build_help_message() }
+      ok {msg}.start_with?(<<END)
+See https://...
+
+Usage:
+  $ testapp [<options>] [<action> [<arguments>...]]
+
+END
+    end
+
+    it "[!rvhzd] no preamble when neigher app desc nor detail specified." do
+      @config.app_desc   = nil
+      @config.app_detail = nil
+      msg = without_tty { @builder.build_help_message() }
+      ok {msg}.start_with?(<<END)
+Usage:
+  $ testapp [<options>] [<action> [<arguments>...]]
+
+END
+    end
+
     it "[!o176w] includes command name specified by config." do
       @config.app_name = "GreatCommand"
       @config.app_command = "greatcmd"

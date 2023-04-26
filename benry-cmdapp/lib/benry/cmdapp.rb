@@ -741,14 +741,19 @@ module Benry::CmdApp
       #; [!d1xz4] includes version number if specified by config.
       c = @config
       sb = []
-      v = c.app_version ? " (#{c.app_version})" : ""
-      sb << "#{c.app_name}#{v} -- #{c.app_desc}\n"
+      if c.app_desc
+        v = c.app_version ? " (#{c.app_version})" : ""
+        sb << "#{c.app_name}#{v} -- #{c.app_desc}\n"
+      end
       #; [!775jb] includes detail text if specified by config.
+      #; [!t3tbi] adds '\n' before detail text only when app desc specified.
       if c.app_detail
-        sb << "\n"
+        sb << "\n" unless sb.empty?
         sb << c.app_detail
         sb << "\n" unless c.app_detail.end_with?("\n")
       end
+      #; [!rvhzd] no preamble when neigher app desc nor detail specified.
+      return nil if sb.empty?
       return sb.join()
     end
 
