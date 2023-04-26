@@ -1203,6 +1203,20 @@ describe Benry::CmdApp::Application do
 END
     end
 
+    it "[!h786g] acceps callback block." do
+      config = Benry::CmdApp::Config.new("test app")
+      n = 0
+      app = Benry::CmdApp::Application.new(config) do |args|
+        n += 1
+      end
+      ok {app.callback}.is_a?(Proc)
+      ok {n} == 0
+      app.callback.call([])
+      ok {n} == 1
+      app.callback.call([])
+      ok {n} == 2
+    end
+
   end
 
 
@@ -1304,23 +1318,23 @@ END
 
     it "[!5iczl] skip actions if help option or version option specified." do
       def @app.do_callback(args)
-        @_called = args.dup
+        @_called_ = args.dup
       end
       capture_io { @app.run("--help") }
-      ok {@app.instance_variable_get('@_called')} == nil
+      ok {@app.instance_variable_get('@_called_')} == nil
       capture_io { @app.run("--version") }
-      ok {@app.instance_variable_get('@_called')} == nil
+      ok {@app.instance_variable_get('@_called_')} == nil
       capture_io { @app.run("sayhello") }
-      ok {@app.instance_variable_get('@_called')} == ["sayhello"]
+      ok {@app.instance_variable_get('@_called_')} == ["sayhello"]
     end
 
     it "[!w584g] calls callback method." do
       def @app.do_callback(args)
-        @_called = args.dup
+        @_called_ = args.dup
       end
-      ok {@app.instance_variable_get('@_called')} == nil
+      ok {@app.instance_variable_get('@_called_')} == nil
       capture_io { @app.run("sayhello") }
-      ok {@app.instance_variable_get('@_called')} == ["sayhello"]
+      ok {@app.instance_variable_get('@_called_')} == ["sayhello"]
     end
 
     it "[!pbug7] skip actions if callback method returns `:SKIP` value." do
@@ -1635,6 +1649,43 @@ END
       ensure
         $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = bkup
       end
+    end
+
+  end
+
+
+  describe '#do_callback()' do
+
+    def new_app(&block)
+      @config = Benry::CmdApp::Config.new("test app", "1.0.0")
+      return Benry::CmdApp::Application.new(@config, &block)
+    end
+
+    it "[!xwo0v] calls callback if provided." do
+      called = nil
+      app = new_app do |args, global_opts, config|
+        called = [args.dup, global_opts, config]
+      end
+      ok {called} == nil
+      without_tty { app.run("sayhello") }
+      ok {called} != nil
+      ok {called[0]} == ["sayhello"]
+      ok {called[1]} == {}
+      ok {called[2]} == @config
+    end
+
+    it "[!lljs1] calls callback only once." do
+      n = 0
+      app = new_app do |args, global_opts, config|
+        n += 1
+      end
+      ok {n} == 0
+      without_tty { app.run("sayhello") }
+      ok {n} == 1
+      without_tty { app.run("sayhello") }
+      ok {n} == 1
+      without_tty { app.run("sayhello") }
+      ok {n} == 1
     end
 
   end

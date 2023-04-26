@@ -503,15 +503,17 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, schema=nil, help_builder=nil)
+    def initialize(config, schema=nil, help_builder=nil, &callback)
       @config = config
+      #; [!h786g] acceps callback block.
+      @callback = callback
       #; [!jkprn] creates option schema object according to config.
       @schema = schema || do_create_global_option_schema(config)
       @help_builder = help_builder || do_create_help_message_builder(@config, @schema)
       @global_options = nil
     end
 
-    attr_reader :config, :schema, :help_builder
+    attr_reader :config, :schema, :help_builder, :callback
 
     def main(argv=ARGV)
       begin
@@ -618,8 +620,12 @@ module Benry::CmdApp
     end
 
     def do_callback(args)
-      ## do nothing (intended to be overridden in subclass)
-      return nil
+      #; [!xwo0v] calls callback if provided.
+      #; [!lljs1] calls callback only once.
+      if @callback && ! @__called
+        @__called = true
+        @callback.call(args, @global_options, @config)
+      end
     end
 
     def do_find_action(args)
