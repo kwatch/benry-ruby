@@ -475,6 +475,30 @@ module Benry::CmdApp
   end
 
 
+  class GlobalOptionSchema < Benry::CmdOpt::Schema
+
+    def self.create(config)
+      c = config
+      #; [!enuxy] creates schema object.
+      schema = self.new
+      #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
+      schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
+      #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
+      schema.add(:version, "-V, --version", "print version")      if c.app_version
+      #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
+      schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
+      #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
+      schema.add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
+      #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.
+      schema.add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
+      #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
+      schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
+      return schema
+    end
+
+  end
+
+
   class Application
 
     def initialize(config, schema=nil)
@@ -537,30 +561,11 @@ module Benry::CmdApp
       do_teardown(exc)
     end
 
-    def self.create_global_option_schema(config)
-      c = config
-      #; [!enuxy] creates schema object.
-      schema = SCHEMA_CLASS.new
-      #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
-      schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
-      #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
-      schema.add(:version, "-V, --version", "print version")      if c.app_version
-      #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
-      schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
-      #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
-      schema.add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
-      #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.
-      schema.add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
-      #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
-      schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
-      return schema
-    end
-
     protected
 
     def do_create_global_option_schema(config)
       #; [!u3zdg] creates global option schema object according to config.
-      return self.class.create_global_option_schema(config)
+      return GlobalOptionSchema.create(config)
     end
 
     def do_parse_global_options(args)

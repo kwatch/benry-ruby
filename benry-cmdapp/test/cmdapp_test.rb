@@ -1052,6 +1052,82 @@ describe Benry::CmdApp::Config do
 end
 
 
+describe Benry::CmdApp::GlobalOptionSchema do
+
+
+  describe '.create()' do
+
+    def new_gschema(desc="", version=nil, **kwargs)
+      config = Benry::CmdApp::Config.new(desc, version, **kwargs)
+      x = Benry::CmdApp::GlobalOptionSchema.create(config)
+      return x
+    end
+
+    it "[!enuxy] creates schema object." do
+      x = new_gschema()
+      ok {x}.is_a?(Benry::CmdApp::GlobalOptionSchema)
+    end
+
+    it "[!tq2ol] adds '-h, --help' option if 'config.option_help' is set." do
+      x = new_gschema(option_help: true)
+      ok {x.find_long_option("help")} != nil
+      ok {x.find_short_option("h")}   != nil
+      x = new_gschema(option_help: false)
+      ok {x.find_long_option("help")} == nil
+      ok {x.find_short_option("h")}   == nil
+    end
+
+    it "[!mbtw0] adds '-V, --version' option if 'config.app_version' is set." do
+      x = new_gschema("", "0.0.0")
+      ok {x.find_long_option("version")} != nil
+      ok {x.find_short_option("V")}      != nil
+      x = new_gschema("", nil)
+      ok {x.find_long_option("version")} == nil
+      ok {x.find_short_option("V")}      == nil
+    end
+
+    it "[!f5do6] adds '-a, --all' option if 'config.option_all' is set." do
+      x = new_gschema(option_all: true)
+      ok {x.find_long_option("all")} != nil
+      ok {x.find_short_option("a")}  != nil
+      x = new_gschema(option_all: false)
+      ok {x.find_long_option("all")} == nil
+      ok {x.find_short_option("a")}  == nil
+    end
+
+    it "[!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set." do
+      x = new_gschema(option_verbose: true)
+      ok {x.find_long_option("verbose")} != nil
+      ok {x.find_short_option("v")}  != nil
+      x = new_gschema(option_verbose: false)
+      ok {x.find_long_option("verbose")} == nil
+      ok {x.find_short_option("v")}  == nil
+    end
+
+    it "[!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set." do
+      x = new_gschema(option_quiet: true)
+      ok {x.find_long_option("quiet")} != nil
+      ok {x.find_short_option("q")}  != nil
+      x = new_gschema(option_quiet: false)
+      ok {x.find_long_option("quiet")} == nil
+      ok {x.find_short_option("q")}  == nil
+    end
+
+    it "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
+      x = new_gschema(option_debug: true)
+      ok {x.find_long_option("debug")} != nil
+      ok {x.find_short_option("D")}    != nil
+      x = new_gschema(option_debug: false)
+      ok {x.find_long_option("debug")} == nil
+      ok {x.find_short_option("D")}    == nil
+    end
+
+  end
+
+
+end
+
+
 describe Benry::CmdApp::Application do
 
   def without_tty(&block)
@@ -1347,76 +1423,6 @@ END
   end
 
 
-  describe '.create_global_option_schema()' do
-
-    def new_gschema(desc="", version=nil, **kwargs)
-      config = Benry::CmdApp::Config.new(desc, version, **kwargs)
-      x = Benry::CmdApp::Application.create_global_option_schema(config)
-      return x
-    end
-
-    it "[!enuxy] creates schema object." do
-      x = new_gschema()
-      ok {x}.is_a?(Benry::CmdOpt::Schema)
-    end
-
-    it "[!tq2ol] adds '-h, --help' option if 'config.option_help' is set." do
-      x = new_gschema(option_help: true)
-      ok {x.find_long_option("help")} != nil
-      ok {x.find_short_option("h")}   != nil
-      x = new_gschema(option_help: false)
-      ok {x.find_long_option("help")} == nil
-      ok {x.find_short_option("h")}   == nil
-    end
-
-    it "[!mbtw0] adds '-V, --version' option if 'config.app_version' is set." do
-      x = new_gschema("", "0.0.0")
-      ok {x.find_long_option("version")} != nil
-      ok {x.find_short_option("V")}      != nil
-      x = new_gschema("", nil)
-      ok {x.find_long_option("version")} == nil
-      ok {x.find_short_option("V")}      == nil
-    end
-
-    it "[!f5do6] adds '-a, --all' option if 'config.option_all' is set." do
-      x = new_gschema(option_all: true)
-      ok {x.find_long_option("all")} != nil
-      ok {x.find_short_option("a")}  != nil
-      x = new_gschema(option_all: false)
-      ok {x.find_long_option("all")} == nil
-      ok {x.find_short_option("a")}  == nil
-    end
-
-    it "[!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set." do
-      x = new_gschema(option_verbose: true)
-      ok {x.find_long_option("verbose")} != nil
-      ok {x.find_short_option("v")}  != nil
-      x = new_gschema(option_verbose: false)
-      ok {x.find_long_option("verbose")} == nil
-      ok {x.find_short_option("v")}  == nil
-    end
-
-    it "[!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set." do
-      x = new_gschema(option_quiet: true)
-      ok {x.find_long_option("quiet")} != nil
-      ok {x.find_short_option("q")}  != nil
-      x = new_gschema(option_quiet: false)
-      ok {x.find_long_option("quiet")} == nil
-      ok {x.find_short_option("q")}  == nil
-    end
-
-    it "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
-      x = new_gschema(option_debug: true)
-      ok {x.find_long_option("debug")} != nil
-      ok {x.find_short_option("D")}    != nil
-      x = new_gschema(option_debug: false)
-      ok {x.find_long_option("debug")} == nil
-      ok {x.find_short_option("D")}    == nil
-    end
-
-  end
-
-
   describe '#do_create_global_option_schema()' do
 
     it "[!u3zdg] creates global option schema object according to config." do
@@ -1424,7 +1430,7 @@ END
                                          option_all: true, option_quiet: true)
       app = Benry::CmdApp::Application.new(config)
       x = app.__send__(:do_create_global_option_schema, config)
-      ok {x}.is_a?(Benry::CmdOpt::Schema)
+      ok {x}.is_a?(Benry::CmdApp::GlobalOptionSchema)
       ok {x.find_long_option("all")}     != nil
       ok {x.find_long_option("quiet")}   != nil
       ok {x.find_long_option("verbose")} == nil
