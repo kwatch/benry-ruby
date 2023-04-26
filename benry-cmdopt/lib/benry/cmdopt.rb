@@ -264,6 +264,14 @@ module Benry
         return @items.find {|item| item.key == key }
       end
 
+      def delete(key)
+        #; [!l86rb] deletes option item corresponding to key.
+        #; [!rq0aa] returns deleted item.
+        item = get(key)
+        @items.delete_if {|item| item.key == key }
+        return item
+      end
+
       def find_short_option(short)
         #; [!b4js1] returns option definition matched to short name.
         #; [!s4d1y] returns nil when nothing found.

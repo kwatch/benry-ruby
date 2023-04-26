@@ -696,6 +696,31 @@ END
   end
 
 
+  describe '#delete()' do
+
+    before do
+      @schema = Benry::CmdOpt::Schema.new
+      @schema.add(:help   , "-h, --help"   , "help message")
+      @schema.add(:version, "    --version", "print version")
+    end
+
+    it "[!l86rb] deletes option item corresponding to key." do
+      keys = @schema.each.collect {|x| x.key }
+      ok {keys} == [:help, :version]
+      @schema.delete(:help)
+      keys = @schema.each.collect {|x| x.key }
+      ok {keys} == [:version]
+    end
+
+    it "[!rq0aa] returns deleted item." do
+      item = @schema.delete(:version)
+      ok {item} != nil
+      ok {item.key} == :version
+    end
+
+  end
+
+
   describe '#find_short_option()' do
 
     before do
