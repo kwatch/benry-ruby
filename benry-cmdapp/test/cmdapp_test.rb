@@ -1905,6 +1905,22 @@ END
       ok {_run_app("--help", "hidden1")}      !~ /^  -T +: enable tracing$/
     end
 
+    it "[!l4d6n] `all` flag should be true or false, not nil." do
+      config = Benry::CmdApp::Config.new("test app", "1.0.0", option_all: true)
+      app = Benry::CmdApp::Application.new(config)
+      def app.help_message(all)
+        @_all_ = all
+        super
+      end
+      msg = without_tty { app.run("-h") }
+      ok {app.instance_variable_get('@_all_')} != nil
+      ok {app.instance_variable_get('@_all_')} == false
+      #
+      msg = without_tty { app.run("-ha") }
+      ok {app.instance_variable_get('@_all_')} != nil
+      ok {app.instance_variable_get('@_all_')} == true
+    end
+
   end
 
 

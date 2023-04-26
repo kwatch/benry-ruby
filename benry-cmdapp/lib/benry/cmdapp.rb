@@ -711,7 +711,8 @@ module Benry::CmdApp
 
     def do_print_help_message(args)
       #; [!4qs7y] shows private (hidden) actions/options if '--all' option specified.
-      all = @global_options[:all]
+      #; [!l4d6n] `all` flag should be true or false, not nil.
+      all = !! @global_options[:all]
       #; [!eabis] prints help message of action if action name provided.
       action_name = args[0]
       if action_name
