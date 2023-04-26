@@ -539,7 +539,7 @@ module Benry::CmdApp
       @callback = callback
       #; [!jkprn] creates option schema object according to config.
       @schema = schema || do_create_global_option_schema(config)
-      @help_builder = help_builder || do_create_help_message_builder(@config, @schema)
+      @help_builder = help_builder
       @global_options = nil
     end
 
@@ -739,6 +739,7 @@ module Benry::CmdApp
 
     def help_message(all=false, format=nil)
       #; [!owg9y] returns help message.
+      @help_builder ||= do_create_help_message_builder(@config, @schema)
       return @help_builder.build_help_message(all, format)
     end
 
