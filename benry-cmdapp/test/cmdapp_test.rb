@@ -225,7 +225,7 @@ describe Benry::CmdApp::Index do
 end
 
 
-module ActionMetadataTestingHelper
+module CommonTestingHelper
 
   def without_tty(&block)
     result = nil
@@ -242,6 +242,12 @@ module ActionMetadataTestingHelper
     return result
   end
 
+end
+
+
+module ActionMetadataTestingHelper
+  include CommonTestingHelper
+
   def new_schema(lang: true)
     schema = Benry::Cmdopt::Schema.new
     schema.add(:lang, "-l, --lang=<en|fr|it>", "language") if lang
@@ -257,6 +263,7 @@ end
 
 
 describe Benry::CmdApp::ActionMetadata do
+  #include CommonTestingHelper         # not work. why?
   include ActionMetadataTestingHelper
 
   class MetadataTestAction < Benry::CmdApp::Action
@@ -1191,21 +1198,7 @@ end
 
 
 describe Benry::CmdApp::Application do
-
-  def without_tty(&block)
-    result = nil
-    capture_io { result = yield }
-    return result
-  end
-
-  def with_tty(&block)
-    result = nil
-    capture_io do
-      def $stdout.tty?; true; end
-      result = yield
-    end
-    return result
-  end
+  include CommonTestingHelper
 
   class AppTest < Benry::CmdApp::Action
     @action.("print greeting message")
@@ -1942,21 +1935,7 @@ end
 
 
 describe Benry::CmdApp::HelpMessageBuilder do
-
-  def without_tty(&block)
-    msg = nil
-    capture_io { msg = yield }
-    return msg
-  end
-
-  def with_tty(&block)
-    msg = nil
-    capture_io do
-      def $stdout.tty?; true; end
-      msg = yield
-    end
-    return msg
-  end
+  include CommonTestingHelper
 
   before do
     @config = Benry::CmdApp::Config.new("test app", "1.0.0").tap do |config|
