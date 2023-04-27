@@ -507,7 +507,7 @@ module Benry::CmdApp
     #FORMAT_HEADING   = "\e[33;4m%s\e[0m"          # yellow, underline
 
     def initialize(app_desc, app_version=nil, app_name: nil, app_command: nil,
-                   app_detail: nil, app_postamble: nil,
+                   app_detail: nil, help_postamble: nil,
                    default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
                    option_verbose: false, option_quiet: false, option_color: false,
@@ -518,7 +518,7 @@ module Benry::CmdApp
       @app_name       = app_name    || ::File.basename($0)   # ex: "MyApp"
       @app_command    = app_command || ::File.basename($0)   # ex: "myapp"
       @app_detail     = app_detail      # ex: "See https://.... for details.\n"
-      @app_postamble  = app_postamble   # ex: "(Tips: ....)\n"
+      @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
       @default_action = default_action  # default action name
       @default_help   = default_help    # print help message if action not specified
       @option_help    = option_help     # '-h' and '--help' are enabled when true
@@ -532,7 +532,7 @@ module Benry::CmdApp
       @format_heading = format_heading || FORMAT_HEADING
     end
 
-    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail, :app_postamble
+    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail, :help_postamble
     attr_accessor :default_action, :default_help
     attr_accessor :option_help, :option_all, :option_debug
     attr_accessor :option_verbose, :option_quiet, :option_color
@@ -949,9 +949,9 @@ module Benry::CmdApp
 
     def build_postamble(all=false)
       #; [!i04hh] includes postamble text if specified by config.
-      s = @config.app_postamble
+      s = @config.help_postamble
       if s
-        #; [!ckagw] adds '\n' at end of preamble text if it doesn't end with '\n'.
+        #; [!ckagw] adds '\n' at end of postamble text if it doesn't end with '\n'.
         s += "\n" unless s.end_with?("\n")
       end
       return s

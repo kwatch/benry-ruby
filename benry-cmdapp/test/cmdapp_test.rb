@@ -2655,7 +2655,7 @@ END
     end
 
     it "[!i04hh] includes postamble text if specified by config." do
-      @config.app_postamble = "Home:\n  https://example.com/\n"
+      @config.help_postamble = "Home:\n  https://example.com/\n"
       msg = @builder.build_help_message()
       ok {msg}.end_with?(<<"END")
 Home:
@@ -2663,8 +2663,8 @@ Home:
 END
     end
 
-    it "[!ckagw] adds '\n' at end of preamble text if it doesn't end with '\n'." do
-      @config.app_postamble = "END"
+    it "[!ckagw] adds '\n' at end of postamble text if it doesn't end with '\n'." do
+      @config.help_postamble = "END"
       msg = @builder.build_help_message()
       ok {msg}.end_with?("\nEND\n")
     end
