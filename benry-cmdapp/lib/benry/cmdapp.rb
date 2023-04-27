@@ -420,6 +420,8 @@ module Benry::CmdApp
         #; [!myj3p] uses prefix name (expect last char ':') as action name.
         @__prefix__ != nil  or raise "** assertion failed"
         name = @__prefix__.chomp(":")
+        #; [!j5oto] clears '@__default__'.
+        @__default__ = nil
       #; [!agpwh] else...
       else
         #; [!3icc4] uses method name as action name.
@@ -430,6 +432,8 @@ module Benry::CmdApp
         #; [!8hlni] when action name is same as default name, uses prefix as action name.
         if name == @__default__      # when String
           name = @__prefix__.chomp(":")
+          #; [!q8oxi] clears '@__default__' when default name matched to action name.
+          @__default__ = nil
         #; [!xfent] when prefix is provided, adds it to action name.
         elsif @__prefix__
           name = "#{@__prefix__}#{name}"
@@ -758,6 +762,12 @@ module Benry::CmdApp
         alias_of = klass.instance_variable_get(:@__aliasof__)
         if alias_of
           warn "#{nl}** [warning] in '#{klass.name}' class, `alias_of: #{alias_of.inspect}` specified but corresponding action not exist."
+          nl = ""
+        end
+        #; [!h7lon] reports warning if `default:` specified in action class but corresponding action not exist.
+        default = klass.instance_variable_get(:@__default__)
+        if default
+          warn "#{nl}** [warning] in '#{klass.name}' class, `default: #{default.inspect}` specified but corresponding action not exist."
           nl = ""
         end
       end

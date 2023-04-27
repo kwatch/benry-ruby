@@ -970,6 +970,24 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello6
       end
 
+      it "[!j5oto] clears '@__default__'." do
+        class ClearDefaultTest1 < Benry::CmdApp::Action
+          prefix "cleardefault1", default: :test2_   # symbol
+          @__default__ != nil  or
+            raise MiniTest::Assertion, "@__default__ should NOT be nil"
+          #
+          @action.("test")
+          def test1_(); end
+          @__default__ != nil  or
+            raise MiniTest::Assertion, "@__default__ should NOT be nil"
+          #
+          @action.("test")
+          def test2_(); end
+          @__default__ == nil  or
+            raise MiniTest::Assertion, "@__default__ should be nil"
+        end
+      end
+
     end
 
     describe '[!agpwh] else...' do
@@ -1033,6 +1051,24 @@ describe Benry::CmdApp::Action do
         ok {new_names} == ["added11"]
         ok {x.klass} == Added11Test
         ok {x.method} == :hello11
+      end
+
+      it "[!q8oxi] clears '@__default__' when default name matched to action name." do
+        class ClearDefaultTest2 < Benry::CmdApp::Action
+          prefix "cleardefault2", default: "test2"   # string
+          @__default__ != nil  or
+            raise MiniTest::Assertion, "@__default__ should NOT be nil"
+          #
+          @action.("test")
+          def test1_(); end
+          @__default__ != nil  or
+            raise MiniTest::Assertion, "@__default__ should NOT be nil"
+          #
+          @action.("test")
+          def test2_(); end
+          @__default__ == nil  or
+            raise MiniTest::Assertion, "@__default__ should be nil"
+        end
       end
 
       it "[!xfent] when prefix is provided, adds it to action name." do
@@ -2046,6 +2082,23 @@ END
 END
       ensure
         ValidateActionTest2.class_eval { @__aliasof__ = nil }
+      end
+    end
+
+    it "[!h7lon] reports warning if `default:` specified in action class but corresponding action not exist." do
+      class ValidateActionTest3 < Benry::CmdApp::Action
+        prefix "validate3", default: :test3
+        @action.("test")
+        def test(); end
+      end
+      begin
+        sout, serr = capture_io { @app.__send__(:do_validate_actions) }
+        ok {serr} == <<'END'
+
+** [warning] in 'ValidateActionTest3' class, `default: :test3` specified but corresponding action not exist.
+END
+      ensure
+        ValidateActionTest3.class_eval { @__default__ = nil }
       end
     end
 
