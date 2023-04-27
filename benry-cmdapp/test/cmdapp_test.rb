@@ -1100,7 +1100,11 @@ describe Benry::CmdApp::Action do
           def bla3(); end
         end
       end
-      ok {pr}.NOT.raise?(Exception)
+      begin
+        ok {pr}.NOT.raise?(Exception)
+      ensure
+        AliasOfTest4.class_eval { @__aliasof__ = nil }
+      end
     end
 
     it "[!349nr] raises error when same name action or alias with prefix already exists." do
@@ -1115,8 +1119,12 @@ describe Benry::CmdApp::Action do
           def blala(); end
         end
       end
-      ok {pr}.raise?(Benry::CmdApp::AliasDefError,
-                     'action_alias("bla5", "bla5:blala"): not allowed to define same name alias as existing action.')
+      begin
+        ok {pr}.raise?(Benry::CmdApp::AliasDefError,
+                       'action_alias("bla5", "bla5:blala"): not allowed to define same name alias as existing action.')
+      ensure
+        AliasOfTest5b.class_eval { @__aliasof__ = nil }
+      end
     end
 
   end
@@ -1997,6 +2005,48 @@ END
       msg = without_tty { app.run("-ha") }
       ok {app.instance_variable_get('@_all_')} != nil
       ok {app.instance_variable_get('@_all_')} == true
+    end
+
+  end
+
+
+  describe '#do_validate_actions()' do
+
+    it "[!6xhvt] reports warning at end of help message." do
+      class ValidateActionTest1 < Benry::CmdApp::Action
+        prefix "validate1", alias_of: :test
+        @action.("test")
+        def test1(); end
+      end
+      @app.config.default_help = true
+      begin
+        [["-h"], []].each do |args|
+          sout, serr = capture_io { @app.run(*args) }
+          ok {serr} == <<'END'
+
+** [warning] in 'ValidateActionTest1' class, `alias_of: :test` specified but corresponding action not exist.
+END
+        end
+      ensure
+        ValidateActionTest1.class_eval { @__aliasof__ = nil }
+      end
+    end
+
+    it "[!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist." do
+      class ValidateActionTest2 < Benry::CmdApp::Action
+        prefix "validate2", alias_of: :test2
+        @action.("test")
+        def test(); end
+      end
+      begin
+        sout, serr = capture_io { @app.__send__(:do_validate_actions) }
+        ok {serr} == <<'END'
+
+** [warning] in 'ValidateActionTest2' class, `alias_of: :test2` specified but corresponding action not exist.
+END
+      ensure
+        ValidateActionTest2.class_eval { @__aliasof__ = nil }
+      end
     end
 
   end

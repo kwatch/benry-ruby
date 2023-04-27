@@ -604,6 +604,7 @@ module Benry::CmdApp
       metadata = do_find_action(args)
       if metadata == nil
         do_print_help_message([])
+        do_validate_actions()
         return
       end
       #; [!x1xgc] run action with options and arguments.
@@ -651,6 +652,7 @@ module Benry::CmdApp
       if global_opts[:help]
         #; [!lpoz7] prints help message of action if action name specified with help option.
         do_print_help_message(args)
+        do_validate_actions()
         return :SKIP
       end
       #; [!fslsy] prints version if '-V' or '--version' specified.
@@ -745,6 +747,19 @@ module Benry::CmdApp
       #; [!nv0x3] prints help message of command if action name not provided.
       else
         puts help_message(all)
+      end
+    end
+
+    def do_validate_actions()
+      #; [!6xhvt] reports warning at end of help message.
+      nl = "\n"
+      Action::SUBCLASSES.each do |klass|
+        #; [!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist.
+        alias_of = klass.instance_variable_get(:@__aliasof__)
+        if alias_of
+          warn "#{nl}** [warning] in '#{klass.name}' class, `alias_of: #{alias_of.inspect}` specified but corresponding action not exist."
+          nl = ""
+        end
       end
     end
 
