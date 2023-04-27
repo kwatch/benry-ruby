@@ -587,17 +587,20 @@ module Benry::CmdApp
 
     attr_reader :config, :schema, :help_builder, :callback
 
-    def main(argv=ARGV)
+    def main(argv=ARGV, error_ignore_rexp: /\/benry\/cmd(app|opt)\.rb\z/)
       begin
         #; [!y6q9z] runs action with options.
         self.run(*argv)
-      rescue ExecutionError, OPTION_ERROR => exc
+      rescue OPTION_ERROR, ExecutionError, DefinitionError => exc
         #; [!6ro6n] not catch error when $DEBUG_MODE is on.
         raise if $DEBUG_MODE
         #; [!a7d4w] prints error message with '[ERROR]' prompt.
         $stderr.puts "\033[0;31m[ERROR]\033[0m #{exc.message}"
-        #loc = exc.backtrace_locations.find {|x| x.path !~ /\/benry\/cmd(app|opt)\.rb\z/ }
-        #$stderr.puts "\t(file: #{loc.path}, line: #{loc.lineno})" if loc
+        if exc.is_a?(DefinitionError)
+          loc = exc.backtrace_locations.find {|x| x.path !~ error_ignore_rexp }
+          raise unless loc
+          $stderr.puts "\t(file: #{loc.path}, line: #{loc.lineno})"
+        end
         #; [!qk5q5] returns 1 as exit code when error occurred.
         return 1
       else

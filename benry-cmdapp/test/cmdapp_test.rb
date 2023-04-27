@@ -1414,6 +1414,28 @@ END
       ok {sout} == ""
     end
 
+    it "[!r7opi] prints filename and line number on where error raised if DefinitionError." do
+      class MainTest1 < Benry::CmdApp::Action
+        prefix "main1"
+        @action.("test")
+        def err1
+          MainTest1.class_eval do
+            @action.("test")
+            @option.(:foo, "--foo", "foo")
+            def err2(bar: nil)   # should have keyword parameter 'foo'
+            end
+          end
+        end
+      end
+      lineno = __LINE__ - 5
+      sout, serr = capture_io { @app.main(["main1:err1"]) }
+      ok {sout} == ""
+      ok {serr} == <<"END"
+\e[0;31m[ERROR]\e[0m def err2(): should have keyword parameter 'foo' for '@option.(:foo)', but not.
+\t\(file: test\/cmdapp_test\.rb, line: #{lineno})
+END
+    end
+
     it "[!6ro6n] not catch error when $DEBUG_MODE is on." do
       bkup = $DEBUG_MODE
       begin
