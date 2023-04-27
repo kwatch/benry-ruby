@@ -1331,6 +1331,15 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("D")}    == nil
     end
 
+    it "[!s97go] adds '-T, --trace' option if 'config.option_trace' is set." do
+      x = new_gschema(option_trace: true)
+      ok {x.find_long_option("trace")} != nil
+      ok {x.find_short_option("T")}    != nil
+      x = new_gschema(option_debug: false)
+      ok {x.find_long_option("trace")} == nil
+      ok {x.find_short_option("T")}    == nil
+    end
+
   end
 
 

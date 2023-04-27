@@ -512,8 +512,9 @@ module Benry::CmdApp
     def initialize(app_desc, app_version=nil,
                    app_name: nil, app_command: nil, app_detail: nil,
                    default_action: nil, default_help: false,
-                   option_help: true, option_all: false, option_debug: false,
+                   option_help: true, option_all: false,
                    option_verbose: false, option_quiet: false, option_color: false,
+                   option_debug: false, option_trace: false,
                    help_sections: [], help_postamble: nil,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
@@ -529,7 +530,8 @@ module Benry::CmdApp
       @option_verbose = option_verbose  # '-v' and '--verbose' are enabled when true
       @option_quiet   = option_quiet    # '-q' and '--quiet' are enabled when true
       @option_color   = option_color    # '--color[=<on|off>]' enabled when true
-      @option_debug   = option_debug    # '-D' and '--debug' are enable when true
+      @option_debug   = option_debug    # '-D' and '--debug' are enabled when true
+      @option_trace   = option_trace    # '-T' and '--trace' are enabled when true
       @help_sections  = help_sections   # ex: [["Example", "..text.."], ...]
       @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
       @format_help    = format_help    || FORMAT_HELP
@@ -539,8 +541,9 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail
     attr_accessor :default_action, :default_help
-    attr_accessor :option_help, :option_all, :option_debug
+    attr_accessor :option_help, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
+    attr_accessor :option_debug, :option_trace
     attr_accessor :help_sections, :help_postamble
     attr_accessor :format_help, :format_usage, :format_heading
 
@@ -556,7 +559,7 @@ module Benry::CmdApp
       #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
       schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
       #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
-      schema.add(:version, "-V, --version", "print version")      if c.app_version
+      schema.add(:version, "-V, --version", "print version") if c.app_version
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
       schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
       #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
@@ -567,6 +570,8 @@ module Benry::CmdApp
       schema.add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass) if c.option_color
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
       schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
+      #; [!s97go] adds '-T, --trace' option if 'config.option_trace' is set.
+      schema.add(:trace  , "-T, --trace"  , "report enter into and exit from action") if c.option_trace
       return schema
     end
 
