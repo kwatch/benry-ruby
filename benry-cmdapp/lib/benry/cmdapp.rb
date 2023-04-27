@@ -346,7 +346,7 @@ module Benry::CmdApp
 
     private
 
-    def self.prefix(str, default: nil)
+    def self.prefix(str, alias_of: nil, default: nil)
       #; [!1gwyv] converts symbol into string.
       str = str.to_s
       #; [!pz46w] error if prefix contains extra '_'.
@@ -355,6 +355,7 @@ module Benry::CmdApp
       #; [!9pu01] adds ':' at end of prefix name if prefix not end with ':'.
       str += ':' unless str.end_with?(':')
       @__prefix__  = str
+      @__aliasof__ = alias_of  # method name if symbol, or action name if string
       @__default__ = default   # method name if symbol, or action name if string
     end
 
@@ -364,6 +365,7 @@ module Benry::CmdApp
         @__action__   = nil    # ex: ["action desc", {detail: nil, postamble: nil}]
         @__option__   = nil    # Benry::CmdOpt::Schema object
         @__prefix__   = nil    # ex: "foo:bar:"
+        @__aliasof__  = nil    # ex: :method_name or "action-name"
         @__default__  = nil    # ex: :method_name or "action-name"
         #; [!1qv12] @action is a Proc object and saves args.
         @action = proc do |desc, detail: nil, postamble: nil|
@@ -403,6 +405,13 @@ module Benry::CmdApp
       errmsg == nil  or
         raise ActionDefError.new("def #{method}(): #{errmsg}")
       Index::ACTIONS[name] = metadata
+      #; [!jpzbi] defines same name alias of action as prefix.
+      #; [!tvjb0] clears '@__aliasof__' when alias created.
+      #; [!997gs] not raise error when action not found.
+      if @__aliasof__
+        self.__define_alias_of_action(@__aliasof__, method, name)
+        @__aliasof__ = nil
+      end
     end
 
     def self.__method2action(method)   # :nodoc:
@@ -427,6 +436,15 @@ module Benry::CmdApp
         end
       end
       return name
+    end
+
+    def self.__define_alias_of_action(alias_of, method, action_name)
+      #; [!349nr] raises error when same name action or alias with prefix already exists.
+      @__prefix__ != nil  or raise "** internal error"
+      if alias_of == method || alias_of == Util.method2action(method.to_s)
+        alias_name = @__prefix__.chomp(":")
+        Benry::CmdApp.action_alias(alias_name, action_name)
+      end
     end
 
   end

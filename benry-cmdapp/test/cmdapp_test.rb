@@ -792,7 +792,7 @@ describe Benry::CmdApp::Action do
       class InheritedTest1 < Benry::CmdApp::Action
       end
       ivars = InheritedTest1.instance_variables().sort()
-      ok {ivars} == [:@__action__, :@__default__, :@__option__, :@__prefix__, :@action, :@copy_options, :@option]
+      ok {ivars} == [:@__action__, :@__aliasof__, :@__default__, :@__option__, :@__prefix__, :@action, :@copy_options, :@option]
     end
 
     it "[!1qv12] @action is a Proc object and saves args." do
@@ -1039,6 +1039,64 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello12
       end
 
+    end
+
+    it "[!jpzbi] defines same name alias of action as prefix." do
+      ## when symbol
+      class AliasOfTest1 < Benry::CmdApp::Action
+        prefix "blabla1", alias_of: :bla1    # symbol
+        @action.("test")
+        def bla1(); end
+      end
+      ok {Benry::CmdApp::Index::ALIASES["blabla1"]} == "blabla1:bla1"
+      ## when string
+      class AliasOfTest2 < Benry::CmdApp::Action
+        prefix "bla:bla2", alias_of: "blala"    # string
+        @action.("test")
+        def blala(); end
+      end
+      ok {Benry::CmdApp::Index::ALIASES["bla:bla2"]} == "bla:bla2:blala"
+    end
+
+    it "[!tvjb0] clears '@__aliasof__' when alias created." do
+      class AliasOfTest3 < Benry::CmdApp::Action
+        prefix "bla:bla3", alias_of: "bla3"    # string
+        @__aliasof__ != nil  or
+          raise MiniTest::Assertion, "@__aliasof__ should NOT be nil"
+        #
+        @action.("test")
+        def bla3(); end
+        @__aliasof__ == nil  or
+          raise MiniTest::Assertion, "@__aliasof__ should be nil"
+      end
+      ok {AliasOfTest3.instance_variable_get('@__aliasof__')} == nil
+    end
+
+    it "[!997gs] not raise error when action not found." do
+      pr = proc do
+        class AliasOfTest4 < Benry::CmdApp::Action
+          prefix "blabla4", alias_of: :bla99     # action not exist
+          @action.("test")
+          def bla3(); end
+        end
+      end
+      ok {pr}.NOT.raise?(Exception)
+    end
+
+    it "[!349nr] raises error when same name action or alias with prefix already exists." do
+      pr = proc do
+        class AliasOfTest5a < Benry::CmdApp::Action
+          @action.("test")
+          def bla5(); end                    # define 'bla5' action
+        end
+        class AliasOfTest5b < Benry::CmdApp::Action
+          prefix "bla5", alias_of: :blala    # define 'bla5' action, too
+          @action.("test")
+          def blala(); end
+        end
+      end
+      ok {pr}.raise?(Benry::CmdApp::AliasDefError,
+                     'action_alias("bla5", "bla5:blala"): not allowed to define same name alias as existing action.')
     end
 
   end
