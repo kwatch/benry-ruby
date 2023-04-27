@@ -788,6 +788,15 @@ describe Benry::CmdApp::Action do
 
   describe '.inherited()' do
 
+    it "[!f826w] registers all subclasses into 'Action::SUBCLASSES'." do
+      class InheritedTest0a < Benry::CmdApp::Action
+      end
+      class InheritedTest0b < Benry::CmdApp::Action
+      end
+      ok {Benry::CmdApp::Action::SUBCLASSES}.include?(InheritedTest0a)
+      ok {Benry::CmdApp::Action::SUBCLASSES}.include?(InheritedTest0b)
+    end
+
     it "[!2imrb] sets class instance variables in subclass." do
       class InheritedTest1 < Benry::CmdApp::Action
       end

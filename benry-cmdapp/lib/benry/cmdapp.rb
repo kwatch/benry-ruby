@@ -359,7 +359,11 @@ module Benry::CmdApp
       @__default__ = default   # method name if symbol, or action name if string
     end
 
+    SUBCLASSES = []
+
     def self.inherited(subclass)
+      #; [!f826w] registers all subclasses into 'Action::SUBCLASSES'.
+      SUBCLASSES << subclass
       #; [!2imrb] sets class instance variables in subclass.
       subclass.instance_eval do
         @__action__   = nil    # ex: ["action desc", {detail: nil, postamble: nil}]
