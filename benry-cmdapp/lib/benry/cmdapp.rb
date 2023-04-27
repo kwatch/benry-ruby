@@ -75,6 +75,10 @@ module Benry::CmdApp
       return str.gsub(/\e\[.*?m/, '')
     end
 
+    def alias_desc(action_name)
+      return "alias of '#{action_name}' action"
+    end
+
     class Doing    # :nodoc:
       def inspect(); "<DOING>"; end
       alias to_s inspect
@@ -109,7 +113,7 @@ module Benry::CmdApp
       metadatas = ACTIONS.values()
       metadatas = metadatas.reject {|ameta| ameta.hidden? } if ! all
       pairs = metadatas.collect {|ameta| [ameta.name, ameta.desc] }
-      pairs += ALIASES.collect {|ali, act| [ali, "alias of '#{act}' action"] } if include_alias
+      pairs += ALIASES.collect {|ali, act| [ali, Util.alias_desc(act)] } if include_alias
       pairs.sort_by {|name, _| name }.each(&block)
     end
 
@@ -808,7 +812,7 @@ module Benry::CmdApp
       #; [!85i5m] candidate actions should include alias names.
       Index::ALIASES.each do |alias_, aname|
         if alias_.start_with?(prefix) || alias_ == prefix2
-          pairs << [alias_, "alias of '#{aname}' action"]
+          pairs << [alias_, Util.alias_desc(aname)]
         end
       end
       #; [!i2azi] raises error when no candidate actions found.
