@@ -39,11 +39,11 @@ module Benry
 
       attr_reader :schema
 
-      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
         #; [!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args.
-        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, &callback)
+        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, tag: tag, &callback)
         #; [!tu4k3] returns self.
         self
       end
@@ -102,7 +102,7 @@ module Benry
         self
       end
 
-      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args.
         rest.each do |x|
@@ -191,7 +191,7 @@ module Benry
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                   type: type, rexp: rexp, enum: enum, value: value, &callback)
+                   type: type, rexp: rexp, enum: enum, value: value, tag: tag, &callback)
         @items << item
         item
       end
@@ -339,7 +339,7 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, &callback)
+      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
@@ -352,12 +352,13 @@ module Benry
         @rexp     = rexp      unless rexp.nil?
         @enum     = enum      unless enum.nil?
         @value    = value     unless value.nil?
+        @tag      = tag       unless tag.nil?
         @callback = callback  unless callback.nil?
         #; [!nn4cp] freezes enum object.
         @enum.freeze() if @enum
       end
 
-      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :value, :callback
+      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :value, :tag, :callback
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
@@ -513,8 +514,8 @@ module Benry
         optstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/  or
           raise error("#{optstr}: invalid long option.")
         name = $1; val = $2
-        #; [!er7h4] default behavior is to raise OptionError when unknown long option.
         #; [!1ab42] invokes error handler method when unknown long option.
+        #; [!er7h4] default behavior is to raise OptionError when unknown long option.
         item = @schema.find_long_option(name)  or
           return handle_unknown_long_option(optstr, name, val)
         #; [!2jd9w] raises OptionError when no arguments specified for arg required long option.
@@ -586,6 +587,7 @@ module Benry
       end
 
       def handle_unknown_long_option(optstr, name, val)
+        #; [!0q78a] raises OptionError.
         raise error("#{optstr}: unknown long option.")
       end
 

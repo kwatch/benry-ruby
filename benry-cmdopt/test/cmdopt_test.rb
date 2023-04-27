@@ -1337,7 +1337,7 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
 
     it "[!vmb3r] defines command option." do
       cmdopt = Benry::CmdOpt.new()
-      cmdopt.add(:help, "-h, --help", "show help message")
+      cmdopt.add(:help, "-h, --help", "show help message", tag: :important)
       items = cmdopt.instance_eval { @schema.instance_variable_get('@items') }
       ok {items}.is_a?(Array)
       ok {items.length} == 1
@@ -1345,6 +1345,7 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
       ok {items[0].short} == 'h'
       ok {items[0].long} == 'help'
       ok {items[0].desc} == 'show help message'
+      ok {items[0].tag} == :important
     end
 
     it "[!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args." do
