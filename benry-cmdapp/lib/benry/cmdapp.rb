@@ -592,6 +592,8 @@ module Benry::CmdApp
         #; [!y6q9z] runs action with options.
         self.run(*argv)
       rescue ExecutionError, OPTION_ERROR => exc
+        #; [!6ro6n] not catch error when $DEBUG_MODE is on.
+        raise if $DEBUG_MODE
         #; [!a7d4w] prints error message with '[ERROR]' prompt.
         $stderr.puts "\033[0;31m[ERROR]\033[0m #{exc.message}"
         #loc = exc.backtrace_locations.find {|x| x.path !~ /\/benry\/cmd(app|opt)\.rb\z/ }

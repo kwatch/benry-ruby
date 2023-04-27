@@ -1414,6 +1414,17 @@ END
       ok {sout} == ""
     end
 
+    it "[!6ro6n] not catch error when $DEBUG_MODE is on." do
+      bkup = $DEBUG_MODE
+      begin
+        pr = proc { @app.main(["-D", "sayhello", "Alice", "Bob"]) }
+        ok {pr}.raise?(Benry::CmdApp::CommandError,
+                       "sayhello: too much arguments (at most 1).")
+      ensure
+        $DEBUG_MODE = bkup
+      end
+    end
+
     it "[!5oypr] returns 0 as exit code when no errors occurred." do
       ret = nil
       sout, serr = capture_io do
