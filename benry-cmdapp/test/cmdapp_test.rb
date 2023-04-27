@@ -1058,18 +1058,29 @@ describe Benry::CmdApp::Action do
       ok {Benry::CmdApp::Index::ALIASES["bla:bla2"]} == "bla:bla2:blala"
     end
 
-    it "[!tvjb0] clears '@__aliasof__' when alias created." do
+    it "[!tvjb0] clears '@__aliasof__' only when alias created." do
       class AliasOfTest3 < Benry::CmdApp::Action
-        prefix "bla:bla3", alias_of: "bla3"    # string
+        prefix "bla:bla3", alias_of: "bla3b"    # string
         @__aliasof__ != nil  or
           raise MiniTest::Assertion, "@__aliasof__ should NOT be nil"
         #
         @action.("test")
-        def bla3(); end
+        def bla3a(); end
+        @__aliasof__ != nil  or
+          raise MiniTest::Assertion, "@__aliasof__ should NOT be nil"
+        #
+        @action.("test")
+        def bla3b(); end
         @__aliasof__ == nil  or
           raise MiniTest::Assertion, "@__aliasof__ should be nil"
       end
-      ok {AliasOfTest3.instance_variable_get('@__aliasof__')} == nil
+      begin
+        ok {AliasOfTest3.instance_variable_get('@__aliasof__')} == nil
+      ensure
+        AliasOfTest3.class_eval do
+          @__aliasof__ = nil
+        end
+      end
     end
 
     it "[!997gs] not raise error when action not found." do

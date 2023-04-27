@@ -406,12 +406,8 @@ module Benry::CmdApp
         raise ActionDefError.new("def #{method}(): #{errmsg}")
       Index::ACTIONS[name] = metadata
       #; [!jpzbi] defines same name alias of action as prefix.
-      #; [!tvjb0] clears '@__aliasof__' when alias created.
       #; [!997gs] not raise error when action not found.
-      if @__aliasof__
-        self.__define_alias_of_action(@__aliasof__, method, name)
-        @__aliasof__ = nil
-      end
+      self.__define_alias_of_action(method, name)
     end
 
     def self.__method2action(method)   # :nodoc:
@@ -438,12 +434,16 @@ module Benry::CmdApp
       return name
     end
 
-    def self.__define_alias_of_action(alias_of, method, action_name)
-      #; [!349nr] raises error when same name action or alias with prefix already exists.
+    def self.__define_alias_of_action(method, action_name)
+      return if @__aliasof__ == nil
       @__prefix__ != nil  or raise "** internal error"
+      alias_of = @__aliasof__
       if alias_of == method || alias_of == Util.method2action(method.to_s)
         alias_name = @__prefix__.chomp(":")
+        #; [!349nr] raises error when same name action or alias with prefix already exists.
         Benry::CmdApp.action_alias(alias_name, action_name)
+        #; [!tvjb0] clears '@__aliasof__' only when alias created.
+        @__aliasof__ = nil
       end
     end
 
