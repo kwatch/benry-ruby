@@ -118,7 +118,7 @@ module Benry::CmdApp
 
   class ActionMetadata
 
-    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil)
+    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, tag: nil)
       @name   = name
       @klass  = klass
       @method = method
@@ -126,9 +126,10 @@ module Benry::CmdApp
       @desc   = desc
       @detail = detail       if detail != nil
       @postamble = postamble if postamble != nil
+      @tag    = tag          if tag != nil
     end
 
-    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble
+    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble, :tag
 
     def hidden?()
       #; [!kp10p] returns true when action method is private.
@@ -341,6 +342,8 @@ module Benry::CmdApp
       return __run_action(action_name, false, args, kwargs)
     end
 
+    private
+
     def __run_action(action_name, once, args, kwargs)
       #; [!7vszf] raises error if action specified not found.
       metadata = Index.lookup_action(action_name)  or
@@ -359,9 +362,6 @@ module Benry::CmdApp
       Index::DONE[name] = ret
       return ret
     end
-    private :__run_action
-
-    private
 
     def self.prefix(str, alias_of: nil, default: nil)
       #; [!1gwyv] converts symbol into string.
@@ -389,16 +389,16 @@ module Benry::CmdApp
         @__aliasof__  = nil    # ex: :method_name or "action-name"
         @__default__  = nil    # ex: :method_name or "action-name"
         #; [!1qv12] @action is a Proc object and saves args.
-        @action = proc do |desc, detail: nil, postamble: nil|
-          @__action__ = [desc, {detail: detail, postamble: postamble}]
+        @action = proc do |desc, detail: nil, postamble: nil, tag: nil|
+          @__action__ = [desc, {detail: detail, postamble: postamble, tag: tag}]
         end
         #; [!33ma7] @option is a Proc object and saves args.
-        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, value: nil, &block|
+        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, value: nil, tag: nil, &block|
           #; [!gxybo] '@option.()' raises error when '@action.()' not called.
           @__action__ != nil  or
             raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` required but not called.")
           schema = (@__option__ ||= SCHEMA_CLASS.new)
-          schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, &block)
+          schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, tag: nil, &block)
         end
         #; [!yrkxn] @copy_options is a Proc object and copies options from other action.
         @copy_options = proc do |action_name, except: nil|

@@ -847,10 +847,10 @@ describe Benry::CmdApp::Action do
 
     it "[!1qv12] @action is a Proc object and saves args." do
       class InheritedTest2 < Benry::CmdApp::Action
-        @action.("description", detail: "xxx", postamble: "yyy")
+        @action.("description", detail: "xxx", postamble: "yyy", tag: "zzz")
       end
       x = InheritedTest2.instance_variable_get('@__action__')
-      ok {x} == ["description", {detail: "xxx", postamble: "yyy"}]
+      ok {x} == ["description", {detail: "xxx", postamble: "yyy", tag: "zzz"}]
     end
 
     it "[!33ma7] @option is a Proc object and saves args." do
