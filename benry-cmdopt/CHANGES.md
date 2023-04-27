@@ -8,18 +8,22 @@ Release 2.0.0 (????-??-??)
 
 * [change] rename 'Benry::Cmdopt' to 'Benry::CmdOpt', and the old name is still available for backward compatibility.
 * [change] `Parser#parse()` parses all options even after arguments.
+* [change] treat argument `-` as normal argument (in before release, `-` is ignored because treated as option).
 * [change] keyword parameter `pattern:` is renamed to `rexp:` (`pattern:` is also available for backward compatibilidy).
 * [change] `SchemaItem#help` is renamed to `SchemaItem#desc` (old name `#help` is also available for backward compatibility).
 * [change] `add(..., type: Integer, enum: ['1','2'])` now raises error because enum contains non-Integer value.
+* [change] freeze enum value of `enum:` keyword arg of `Facade#add()` and `Schema#add()`.
 * [enhance] `Parser#parse(argv, false)` parses options only before arguments.
 * [enhance] define `#to_s()` which is alias of `#option_help()`.
 * [enhance] `Facade#add()` and `Schema#add()` supports `value:` keyword arg for additional value.
+* [enhance] `Facade#add()` and `Schema#add()` supports `tag:` keyword arg which accepts arbitrary value.
 * [enhance] regard options which key name starts with '_' as hidden, as well as options which description is nil.
-* [enhance] `Facade#dup()` and `Schema#dup()` implemented which duplicates each object.
-* [enhance] `Schema#copy_from(other)` implemented which copies option items from other schema.
-* [enhance] implemented `Facade#each()` and `Schema#each()` which yields option item.
-* [bugfix] treat argument `-` as normal argument (in before release, `-` is ignored because treated as option).
-* [bugfix] freeze enum value of `enum:` keyword arg of `Facade#add()` and `Schema#add()`.
+* [enhance] add `Schema#get()` which finds option item by key name.
+* [enhance] add `Schema#delete()` which deletes option item by key name.
+* [enhance] add `Schema#each()` which yields option items.
+* [enhance] add `Schema#empty?(all: true)` which returns true if schema has no option items.
+* [enhance] add `Schema#dup()` which duplicates each object.
+* [enhance] add `Schema#copy_from(other)` which copies option items from other schema.
 
 
 Release 1.1.0 (2021-01-18)

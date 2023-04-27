@@ -46,8 +46,8 @@ Why not `optparse.rb`?
   (schema class, parser class, and facade class).
   Therefore it is easy to understand and extend these classes.
 
-  File `optparse.rb` (in Ruby 3.0) contains 1061 lines (except comments and blanks),
-  while `benry/cmdopt.rb` (v2.0) contains 373 lines (except both, too).
+  File `optparse.rb` (in Ruby 3.2) contains 1143 lines (except comments and blanks),
+  while `benry/cmdopt.rb` (v2.0) contains less than 400 lines (except both, too).
 
 * `optparse.rb` regards `-x` and `--x` as a short cut of `--xxx` automatically
   even if you have not defined `-x` option.
@@ -246,6 +246,14 @@ if options[:help]
   #format = "  %-20s : %s"
   #cmdopt.each_option_help {|opt, help| puts format % [opt, help] }
 end
+```
+
+You can set nil to option name only if long option specified.
+
+```ruby
+## both are same
+cmdopt.add(:help, "-h, --help", "print help message")
+cmdopt.add(nil  , "-h, --help", "print help message")
 ```
 
 
@@ -478,6 +486,28 @@ end
 sub_opts = cmdopt.parse(argv, true)       # !!!true!!!
 p sub_opts          #=> {:message => "yyy"}
 p argv              #=> ["xxx"]
+```
+
+
+Option Tag
+----------
+
+`#add()` method in `Benry::Cmdopt` or `Benry::Cmdopt::Schema` supports `tag:` keyword argument.
+You can use it for any purpose.
+
+```ruby
+require 'benry/cmdopt'
+
+cmdopt = Benry::CmdOpt.new()
+cmdopt.add(:help, "-h, --help", "help message", tag: "important")  # !!!
+cmdopt.add(:version, "--version", "print version", tag: nil)
+cmdopt.schema.each do |item|
+  puts "#{item.key}: tag=#{item.tag.inspect}"
+end
+
+## output:
+#help: tag="important"
+#version: tag=nil
 ```
 
 
