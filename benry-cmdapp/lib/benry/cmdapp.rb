@@ -109,7 +109,7 @@ module Benry::CmdApp
       metadatas = ACTIONS.values()
       metadatas = metadatas.reject {|ameta| ameta.hidden? } if ! all
       pairs = metadatas.collect {|ameta| [ameta.name, ameta.desc] }
-      pairs += ALIASES.collect {|ali, act| [ali, "alias to '#{act}' action"] } if include_alias
+      pairs += ALIASES.collect {|ali, act| [ali, "alias of '#{act}' action"] } if include_alias
       pairs.sort_by {|name, _| name }.each(&block)
     end
 

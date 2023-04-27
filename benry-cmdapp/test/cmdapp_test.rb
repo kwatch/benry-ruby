@@ -188,7 +188,7 @@ describe Benry::CmdApp::Index do
       arr = []
       Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == [
-        ["findxx", "alias to 'lookup2' action"],
+        ["findxx", "alias of 'lookup2' action"],
         ["lookup1", "lookup test #1"],
         ["lookup2", "lookup test #2"],
       ]
@@ -2068,7 +2068,7 @@ TestApp (1.0.0) -- test app
 
 \e[34mActions:\e[0m
   \e[1mya:ya             \e[0m : greeting #2
-  \e[1myes               \e[0m : alias to 'yo-yo' action
+  \e[1myes               \e[0m : alias of 'yo-yo' action
   \e[1myo-yo             \e[0m : greeting #1
 END
 
@@ -2086,7 +2086,7 @@ Options:
 
 Actions:
   ya:ya              : greeting #2
-  yes                : alias to 'yo-yo' action
+  yes                : alias of 'yo-yo' action
   yo-yo              : greeting #1
 END
 
@@ -2296,7 +2296,7 @@ END
       ok {msg}.end_with?(<<'END')
 Actions:
   ya:ya              : greeting #2
-  yes                : alias to 'yo-yo' action
+  yes                : alias of 'yo-yo' action
   yo-yo              : greeting #1
 END
     end
@@ -2306,7 +2306,7 @@ END
       ok {msg}.end_with?(<<"END")
 \e[34mActions:\e[0m
   \e[1mya:ya             \e[0m : greeting #2
-  \e[1myes               \e[0m : alias to 'yo-yo' action
+  \e[1myes               \e[0m : alias of 'yo-yo' action
   \e[1myo-yo             \e[0m : greeting #1
 END
     end
@@ -2329,7 +2329,7 @@ END
       ok {msg}.end_with?(<<END)
 Actions:
   ya:ya              : greeting #2
-  yes                : alias to 'yo-yo' action
+  yes                : alias of 'yo-yo' action
   yo-yo              : greeting #1
 END
     end
@@ -2343,7 +2343,7 @@ Actions:
   _aha               : greeting #3
   ya:_mada           : greeting #4
   ya:ya              : greeting #2
-  yes                : alias to 'yo-yo' action
+  yes                : alias of 'yo-yo' action
   yo-yo              : greeting #1
 END
     end
