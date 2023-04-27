@@ -2654,6 +2654,22 @@ Actions:
 END
     end
 
+    it "[!cfijh] includes section title and content if specified by config." do
+      @config.help_sections = [
+        ["Example", "  $ echo 'Hello, world!'"],
+        ["Tips"   , "  * Try `--help` option.\n"],
+      ]
+      msg = @builder.build_help_message()
+      ok {msg}.end_with?(<<"END")
+
+\e[34mExample\e[0m
+  $ echo 'Hello, world!'
+
+\e[34mTips\e[0m
+  * Try `--help` option.
+END
+    end
+
     it "[!i04hh] includes postamble text if specified by config." do
       @config.help_postamble = "Home:\n  https://example.com/\n"
       msg = @builder.build_help_message()

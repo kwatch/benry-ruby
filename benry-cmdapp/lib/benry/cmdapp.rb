@@ -506,11 +506,12 @@ module Benry::CmdApp
     FORMAT_HEADING    = "\e[34m%s\e[0m"            # blue
     #FORMAT_HEADING   = "\e[33;4m%s\e[0m"          # yellow, underline
 
-    def initialize(app_desc, app_version=nil, app_name: nil, app_command: nil,
-                   app_detail: nil, help_postamble: nil,
+    def initialize(app_desc, app_version=nil,
+                   app_name: nil, app_command: nil, app_detail: nil,
                    default_action: nil, default_help: false,
                    option_help: true, option_all: false, option_debug: false,
                    option_verbose: false, option_quiet: false, option_color: false,
+                   help_sections: [], help_postamble: nil,
                    format_help: nil, format_usage: nil, format_heading: nil)
       #; [!uve4e] sets command name automatically if not provided.
       @app_desc       = app_desc        # ex: "sample application"
@@ -518,7 +519,6 @@ module Benry::CmdApp
       @app_name       = app_name    || ::File.basename($0)   # ex: "MyApp"
       @app_command    = app_command || ::File.basename($0)   # ex: "myapp"
       @app_detail     = app_detail      # ex: "See https://.... for details.\n"
-      @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
       @default_action = default_action  # default action name
       @default_help   = default_help    # print help message if action not specified
       @option_help    = option_help     # '-h' and '--help' are enabled when true
@@ -527,15 +527,18 @@ module Benry::CmdApp
       @option_quiet   = option_quiet    # '-q' and '--quiet' are enabled when true
       @option_color   = option_color    # '--color[=<on|off>]' enabled when true
       @option_debug   = option_debug    # '-D' and '--debug' are enable when true
+      @help_sections  = help_sections   # ex: [["Example", "..text.."], ...]
+      @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
       @format_help    = format_help    || FORMAT_HELP
       @format_usage   = format_usage   || FORMAT_USAGE
       @format_heading = format_heading || FORMAT_HEADING
     end
 
-    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail, :help_postamble
+    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail
     attr_accessor :default_action, :default_help
     attr_accessor :option_help, :option_all, :option_debug
     attr_accessor :option_verbose, :option_quiet, :option_color
+    attr_accessor :help_sections, :help_postamble
     attr_accessor :format_help, :format_usage, :format_heading
 
   end
@@ -875,6 +878,9 @@ module Benry::CmdApp
       sb << build_options(all, format)
       sb << build_actions(all, format)
       #sb << build_aliases(all, format)
+      @config.help_sections.each do |title, content|
+        sb << build_section(title, content, all)
+      end if @config.help_sections
       sb << build_postamble(all)
       return sb.reject {|s| s.nil? || s.empty? }.join("\n")
     end
@@ -944,6 +950,15 @@ module Benry::CmdApp
         #; [!yigf3] shows private (hidden) action names if 'all' flag is true.
         sb << format % [name, desc] if all || ! Util.hidden_name?(name)
       end
+      return sb.join()
+    end
+
+    def build_section(title, content, all=false)
+      #; [!cfijh] includes section title and content if specified by config.
+      sb = []
+      sb << heading(title) << "\n"
+      sb << content
+      sb << "\n" unless content.end_with?("\n")
       return sb.join()
     end
 
