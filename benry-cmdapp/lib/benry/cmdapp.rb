@@ -16,7 +16,6 @@ module Benry::CmdApp
 
   SCHEMA_CLASS   = Benry::CmdOpt::Schema
   PARSER_CLASS   = Benry::CmdOpt::Parser
-  OPTION_ERROR   = Benry::CmdOpt::OptionError
 
 
   class BaseError < StandardError; end
@@ -595,7 +594,7 @@ module Benry::CmdApp
       begin
         #; [!y6q9z] runs action with options.
         self.run(*argv)
-      rescue OPTION_ERROR, ExecutionError, DefinitionError => exc
+      rescue ExecutionError, DefinitionError => exc
         #; [!6ro6n] not catch error when $DEBUG_MODE is on.
         raise if $DEBUG_MODE
         #; [!a7d4w] prints error message with '[ERROR]' prompt.
