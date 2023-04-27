@@ -503,6 +503,17 @@ END
       end
     end
 
+    it "[!tnv9n] deletes escape chars if stdout is not a tty." do
+      detail = "\e[34mDocument:\e[0m https://..."
+      metadata = new_metadata(new_schema(), detail: detail)
+      ## without tty
+      msg = without_tty { metadata.help_message("testapp") }
+      ok {msg}.include?("\nDocument: https://...\n\n")
+      ## with tty
+      msg = with_tty { metadata.help_message("testapp") }
+      ok {msg}.include?("\n\e[34mDocument:\e[0m https://...\n\n")
+    end
+
     it "[!4xsc1] colorizes usage string when stdout is a tty." do
       schema = new_schema()
       msg = with_tty { new_metadata(schema).help_message("testapp") }
@@ -2334,6 +2345,16 @@ Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
 
 END
+    end
+
+    it "[!6bwle] deletes escape chars if stdout is not a tty." do
+      @config.app_detail = "\e[34mDocument:\e[0m https://..."
+      ## without tty
+      msg = without_tty { @builder.build_help_message() }
+      ok {msg}.include?("\nDocument: https://...\n\n")
+      ## with tty
+      msg = with_tty { @builder.build_help_message() }
+      ok {msg}.include?("\n\e[34mDocument:\e[0m https://...\n\n")
     end
 
     it "[!rvhzd] no preamble when neigher app desc nor detail specified." do

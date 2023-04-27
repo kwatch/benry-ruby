@@ -228,12 +228,15 @@ module Benry::CmdApp
 
     def build_preamble(command, all=false)
       #; [!pqoup] adds detail text into help if specified.
+      #; [!tnv9n] deletes escape chars if stdout is not a tty.
       sb = []
       sb << "#{command} #{@am.name} -- #{@am.desc}\n"
       if @am.detail
+        s = @am.detail
+        s = Util.del_escape_seq(s) unless Util.colorize?
         sb << "\n"
-        sb << @am.detail
-        sb << "\n" unless @am.detail.end_with?("\n")
+        sb << s
+        sb << "\n" unless s.end_with?("\n")
       end
       return sb.join()
     end
@@ -847,9 +850,12 @@ module Benry::CmdApp
       end
       #; [!775jb] includes detail text if specified by config.
       #; [!t3tbi] adds '\n' before detail text only when app desc specified.
+      #; [!6bwle] deletes escape chars if stdout is not a tty.
       if c.app_detail
+        s = c.app_detail
+        s = Util.del_escape_seq(s) unless Util.colorize?
         sb << "\n" unless sb.empty?
-        sb << c.app_detail
+        sb << s
         sb << "\n" unless c.app_detail.end_with?("\n")
       end
       #; [!rvhzd] no preamble when neigher app desc nor detail specified.
