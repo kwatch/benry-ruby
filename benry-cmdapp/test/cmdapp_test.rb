@@ -1529,6 +1529,32 @@ END
       ok {@app.instance_variable_get('@_called2')} == nil
     end
 
+    it "[!avxos] prints candidate actions if action name ends with ':'." do
+      class CandidateTest1 < Benry::CmdApp::Action
+        prefix "candi:date1"
+        @action.("test")
+        def bbb(); end
+        @action.("test")
+        def aaa(); end
+      end
+      ## without tty
+      sout, serr = capture_sio(tty: false) { @app.run("candi:date1:") }
+      ok {serr} == ""
+      ok {sout} == <<"END"
+Actions:
+  candi:date1:aaa    : test
+  candi:date1:bbb    : test
+END
+      ## with tty
+      sout, serr = capture_sio(tty: true) { @app.run("candi:date1:") }
+      ok {serr} == ""
+      ok {sout} == <<"END"
+\e[34mActions:\e[0m
+  \e[1mcandi:date1:aaa   \e[0m : test
+  \e[1mcandi:date1:bbb   \e[0m : test
+END
+    end
+
     it "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
       def @app.do_find_action(args)
         ret = super
@@ -2195,6 +2221,69 @@ END
       ensure
         ValidateActionTest3.class_eval { @__default__ = nil }
       end
+    end
+
+  end
+
+
+  describe '#do_print_candidates()' do
+
+    it "[!0e8vt] prints candidate action names including prefix name without tailing ':'." do
+      class CandidateTest2 < Benry::CmdApp::Action
+        prefix "candi:date2", default: :eee
+        @action.("test1")
+        def ddd(); end
+        @action.("test2")
+        def ccc(); end
+        @action.("test3")
+        def eee(); end
+      end
+      sout, serr = capture_io do
+        @app.__send__(:do_print_candidates, ["candi:date2:"])
+      end
+      ok {serr} == ""
+      ok {sout} == <<"END"
+Actions:
+  candi:date2        : test3
+  candi:date2:ccc    : test2
+  candi:date2:ddd    : test1
+END
+    end
+
+    it "[!85i5m] candidate actions should include alias names." do
+      class CandidateTest3 < Benry::CmdApp::Action
+        prefix "candi:date3", default: :ggg
+        @action.("test1")
+        def hhh(); end
+        @action.("test2")
+        def fff(); end
+        @action.("test3")
+        def ggg(); end
+      end
+      Benry::CmdApp.action_alias("pupu", "candi:date3:fff")
+      Benry::CmdApp.action_alias("popo", "candi:date3:fff")
+      Benry::CmdApp.action_alias("candi:date3:xxx", "candi:date3:hhh")
+      sout, serr = capture_io do
+        @app.__send__(:do_print_candidates, ["candi:date3:"])
+      end
+      ok {serr} == ""
+      ok {sout} == <<"END"
+Actions:
+  candi:date3        : test3
+  candi:date3:fff    : test2
+                       (alias: pupu, popo)
+  candi:date3:hhh    : test1
+                       (alias: candi:date3:xxx)
+  candi:date3:xxx    : alias of 'candi:date3:hhh' action
+END
+    end
+
+    it "[!i2azi] raises error when no candidate actions found." do
+      pr = proc do
+        @app.__send__(:do_print_candidates, ["candi:date9:"])
+      end
+      ok {pr}.raise?(Benry::CmdApp::CommandError,
+                     "No actions starting with 'candi:date9:'.")
     end
 
   end

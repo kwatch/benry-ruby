@@ -609,6 +609,11 @@ module Benry::CmdApp
       #; [!pbug7] skip actions if callback method returns `:SKIP` value.
       result = do_callback(args)
       return if result == :SKIP
+      #; [!avxos] prints candidate actions if action name ends with ':'.
+      if ! args.empty? && args[0].end_with?(':')
+        do_print_candidates(args)
+        return
+      end
       #; [!agfdi] reports error when action not found.
       #; [!o5i3w] reports error when default action not found.
       #; [!n60o0] reports error when action nor default action not specified.
@@ -786,6 +791,46 @@ module Benry::CmdApp
           nl = ""
         end
       end
+    end
+
+    def do_print_candidates(args)
+      #; [!0e8vt] prints candidate action names including prefix name without tailing ':'.
+      prefix  = args[0]
+      prefix2 = prefix.chomp(':')
+      pairs = []
+      aname2aliases = {}
+      Index::ACTIONS.each do |aname, ameta|
+        if aname.start_with?(prefix) || aname == prefix2
+          pairs << [aname, ameta.desc]
+          aname2aliases[aname] = []
+        end
+      end
+      #; [!85i5m] candidate actions should include alias names.
+      Index::ALIASES.each do |alias_, aname|
+        if alias_.start_with?(prefix) || alias_ == prefix2
+          pairs << [alias_, "alias of '#{aname}' action"]
+        end
+      end
+      #; [!i2azi] raises error when no candidate actions found.
+      ! pairs.empty?  or
+        raise CommandError.new("No actions starting with '#{prefix}'.")
+      Index::ALIASES.each do |alias_, aname|
+        aname2aliases[aname] << alias_ if aname2aliases.key?(aname)
+      end
+      sb = []
+      sb << @config.format_heading % "Actions:" << "\n"
+      format = @config.format_help
+      indent = " " * (Util.del_escape_seq(format) % ['', '']).length
+      pairs.sort_by {|aname, _| aname }.each do |aname, adesc|
+        sb << format % [aname, adesc] << "\n"
+        aliases = aname2aliases[aname]
+        if aliases && ! aliases.empty?
+          sb << indent << "(alias: " << aliases.join(", ") << ")\n"
+        end
+      end
+      s = sb.join()
+      s = Util.del_escape_seq(s) unless Util.colorize?
+      puts s
     end
 
     def do_setup()
