@@ -2286,6 +2286,29 @@ END
                      "No actions starting with 'candi:date9:'.")
     end
 
+    it "[!k3lw0] private (hidden) action should not be printed as candidates." do
+      class CandidateTest4 < Benry::CmdApp::Action
+        prefix "candi:date4"
+        @action.("test1")
+        def kkk(); end
+        private
+        @action.("test2")
+        def iii(); end
+        public
+        @action.("test3")
+        def jjj(); end
+      end
+      sout, serr = capture_io do
+        @app.__send__(:do_print_candidates, ["candi:date4:"])
+      end
+      ok {serr} == ""
+      ok {sout} == <<"END"
+Actions:
+  candi:date4:jjj    : test3
+  candi:date4:kkk    : test1
+END
+    end
+
   end
 
 

@@ -804,16 +804,17 @@ module Benry::CmdApp
       pairs = []
       aname2aliases = {}
       Index::ACTIONS.each do |aname, ameta|
-        if aname.start_with?(prefix) || aname == prefix2
-          pairs << [aname, ameta.desc]
-          aname2aliases[aname] = []
-        end
+        next unless aname.start_with?(prefix) || aname == prefix2
+        #; [!k3lw0] private (hidden) action should not be printed as candidates.
+        next if ameta.hidden?
+        #
+        pairs << [aname, ameta.desc]
+        aname2aliases[aname] = []
       end
       #; [!85i5m] candidate actions should include alias names.
       Index::ALIASES.each do |alias_, aname|
-        if alias_.start_with?(prefix) || alias_ == prefix2
-          pairs << [alias_, Util.alias_desc(aname)]
-        end
+        next unless alias_.start_with?(prefix) || alias_ == prefix2
+        pairs << [alias_, Util.alias_desc(aname)]
       end
       #; [!i2azi] raises error when no candidate actions found.
       ! pairs.empty?  or
