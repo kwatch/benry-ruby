@@ -587,7 +587,7 @@ module Benry::CmdApp
 
     attr_reader :config, :schema, :help_builder, :callback
 
-    def main(argv=ARGV, error_ignore_rexp: /\/benry\/cmd(app|opt)\.rb\z/, &block)
+    def main(argv=ARGV, &block)
       begin
         #; [!y6q9z] runs action with options.
         self.run(*argv)
@@ -598,10 +598,11 @@ module Benry::CmdApp
         $stderr.puts "\033[0;31m[ERROR]\033[0m #{exc.message}"
         #; [!r7opi] prints filename and line number on where error raised if DefinitionError.
         if exc.is_a?(DefinitionError)
-          #; [!v0zrf] error location can be filtered by regexp or block.
+          #; [!v0zrf] error location can be filtered by block.
           if block_given?()
             loc = exc.backtrace_locations.find(&block)
           else
+            error_ignore_rexp = /\/benry\/cmd(app|opt)\.rb\z/
             loc = exc.backtrace_locations.find {|x| x.path !~ error_ignore_rexp }
           end
           raise unless loc

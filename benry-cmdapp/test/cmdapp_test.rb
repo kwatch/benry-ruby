@@ -1436,7 +1436,7 @@ END
 END
     end
 
-    it "[!v0zrf] error location can be filtered by regexp or block." do
+    it "[!v0zrf] error location can be filtered by block." do
       class MainTest2 < Benry::CmdApp::Action
         prefix "main2"
         @action.("test")
@@ -1458,10 +1458,6 @@ END
       sout, serr = capture_io { @app.main(["main2:err2"]) }
       ok {sout} == ""
       ok {serr} =~ /\t\(file: .*\/cmdapp_test\.rb, line: #{lineno1}\)\n/
-      ## filter by regexp
-      sout, serr = capture_io { @app.main(["main2:err2"], error_ignore_rexp: /\.py$/) }
-      ok {sout} == ""
-      ok {serr} =~ /\t\(file: .*\/cmdapp\.rb, line: \d+\)\n/
       ## filter by block
       sout, serr = capture_io {
         @app.main(["main2:err2"]) {|exc| exc.lineno == lineno2 }
