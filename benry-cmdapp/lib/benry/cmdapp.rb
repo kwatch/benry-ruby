@@ -28,6 +28,7 @@ module Benry::CmdApp
 
   class ExecutionError      < BaseError; end
   class CommandError        < ExecutionError; end
+  class InvalidOptionError  < ExecutionError; end
   class ActionNotFoundError < ExecutionError; end
   class LoopedActionError   < ExecutionError; end
 
@@ -144,6 +145,9 @@ module Benry::CmdApp
     def parse_options(argv, all=true)
       #; [!ab3j8] parses argv and returns options.
       return PARSER_CLASS.new(@schema).parse(argv, all)
+      #; [!56da8] raises InvalidOptionError if option value is invalid.
+    rescue Benry::CmdOpt::OptionError => exc
+      raise InvalidOptionError.new(exc.message)
     end
 
     def run_action(*args, **kwargs)
@@ -673,6 +677,9 @@ module Benry::CmdApp
       parser = PARSER_CLASS.new(@schema)
       global_opts = parser.parse(args, false)
       return global_opts
+      #; [!kklah] raises InvalidOptionError if global option value is invalid.
+    rescue Benry::CmdOpt::OptionError => exc
+      raise InvalidOptionError.new(ex.message)
     end
 
     def do_handle_global_options(args)

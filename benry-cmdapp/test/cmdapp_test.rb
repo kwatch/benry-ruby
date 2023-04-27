@@ -363,6 +363,12 @@ describe Benry::CmdApp::ActionMetadata do
       ok {args} == ["Bob"]
     end
 
+    it "[!56da8] raises InvalidOptionError if option value is invalid." do
+      args = ["-x", "fr", "Alice"]
+      pr = proc { @metadata.parse_options(args) }
+      ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-x: unknown option.")
+    end
+
   end
 
 
@@ -1775,6 +1781,11 @@ END
       sout, serr = capture_io { @app.run("test-globalopt", "--help") }
       ok {serr} == ""
       ok {sout} == "help=true\n"
+    end
+
+    it "[!kklah] raises InvalidOptionError if global option value is invalid." do
+      pr = proc { @app.run("test-globalopt", "-hoge") }
+      ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-o: unknown option.")
     end
 
   end
