@@ -1436,6 +1436,40 @@ END
 END
     end
 
+    it "[!v0zrf] error location can be filtered by regexp or block." do
+      class MainTest2 < Benry::CmdApp::Action
+        prefix "main2"
+        @action.("test")
+        def err2
+          _err2()
+        end
+        def _err2()
+          MainTest2.class_eval do  # == lineno2
+            @action.("test")
+            @option.(:foo, "--foo", "foo")
+            def err2x(bar: nil)    # == lineno1
+            end
+          end
+        end
+      end
+      lineno1 = __LINE__ - 5
+      lineno2 = lineno1 - 3
+      ## no filter
+      sout, serr = capture_io { @app.main(["main2:err2"]) }
+      ok {sout} == ""
+      ok {serr} =~ /\t\(file: .*\/cmdapp_test\.rb, line: #{lineno1}\)\n/
+      ## filter by regexp
+      sout, serr = capture_io { @app.main(["main2:err2"], error_ignore_rexp: /\.py$/) }
+      ok {sout} == ""
+      ok {serr} =~ /\t\(file: .*\/cmdapp\.rb, line: \d+\)\n/
+      ## filter by block
+      sout, serr = capture_io {
+        @app.main(["main2:err2"]) {|exc| exc.lineno == lineno2 }
+      }
+      ok {sout} == ""
+      ok {serr} =~ /\t\(file: .*\/cmdapp_test\.rb, line: #{lineno2}\)\n/
+    end
+
     it "[!6ro6n] not catch error when $DEBUG_MODE is on." do
       bkup = $DEBUG_MODE
       begin
