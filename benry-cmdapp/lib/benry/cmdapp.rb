@@ -605,8 +605,7 @@ module Benry::CmdApp
           if block_given?()
             loc = exc.backtrace_locations.find(&block)
           else
-            error_ignore_rexp = /\/benry\/cmd(app|opt)\.rb\z/
-            loc = exc.backtrace_locations.find {|x| x.path !~ error_ignore_rexp }
+            loc = exc.backtrace_locations.find {|x| x.path != __FILE__ }
           end
           raise unless loc
           $stderr.puts "\t(file: #{loc.path}, line: #{loc.lineno})"
