@@ -375,6 +375,47 @@ describe Benry::CmdApp::ActionMetadata do
       ok {serr} == ""
     end
 
+    def _tracing_mode(flag, &block)
+      bkup = $TRACING_MODE
+      $TRACING_MODE = true
+      begin
+        return yield
+      ensure
+        $TRACING_MODE = bkup
+      end
+    end
+
+    it "[!tubhv] if $TRACING_MODE is on, prints tracing info." do
+      args = ["Alice"]; kwargs = {lang: "it"}
+      sout, serr = _tracing_mode(true) do
+        capture_io {
+          @metadata.run_action(*args, **kwargs)
+        }
+      end
+      ok {serr} == ""
+      ok {sout} == <<"END"
+## enter: halo1
+Ciao, Alice!
+## exit:  halo1
+END
+    end
+
+    it "[!zgp14] tracing info is colored when stdout is a tty." do
+      args = ["Alice"]; kwargs = {lang: "it"}
+      sout, serr = _tracing_mode(true) do
+        capture_io {
+          def $stdout.tty?; true; end
+          @metadata.run_action(*args, **kwargs)
+        }
+      end
+      ok {serr} == ""
+      ok {sout} == <<"END"
+\e[33m## enter: halo1\e[0m
+Ciao, Alice!
+\e[33m## exit:  halo1\e[0m
+END
+    end
+
   end
 
 
