@@ -227,6 +227,19 @@ end
 
 module CommonTestingHelper
 
+  def uncolorize(str)
+    return str.gsub(/\e\[.*?m/, '')
+  end
+
+  def capture_sio(tty: false, &block)
+    capture_io do
+      if tty
+        def $stdout.tty?; true; end
+      end
+      yield
+    end
+  end
+
   def without_tty(&block)
     result = nil
     capture_io { result = yield }
@@ -460,7 +473,7 @@ END
     it "[!i7siu] returns help message of action." do
       schema = new_schema()
       msg = without_tty { new_metadata(schema).help_message("testapp") }
-      ok {msg} == <<END
+      ok {uncolorize(msg)} == <<END
 testapp halo1 -- greeting
 
 Usage:
@@ -498,25 +511,22 @@ END
       detail = "See: https://example.com/doc.html"
       [detail, detail+"\n"].each do |detail_|
         metadata = new_metadata(new_schema(), detail: detail)
-        msg = without_tty { metadata.help_message("testapp") }
+        msg = metadata.help_message("testapp")
+        msg = uncolorize(msg)
         ok {msg} == expected
       end
     end
 
-    it "[!4xsc1] colorizes usage string when stdout is a tty." do
-      schema = new_schema()
-      msg = with_tty { new_metadata(schema).help_message("testapp") }
-      ok {msg}.include?("\n  $ \e[1mtestapp halo1\e[0m [<options>] [<user>]\n")
-    end
-
     it "[!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist." do
       schema = new_schema(lang: false)
-      msg = without_tty { new_metadata(schema).help_message("testapp") }
+      msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg}.include?("Usage:\n" +
                         "  $ testapp halo1 [<user>]\n")
       #
       schema = new_schema(lang: true)
-      msg = without_tty { new_metadata(schema).help_message("testapp") }
+      msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg}.include?("Usage:\n" +
                         "  $ testapp halo1 [<options>] [<user>]\n")
     end
@@ -524,35 +534,32 @@ END
     it "[!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified." do
       schema = new_schema(lang: false)
       schema.add(:_lang, "-l, --lang=<en|fr|it>", "language")
-      msg = without_tty { new_metadata(schema).help_message("testapp") }
+      msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp halo1 \[<user>\]\n/
       ok {msg} =~ /^Usage:\n  \$ testapp halo1 \[<user>\]$/
     end
 
     it "[!ou3md] not add extra whiespace when no arguments of command." do
       schema = new_schema(lang: true)
-      msg = without_tty { new_metadata(schema, :halo3).help_message("testapp") }
+      msg = new_metadata(schema, :halo3).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp halo3 \[<options>\]\n/
       ok {msg} =~ /^Usage:\n  \$ testapp halo3 \[<options>\]$/
     end
 
     it "[!g2ju5] adds 'Options:' section." do
       schema = new_schema(lang: true)
-      msg = without_tty { new_metadata(schema).help_message("testapp") }
+      msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg}.include?("Options:\n" +
                         "  -l, --lang=<en|fr|it> : language\n")
-    end
-
-    it "[!45rha] options are colorized when stdout is a tty." do
-      schema = new_schema(lang: true)
-      msg = with_tty { new_metadata(schema).help_message("testapp") }
-      ok {msg}.include?("\e[34mOptions:\e[0m\n" +
-                        "  \e[1m-l, --lang=<en|fr|it>\e[0m : language\n")
     end
 
     it "[!pvu56] ignores 'Options:' section when no options exist." do
       schema = new_schema(lang: false)
       msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg}.NOT.include?("Options:\n")
     end
 
@@ -560,6 +567,7 @@ END
       schema = new_schema(lang: false)
       schema.add(:_lang, "-l, --lang=<en|fr|it>", "language")  # hidden option
       msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg}.NOT.include?("Options:\n")
     end
 
@@ -567,7 +575,8 @@ END
       postamble = "Tips: `testapp -h <action>` print help message of action."
       schema = new_schema(lang: false)
       ameta = new_metadata(schema, postamble: postamble)
-      msg = without_tty { ameta.help_message("testapp") }
+      msg = ameta.help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} == <<END
 testapp halo1 -- greeting
 
@@ -578,61 +587,19 @@ Tips: `testapp -h <action>` print help message of action.
 END
     end
 
-    it "[!37487] deletes escape sequence from postamble when stdout is not a tty." do
-      postamble = "\e[34mTips:\e[0m\n  blabla"
-      schema = new_schema(lang: false)
-      ameta = new_metadata(schema, postamble: postamble)
-      msg = without_tty { ameta.help_message("testapp") }
-      ok {msg}.end_with?("Tips:\n  blabla\n")
-      #
-      msg = with_tty { ameta.help_message("testapp") }
-      ok {msg}.end_with?("\e[34mTips:\e[0m\n  blabla\n")
-    end
-
     it "[!v5567] adds '\n' at end of preamble text if it doesn't end with '\n'." do
-      postamble = "\e[34mEND\e[0m"
+      postamble = "END"
       schema = new_schema(lang: false)
       ameta = new_metadata(schema, postamble: postamble)
-      msg = without_tty { ameta.help_message("testapp") }
+      msg = ameta.help_message("testapp")
       ok {msg}.end_with?("\nEND\n")
-      msg = with_tty { ameta.help_message("testapp") }
-      ok {msg}.end_with?("\n\e[34mEND\e[0m\n")
-    end
-
-    it "[!f33dt] headers are colored only when $stdout is a TTY." do
-      schema = new_schema()
-      metadata = new_metadata(schema)
-      config = Benry::CmdApp::Config.new("test")
-      bkup = $cmdapp_config
-      $cmdapp_config = nil
-      begin
-        ## when $stdout.tty? == false
-        $cmdapp_config = nil
-        msg = without_tty { metadata.help_message("testapp") }
-        ok {msg} =~ /^Usage:\n/
-        ok {msg} =~ /^Options:\n/
-        $cmdapp_config = config
-        msg = without_tty { metadata.help_message("testapp") }
-        ok {msg} =~ /^Usage:\n/
-        ok {msg} =~ /^Options:\n/
-        ## when $stdout.tty? == true
-        $cmdapp_config = config
-        msg = with_tty { metadata.help_message("testapp") }
-        ok {msg}.include?("\n\e[34mUsage:\e[0m\n")
-        ok {msg}.include?("\n\e[34mOptions:\e[0m\n")
-        $cmdapp_config = nil
-        msg = with_tty { metadata.help_message("testapp") }
-        ok {msg}.include?("\n\e[34mUsage:\e[0m\n")
-        ok {msg}.include?("\n\e[34mOptions:\e[0m\n")
-      ensure
-        $cmdapp_config = bkup
-      end
     end
 
     it "[!x0z89] required arg is represented as '<arg>'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args1", MetadataTestAction, :args1, "", schema)
-      msg = without_tty { metadata.help_message("testapp") }
+      msg = metadata.help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp args1 <aa> <bb>$/
     end
 
@@ -640,27 +607,31 @@ END
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args2", MetadataTestAction, :args2, "", schema)
       msg = without_tty { metadata.help_message("testapp") }
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp args2 <aa> \[<bb> \[<cc>\]\]$/
     end
 
     it "[!xugkz] variable args are represented as '[<arg>...]'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args3", MetadataTestAction, :args3, "", schema)
-      msg = without_tty { metadata.help_message("testapp") }
+      msg = metadata.help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp args3 <aa> \[<bb> \[<cc> \[<dd>...\]\]\]$/
     end
 
     it "[!eou4h] converts arg name 'xx_or_yy_or_zz' into 'xx|yy|zz'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args4", MetadataTestAction, :args4, "", schema)
-      msg = without_tty { metadata.help_message("testapp") }
+      msg = metadata.help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp args4 <xx\|yy\|zz>$/
     end
 
     it "[!naoft] converts arg name '_xx_yy_zz' into '_xx-yy-zz'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args5", MetadataTestAction, :args5, "", schema)
-      msg = without_tty { metadata.help_message("testapp") }
+      msg = metadata.help_message("testapp")
+      msg = uncolorize(msg)
       ok {msg} =~ /^  \$ testapp args5 <_xx-yy-zz>$/
     end
 
@@ -1658,7 +1629,8 @@ END
   describe '#help_message()' do
 
     it "[!owg9y] returns help message." do
-      msg = without_tty { @app.help_message() }
+      msg = @app.help_message()
+      msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
 TestApp (1.0.0) -- test app
 
@@ -2084,6 +2056,88 @@ END
       ok {app.instance_variable_get('@_all_')} == true
     end
 
+    it "[!efaws] prints colorized help message when stdout is a tty." do
+      sout, serr = capture_sio(tty: true) { @app.run("-h") }
+      ok {serr} == ""
+      ok {sout}.include?(<<"END")
+\e[34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]
+END
+      ok {sout}.include?(<<"END")
+\e[34mOptions:\e[0m
+  \e[1m-h, --help        \e[0m : print help message (of action if action specified)
+  \e[1m-V, --version     \e[0m : print version
+END
+      ok {sout}.include?(<<"END")
+\e[34mActions:\e[0m
+END
+    end
+
+    it "[!9vdy1] prints non-colorized help message when stdout is not a tty." do
+      sout, serr = capture_sio(tty: false) { @app.run("-h") }
+      ok {serr} == ""
+      ok {sout}.include?(<<"END")
+Usage:
+  $ testapp [<options>] [<action> [<arguments>...]]
+END
+      ok {sout}.include?(<<"END")
+Options:
+  -h, --help         : print help message (of action if action specified)
+  -V, --version      : print version
+END
+      ok {sout}.include?(<<"END")
+Actions:
+END
+    end
+
+    it "[!gsdcu] prints colorized help message when '--color[=on]' specified." do
+      @config.option_color = true
+      app = Benry::CmdApp::Application.new(@config)
+      bkup = $COLOR_MODE
+      begin
+        sout, serr = capture_sio(tty: false) { app.run("-h", "--color") }
+        ok {serr} == ""
+        ok {sout}.include?(<<"END")
+\e[34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]
+END
+        ok {sout}.include?(<<"END")
+\e[34mOptions:\e[0m
+  \e[1m-h, --help        \e[0m : print help message (of action if action specified)
+  \e[1m-V, --version     \e[0m : print version
+END
+        ok {sout}.include?(<<"END")
+\e[34mActions:\e[0m
+END
+      ensure
+        $COLOR_MODE = bkup
+      end
+    end
+
+    it "[!be8y2] prints non-colorized help message when '--color=off' specified." do
+      @config.option_color = true
+      app = Benry::CmdApp::Application.new(@config)
+      bkup = $COLOR_MODE
+      begin
+        sout, serr = capture_sio(tty: true) { app.run("-h", "--color=off") }
+        ok {serr} == ""
+        ok {sout}.include?(<<"END")
+Usage:
+  $ testapp [<options>] [<action> [<arguments>...]]
+END
+        ok {sout}.include?(<<"END")
+Options:
+  -h, --help         : print help message (of action if action specified)
+  -V, --version      : print version
+END
+        ok {sout}.include?(<<"END")
+Actions:
+END
+      ensure
+        $COLOR_MODE = bkup
+      end
+    end
+
   end
 
 
@@ -2255,7 +2309,8 @@ Actions:
 END
 
     it "[!rvpdb] returns help message." do
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} == expected_mono
     end
 
@@ -2267,45 +2322,36 @@ END
       $COLOR_MODE = bkup
     end
 
-    it "[!hvenw] builds colorized help message if `--color=on` specified." do
-      _with_color_mode(true) do
-        msg = without_tty { @builder.build_help_message() }
-        ok {msg} == expected_color
-      end
-    end
-
-    it "[!s62iq] builds mono-color help message if `--color=off` specified." do
-      _with_color_mode(false) do
-        msg = with_tty { @builder.build_help_message() }
-        ok {msg} == expected_mono
-      end
-    end
-
     it "[!34y8e] includes application name specified by config." do
       @config.app_name = "MyGreatApp"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} =~ /^MyGreatApp \(1\.0\.0\) -- test app$/
     end
 
     it "[!744lx] includes application description specified by config." do
       @config.app_desc = "my great app"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} =~ /^TestApp \(1\.0\.0\) -- my great app$/
     end
 
     it "[!d1xz4] includes version number if specified by config." do
       @config.app_version = "1.2.3"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} =~ /^TestApp \(1\.2\.3\) -- test app$/
       #
       @config.app_version = nil
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} =~ /^TestApp -- test app$/
     end
 
     it "[!775jb] includes detail text if specified by config." do
       @config.app_detail = "See https://example.com/doc.html"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
 TestApp (1.0.0) -- test app
 
@@ -2315,7 +2361,8 @@ Usage:
 END
       #
       @config.app_detail = nil
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
 TestApp (1.0.0) -- test app
 
@@ -2326,7 +2373,8 @@ END
     it "[!t3tbi] adds '\n' before detail text only when app desc specified." do
       @config.app_desc   = nil
       @config.app_detail = "See https://..."
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
 See https://...
 
@@ -2339,7 +2387,8 @@ END
     it "[!rvhzd] no preamble when neigher app desc nor detail specified." do
       @config.app_desc   = nil
       @config.app_detail = nil
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
 Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
@@ -2350,7 +2399,8 @@ END
     it "[!o176w] includes command name specified by config." do
       @config.app_name = "GreatCommand"
       @config.app_command = "greatcmd"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
 GreatCommand (1.0.0) -- test app
 
@@ -2361,16 +2411,12 @@ Options:
 END
     end
 
-    it "[!f3qap] colorizes usage string when stdout is a tty." do
-      msg = with_tty { @builder.build_help_message() }
-      ok {msg}.include?("  $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]\n")
-    end
-
     it "[!proa4] includes description of global options." do
       @config.app_version = "1.0.0"
       @config.option_debug = true
       app = Benry::CmdApp::Application.new(@config)
       msg = without_tty { app.help_message() }
+      msg = uncolorize(msg)
       ok {msg}.include?(<<END)
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2385,6 +2431,7 @@ END
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       msg = without_tty { app.help_message() }
+      msg = uncolorize(msg)
       ok {msg}.include?(<<END)
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2394,27 +2441,14 @@ Actions:
 END
     end
 
-    it "[!icmd7] colorizes options when stdout is a tty." do
-      @config.app_version = nil
-      @config.option_debug = false
-      app = Benry::CmdApp::Application.new(@config)
-      msg = with_tty { app.help_message() }
-      ok {msg}.include?(<<"END")
-\e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message (of action if action specified)
-  \e[1m-a, --all         \e[0m : list all actions/options including private (hidden) ones
-
-\e[34mActions:\e[0m
-END
-    end
-
     it "[!in3kf] ignores private (hidden) options." do
       @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
       schema.add(:_log, "-L", "private option")
-      msg = without_tty { app.help_message() }
+      msg = app.help_message()
+      msg = uncolorize(msg)
       ok {msg} !~ /^  -L /
       ok {msg}.include?(<<END)
 Options:
@@ -2431,7 +2465,8 @@ END
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
       schema.add(:_log, "-L", "private option")
-      msg = without_tty { app.help_message(true) }
+      msg = app.help_message(true)
+      msg = uncolorize(msg)
       ok {msg} =~ /^  -L /
       ok {msg}.include?(<<END)
 Options:
@@ -2451,12 +2486,14 @@ END
       app = Benry::CmdApp::Application.new(@config)
       schema = app.instance_variable_get('@schema')
       schema.add(:_log, "-L", "private option")
-      msg = without_tty { app.help_message() }
+      msg = app.help_message()
+      msg = uncolorize(msg)
       ok {msg} !~ /^Options:$/
     end
 
     it "[!jat15] includes action names ordered by name." do
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg}.end_with?(<<'END')
 Actions:
   ya:ya              : greeting #2
@@ -2465,29 +2502,21 @@ Actions:
 END
     end
 
-    it "[!ysqpm] colorizes action names when stdout is a tty." do
-      msg = with_tty { @builder.build_help_message() }
-      ok {msg}.end_with?(<<"END")
-\e[34mActions:\e[0m
-  \e[1mya:ya             \e[0m : greeting #2
-  \e[1myes               \e[0m : alias of 'yo-yo' action
-  \e[1myo-yo             \e[0m : greeting #1
-END
-    end
-
     it "[!df13s] includes default action name if specified by config." do
       @config.default_action = nil
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} =~ /^Actions:$/
       #
       @config.default_action = "yo-yo"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} =~ /^Actions: \(default: yo-yo\)$/
     end
 
     it "[!b3l3m] not show private (hidden) action names in default." do
-      msg = nil
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
+      msg = uncolorize(msg)
       ok {msg} !~ /^  _aha /
       ok {msg} !~ /^  ya:_mada /
       ok {msg}.end_with?(<<END)
@@ -2499,7 +2528,8 @@ END
     end
 
     it "[!yigf3] shows private (hidden) action names if 'all' flag is true." do
-      msg = without_tty { @builder.build_help_message(true) }
+      msg = @builder.build_help_message(true)
+      msg = uncolorize(msg)
       ok {msg} =~ /^  _aha /
       ok {msg} =~ /^  ya:_mada /
       ok {msg}.end_with?(<<END)
@@ -2514,38 +2544,17 @@ END
 
     it "[!i04hh] includes postamble text if specified by config." do
       @config.app_postamble = "Home:\n  https://example.com/\n"
-      msg = without_tty { @builder.build_help_message() }
+      msg = @builder.build_help_message()
       ok {msg}.end_with?(<<"END")
 Home:
-  https://example.com/
-END
-    end
-
-    it "[!d35wp] deletes escape sequence from postamble when stdout is not a tty." do
-      @config.app_postamble = "\e[34mHome:\e[0m\n  https://example.com/"
-      msg = without_tty { @builder.build_help_message() }
-      ok {msg}.end_with?(<<"END")
-Home:
-  https://example.com/
-END
-      msg = with_tty { @builder.build_help_message() }
-      ok {msg}.end_with?(<<"END")
-\e[34mHome:\e[0m
   https://example.com/
 END
     end
 
     it "[!ckagw] adds '\n' at end of preamble text if it doesn't end with '\n'." do
-      @config.app_postamble = "\e[34mEND\e[0m"
-      msg = without_tty { @builder.build_help_message() }
+      @config.app_postamble = "END"
+      msg = @builder.build_help_message()
       ok {msg}.end_with?("\nEND\n")
-      msg = with_tty { @builder.build_help_message() }
-      ok {msg}.end_with?("\n\e[34mEND\e[0m\n")
-    end
-
-    it "[!r636j] heading title is colored when $stdout is a TTY." do
-      msg = with_tty { @builder.build_help_message() }
-      ok {msg} == expected_color
     end
 
   end

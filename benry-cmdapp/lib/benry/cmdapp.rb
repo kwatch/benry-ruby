@@ -239,10 +239,8 @@ module Benry::CmdApp
     end
 
     def build_usage(command, all=false)
-      #; [!4xsc1] colorizes usage string when stdout is a tty.
       config = $cmdapp_config
       format = config ? config.format_usage : Config::FORMAT_USAGE
-      format = Util.del_escape_seq(format) unless Util.colorize?
       #; [!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist.
       #; [!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified.
       #; [!ou3md] not add extra whiespace when no arguments of command.
@@ -258,8 +256,6 @@ module Benry::CmdApp
     def build_options(command, all=false)
       config = $cmdapp_config
       format = config ? config.format_help : Config::FORMAT_HELP
-      #; [!45rha] options are colorized when stdout is a tty.
-      format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
       #; [!g2ju5] adds 'Options:' section.
       #; [!pvu56] ignores 'Options:' section when no options exist.
@@ -276,8 +272,6 @@ module Benry::CmdApp
       #; [!0p2gt] adds postamble text if specified.
       s = @am.postamble
       if s
-        #; [!37487] deletes escape sequence from postamble when stdout is not a tty.
-        s = Util.del_escape_seq(s) unless Util.colorize?
         #; [!v5567] adds '\n' at end of preamble text if it doesn't end with '\n'.
         s += "\n" unless s.end_with?("\n")
       end
@@ -285,10 +279,8 @@ module Benry::CmdApp
     end
 
     def heading(str)
-      #; [!f33dt] headers are colored only when $stdout is a TTY.
       config = $cmdapp_config
       format = config ? config.format_heading : Config::FORMAT_HEADING
-      format = Util.del_escape_seq(format) unless Util.colorize?
       return format % str
     end
 
@@ -764,11 +756,17 @@ module Benry::CmdApp
         #; [!cgxkb] error if action for help option not found.
         metadata = Index.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: action not found.")
-        puts metadata.help_message(@config.app_command, all)
+        msg = metadata.help_message(@config.app_command, all)
       #; [!nv0x3] prints help message of command if action name not provided.
       else
-        puts help_message(all)
+        msg = help_message(all)
       end
+      #; [!efaws] prints colorized help message when stdout is a tty.
+      #; [!9vdy1] prints non-colorized help message when stdout is not a tty.
+      #; [!gsdcu] prints colorized help message when '--color[=on]' specified.
+      #; [!be8y2] prints non-colorized help message when '--color=off' specified.
+      msg = Util.del_escape_seq(msg) unless Util.colorize?
+      puts msg
     end
 
     def do_validate_actions()
@@ -820,8 +818,6 @@ module Benry::CmdApp
 
     def build_help_message(all=false, format=nil)
       #; [!rvpdb] returns help message.
-      #; [!hvenw] builds colorized help message if `--color=on` specified.
-      #; [!s62iq] builds mono-color help message if `--color=off` specified.
       format ||= @config.format_help
       sb = []
       sb << build_preamble(all)
@@ -858,10 +854,8 @@ module Benry::CmdApp
     end
 
     def build_usage(all=false)
-      #; [!f3qap] colorizes usage string when stdout is a tty.
       c = @config
       format = c.format_usage
-      format = Util.del_escape_seq(format) unless Util.colorize?
       #; [!o176w] includes command name specified by config.
       sb = []
       sb << "#{heading('Usage:')}\n"
@@ -871,8 +865,6 @@ module Benry::CmdApp
 
     def build_options(all=false, format=nil)
       format ||= @config.format_help
-      #; [!icmd7] colorizes options when stdout is a tty.
-      format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
       #; [!in3kf] ignores private (hidden) options.
       #; [!ywarr] not ignore private (hidden) options if 'all' flag is true.
@@ -889,8 +881,6 @@ module Benry::CmdApp
     def build_actions(all=false, format=nil)
       c = @config
       format ||= c.format_help
-      #; [!ysqpm] colorizes action names when stdout is a tty.
-      format = Util.del_escape_seq(format) unless Util.colorize?
       format += "\n"
       sb = []
       sb << heading("Actions:")
@@ -911,8 +901,6 @@ module Benry::CmdApp
       #; [!i04hh] includes postamble text if specified by config.
       s = @config.app_postamble
       if s
-        #; [!d35wp] deletes escape sequence from postamble when stdout is not a tty.
-        s = Util.del_escape_seq(s) unless Util.colorize?
         #; [!ckagw] adds '\n' at end of preamble text if it doesn't end with '\n'.
         s += "\n" unless s.end_with?("\n")
       end
@@ -920,8 +908,6 @@ module Benry::CmdApp
     end
 
     def heading(str)
-      #; [!r636j] heading title is colored when $stdout is a TTY.
-      return str unless Util.colorize?
       return @config.format_heading % str
     end
 
