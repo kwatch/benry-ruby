@@ -67,7 +67,7 @@ Table of Contents
 Install
 =======
 
-```terminal
+```console
 $ gem install benry-cmdapp
 ```
 
@@ -112,7 +112,7 @@ exit status_code
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex01.rb hello
 Hello, world!
 
@@ -122,7 +122,7 @@ Hello, Alice!
 
 Help message of command:
 
-```terminal
+```console
 [bash]$ ruby ex01.rb -h     # or `--help`
 ex01.rb (1.0.0) -- sample app
 
@@ -139,7 +139,7 @@ Actions:
 
 Help message of action:
 
-```terminal
+```console
 [bash]$ ruby ex01.rb -h hello
 ex01.rb hello -- print greeting message
 
@@ -190,7 +190,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex02.rb --help
 ex02.rb -- test app
 
@@ -208,7 +208,7 @@ Actions:
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex02.rb print
 print_
 
@@ -257,7 +257,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex03.rb -h test1
 hoge.rb test1 -- parameter names test
 
@@ -306,7 +306,7 @@ exit status_code
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex04.rb hello
 Hello, world!
 
@@ -358,7 +358,7 @@ exit status_code
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex05.rb hello Alice -l fr --repeat=3
 Bonjour, Alice!
 Bonjour, Alice!
@@ -367,7 +367,7 @@ Bonjour, Alice!
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex05.rb -h hello
 ex05.rb hello -- print greeting message
 
@@ -384,7 +384,7 @@ and doesn't support `--lang <val>` style option.
 Benry::CmdApp regards `--lang <val>` as 'long option without argument'
 and 'argument for command'.
 
-```terminal
+```console
 [bash]$ ruby ex05.rb hello --lang fr         # `--lang fr` != `--lang=fr`
 [ERROR] --lang: argument required.
 ```
@@ -447,7 +447,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex06.rb test1 -q -f readme.txt -i4
 quiet=true, file="readme.txt", indent="4"
 
@@ -462,7 +462,7 @@ quiet=true, file="readme.txt", indent="4"
 
 Optional argument example:
 
-```terminal
+```console
 [bash]$ ruby ex06.rb test1 -i                 # `-i` results in `true`
 quiet=false, file=nil, indent=true
 [bash]$ ruby ex06.rb test1 -i4                # `-i4` results in `4`
@@ -563,7 +563,7 @@ exit status_code
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex07.rb hello -l japan
 [ERROR] -l japan: pattern unmatched.
 
@@ -627,7 +627,7 @@ exit status_code
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex08.rb hello -l FR
 Bonjour, world!
 
@@ -689,7 +689,7 @@ exit status_code
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex09.rb --upper         # on
 HELLO, WORLD!
 
@@ -745,7 +745,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex10.rb flagtest1          # false if '-x' NOT specified
 flag=false
 
@@ -793,7 +793,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex11.rb foo:bar:test1
 test1
 
@@ -803,7 +803,7 @@ baz__test2
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex11.rb -h
 ex11.rb -- sample app
 
@@ -849,7 +849,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex12.rb foo:bar:test1
 test1
 
@@ -862,7 +862,7 @@ test3_
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex12.rb -h
 ex12.rb -- sample app
 
@@ -915,7 +915,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex13.rb build
 rm -rf build                          # !!!!
 mkdir build                           # !!!!
@@ -956,7 +956,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex14.rb test1
 [ERROR] test1: looped action detected.
 
@@ -994,7 +994,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex15.rb test
 test1
 
@@ -1004,7 +1004,7 @@ test1
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex15.rb -h
 ex15.rb -- sample app
 
@@ -1049,7 +1049,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex17.rb test1
 test1
 
@@ -1059,7 +1059,7 @@ test1
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex17.rb -h
 ex17.rb -- sample app
 
@@ -1103,7 +1103,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex18.rb            # !!!!
 ex18.rb -- sample app
 
@@ -1160,7 +1160,7 @@ exit app.main()
 
 Help message (without `-a` nor `--all`):
 
-```terminal
+```console
 [bash]$ ruby ex20.rb -h
 ex20.rb -- sample app
 
@@ -1177,7 +1177,7 @@ Actions:
 
 Help message (with `-a` or `--all`):
 
-```terminal
+```console
 [bash]$ ruby ex20.rb -h --all      # !!!!
 ex20.rb -- sample app
 
@@ -1226,7 +1226,7 @@ exit app.main()
 
 Help message (without `-a` nor `--all`):
 
-```terminal
+```console
 [bash]$ ruby ex21.rb -h test1
 ex21.rb test1 -- test action
 
@@ -1239,7 +1239,7 @@ Options:
 
 Help message (with `-a` or `--all`)
 
-```terminal
+```console
 [bash]$ ruby ex21.rb -h --all test1           # !!!!
 ex21.rb test1 -- test action
 
@@ -1299,7 +1299,7 @@ end
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex22.rb
 config.app_desc           = "sample app"
 config.app_version        = "1.0.0"
@@ -1359,7 +1359,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex23.rb -h
 ex23.rb -- sample app
 
@@ -1493,7 +1493,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex26.rb -h
 ex26.rb -- sample app
 
@@ -1657,7 +1657,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex29.rb -h
 ex29.rb hello -- test action #1
 
@@ -1834,7 +1834,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex41.rb hello
 ---- >8 ---- >8 ----
 Hello, world!
@@ -1880,7 +1880,7 @@ exit app.main()
 
 Output:
 
-```terminal
+```console
 [bash]$ ruby ex42.rb -T build           # !!!!
 ## enter: build
 ## enter: prepare
@@ -1918,7 +1918,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex43.rb -h
 ex43.rb -- sample app
 
@@ -1974,7 +1974,7 @@ exit app.main()
 
 Help message of `test2` action:
 
-```terminal
+```console
 [bash]$ ruby ex44.rb -h test2
 ex44.rb test2 -- test action #2
 
@@ -2026,7 +2026,7 @@ exit app.main()
 
 Help message:
 
-```terminal
+```console
 [bash]$ ruby ex45.rb
 ex45.rb -- sample app
 
