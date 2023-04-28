@@ -39,11 +39,11 @@ module Benry
 
       attr_reader :schema
 
-      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, tag: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
-        #; [!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args.
-        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, tag: tag, &callback)
+        #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
+        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, tag: tag, &callback)
         #; [!tu4k3] returns self.
         self
       end
@@ -102,17 +102,18 @@ module Benry
         self
       end
 
-      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, tag: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
-        #; [!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args.
+        #; [!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
         rest.each do |x|
           case x
           when Class      ; type ||= x
           when Regexp     ; rexp ||= x
           when Array, Set ; enum ||= x
+          when Range      ; range ||= x
           else
-            #; [!e3emy] raises error when positional arg is not one of class, regexp, nor array.
-            raise error("#{x.inspect}: expected one of class, regexp, or array, but got #{x.class.name}.")
+            #; [!e3emy] raises error when positional arg is not one of class, regexp, array, nor range.
+            raise error("#{x.inspect}: expected one of class, regexp, array or range, but got #{x.class.name}.")
           end
         end
         #; [!rhhji] raises SchemaError when key is not a Symbol.
@@ -155,7 +156,7 @@ module Benry
         end
         #; [!5nrvq] when 'enum:' specified...
         if enum
-          #; [!melyd] raises SchmeaError when enum is not a Array nor Set.
+          #; [!melyd] raises SchemaError when enum is not an Array nor Set.
           enum.is_a?(Array) || enum.is_a?(Set)  or
             raise error("#{enum.inspect}: array or set expected.")
           #; [!xqed8] raises SchemaError when enum specified for no param option.
@@ -166,6 +167,24 @@ module Benry
             x.is_a?(type)  or
               raise error("#{enum.inspect}: enum element value should be instance of #{type.class.name}, but #{x.inspect} is not.")
           end if type
+        end
+        #; [!hk4nw] when 'range:' specified...
+        if range
+          #; [!z20ky] raises SchemaError when range is not a Range object.
+          range.is_a?(Range)  or
+            raise error("#{range.inspect}: range object expected.")
+          #; [!gp025] raises SchemaError when range specified with `type: TrueClass`.
+          if type == TrueClass
+            raise error("#{range.inspect}: range is not available with `type: TrueClass`.")
+          #; [!7njd5] range beginning/end value should be expected type.
+          else
+            #; [!uymig] range object can be endless.
+            type_ = type || String
+            ok1 = range.begin == nil || range.begin.is_a?(type_)
+            ok2 = range.end   == nil || range.end.is_a?(type_)
+            ok1 && ok2  or
+              raise error("#{range.inspect}: range value should be #{type_.name}, but not.")
+          end
         end
         #; [!a0g52] when 'value:' specified...
         if value != nil
@@ -191,7 +210,7 @@ module Benry
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                   type: type, rexp: rexp, enum: enum, value: value, tag: tag, &callback)
+                   type: type, rexp: rexp, enum: enum, range: range, value: value, tag: tag, &callback)
         @items << item
         item
       end
@@ -339,7 +358,7 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, value: nil, tag: nil, &callback)
+      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
@@ -351,6 +370,7 @@ module Benry
         @type     = type      unless type.nil?
         @rexp     = rexp      unless rexp.nil?
         @enum     = enum      unless enum.nil?
+        @range    = range     unless range.nil?
         @value    = value     unless value.nil?
         @tag      = tag       unless tag.nil?
         @callback = callback  unless callback.nil?
@@ -358,7 +378,7 @@ module Benry
         @enum.freeze() if @enum
       end
 
-      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :value, :tag, :callback
+      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :value, :tag, :callback
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 
@@ -400,6 +420,18 @@ module Benry
         if @enum && val != true
           @enum.include?(val)  or
             raise "expected one of #{@enum.join('/')}."
+        end
+        #; [!5falp] raise RuntimeError when value not in range.
+        #; [!a0rej] supports endless range.
+        if @range && val != true
+          r = @range
+          r.begin == nil || r.begin <= val  or (
+            raise "positive value (>= 0) expected." if r.begin == 0
+            raise "positive value (>= 1) expected." if r.begin == 1
+            raise "too small (min: #{r.begin.inspect})"
+          )
+          r.end == nil || val <= r.end  or
+            raise "too large (max: #{r.end.inspect})"
         end
         #; [!jn9z3] calls callback when callback specified.
         #; [!iqalh] calls callback with different number of args according to arity.

@@ -207,20 +207,21 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {items[0].callback.arity} == 1
     end
 
-    it "[!kuhf9] type, rexp, and enum are can be passed as positional args as well as keyword args." do
+    it "[!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args." do
       sc = @schema
-      sc.add(:key, "--optdef=xx", "desc", Integer, /\A\d+\z/, [2,4,8])
+      sc.add(:key, "--optdef=xx", "desc", Integer, /\A\d+\z/, [2,4,8], (2..8))
       item = sc.each.first
       ok {item.type} == Integer
       ok {item.rexp} == /\A\d+\z/
       ok {item.enum} == [2,4,8]
+      ok {item.range} == (2..8)
     end
 
-    it "[!e3emy] raises error when positional arg is not one of class, regexp, nor array." do
+    it "[!e3emy] raises error when positional arg is not one of class, regexp, array, nor range." do
       sc = @schema
       pr = proc { sc.add(:key, "--optdef=xx", "desc", "value") }
       ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                     '"value": expected one of class, regexp, or array, but got String.')
+                     '"value": expected one of class, regexp, array or range, but got String.')
     end
 
     it "[!rhhji] raises SchemaError when key is not a Symbol." do
@@ -307,7 +308,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
 
     describe "[!5nrvq] when 'enum:' specified..." do
 
-      it "[!melyd] raises SchmeaError when enum is not a Array nor Set." do
+      it "[!melyd] raises SchemaError when enum is not an Array nor Set." do
         sc = @schema
         sc.add(:indent, "-i <N>", "indent width", enum: ["2", "4", "8"])
         sc.add(:indent, "-i <N>", "indent width", enum: Set.new(["2", "4", "8"]))
@@ -334,6 +335,57 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
         }
         ok {pr}.raise?(Benry::CmdOpt::SchemaError,
                        '["2", "4", "8"]: enum element value should be instance of Class, but "2" is not.')
+      end
+
+    end
+
+    describe "[!hk4nw] when 'range:' specified..." do
+
+      it "[!z20ky] raises SchemaError when range is not a Range object." do
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", type: Integer, range: [1,8])
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "[1, 8]: range object expected.")
+      end
+
+      it "[!gp025] raises SchemaError when range specified with `type: TrueClass`." do
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", type: TrueClass, range: 0..1)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "0..1: range is not available with `type: TrueClass`.")
+      end
+
+      it "[!7njd5] range beginning/end value should be expected type." do
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", range: (1..8))
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "1..8: range value should be String, but not.")
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", type: Date, range: (1..8))
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "1..8: range value should be Date, but not.")
+      end
+
+      it "[!uymig] range object can be endless." do
+        begin
+          range1 = eval "(1..)"    # Ruby >= 2.6
+          range2 = eval "(..3)"    # Ruby >= 2.6
+        rescue SyntaxError
+          range1 = nil             # Ruby < 2.6
+          range2 = nil             # Ruby < 2.6
+        end
+        if range1
+          pr = proc {
+            @schema.add(:indent1, "-i <N>", "indent", type: Integer, range: range1)
+            @schema.add(:indent2, "-j <N>", "indent", type: Integer, range: range2)
+          }
+          pr.call
+          ok {pr}.NOT.raise?(Exception)
+        end
       end
 
     end
@@ -859,9 +911,9 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
   describe '#validate_and_convert()' do
 
     def new_item(key, optstr, desc, short, long, param, required,
-                 type: nil, rexp: nil, enum: nil, value: nil, &callback)
+                 type: nil, rexp: nil, enum: nil, range: nil, value: nil, &callback)
       return Benry::CmdOpt::SchemaItem.new(key, optstr, desc, short, long, param, required,
-                 type: type, rexp: rexp, enum: enum, value: value, &callback)
+                 type: type, rexp: rexp, enum: enum, range: range, value: value, &callback)
     end
 
     it "[!h0s0o] raises RuntimeError when value not matched to pattern." do
@@ -876,6 +928,56 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
       optdict = {}
       pr = proc { x.validate_and_convert("10", optdict) }
       ok {pr}.raise?(RuntimeError, "expected one of 2/4/8.")
+    end
+
+    it "[!5falp] raise RuntimeError when value not in range." do
+      x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
+                   type: Integer, range: 2..8)
+      optdict = {}
+      pr = proc { x.validate_and_convert("1", optdict) }
+      ok {pr}.raise?(RuntimeError, "too small (min: 2)")
+      pr = proc { x.validate_and_convert("9", optdict) }
+      ok {pr}.raise?(RuntimeError, "too large (max: 8)")
+      ## when min==0
+      x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
+                   type: Integer, range: 0..8)
+      optdict = {}
+      pr = proc { x.validate_and_convert("-1", optdict) }
+      ok {pr}.raise?(RuntimeError, "positive value (>= 0) expected.")
+      ## when min==1
+      x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
+                   type: Integer, range: 1..8)
+      optdict = {}
+      pr = proc { x.validate_and_convert("0", optdict) }
+      ok {pr}.raise?(RuntimeError, "positive value (>= 1) expected.")
+    end
+
+    it "[!a0rej] supports endless range." do
+      begin
+        range1 = eval "(2..)"     # Ruby >= 2.6
+        range2 = eval "(..8)"
+      rescue SyntaxError
+        range1 = nil              # Ruby < 2.6
+        range2 = nil
+      end
+      if range1
+        x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
+                     type: Integer, range: range1)
+        optdict = {}
+        pr = proc { x.validate_and_convert("1", optdict) }
+        ok {pr}.raise?(RuntimeError, "too small (min: 2)")
+        pr = proc { x.validate_and_convert("9", optdict) }
+        ok {pr}.NOT.raise?(RuntimeError)
+      end
+      if range2
+        x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
+                     type: Integer, range: range2)
+        optdict = {}
+        pr = proc { x.validate_and_convert("1", optdict) }
+        ok {pr}.NOT.raise?(RuntimeError)
+        pr = proc { x.validate_and_convert("9", optdict) }
+        ok {pr}.raise?(RuntimeError, "too large (max: 8)")
+      end
     end
 
     it "[!j4fuz] calls type-specific callback when type specified." do
@@ -1348,14 +1450,15 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
       ok {items[0].tag} == :important
     end
 
-    it "[!71cvg] type, rexp, and enum are can be passed as positional args as well as keyword args." do
+    it "[!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args." do
       cmdopt = Benry::CmdOpt.new()
-      cmdopt.add(:key, "--optdef[=xx]", "desc", Integer, /\A\d+\z/, [2,4,8], value: 4)
+      cmdopt.add(:key, "--optdef[=xx]", "desc", Integer, /\A\d+\z/, [2,4,8], (2..8), value: 4)
       items = cmdopt.instance_eval { @schema.instance_variable_get('@items') }
       item = items.first
       ok {item.type} == Integer
       ok {item.rexp} == /\A\d+\z/
       ok {item.enum} == [2,4,8]
+      ok {item.range} == (2..8)
       ok {item.value} == 4
     end
 
