@@ -392,12 +392,12 @@ module Benry::CmdApp
           @__action__ = [desc, {detail: detail, postamble: postamble, tag: tag}]
         end
         #; [!33ma7] @option is a Proc object and saves args.
-        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, value: nil, tag: nil, &block|
+        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, tag: nil, &block|
           #; [!gxybo] '@option.()' raises error when '@action.()' not called.
           @__action__ != nil  or
             raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` required but not called.")
           schema = (@__option__ ||= SCHEMA_CLASS.new)
-          schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, value: value, tag: nil, &block)
+          schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, tag: nil, &block)
         end
         #; [!yrkxn] @copy_options is a Proc object and copies options from other action.
         @copy_options = proc do |action_name, except: nil|

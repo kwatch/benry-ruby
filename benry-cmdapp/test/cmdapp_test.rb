@@ -818,7 +818,7 @@ topic Benry::CmdApp::Action do
     spec "[!33ma7] @option is a Proc object and saves args." do
       class InheritedTest3 < Benry::CmdApp::Action
         @action.("description", detail: "xxx", postamble: "yyy")
-        @option.(:xx, "-x, --xxx=<N>", "desc 1", type: Integer, rexp: /\A\d+\z/, enum: [2,4,8])
+        @option.(:xx, "-x, --xxx=<N>", "desc 1", type: Integer, rexp: /\A\d+\z/, enum: [2,4,8], range: (2..8))
         @option.(:yy, "-y, --yyy[=<on|off>]", "desc 2", type: TrueClass, value: false)
       end
       x = InheritedTest3.instance_variable_get('@__option__')
@@ -831,6 +831,7 @@ topic Benry::CmdApp::Action do
       ok {items[0].type}   == Integer
       ok {items[0].rexp}   == /\A\d+\z/
       ok {items[0].enum}   == [2, 4, 8]
+      ok {items[0].range}  == (2..8)
       ok {items[0].value}  == nil
       ok {items[1].key}    == :yy
       ok {items[1].optdef} == "-y, --yyy[=<on|off>]"
@@ -838,6 +839,7 @@ topic Benry::CmdApp::Action do
       ok {items[1].type}   == TrueClass
       ok {items[1].rexp}   == nil
       ok {items[1].enum}   == nil
+      ok {items[1].range}  == nil
       ok {items[1].value}  == false
     end
 
