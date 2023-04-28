@@ -1257,16 +1257,18 @@ end
 describe Benry::CmdApp::GlobalOptionSchema do
 
 
-  describe '.create()' do
+  describe '#initialize()' do
 
     def new_gschema(desc="", version=nil, **kwargs)
       config = Benry::CmdApp::Config.new(desc, version, **kwargs)
-      x = Benry::CmdApp::GlobalOptionSchema.create(config)
+      x = Benry::CmdApp::GlobalOptionSchema.new(config)
       return x
     end
 
-    it "[!enuxy] creates schema object." do
-      x = new_gschema()
+    it "[!3ihzx] do nothing when config is nil." do
+      x = nil
+      pr = proc { x = Benry::CmdApp::GlobalOptionSchema.new(nil) }
+      ok {pr}.NOT.raise?(Exception)
       ok {x}.is_a?(Benry::CmdApp::GlobalOptionSchema)
     end
 
@@ -2474,7 +2476,7 @@ describe Benry::CmdApp::CommandHelpBuilder do
       config.option_all   = true
       config.option_debug = true
     end
-    @schema = Benry::CmdApp::GlobalOptionSchema.create(@config)
+    @schema = Benry::CmdApp::GlobalOptionSchema.new(@config)
     @builder = Benry::CmdApp::CommandHelpBuilder.new(@config, @schema)
   end
 

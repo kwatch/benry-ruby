@@ -552,27 +552,27 @@ module Benry::CmdApp
 
   class GlobalOptionSchema < Benry::CmdOpt::Schema
 
-    def self.create(config)
+    def initialize(config)
+      super()
+      #; [!3ihzx] do nothing when config is nil.
       c = config
-      #; [!enuxy] creates schema object.
-      schema = self.new
+      return nil if c == nil
       #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
-      schema.add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
+      add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
       #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
-      schema.add(:version, "-V, --version", "print version") if c.app_version
+      add(:version, "-V, --version", "print version") if c.app_version
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
-      schema.add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
+      add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
       #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
-      schema.add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
+      add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
       #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.
-      schema.add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
+      add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
       #; [!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set.
-      schema.add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass) if c.option_color
+      add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass) if c.option_color
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
-      schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
+      add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
       #; [!s97go] adds '-T, --trace' option if 'config.option_trace' is set.
-      schema.add(:trace  , "-T, --trace"  , "report enter into and exit from action") if c.option_trace
-      return schema
+      add(:trace  , "-T, --trace"  , "report enter into and exit from action") if c.option_trace
     end
 
   end
@@ -670,7 +670,7 @@ module Benry::CmdApp
 
     def do_create_global_option_schema(config)
       #; [!u3zdg] creates global option schema object according to config.
-      return GLOBAL_OPTION_SCHEMA_CLASS.create(config)
+      return GLOBAL_OPTION_SCHEMA_CLASS.new(config)
     end
 
     def do_create_help_message_builder(config, schema)
