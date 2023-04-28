@@ -682,7 +682,7 @@ module Benry::CmdApp
       return global_opts
       #; [!kklah] raises InvalidOptionError if global option value is invalid.
     rescue Benry::CmdOpt::OptionError => exc
-      raise InvalidOptionError.new(ex.message)
+      raise InvalidOptionError.new(exc.message)
     end
 
     def do_handle_global_options(args)
