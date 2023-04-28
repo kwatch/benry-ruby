@@ -150,10 +150,10 @@ module Benry::CmdApp
     end
 
     def run_action(*args, **kwargs)
-      if ! $TRACING_MODE
+      if ! $TRACE_MODE
         _run_action(*args, **kwargs)
       else
-        #; [!tubhv] if $TRACING_MODE is on, prints tracing info.
+        #; [!tubhv] if $TRACE_MODE is on, prints tracing info.
         #; [!zgp14] tracing info is colored when stdout is a tty.
         s = "## enter: #{@name}"
         s = "\e[33m#{s}\e[0m" if Util.colorize?
