@@ -693,12 +693,14 @@ module Benry::CmdApp
       #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
       #; [!2zvf9] sets $COLOR_MODE to true/false according to '--color' option.
       #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
+      #; [!8trmz] sets $TRACE_MODE to true if '-T' or '--trace' specified.
       global_opts.each do |key, val|
         case key
         when :quiet   ; $QUIET_MODE   = val
         when :verbose ; $VERBOSE_MODE = val
         when :color   ; $COLOR_MODE   = val
         when :debug   ; $DEBUG_MODE   = val
+        when :trace   ; $TRACE_MODE   = val
         else          ; # do nothing
         end
       end

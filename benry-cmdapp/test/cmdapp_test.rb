@@ -1849,7 +1849,8 @@ END
                                           option_verbose: true,
                                           option_quiet: true,
                                           option_debug: true,
-                                          option_color: true)
+                                          option_color: true,
+                                          option_trace: true)
       @app = Benry::CmdApp::Application.new(@config)
     end
 
@@ -1903,9 +1904,24 @@ END
           sout, serr = capture_io { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
           ok {sout} == "$DEBUG_MODE=true\n"
+          ok {$DEBUG_MODE} == true
         end
       ensure
         $DEBUG_MODE = bkup
+      end
+    end
+
+    it "[!8trmz] sets $TRACE_MODE to true if '-T' or '--trace' specified." do
+      bkup = $TRACE_MODE
+      begin
+        ["-T", "--trace"].each do |opt|
+          $TRACE_MODE = false
+          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$TRACE_MODE} == true
+        end
+      ensure
+        $TRACE_MODE = bkup
       end
     end
 
