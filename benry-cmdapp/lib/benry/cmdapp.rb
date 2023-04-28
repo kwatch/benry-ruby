@@ -397,7 +397,12 @@ module Benry::CmdApp
           @__action__ != nil  or
             raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` required but not called.")
           schema = (@__option__ ||= SCHEMA_CLASS.new)
-          schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, tag: nil, &block)
+          #; [!ga6zh] '@option.()' raises error when invalid option info specified.
+          begin
+            schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, tag: nil, &block)
+          rescue Benry::CmdOpt::SchemaError => exc
+            raise OptionDefError.new(exc.message)
+          end
         end
         #; [!yrkxn] @copy_options is a Proc object and copies options from other action.
         @copy_options = proc do |action_name, except: nil|

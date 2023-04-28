@@ -853,6 +853,19 @@ topic Benry::CmdApp::Action do
                      "@option.(:xx): `@action.()` required but not called.")
     end
 
+    spec "[!ga6zh] '@option.()' raises error when invalid option info specified." do
+      pr = proc do
+        class InheritedTest20 < Benry::CmdApp::Action
+          @action.("test")
+          @option.(:xx, "-x, --xxx=<N>", "desc 1", range: (2..8))
+          def hello(xx: nil)
+          end
+        end
+      end
+      ok {pr}.raise?(Benry::CmdApp::OptionDefError,
+                     "2..8: range value should be String, but not.")
+    end
+
     spec "[!yrkxn] @copy_options is a Proc object and copies options from other action." do
       class InheritedTest5 < Benry::CmdApp::Action
         @action.("copy src")
