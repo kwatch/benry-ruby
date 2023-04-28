@@ -334,7 +334,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
           sc.add(:indent, "-i <N>", "enable indent", type: Integer, enum: ['2', '4', '8'])
         }
         ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       '["2", "4", "8"]: enum element value should be instance of Class, but "2" is not.')
+                       '["2", "4", "8"]: enum element value should be instance of Integer, but "2" is not.')
       end
 
     end

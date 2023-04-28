@@ -165,7 +165,7 @@ module Benry
           #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
           enum.each do |x|
             x.is_a?(type)  or
-              raise error("#{enum.inspect}: enum element value should be instance of #{type.class.name}, but #{x.inspect} is not.")
+              raise error("#{enum.inspect}: enum element value should be instance of #{type.name}, but #{x.inspect} is not.")
           end if type
         end
         #; [!hk4nw] when 'range:' specified...
