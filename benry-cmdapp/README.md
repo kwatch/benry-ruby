@@ -27,11 +27,45 @@ Table of Contents
 
 <!-- TOC -->
 
+  * <a href="#install">Install</a>
+* <a href="#usage">Usage</a>
+  * <a href="#action">Action</a>
+  * <a href="#method-name-and-action-name">Method Name and Action Name</a>
+  * <a href="#parameter-name-in-help-message-of-action">Parameter Name in Help Message of Action</a>
+  * <a href="#options">Options</a>
+  * <a href="#option-definition-format">Option Definition Format</a>
+  * <a href="#option-value-validation">Option Value Validation</a>
+  * <a href="#callback-for-option-value">Callback for Option Value</a>
+  * <a href="#boolean-onoff-option">Boolean (On/Off) Option</a>
+  * <a href="#substitue-value-instead-of-true">Substitue Value Instead of True</a>
+  * <a href="#prefix-of-action-name">Prefix of Action Name</a>
+  * <a href="#invoke-other-action">Invoke Other Action</a>
+  * <a href="#action-alias">Action Alias</a>
+  * <a href="#default-action">Default Action</a>
+  * <a href="#default-help">Default Help</a>
+  * <a href="#private-hidden-action">Private (Hidden) Action</a>
+  * <a href="#private-hidden-option">Private (Hidden) Option</a>
+* <a href="#configuratoin-and-customization">Configuratoin and Customization</a>
+  * <a href="#application-configuration">Application Configuration</a>
+  * <a href="#custom-global-options">Custom Global Options</a>
+  * <a href="#custom-hook-of-application">Custom Hook of Application</a>
+  * <a href="#customization-of-command-help-message">Customization of Command Help Message</a>
+  * <a href="#customization-of-action-help-message">Customization of Action Help Message</a>
+  * <a href="#changing-behaviour-of-global-options">Changing Behaviour of Global Options</a>
+* <a href="#q--a">Q &amp; A</a>
+  * <a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a>
+  * <a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a>
+  * <a href="#q-how-to-enabledisable-color-mode">Q: How to Enable/Disable Color Mode?</a>
+  * <a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a>
+  * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixdefault">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(default:)`?</a>
+  * <a href="#q-how-to-add-metadata-to-action-or-option">Q: How to Add Metadata to Action or Option?</a>
+* <a href="#license-and-copyright">License and Copyright</a>
+
 <!-- /TOC -->
 
 
 Install
--------
+=======
 
 ```terminal
 $ gem install benry-cmdapp
