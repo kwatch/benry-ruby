@@ -11,6 +11,7 @@ and easy to understahnd.
 (Benry::CmdOpt requires Ruby >= 2.3)
 
 
+
 Table of Contents
 =================
 
@@ -35,28 +36,9 @@ Table of Contents
 <!-- /TOC -->
 
 
+
 Why not `optparse.rb`?
 ======================
-
-* Source code of `optparse.rb` is very large and complicated, because
-  `OptParse` class does everything about command option parsing.
-  It is hard to customize or extend `OptionParser` class.
-
-  On the other hand, `benry/cmdopt.rb` consists of several classes
-  (schema class, parser class, and facade class).
-  Therefore it is easy to understand and extend these classes.
-
-  File `optparse.rb` (in Ruby 3.2) contains 1143 lines (except comments and blanks),
-  while `benry/cmdopt.rb` (v2.0) contains less than 400 lines (except both, too).
-
-* `optparse.rb` regards `-x` and `--x` as a short cut of `--xxx` automatically
-  even if you have not defined `-x` option.
-  That is, short options which are not defined can be available unexpectedly.
-  This feature is hard-coded in `OptionParser#parse_in_order()`
-  and hard to be disabled.
-
-  On the other hand, `benry/cmdopt.rb` doesn't behave this way.
-  `-x` option is available only when `-x` is defined.
 
 * `optparse.rb` can handle both `--name=val` and `--name val` styles.
   The later style is ambiguous; you may wonder whether `--name` takes
@@ -68,34 +50,14 @@ Why not `optparse.rb`?
   `optparse.rb` cannot disable `--name val` style.
   `benry/cmdopt.rb` supports only `--name=val` style.
 
-* `optparse.rb` enforces you to catch `OptionParser::ParseError` exception.
-  That is, you must know error class name.
+* `optparse.rb` regards `-x` and `--x` as a short cut of `--xxx` automatically
+  even if you have not defined `-x` option.
+  That is, short options which are not defined can be available unexpectedly.
+  This feature is hard-coded in `OptionParser#parse_in_order()`
+  and hard to be disabled.
 
-  `benry/cmdopt.rb` provides error handler without exception class name.
-  You don't need to know error class name on error handling.
-
-```ruby
-### optparse.rb
-require 'optparse'
-parser = OptionParser.new
-parser.on('-f', '--file=<FILE>', "filename")
-opts = {}
-begin
-  parser.parse!(ARGV, into: opts)
-rescue OptionParser::ParseError => ex   # specify error class
-  $stderr.puts "ERROR: #{ex.message}"
-  exit 1
-end
-
-### benry/cmdopt.rb
-require 'benry/cmdopt'
-cmdopt = Benry::CmdOpt.new
-cmdopt.add(:file, '-f, --file=<FILE>', "filename")
-opts = cmdopt.parse(ARGV) do |err|  # error handling wihtout error class name
-  $stderr.puts "ERROR: #{err.message}"
-  exit 1
-end
-```
+  On the other hand, `benry/cmdopt.rb` doesn't behave this way.
+  `-x` option is available only when `-x` is defined.
 
 * `optparse.rb` uses long option name as hash key automatically, but
   it doesn't provide the way to specify hash key of short-only option.
@@ -202,6 +164,47 @@ puts cmdopt.to_s()
 #   -m <MODE>            : verbose/quiet
 ```
 
+* `optparse.rb` enforces you to catch `OptionParser::ParseError` exception.
+  That is, you must know error class name.
+
+  `benry/cmdopt.rb` provides error handler without exception class name.
+  You don't need to know error class name on error handling.
+
+```ruby
+### optparse.rb
+require 'optparse'
+parser = OptionParser.new
+parser.on('-f', '--file=<FILE>', "filename")
+opts = {}
+begin
+  parser.parse!(ARGV, into: opts)
+rescue OptionParser::ParseError => ex   # specify error class
+  $stderr.puts "ERROR: #{ex.message}"
+  exit 1
+end
+
+### benry/cmdopt.rb
+require 'benry/cmdopt'
+cmdopt = Benry::CmdOpt.new
+cmdopt.add(:file, '-f, --file=<FILE>', "filename")
+opts = cmdopt.parse(ARGV) do |err|  # error handling wihtout error class name
+  $stderr.puts "ERROR: #{err.message}"
+  exit 1
+end
+```
+
+* Source code of `optparse.rb` is very large and complicated, because
+  `OptParse` class does everything about command option parsing.
+  It is hard to customize or extend `OptionParser` class.
+
+  On the other hand, `benry/cmdopt.rb` consists of several classes
+  (schema class, parser class, and facade class).
+  Therefore it is easy to understand and extend these classes.
+
+  File `optparse.rb` (in Ruby 3.2) contains 1143 lines (except comments and blanks),
+  while `benry/cmdopt.rb` (v2.0) contains 423 lines (except both, too).
+
+
 
 Install
 =======
@@ -211,11 +214,12 @@ $ gem install benry-cmdopt
 ```
 
 
+
 Usage
 =====
 
 
-Define, parse, and print help
+Define, Parse, and Print Help
 -----------------------------
 
 ```ruby
@@ -257,7 +261,7 @@ cmdopt.add(nil  , "-h, --help", "print help message")
 ```
 
 
-Command option parameter
+Command Option Parameter
 ------------------------
 
 ```ruby
@@ -280,7 +284,7 @@ Use `"--file=<FILE>"` style instead.
  and doesn't provide the way to disable the former style.)
 
 
-Argument validation
+Argument Validation
 -------------------
 
 ```ruby
@@ -290,6 +294,8 @@ cmdopt.add(:indent , '-i <N>', "indent width", type: Integer)
 cmdopt.add(:indent , '-i <N>', "indent width", rexp: /\A\d+\z/)
 ## enum (Array or Set)
 cmdopt.add(:indent , '-i <N>', "indent width", enum: ["2", "4", "8"])
+## range (endless range such as `1..` available)
+cmdopt.add(:indent , '-i <N>', "indent width", range: (1..8))
 ## callback
 cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   val =~ /\A\d+\z/  or
@@ -302,16 +308,37 @@ cmdopt.add(:indent , '-i <N>', "indent width") {|val|
  which is same as `rexp:`.)
 
 
-Available types
+Available Types
 ---------------
+
+`type:` keyword argument accepts the following classes.
 
 * Integer   (`/\A[-+]?\d+\z/`)
 * Float     (`/\A[-+]?(\d+\.\d*\|\.\d+)z/`)
 * TrueClass (`/\A(true|on|yes|false|off|no)\z/`)
 * Date      (`/\A\d\d\d\d-\d\d?-\d\d?\z/`)
 
+In addition:
 
-Boolean (on/off) option
+* Values of `enum:` or `range:` should match to type class specified by `type:`.
+* When `type:` is not specified, then String class will be used instead.
+
+```ruby
+## ok
+cmdopt.add(:lang, '-l <lang>', "language", enum: ["en", "fr", "it"])
+
+## error: enum values are not String
+cmdopt.add(:lang, '-l <lang>', "language", enum: ["en", "fr", "it"], type: Integer)
+
+## ok
+cmdopt.add(:indent, '-i <N>', "indent", range: (0..), type: Integer)
+
+## error: beginning value of range is not a String
+cmdopt.add(:indent, '-i <N>', "indent", range: (0..))
+```
+
+
+Boolean (on/off) Option
 -----------------------
 
 Benry::CmdOpt doens't support `--no-xxx` style option.
@@ -341,7 +368,7 @@ $ ruby ex3.rb --foo=off       # disable
 ```
 
 
-Alternative value
+Alternative Value
 -----------------
 
 Benry::CmdOpt supports alternative value.
@@ -372,7 +399,7 @@ p options[:flag2]   #=> false (!!!!!)
 ```
 
 
-Multiple option
+Multiple Option
 ---------------
 
 ```ruby
@@ -392,7 +419,7 @@ p options   #=> {:lib=>["foo", "bar", "baz"]}
 ```
 
 
-Hidden option
+Hidden Option
 -------------
 
 Benry::CmdOpt regards the following options as hidden.
@@ -429,7 +456,7 @@ puts cmdopt.to_s(all: true)   # or: cmdopt.to_s(nil, all: true)
 ```
 
 
-Global options with sub-commands
+Global Options with Sub-Commands
 --------------------------------
 
 `parse()` accepts boolean flag as second argument.
@@ -511,7 +538,7 @@ end
 ```
 
 
-Not supported
+Not Supported
 -------------
 
 * default value
@@ -519,7 +546,8 @@ Not supported
 * bash/zsh completion
 
 
-Internal classes
+
+Internal Classes
 ================
 
 * `Benry::CmdOpt::Schema` -- command option schema.
@@ -558,6 +586,7 @@ opts = cmdopt.parse(ARGV)                # same as parser.parse(...)
 
 Notice that `cmdopt.is_a?(Benry::CmdOpt)` results in false.
 Use `cmdopt.is_a?(Benry::Facade)` instead if necessary.
+
 
 
 License and Copyright

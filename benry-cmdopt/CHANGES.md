@@ -15,6 +15,7 @@ Release 2.0.0 (????-??-??)
 * [change] freeze enum value of `enum:` keyword arg of `Facade#add()` and `Schema#add()`.
 * [enhance] `Parser#parse(argv, false)` parses options only before arguments.
 * [enhance] define `#to_s()` which is alias of `#option_help()`.
+* [enhance] `Facade#add()` and `Schema#add()` supports `range:` keyword arg which validates option value.
 * [enhance] `Facade#add()` and `Schema#add()` supports `value:` keyword arg for additional value.
 * [enhance] `Facade#add()` and `Schema#add()` supports `tag:` keyword arg which accepts arbitrary value.
 * [enhance] regard options which key name starts with '_' as hidden, as well as options which description is nil.
