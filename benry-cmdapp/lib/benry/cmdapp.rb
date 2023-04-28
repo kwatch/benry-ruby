@@ -209,14 +209,14 @@ module Benry::CmdApp
 
     def help_message(command, all=false)
       #; [!i7siu] returns help message of action.
-      builder = ACTION_HELP_MESSAGE_BUILDER_CLASS.new(self)
+      builder = ACTION_HELP_BUILDER_CLASS.new(self)
       return builder.build_help_message(command, all)
     end
 
   end
 
 
-  class ActionHelpMessageBuilder
+  class ActionHelpBuilder
 
     def initialize(action_metadata)
       @am = action_metadata
@@ -326,7 +326,7 @@ module Benry::CmdApp
   end
 
 
-  ACTION_HELP_MESSAGE_BUILDER_CLASS = ActionHelpMessageBuilder
+  ACTION_HELP_BUILDER_CLASS = ActionHelpBuilder
 
 
   class Action
@@ -675,7 +675,7 @@ module Benry::CmdApp
 
     def do_create_help_message_builder(config, schema)
       #; [!pk5da] creates help message builder object.
-      return COMMAND_HELP_MESSAGE_BUILDER_CLASS.new(config, schema)
+      return COMMAND_HELP_BUILDER_CLASS.new(config, schema)
     end
 
     def do_parse_global_options(args)
@@ -885,7 +885,7 @@ module Benry::CmdApp
   end
 
 
-  class CommandHelpMessageBuilder
+  class CommandHelpBuilder
 
     def initialize(config, schema)
       @config = config
@@ -1002,7 +1002,7 @@ module Benry::CmdApp
   end
 
 
-  COMMAND_HELP_MESSAGE_BUILDER_CLASS = CommandHelpMessageBuilder
+  COMMAND_HELP_BUILDER_CLASS = CommandHelpBuilder
 
 
 end
