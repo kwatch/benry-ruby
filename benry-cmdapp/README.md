@@ -88,6 +88,7 @@ Action
 File: ex01.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 ## action
@@ -159,6 +160,7 @@ Method Name and Action Name
 File: ex02.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -239,6 +241,7 @@ In addition, positional parameters are printed in different way according to its
 File: ex03.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -275,6 +278,7 @@ Options
 File: ex04.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 ## action
@@ -323,6 +327,7 @@ Ciao, world!
 File: ex05.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 ## action
@@ -407,6 +412,7 @@ Option Definition Format
 File: ex06.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -525,6 +531,7 @@ Option Value Validation
 File: ex07.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 ## action
@@ -587,6 +594,7 @@ Callback can:
 File: ex08.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 ## action
@@ -649,6 +657,7 @@ Instead, define boolean (on/off) option.
 File: ex09.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 ## action
@@ -716,6 +725,7 @@ Substitue Value Instead of True
 File: ex10.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -769,6 +779,7 @@ Prefix of Action Name
 File: ex11.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -823,6 +834,7 @@ Actions:
 File: ex12.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -888,6 +900,7 @@ Invoke Other Action
 File: ex13.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -928,6 +941,7 @@ zip -r build.zip build
 File: ex14.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class LoopedAction < Benry::CmdApp::Action
@@ -973,6 +987,7 @@ Action Alias
 File: ex15.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1030,6 +1045,7 @@ Default Action
 File: ex17.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1084,6 +1100,7 @@ Default Help
 File: ex18.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1128,6 +1145,7 @@ Private (Hidden) Action
 File: ex20.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1205,6 +1223,7 @@ Private (Hidden) Option
 File: ex21.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1284,6 +1303,7 @@ Application Configuration
 File: ex22.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 config = Benry::CmdApp::Config.new("sample app", "1.0.0")
@@ -1333,6 +1353,7 @@ Custom Global Options
 File: ex23.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1385,6 +1406,7 @@ Custom Hook of Application
 File: ex24.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1435,6 +1457,7 @@ exit app.main()
 File: ex25.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1470,6 +1493,7 @@ set `config.app_detail`, `config.help_sections`, and/or `config.help_postamble`.
 File: ex26.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1524,6 +1548,7 @@ If you want to change behaviour of building command help message:
 File: ex27.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1582,6 +1607,7 @@ More simple way:
 File: ex28.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1637,6 +1663,7 @@ pass `detail:` and/or `postamble:` keyword arguments to `@action.()`.
 File: ex29.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1678,6 +1705,7 @@ If you want to change behaviour of building action help message:
 File: ex30.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
@@ -1731,6 +1759,7 @@ To change behaviour of global options (such as `-v/--verbose`,
 File: ex31.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class MyApplication < Benry::CmdApp::Application
@@ -1761,6 +1790,7 @@ Of course, prepending custom module to Application class is also effective way.
 File: ex32.rb
 
 ```ruby
+#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 module MyApplicationMod
