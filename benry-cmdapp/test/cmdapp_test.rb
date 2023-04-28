@@ -1613,7 +1613,7 @@ END
     end
 
     it "[!5iczl] skip actions if help option or version option specified." do
-      def @app.do_callback(args)
+      def @app.do_callback(args, global_opts)
         @_called_ = args.dup
       end
       capture_io { @app.run("--help") }
@@ -1625,7 +1625,7 @@ END
     end
 
     it "[!w584g] calls callback method." do
-      def @app.do_callback(args)
+      def @app.do_callback(args, global_opts)
         @_called_ = args.dup
       end
       ok {@app.instance_variable_get('@_called_')} == nil
@@ -1634,11 +1634,11 @@ END
     end
 
     it "[!pbug7] skip actions if callback method returns `:SKIP` value." do
-      def @app.do_callback(args)
+      def @app.do_callback(args, global_opts)
         @_called1 = args.dup
         return :SKIP
       end
-      def @app.do_find_action(args)
+      def @app.do_find_action(args, global_opts)
         super
         @_called2 = args.dup
       end
@@ -1676,13 +1676,13 @@ END
     end
 
     it "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
-      def @app.do_find_action(args)
+      def @app.do_find_action(args, global_opts)
         ret = super
         @_args1 = args.dup
         @_result = ret
         ret
       end
-      def @app.do_run_action(metadata, args)
+      def @app.do_run_action(metadata, args, global_opts)
         ret = super
         @_args2 = args.dup
         ret
@@ -2024,27 +2024,27 @@ END
   describe '#do_find_action()' do
 
     it "[!bm8np] returns action metadata." do
-      x = @app.__send__(:do_find_action, ["sayhello"])
+      x = @app.__send__(:do_find_action, ["sayhello"], {})
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "sayhello"
     end
 
     it "[!vl0zr] error when action not found." do
-      pr = proc { @app.__send__(:do_find_action, ["hiyo"]) }
+      pr = proc { @app.__send__(:do_find_action, ["hiyo"], {}) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "hiyo: unknown action.")
     end
 
     it "[!gucj7] if no action specified, finds default action instead." do
       @app.config.default_action = "sayhello"
-      x = @app.__send__(:do_find_action, [])
+      x = @app.__send__(:do_find_action, [], {})
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "sayhello"
     end
 
     it "[!388rs] error when default action not found." do
       @app.config.default_action = "hiyo"
-      pr = proc { @app.__send__(:do_find_action, []) }
+      pr = proc { @app.__send__(:do_find_action, [], {}) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "hiyo: unknown default action.")
     end
@@ -2052,14 +2052,14 @@ END
     it "[!drmls] returns nil if no action specified but 'config.default_help' is set." do
       @app.config.default_action = nil
       @app.config.default_help = true
-      x = @app.__send__(:do_find_action, [])
+      x = @app.__send__(:do_find_action, [], {})
       ok {x} == nil
     end
 
     it "[!hs589] error when action nor default action not specified." do
       @app.config.default_action = nil
       @app.config.default_help = false
-      pr = proc { @app.__send__(:do_find_action, []) }
+      pr = proc { @app.__send__(:do_find_action, [], {}) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "testapp: action name required (run `testapp -h` for details).")
     end
@@ -2306,7 +2306,7 @@ END
         def test(); end
       end
       begin
-        sout, serr = capture_io { @app.__send__(:do_validate_actions) }
+        sout, serr = capture_io { @app.__send__(:do_validate_actions, [], {}) }
         ok {serr} == <<'END'
 
 ** [warning] in 'ValidateActionTest2' class, `alias_of: :test2` specified but corresponding action not exist.
@@ -2323,7 +2323,7 @@ END
         def test(); end
       end
       begin
-        sout, serr = capture_io { @app.__send__(:do_validate_actions) }
+        sout, serr = capture_io { @app.__send__(:do_validate_actions, [], {}) }
         ok {serr} == <<'END'
 
 ** [warning] in 'ValidateActionTest3' class, `default: :test3` specified but corresponding action not exist.
@@ -2349,7 +2349,7 @@ END
         def eee(); end
       end
       sout, serr = capture_io do
-        @app.__send__(:do_print_candidates, ["candi:date2:"])
+        @app.__send__(:do_print_candidates, ["candi:date2:"], {})
       end
       ok {serr} == ""
       ok {sout} == <<"END"
@@ -2374,7 +2374,7 @@ END
       Benry::CmdApp.action_alias("popo", "candi:date3:fff")
       Benry::CmdApp.action_alias("candi:date3:xxx", "candi:date3:hhh")
       sout, serr = capture_io do
-        @app.__send__(:do_print_candidates, ["candi:date3:"])
+        @app.__send__(:do_print_candidates, ["candi:date3:"], {})
       end
       ok {serr} == ""
       ok {sout} == <<"END"
@@ -2390,7 +2390,7 @@ END
 
     it "[!i2azi] raises error when no candidate actions found." do
       pr = proc do
-        @app.__send__(:do_print_candidates, ["candi:date9:"])
+        @app.__send__(:do_print_candidates, ["candi:date9:"], {})
       end
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "No actions starting with 'candi:date9:'.")
@@ -2409,7 +2409,7 @@ END
         def jjj(); end
       end
       sout, serr = capture_io do
-        @app.__send__(:do_print_candidates, ["candi:date4:"])
+        @app.__send__(:do_print_candidates, ["candi:date4:"], {})
       end
       ok {serr} == ""
       ok {sout} == <<"END"

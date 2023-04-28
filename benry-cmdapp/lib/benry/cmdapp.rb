@@ -627,19 +627,20 @@ module Benry::CmdApp
       #; [!t4ypg] sets $cmdapp_config at beginning.
       do_setup()
       #; [!pyotc] sets global options to '@global_options'.
-      @global_options = do_parse_global_options(args)
+      global_opts = do_parse_global_options(args)
+      @global_options = global_opts
       #; [!go9kk] sets global variables according to global options.
-      do_toggle_global_switches(args)
+      do_toggle_global_switches(args, global_opts)
       #; [!5iczl] skip actions if help option or version option specified.
-      result = do_handle_global_options(args)
+      result = do_handle_global_options(args, global_opts)
       return if result == :SKIP
       #; [!w584g] calls callback method.
       #; [!pbug7] skip actions if callback method returns `:SKIP` value.
-      result = do_callback(args)
+      result = do_callback(args, global_opts)
       return if result == :SKIP
       #; [!avxos] prints candidate actions if action name ends with ':'.
       if ! args.empty? && args[0].end_with?(':')
-        do_print_candidates(args)
+        do_print_candidates(args, global_opts)
         return
       end
       #; [!agfdi] reports error when action not found.
@@ -647,15 +648,15 @@ module Benry::CmdApp
       #; [!n60o0] reports error when action nor default action not specified.
       #; [!7h0ku] prints help if no action but 'config.default_help' is true.
       #; [!l0g1l] skip actions if no action specified and 'config.default_help' is set.
-      metadata = do_find_action(args)
+      metadata = do_find_action(args, global_opts)
       if metadata == nil
-        do_print_help_message([])
-        do_validate_actions()
+        do_print_help_message([], global_opts)
+        do_validate_actions(args, global_opts)
         return
       end
       #; [!x1xgc] run action with options and arguments.
       #; [!v5k56] runs default action if action not specified.
-      do_run_action(metadata, args)
+      do_run_action(metadata, args, global_opts)
     rescue => exc
       raise
     ensure
@@ -687,12 +688,12 @@ module Benry::CmdApp
       raise InvalidOptionError.new(exc.message)
     end
 
-    def do_toggle_global_switches(_args)
+    def do_toggle_global_switches(_args, global_opts)
       #; [!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified.
       #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
       #; [!2zvf9] sets $COLOR_MODE to true/false according to '--color' option.
       #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
-      @global_options.each do |key, val|
+      global_opts.each do |key, val|
         case key
         when :quiet   ; $QUIET_MODE   = val
         when :verbose ; $VERBOSE_MODE = val
@@ -703,13 +704,12 @@ module Benry::CmdApp
       end
     end
 
-    def do_handle_global_options(args)
-      global_opts = @global_options
+    def do_handle_global_options(args, global_opts)
       #; [!xvj6s] prints help message if '-h' or '--help' specified.
       if global_opts[:help]
         #; [!lpoz7] prints help message of action if action name specified with help option.
-        do_print_help_message(args)
-        do_validate_actions()
+        do_print_help_message(args, global_opts)
+        do_validate_actions(args, global_opts)
         return :SKIP
       end
       #; [!fslsy] prints version if '-V' or '--version' specified.
@@ -721,16 +721,16 @@ module Benry::CmdApp
       return nil
     end
 
-    def do_callback(args)
+    def do_callback(args, global_opts)
       #; [!xwo0v] calls callback if provided.
       #; [!lljs1] calls callback only once.
       if @callback && ! @__called
         @__called = true
-        @callback.call(args, @global_options, @config)
+        @callback.call(args, global_opts, @config)
       end
     end
 
-    def do_find_action(args)
+    def do_find_action(args, _global_opts)
       c = @config
       #; [!bm8np] returns action metadata.
       if ! args.empty?
@@ -755,7 +755,7 @@ module Benry::CmdApp
       return metadata
     end
 
-    def do_run_action(metadata, args)
+    def do_run_action(metadata, args, _global_opts)
       action_name = metadata.name
       #; [!62gv9] parses action options even if specified after args.
       options = metadata.parse_options(args, true)
@@ -779,10 +779,10 @@ module Benry::CmdApp
       return ret
     end
 
-    def do_print_help_message(args)
+    def do_print_help_message(args, global_opts)
       #; [!4qs7y] shows private (hidden) actions/options if '--all' option specified.
       #; [!l4d6n] `all` flag should be true or false, not nil.
-      all = !! @global_options[:all]
+      all = !! global_opts[:all]
       #; [!eabis] prints help message of action if action name provided.
       action_name = args[0]
       if action_name
@@ -802,7 +802,7 @@ module Benry::CmdApp
       puts msg
     end
 
-    def do_validate_actions()
+    def do_validate_actions(_args, _global_opts)
       #; [!6xhvt] reports warning at end of help message.
       nl = "\n"
       Action::SUBCLASSES.each do |klass|
@@ -821,7 +821,7 @@ module Benry::CmdApp
       end
     end
 
-    def do_print_candidates(args)
+    def do_print_candidates(args, _global_opts)
       #; [!0e8vt] prints candidate action names including prefix name without tailing ':'.
       prefix  = args[0]
       prefix2 = prefix.chomp(':')
