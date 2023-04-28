@@ -27,7 +27,7 @@ Table of Contents
 
 <!-- TOC -->
 
-  * <a href="#install">Install</a>
+* <a href="#install">Install</a>
 * <a href="#usage">Usage</a>
   * <a href="#action">Action</a>
   * <a href="#method-name-and-action-name">Method Name and Action Name</a>
@@ -58,7 +58,7 @@ Table of Contents
   * <a href="#q-how-to-enabledisable-color-mode">Q: How to Enable/Disable Color Mode?</a>
   * <a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a>
   * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixdefault">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(default:)`?</a>
-  * <a href="#q-how-to-add-metadata-to-action-or-option">Q: How to Add Metadata to Action or Option?</a>
+  * <a href="#q-is-it-possible-to-add-add-metadata-to-action-or-option">Q: Is It Possible to Add Add Metadata to Action or Option?</a>
 * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
@@ -2076,10 +2076,10 @@ In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
 and action `bbb` is not an alias due to `prefix(default:)`.
 
 
-Q: How to Add Metadata to Action or Option?
--------------------------------------------
+Q: Is It Possible to Add Add Metadata to Action or Option?
+----------------------------------------------------------
 
-A: Pass `tag:` keyword argument to `@action.()` or `@option.()`.
+A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 
 * `tag:` keyword argument accept any type of value such as symbol, string, array, and so on.
 * Currenty, Benry::CmdApp doesn't provide the good way to use it effectively.
