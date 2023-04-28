@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 
-require 'minitest/spec'
-require 'minitest/autorun'
-require 'minitest/ok'
+require 'oktest'
 
 require 'benry/cmdapp'
 
 
+Oktest.scope do
 
-describe Benry::CmdApp::Util do
+
+topic Benry::CmdApp::Util do
 
 
-  describe '.hidden_name?()' do
+  topic '.hidden_name?()' do
 
-    it "[!fcfic] returns true if name is '_foo'." do
+    spec "[!fcfic] returns true if name is '_foo'." do
       ok {Benry::CmdApp::Util.hidden_name?("_foo")} == true
     end
 
-    it "[!po5co] returns true if name is '_foo:bar'." do
+    spec "[!po5co] returns true if name is '_foo:bar'." do
       ok {Benry::CmdApp::Util.hidden_name?("_foo:bar")} == true
     end
 
-    it "[!9iqz3] returns true if name is 'foo:_bar'." do
+    spec "[!9iqz3] returns true if name is 'foo:_bar'." do
       ok {Benry::CmdApp::Util.hidden_name?("foo:_bar")} == true
     end
 
-    it "[!mjjbg] returns false if else." do
+    spec "[!mjjbg] returns false if else." do
       ok {Benry::CmdApp::Util.hidden_name?("foo")} == false
       ok {Benry::CmdApp::Util.hidden_name?("foo_")} == false
       ok {Benry::CmdApp::Util.hidden_name?("foo_:bar")} == false
@@ -35,16 +35,16 @@ describe Benry::CmdApp::Util do
   end
 
 
-  describe '.schema_empty?()' do
+  topic '.schema_empty?()' do
 
-    it "[!8t5ju] returns true if schema empty." do
+    spec "[!8t5ju] returns true if schema empty." do
       sc = Benry::CmdOpt::Schema.new
       ok {Benry::CmdApp::Util.schema_empty?(sc)} == true
       sc.add(:help, "-h", "help")
       ok {Benry::CmdApp::Util.schema_empty?(sc)} == false
     end
 
-    it "[!c4ljy] returns true if schema contains only private (hidden) options." do
+    spec "[!c4ljy] returns true if schema contains only private (hidden) options." do
       sc = Benry::CmdOpt::Schema.new
       sc.add(:_help, "-h", "help")
       ok {Benry::CmdApp::Util.schema_empty?(sc)} == true
@@ -55,18 +55,18 @@ describe Benry::CmdApp::Util do
   end
 
 
-  describe '.method2action()' do
+  topic '.method2action()' do
 
-    it "[!801f9] converts action name 'aa_bb_cc_' into 'aa_bb_cc'." do
+    spec "[!801f9] converts action name 'aa_bb_cc_' into 'aa_bb_cc'." do
       ok {Benry::CmdApp::Util.method2action("aa_")} == "aa"
       ok {Benry::CmdApp::Util.method2action("_aa_")} == "_aa"
     end
 
-    it "[!9pahu] converts action name 'aa__bb__cc' into 'aa:bb:cc'." do
+    spec "[!9pahu] converts action name 'aa__bb__cc' into 'aa:bb:cc'." do
       ok {Benry::CmdApp::Util.method2action("aa__bb__cc")} == "aa:bb:cc"
     end
 
-    it "[!7a1s7] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'." do
+    spec "[!7a1s7] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'." do
       ok {Benry::CmdApp::Util.method2action("aa_bb:cc_dd")} == "aa-bb:cc-dd"
       ok {Benry::CmdApp::Util.method2action("aa_bb:_cc_dd")} == "aa-bb:_cc-dd"
       ok {Benry::CmdApp::Util.method2action("aa___bb")} == "aa:_bb"
@@ -75,9 +75,9 @@ describe Benry::CmdApp::Util do
   end
 
 
-  describe '.colorize?()' do
+  topic '.colorize?()' do
 
-    it "[!801y1] returns $COLOR_MODE value if it is not nil." do
+    spec "[!801y1] returns $COLOR_MODE value if it is not nil." do
       bkup = $COLOR_MODE
       begin
         $COLOR_MODE = true
@@ -89,16 +89,14 @@ describe Benry::CmdApp::Util do
       end
     end
 
-    it "[!0harg] returns true if stdout is a tty." do
-      capture_io {
-        def $stdout.tty?; true; end
+    spec "[!0harg] returns true if stdout is a tty." do
+      capture_sio(tty: true) {
         ok {Benry::CmdApp::Util.colorize?()} == true
       }
     end
 
-    it "[!u1j1x] returns false if stdout is not a tty." do
-      capture_io {
-        def $stdout.tty?; false; end
+    spec "[!u1j1x] returns false if stdout is not a tty." do
+      capture_sio(tty: false) {
         ok {Benry::CmdApp::Util.colorize?()} == false
       }
     end
@@ -106,9 +104,9 @@ describe Benry::CmdApp::Util do
   end
 
 
-  describe '.del_escape_seq()' do
+  topic '.del_escape_seq()' do
 
-    it "[!wgp2b] deletes escape sequence." do
+    spec "[!wgp2b] deletes escape sequence." do
       s = "  \e[1m%-18s\e[0m : %s"
       ok {Benry::CmdApp::Util.del_escape_seq(s)} == "  %-18s : %s"
     end
@@ -119,7 +117,7 @@ describe Benry::CmdApp::Util do
 end
 
 
-describe Benry::CmdApp::Index do
+topic Benry::CmdApp::Index do
 
 
   class IndexTestAction < Benry::CmdApp::Action
@@ -137,9 +135,9 @@ describe Benry::CmdApp::Index do
   Benry::CmdApp.action_alias("findxx", "lookup2")
 
 
-  describe '.lookup_action()' do
+  topic '.lookup_action()' do
 
-    it "[!vivoa] returns action metadata object." do
+    spec "[!vivoa] returns action metadata object." do
       x = Benry::CmdApp::Index.lookup_action("lookup1")
       ok {x} != nil
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
@@ -148,7 +146,7 @@ describe Benry::CmdApp::Index do
       ok {x.method} == :lookup1
     end
 
-    it "[!tnwq0] supports alias name." do
+    spec "[!tnwq0] supports alias name." do
       x = Benry::CmdApp::Index.lookup_action("findxx")
       ok {x} != nil
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
@@ -160,7 +158,7 @@ describe Benry::CmdApp::Index do
   end
 
 
-  describe '.each_action_name_and_desc()' do
+  topic '.each_action_name_and_desc()' do
 
     before do
       @_bkup_actions = Benry::CmdApp::Index::ACTIONS.dup()
@@ -175,7 +173,7 @@ describe Benry::CmdApp::Index do
       Benry::CmdApp::Index::ALIASES.update(@_bkup_aliases)
     end
 
-    it "[!5lahm] yields action name and description." do
+    spec "[!5lahm] yields action name and description." do
       arr = []
       Benry::CmdApp::Index.each_action_name_and_desc(false) {|a| arr << a }
       ok {arr} == [
@@ -184,7 +182,7 @@ describe Benry::CmdApp::Index do
       ]
     end
 
-    it "[!27j8b] includes alias names when the first arg is true." do
+    spec "[!27j8b] includes alias names when the first arg is true." do
       arr = []
       Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == [
@@ -194,7 +192,7 @@ describe Benry::CmdApp::Index do
       ]
     end
 
-    it "[!8xt8s] rejects hidden actions if 'all: false' kwarg specified." do
+    spec "[!8xt8s] rejects hidden actions if 'all: false' kwarg specified." do
       arr = []
       Benry::CmdApp::Index.each_action_name_and_desc(false, all: false) {|a| arr << a }
       ok {arr} == [
@@ -203,7 +201,7 @@ describe Benry::CmdApp::Index do
       ]
     end
 
-    it "[!5h7s5] includes hidden actions if 'all: true' kwarg specified." do
+    spec "[!5h7s5] includes hidden actions if 'all: true' kwarg specified." do
       arr = []
       Benry::CmdApp::Index.each_action_name_and_desc(false, all: true) {|a| arr << a }
       ok {arr} == [
@@ -213,7 +211,7 @@ describe Benry::CmdApp::Index do
       ]
     end
 
-    it "[!arcia] action names are sorted." do
+    spec "[!arcia] action names are sorted." do
       arr = []
       Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == arr.sort_by(&:first)
@@ -231,27 +229,15 @@ module CommonTestingHelper
     return str.gsub(/\e\[.*?m/, '')
   end
 
-  def capture_sio(tty: false, &block)
-    capture_io do
-      if tty
-        def $stdout.tty?; true; end
-      end
-      yield
-    end
-  end
-
   def without_tty(&block)
     result = nil
-    capture_io { result = yield }
+    capture_sio(tty: false) { result = yield }
     return result
   end
 
   def with_tty(&block)
     result = nil
-    capture_io do
-      def $stdout.tty?; true; end
-      result = yield
-    end
+    capture_sio(tty: true) { result = yield }
     return result
   end
 
@@ -275,7 +261,7 @@ module ActionMetadataTestingHelper
 end
 
 
-describe Benry::CmdApp::ActionMetadata do
+topic Benry::CmdApp::ActionMetadata do
   #include CommonTestingHelper         # not work. why?
   include ActionMetadataTestingHelper
 
@@ -320,7 +306,7 @@ describe Benry::CmdApp::ActionMetadata do
   end
 
 
-  describe '#hidden?()' do
+  topic '#hidden?()' do
 
     class HiddenTestAction < Benry::CmdApp::Action
       @action.("public")
@@ -335,14 +321,14 @@ describe Benry::CmdApp::ActionMetadata do
       def pphidden3(); puts __method__(); end
     end
 
-    it "[!kp10p] returns true when action method is private." do
+    spec "[!kp10p] returns true when action method is private." do
       ameta = Benry::CmdApp::Index::ACTIONS["pphidden3"]
       ok {ameta.hidden?} == true
       ameta = Benry::CmdApp::Index::ACTIONS["pphidden2"]
       ok {ameta.hidden?} == true
     end
 
-    it "[!nw322] returns false when action method is not private." do
+    spec "[!nw322] returns false when action method is not private." do
       ameta = Benry::CmdApp::Index::ACTIONS["pphidden1"]
       ok {ameta.hidden?} == false
     end
@@ -350,9 +336,9 @@ describe Benry::CmdApp::ActionMetadata do
   end
 
 
-  describe '#parse_options()' do
+  topic '#parse_options()' do
 
-    it "[!ab3j8] parses argv and returns options." do
+    spec "[!ab3j8] parses argv and returns options." do
       args = ["-l", "fr", "Alice"]
       opts = @metadata.parse_options(args)
       ok {opts} == {:lang => "fr"}
@@ -363,7 +349,7 @@ describe Benry::CmdApp::ActionMetadata do
       ok {args} == ["Bob"]
     end
 
-    it "[!56da8] raises InvalidOptionError if option value is invalid." do
+    spec "[!56da8] raises InvalidOptionError if option value is invalid." do
       args = ["-x", "fr", "Alice"]
       pr = proc { @metadata.parse_options(args) }
       ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-x: unknown option.")
@@ -372,24 +358,24 @@ describe Benry::CmdApp::ActionMetadata do
   end
 
 
-  describe '#run_action()' do
+  topic '#run_action()' do
 
-    it "[!veass] runs action with args and kwargs." do
+    spec "[!veass] runs action with args and kwargs." do
       args = ["Alice"]; kwargs = {lang: "fr"}
       #
-      sout, serr = capture_io { @metadata.run_action() }
+      sout, serr = capture_sio { @metadata.run_action() }
       ok {sout} == "Hello, world!\n"
       ok {serr} == ""
       #
-      sout, serr = capture_io { @metadata.run_action(*args) }
+      sout, serr = capture_sio { @metadata.run_action(*args) }
       ok {sout} == "Hello, Alice!\n"
       ok {serr} == ""
       #
-      sout, serr = capture_io { @metadata.run_action(**kwargs) }
+      sout, serr = capture_sio { @metadata.run_action(**kwargs) }
       ok {sout} == "Bonjour, world!\n"
       ok {serr} == ""
       #
-      sout, serr = capture_io { @metadata.run_action(*args, **kwargs) }
+      sout, serr = capture_sio { @metadata.run_action(*args, **kwargs) }
       ok {sout} == "Bonjour, Alice!\n"
       ok {serr} == ""
     end
@@ -404,10 +390,10 @@ describe Benry::CmdApp::ActionMetadata do
       end
     end
 
-    it "[!tubhv] if $TRACE_MODE is on, prints tracing info." do
+    spec "[!tubhv] if $TRACE_MODE is on, prints tracing info." do
       args = ["Alice"]; kwargs = {lang: "it"}
       sout, serr = _trace_mode(true) do
-        capture_io {
+        capture_sio {
           @metadata.run_action(*args, **kwargs)
         }
       end
@@ -419,11 +405,10 @@ Ciao, Alice!
 END
     end
 
-    it "[!zgp14] tracing info is colored when stdout is a tty." do
+    spec "[!zgp14] tracing info is colored when stdout is a tty." do
       args = ["Alice"]; kwargs = {lang: "it"}
       sout, serr = _trace_mode(true) do
-        capture_io {
-          def $stdout.tty?; true; end
+        capture_sio(tty: true) {
           @metadata.run_action(*args, **kwargs)
         }
       end
@@ -438,13 +423,13 @@ END
   end
 
 
-  describe '#method_arity()' do
+  topic '#method_arity()' do
 
-    it "[!7v4tp] returns min and max number of positional arguments." do
+    spec "[!7v4tp] returns min and max number of positional arguments." do
       ok {@metadata.method_arity()} == [0, 1]
     end
 
-    it "[!w3rer] max is nil if variable argument exists." do
+    spec "[!w3rer] max is nil if variable argument exists." do
       schema = Benry::Cmdopt::Schema.new
       metadata = Benry::CmdApp::ActionMetadata.new("halo2", MetadataTestAction, :halo2, "greeting", schema)
       ok {metadata.method_arity()} == [0, nil]
@@ -453,9 +438,9 @@ END
   end
 
 
-  describe '#validate_method_params()' do
+  topic '#validate_method_params()' do
 
-    it "[!plkhs] returns error message if keyword parameter for option not exist." do
+    spec "[!plkhs] returns error message if keyword parameter for option not exist." do
       schema = Benry::Cmdopt::Schema.new
       schema.add(:foo, "--foo", "foo")
       metadata = Benry::CmdApp::ActionMetadata.new("halo1", MetadataTestAction, :halo1, "greeting", schema)
@@ -463,7 +448,7 @@ END
       ok {msg} == "should have keyword parameter 'foo' for '@option.(:foo)', but not."
     end
 
-    it "[!1koi8] returns nil if all keyword parameters for option exist." do
+    spec "[!1koi8] returns nil if all keyword parameters for option exist." do
       schema = Benry::Cmdopt::Schema.new
       schema.add(:lang, "-l, --lang=<lang>", "lang")
       metadata = Benry::CmdApp::ActionMetadata.new("halo1", MetadataTestAction, :halo1, "greeting", schema)
@@ -474,9 +459,9 @@ END
   end
 
 
-  describe '#help_message()' do
+  topic '#help_message()' do
 
-    it "[!i7siu] returns help message of action." do
+    spec "[!i7siu] returns help message of action." do
       schema = new_schema()
       msg = without_tty { new_metadata(schema).help_message("testapp") }
       ok {uncolorize(msg)} == <<END
@@ -496,13 +481,13 @@ END
 end
 
 
-describe Benry::CmdApp::ActionHelpBuilder do
+topic Benry::CmdApp::ActionHelpBuilder do
   include ActionMetadataTestingHelper
 
 
-  describe '#build_help_message()' do
+  topic '#build_help_message()' do
 
-    it "[!pqoup] adds detail text into help if specified." do
+    spec "[!pqoup] adds detail text into help if specified." do
       expected = <<END
 testapp halo1 -- greeting
 
@@ -523,7 +508,7 @@ END
       end
     end
 
-    it "[!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist." do
+    spec "[!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist." do
       schema = new_schema(lang: false)
       msg = new_metadata(schema).help_message("testapp")
       msg = uncolorize(msg)
@@ -537,7 +522,7 @@ END
                         "  $ testapp halo1 [<options>] [<user>]\n")
     end
 
-    it "[!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified." do
+    spec "[!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified." do
       schema = new_schema(lang: false)
       schema.add(:_lang, "-l, --lang=<en|fr|it>", "language")
       msg = new_metadata(schema).help_message("testapp")
@@ -546,7 +531,7 @@ END
       ok {msg} =~ /^Usage:\n  \$ testapp halo1 \[<user>\]$/
     end
 
-    it "[!ou3md] not add extra whiespace when no arguments of command." do
+    spec "[!ou3md] not add extra whiespace when no arguments of command." do
       schema = new_schema(lang: true)
       msg = new_metadata(schema, :halo3).help_message("testapp")
       msg = uncolorize(msg)
@@ -554,7 +539,7 @@ END
       ok {msg} =~ /^Usage:\n  \$ testapp halo3 \[<options>\]$/
     end
 
-    it "[!g2ju5] adds 'Options:' section." do
+    spec "[!g2ju5] adds 'Options:' section." do
       schema = new_schema(lang: true)
       msg = new_metadata(schema).help_message("testapp")
       msg = uncolorize(msg)
@@ -562,14 +547,14 @@ END
                         "  -l, --lang=<en|fr|it> : language\n")
     end
 
-    it "[!pvu56] ignores 'Options:' section when no options exist." do
+    spec "[!pvu56] ignores 'Options:' section when no options exist." do
       schema = new_schema(lang: false)
       msg = new_metadata(schema).help_message("testapp")
       msg = uncolorize(msg)
       ok {msg}.NOT.include?("Options:\n")
     end
 
-    it "[!hghuj] ignores 'Options:' section when only hidden options speicified." do
+    spec "[!hghuj] ignores 'Options:' section when only hidden options speicified." do
       schema = new_schema(lang: false)
       schema.add(:_lang, "-l, --lang=<en|fr|it>", "language")  # hidden option
       msg = new_metadata(schema).help_message("testapp")
@@ -577,7 +562,7 @@ END
       ok {msg}.NOT.include?("Options:\n")
     end
 
-    it "[!0p2gt] adds postamble text if specified." do
+    spec "[!0p2gt] adds postamble text if specified." do
       postamble = "Tips: `testapp -h <action>` print help message of action."
       schema = new_schema(lang: false)
       ameta = new_metadata(schema, postamble: postamble)
@@ -593,7 +578,7 @@ Tips: `testapp -h <action>` print help message of action.
 END
     end
 
-    it "[!v5567] adds '\n' at end of preamble text if it doesn't end with '\n'." do
+    spec "[!v5567] adds '\n' at end of preamble text if it doesn't end with '\n'." do
       postamble = "END"
       schema = new_schema(lang: false)
       ameta = new_metadata(schema, postamble: postamble)
@@ -601,7 +586,7 @@ END
       ok {msg}.end_with?("\nEND\n")
     end
 
-    it "[!x0z89] required arg is represented as '<arg>'." do
+    spec "[!x0z89] required arg is represented as '<arg>'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args1", MetadataTestAction, :args1, "", schema)
       msg = metadata.help_message("testapp")
@@ -609,7 +594,7 @@ END
       ok {msg} =~ /^  \$ testapp args1 <aa> <bb>$/
     end
 
-    it "[!md7ly] optional arg is represented as '[<arg>]'." do
+    spec "[!md7ly] optional arg is represented as '[<arg>]'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args2", MetadataTestAction, :args2, "", schema)
       msg = without_tty { metadata.help_message("testapp") }
@@ -617,7 +602,7 @@ END
       ok {msg} =~ /^  \$ testapp args2 <aa> \[<bb> \[<cc>\]\]$/
     end
 
-    it "[!xugkz] variable args are represented as '[<arg>...]'." do
+    spec "[!xugkz] variable args are represented as '[<arg>...]'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args3", MetadataTestAction, :args3, "", schema)
       msg = metadata.help_message("testapp")
@@ -625,7 +610,7 @@ END
       ok {msg} =~ /^  \$ testapp args3 <aa> \[<bb> \[<cc> \[<dd>...\]\]\]$/
     end
 
-    it "[!eou4h] converts arg name 'xx_or_yy_or_zz' into 'xx|yy|zz'." do
+    spec "[!eou4h] converts arg name 'xx_or_yy_or_zz' into 'xx|yy|zz'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args4", MetadataTestAction, :args4, "", schema)
       msg = metadata.help_message("testapp")
@@ -633,7 +618,7 @@ END
       ok {msg} =~ /^  \$ testapp args4 <xx\|yy\|zz>$/
     end
 
-    it "[!naoft] converts arg name '_xx_yy_zz' into '_xx-yy-zz'." do
+    spec "[!naoft] converts arg name '_xx_yy_zz' into '_xx-yy-zz'." do
       schema = new_schema(lang: false)
       metadata = Benry::CmdApp::ActionMetadata.new("args5", MetadataTestAction, :args5, "", schema)
       msg = metadata.help_message("testapp")
@@ -647,7 +632,7 @@ END
 end
 
 
-describe Benry::CmdApp::Action do
+topic Benry::CmdApp::Action do
 
 
   class InvokeTestAction < Benry::CmdApp::Action
@@ -693,14 +678,14 @@ describe Benry::CmdApp::Action do
   end
 
 
-  describe '#run_action_once()' do
+  topic '#run_action_once()' do
 
-    it "[!oh8dc] don't invoke action if already invoked." do
-      sout, serr = capture_io() do
+    spec "[!oh8dc] don't invoke action if already invoked." do
+      sout, serr = capture_sio() do
         @action.run_action_once("test3:foo:invoke2", "Alice", lang: "fr")
       end
       ok {sout} == "Bonjour, Alice!\n"
-      sout, serr = capture_io() do
+      sout, serr = capture_sio() do
         @action.run_action_once("test3:foo:invoke2", "Alice", lang: "fr")
       end
       ok {sout} == ""
@@ -710,18 +695,18 @@ describe Benry::CmdApp::Action do
   end
 
 
-  describe '#run_action!()' do
+  topic '#run_action!()' do
 
-    it "[!2yrc2] invokes action even if already invoked." do
-      sout, serr = capture_io() do
+    spec "[!2yrc2] invokes action even if already invoked." do
+      sout, serr = capture_sio() do
         @action.run_action!("test3:foo:invoke3", "Alice", lang: "fr")
       end
       ok {sout} == "Bonjour, Alice!\n"
-      sout, serr = capture_io() do
+      sout, serr = capture_sio() do
         @action.run_action!("test3:foo:invoke3", "Alice", lang: "fr")
       end
       ok {sout} == "Bonjour, Alice!\n"
-      sout, serr = capture_io() do
+      sout, serr = capture_sio() do
         @action.run_action!("test3:foo:invoke3", "Alice", lang: "en")
       end
       ok {sout} == "Hello, Alice!\n"
@@ -730,7 +715,7 @@ describe Benry::CmdApp::Action do
   end
 
 
-  describe '#__run_action()' do
+  topic '#__run_action()' do
 
     def __run_action(action_name, once, args, kwargs)
       @action.__send__(:__run_action, action_name, once, args, kwargs)
@@ -741,30 +726,30 @@ describe Benry::CmdApp::Action do
       action.__send__(:__run_action, action_name, once, args, kwargs)
     end
 
-    it "[!7vszf] raises error if action specified not found." do
+    spec "[!7vszf] raises error if action specified not found." do
       pr = proc { __run_action("loop9", nil, ["Alice"], {}) }
       ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError, "loop9: action not found.")
     end
 
-    it "[!u8mit] raises error if action flow is looped." do
+    spec "[!u8mit] raises error if action flow is looped." do
       pr = proc { __run_loop("loop1", nil, [], {}) }
       ok {pr}.raise?(Benry::CmdApp::LoopedActionError, "loop1: looped action detected.")
     end
 
-    it "[!vhdo9] don't invoke action twice if 'once' arg is true." do
-      sout, serr = capture_io() do
+    spec "[!vhdo9] don't invoke action twice if 'once' arg is true." do
+      sout, serr = capture_sio() do
         __run_action("test3:foo:invoke2", true, ["Alice"], {lang: "fr"})
       end
       ok {sout} == "Bonjour, Alice!\n"
-      sout, serr = capture_io() do
+      sout, serr = capture_sio() do
         __run_action("test3:foo:invoke2", true, ["Alice"], {lang: "fr"})
       end
       ok {sout} == ""
       ok {serr} == ""
     end
 
-    it "[!r8fbn] invokes action." do
-      sout, serr = capture_io() do
+    spec "[!r8fbn] invokes action." do
+      sout, serr = capture_sio() do
         __run_action("test3:foo:invoke1", false, ["Alice"], {lang: "fr"})
       end
       ok {sout} == "Bonjour, Alice!\n"
@@ -773,9 +758,9 @@ describe Benry::CmdApp::Action do
   end
 
 
-  describe '.prefix()' do
+  topic '.prefix()' do
 
-    it "[!1gwyv] converts symbol into string." do
+    spec "[!1gwyv] converts symbol into string." do
       class PrefixTest1 < Benry::CmdApp::Action
         prefix :foo
       end
@@ -783,7 +768,7 @@ describe Benry::CmdApp::Action do
       ok {prefix} == "foo:"
     end
 
-    it "[!pz46w] error if prefix contains extra '_'." do
+    spec "[!pz46w] error if prefix contains extra '_'." do
       pr = proc do
         class PrefixTest2 < Benry::CmdApp::Action
           prefix "foo_bar"
@@ -793,7 +778,7 @@ describe Benry::CmdApp::Action do
                      "foo_bar: invalid prefix name (please use ':' or '-' instead of '_' as word separator).")
     end
 
-    it "[!9pu01] adds ':' at end of prefix name if prefix not end with ':'." do
+    spec "[!9pu01] adds ':' at end of prefix name if prefix not end with ':'." do
       class PrefixTest3 < Benry::CmdApp::Action
         prefix "foo:bar"
       end
@@ -804,9 +789,9 @@ describe Benry::CmdApp::Action do
   end
 
 
-  describe '.inherited()' do
+  topic '.inherited()' do
 
-    it "[!f826w] registers all subclasses into 'Action::SUBCLASSES'." do
+    spec "[!f826w] registers all subclasses into 'Action::SUBCLASSES'." do
       class InheritedTest0a < Benry::CmdApp::Action
       end
       class InheritedTest0b < Benry::CmdApp::Action
@@ -815,14 +800,14 @@ describe Benry::CmdApp::Action do
       ok {Benry::CmdApp::Action::SUBCLASSES}.include?(InheritedTest0b)
     end
 
-    it "[!2imrb] sets class instance variables in subclass." do
+    spec "[!2imrb] sets class instance variables in subclass." do
       class InheritedTest1 < Benry::CmdApp::Action
       end
       ivars = InheritedTest1.instance_variables().sort()
       ok {ivars} == [:@__action__, :@__aliasof__, :@__default__, :@__option__, :@__prefix__, :@action, :@copy_options, :@option]
     end
 
-    it "[!1qv12] @action is a Proc object and saves args." do
+    spec "[!1qv12] @action is a Proc object and saves args." do
       class InheritedTest2 < Benry::CmdApp::Action
         @action.("description", detail: "xxx", postamble: "yyy", tag: "zzz")
       end
@@ -830,7 +815,7 @@ describe Benry::CmdApp::Action do
       ok {x} == ["description", {detail: "xxx", postamble: "yyy", tag: "zzz"}]
     end
 
-    it "[!33ma7] @option is a Proc object and saves args." do
+    spec "[!33ma7] @option is a Proc object and saves args." do
       class InheritedTest3 < Benry::CmdApp::Action
         @action.("description", detail: "xxx", postamble: "yyy")
         @option.(:xx, "-x, --xxx=<N>", "desc 1", type: Integer, rexp: /\A\d+\z/, enum: [2,4,8])
@@ -856,7 +841,7 @@ describe Benry::CmdApp::Action do
       ok {items[1].value}  == false
     end
 
-    it "[!gxybo] '@option.()' raises error when '@action.()' not called." do
+    spec "[!gxybo] '@option.()' raises error when '@action.()' not called." do
       pr = proc do
         class InheritedTest4 < Benry::CmdApp::Action
           @option.(:xx, "-x, --xxx=<N>", "desc 1")
@@ -866,7 +851,7 @@ describe Benry::CmdApp::Action do
                      "@option.(:xx): `@action.()` required but not called.")
     end
 
-    it "[!yrkxn] @copy_options is a Proc object and copies options from other action." do
+    spec "[!yrkxn] @copy_options is a Proc object and copies options from other action." do
       class InheritedTest5 < Benry::CmdApp::Action
         @action.("copy src")
         @option.(:xxx, "-x, --xxx=<arg>", "xxx #1")
@@ -889,7 +874,7 @@ describe Benry::CmdApp::Action do
       ok {items[1].long}   == "yyy"
     end
 
-    it "[!mhhn2] '@copy_options.()' raises error when action not found." do
+    spec "[!mhhn2] '@copy_options.()' raises error when action not found." do
       pr = proc do
         class InheritedTest6 < Benry::CmdApp::Action
           @action.("copy")
@@ -905,7 +890,7 @@ describe Benry::CmdApp::Action do
   end
 
 
-  describe '.method_added()' do
+  topic '.method_added()' do
 
     def defined_actions()
       action_names = Benry::CmdApp::Index::ACTIONS.keys()
@@ -915,7 +900,7 @@ describe Benry::CmdApp::Action do
       return new_names, metadata
     end
 
-    it "[!idh1j] do nothing if '@__action__' is nil." do
+    spec "[!idh1j] do nothing if '@__action__' is nil." do
       new_names, x = defined_actions() do
         class Added1Test < Benry::CmdApp::Action
           prefix "added1"
@@ -926,7 +911,7 @@ describe Benry::CmdApp::Action do
       ok {x} == nil
     end
 
-    it "[!ernnb] clears both '@__action__' and '@__option__'." do
+    spec "[!ernnb] clears both '@__action__' and '@__option__'." do
       new_names, x = defined_actions() do
         class Added2Test < Benry::CmdApp::Action
           @action.("test", detail: "XXX", postamble: "YYY")
@@ -942,7 +927,7 @@ describe Benry::CmdApp::Action do
       end
     end
 
-    it "[!n8tem] creates ActionMetadata object if '@__action__' is not nil." do
+    spec "[!n8tem] creates ActionMetadata object if '@__action__' is not nil." do
       new_names, x = defined_actions() do
         class Added3Test < Benry::CmdApp::Action
           prefix "added3"
@@ -960,7 +945,7 @@ describe Benry::CmdApp::Action do
       ok {x.postamble} == "YYY"
     end
 
-    it "[!4pbsc] raises error if keyword param for option not exist in method." do
+    spec "[!4pbsc] raises error if keyword param for option not exist in method." do
       pr = proc do
         class Added5Test < Benry::CmdApp::Action
           prefix "added5"
@@ -973,9 +958,9 @@ describe Benry::CmdApp::Action do
                      "def hello5(): should have keyword parameter 'flag' for '@option.(:flag)', but not.")
     end
 
-    describe '[!5e5o0] when method name is same as default action name...' do
+    topic '[!5e5o0] when method name is same as default action name...' do
 
-      it "[!myj3p] uses prefix name (expect last char ':') as action name." do
+      spec "[!myj3p] uses prefix name (expect last char ':') as action name." do
         new_names, x = defined_actions() do
           class Added6Test < Benry::CmdApp::Action
             prefix "added6", default: :hello6
@@ -988,7 +973,7 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello6
       end
 
-      it "[!j5oto] clears '@__default__'." do
+      spec "[!j5oto] clears '@__default__'." do
         class ClearDefaultTest1 < Benry::CmdApp::Action
           prefix "cleardefault1", default: :test2_   # symbol
           @__default__ != nil  or
@@ -1008,9 +993,9 @@ describe Benry::CmdApp::Action do
 
     end
 
-    describe '[!agpwh] else...' do
+    topic '[!agpwh] else...' do
 
-      it "[!3icc4] uses method name as action name." do
+      spec "[!3icc4] uses method name as action name." do
         new_names, x = defined_actions() do
           class Added7Test < Benry::CmdApp::Action
             @action.("test")
@@ -1022,7 +1007,7 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello7xx
       end
 
-      it "[!c643b] converts action name 'aa_bb_cc_' into 'aa_bb_cc'." do
+      spec "[!c643b] converts action name 'aa_bb_cc_' into 'aa_bb_cc'." do
         new_names, x = defined_actions() do
           class Added8Test < Benry::CmdApp::Action
             @action.("test")
@@ -1034,7 +1019,7 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello8xx_
       end
 
-      it "[!3fkb3] converts action name 'aa__bb__cc' into 'aa:bb:cc'." do
+      spec "[!3fkb3] converts action name 'aa__bb__cc' into 'aa:bb:cc'." do
         new_names, x = defined_actions() do
           class Added9Test < Benry::CmdApp::Action
             @action.("test")
@@ -1046,7 +1031,7 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello9xx__yy__zz
       end
 
-      it "[!o9s9h] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'." do
+      spec "[!o9s9h] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'." do
         new_names, x = defined_actions() do
           class Added10Test < Benry::CmdApp::Action
             @action.("test")
@@ -1058,7 +1043,7 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :_hello10xx_yy_zz
       end
 
-      it "[!8hlni] when action name is same as default name, uses prefix as action name." do
+      spec "[!8hlni] when action name is same as default name, uses prefix as action name." do
         new_names, x = defined_actions() do
           class Added11Test < Benry::CmdApp::Action
             prefix "added11", default: "hello11"
@@ -1071,7 +1056,7 @@ describe Benry::CmdApp::Action do
         ok {x.method} == :hello11
       end
 
-      it "[!q8oxi] clears '@__default__' when default name matched to action name." do
+      spec "[!q8oxi] clears '@__default__' when default name matched to action name." do
         class ClearDefaultTest2 < Benry::CmdApp::Action
           prefix "cleardefault2", default: "test2"   # string
           @__default__ != nil  or
@@ -1089,7 +1074,7 @@ describe Benry::CmdApp::Action do
         end
       end
 
-      it "[!xfent] when prefix is provided, adds it to action name." do
+      spec "[!xfent] when prefix is provided, adds it to action name." do
         new_names, x = defined_actions() do
           class Added12Test < Benry::CmdApp::Action
             prefix "added12"
@@ -1104,7 +1089,7 @@ describe Benry::CmdApp::Action do
 
     end
 
-    it "[!jpzbi] defines same name alias of action as prefix." do
+    spec "[!jpzbi] defines same name alias of action as prefix." do
       ## when symbol
       class AliasOfTest1 < Benry::CmdApp::Action
         prefix "blabla1", alias_of: :bla1    # symbol
@@ -1121,7 +1106,7 @@ describe Benry::CmdApp::Action do
       ok {Benry::CmdApp::Index::ALIASES["bla:bla2"]} == "bla:bla2:blala"
     end
 
-    it "[!tvjb0] clears '@__aliasof__' only when alias created." do
+    spec "[!tvjb0] clears '@__aliasof__' only when alias created." do
       class AliasOfTest3 < Benry::CmdApp::Action
         prefix "bla:bla3", alias_of: "bla3b"    # string
         @__aliasof__ != nil  or
@@ -1146,7 +1131,7 @@ describe Benry::CmdApp::Action do
       end
     end
 
-    it "[!997gs] not raise error when action not found." do
+    spec "[!997gs] not raise error when action not found." do
       pr = proc do
         class AliasOfTest4 < Benry::CmdApp::Action
           prefix "blabla4", alias_of: :bla99     # action not exist
@@ -1161,7 +1146,7 @@ describe Benry::CmdApp::Action do
       end
     end
 
-    it "[!349nr] raises error when same name action or alias with prefix already exists." do
+    spec "[!349nr] raises error when same name action or alias with prefix already exists." do
       pr = proc do
         class AliasOfTest5a < Benry::CmdApp::Action
           @action.("test")
@@ -1187,10 +1172,10 @@ describe Benry::CmdApp::Action do
 end
 
 
-describe Benry::CmdApp do
+topic Benry::CmdApp do
 
 
-  describe '.action_alias()' do
+  topic '.action_alias()' do
 
     class Alias1Test < Benry::CmdApp::Action
       prefix "alias1"
@@ -1200,31 +1185,31 @@ describe Benry::CmdApp do
       def a2(); end
     end
 
-    it "[!vzlrb] registers alias name with action name." do
+    spec "[!vzlrb] registers alias name with action name." do
       Benry::CmdApp.action_alias("a4", "alias1:a1")
       ok {Benry::CmdApp::Index::ALIASES}.key?("a4")
       ok {Benry::CmdApp::Index::ALIASES["a4"]} == "alias1:a1"
     end
 
-    it "[!5immb] convers both alias name and action name into string." do
+    spec "[!5immb] convers both alias name and action name into string." do
       Benry::CmdApp.action_alias(:a5, :'alias1:a2')
       ok {Benry::CmdApp::Index::ALIASES}.key?("a5")
       ok {Benry::CmdApp::Index::ALIASES["a5"]} == "alias1:a2"
     end
 
-    it "[!nrz3d] error if action not found." do
+    spec "[!nrz3d] error if action not found." do
       pr = proc { Benry::CmdApp.action_alias(:a5, :'alias1:a5') }
       ok {pr}.raise?(Benry::CmdApp::AliasDefError,
                      "action_alias(:a5, :\"alias1:a5\"): action not found.")
     end
 
-    it "[!vvmwd] error when action with same name as alias exists." do
+    spec "[!vvmwd] error when action with same name as alias exists." do
       pr = proc { Benry::CmdApp.action_alias(:'alias1:a2', :'alias1:a1') }
       ok {pr}.raise?(Benry::CmdApp::AliasDefError,
                      "action_alias(:\"alias1:a2\", :\"alias1:a1\"): not allowed to define same name alias as existing action.")
     end
 
-    it "[!i9726] error if alias already defined." do
+    spec "[!i9726] error if alias already defined." do
       pr1 = proc { Benry::CmdApp.action_alias(:'a6', :'alias1:a1') }
       pr2 = proc { Benry::CmdApp.action_alias(:'a6', :'alias1:a2') }
       ok {pr1}.NOT.raise?(Exception)
@@ -1237,12 +1222,12 @@ describe Benry::CmdApp do
 end
 
 
-describe Benry::CmdApp::Config do
+topic Benry::CmdApp::Config do
 
 
-  describe '#initialize()' do
+  topic '#initialize()' do
 
-    it "[!uve4e] sets command name automatically if not provided." do
+    spec "[!uve4e] sets command name automatically if not provided." do
       config = Benry::CmdApp::Config.new("test")
       ok {config.app_command} != nil
       ok {config.app_command} == File.basename($0)
@@ -1254,10 +1239,10 @@ describe Benry::CmdApp::Config do
 end
 
 
-describe Benry::CmdApp::GlobalOptionSchema do
+topic Benry::CmdApp::GlobalOptionSchema do
 
 
-  describe '#initialize()' do
+  topic '#initialize()' do
 
     def new_gschema(desc="", version=nil, **kwargs)
       config = Benry::CmdApp::Config.new(desc, version, **kwargs)
@@ -1265,14 +1250,14 @@ describe Benry::CmdApp::GlobalOptionSchema do
       return x
     end
 
-    it "[!3ihzx] do nothing when config is nil." do
+    spec "[!3ihzx] do nothing when config is nil." do
       x = nil
       pr = proc { x = Benry::CmdApp::GlobalOptionSchema.new(nil) }
       ok {pr}.NOT.raise?(Exception)
       ok {x}.is_a?(Benry::CmdApp::GlobalOptionSchema)
     end
 
-    it "[!tq2ol] adds '-h, --help' option if 'config.option_help' is set." do
+    spec "[!tq2ol] adds '-h, --help' option if 'config.option_help' is set." do
       x = new_gschema(option_help: true)
       ok {x.find_long_option("help")} != nil
       ok {x.find_short_option("h")}   != nil
@@ -1281,7 +1266,7 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("h")}   == nil
     end
 
-    it "[!mbtw0] adds '-V, --version' option if 'config.app_version' is set." do
+    spec "[!mbtw0] adds '-V, --version' option if 'config.app_version' is set." do
       x = new_gschema("", "0.0.0")
       ok {x.find_long_option("version")} != nil
       ok {x.find_short_option("V")}      != nil
@@ -1290,7 +1275,7 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("V")}      == nil
     end
 
-    it "[!f5do6] adds '-a, --all' option if 'config.option_all' is set." do
+    spec "[!f5do6] adds '-a, --all' option if 'config.option_all' is set." do
       x = new_gschema(option_all: true)
       ok {x.find_long_option("all")} != nil
       ok {x.find_short_option("a")}  != nil
@@ -1299,7 +1284,7 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("a")}  == nil
     end
 
-    it "[!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set." do
+    spec "[!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set." do
       x = new_gschema(option_verbose: true)
       ok {x.find_long_option("verbose")} != nil
       ok {x.find_short_option("v")}  != nil
@@ -1308,7 +1293,7 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("v")}  == nil
     end
 
-    it "[!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set." do
+    spec "[!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set." do
       x = new_gschema(option_quiet: true)
       ok {x.find_long_option("quiet")} != nil
       ok {x.find_short_option("q")}  != nil
@@ -1317,14 +1302,14 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("q")}  == nil
     end
 
-    it "[!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set." do
+    spec "[!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set." do
       x = new_gschema(option_color: true)
       ok {x.find_long_option("color")} != nil
       x = new_gschema(option_quiet: false)
       ok {x.find_long_option("color")} == nil
     end
 
-    it "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
+    spec "[!29wfy] adds '-D, --debug' option if 'config.option_debug' is set." do
       x = new_gschema(option_debug: true)
       ok {x.find_long_option("debug")} != nil
       ok {x.find_short_option("D")}    != nil
@@ -1333,7 +1318,7 @@ describe Benry::CmdApp::GlobalOptionSchema do
       ok {x.find_short_option("D")}    == nil
     end
 
-    it "[!s97go] adds '-T, --trace' option if 'config.option_trace' is set." do
+    spec "[!s97go] adds '-T, --trace' option if 'config.option_trace' is set." do
       x = new_gschema(option_trace: true)
       ok {x.find_long_option("trace")} != nil
       ok {x.find_short_option("T")}    != nil
@@ -1348,7 +1333,7 @@ describe Benry::CmdApp::GlobalOptionSchema do
 end
 
 
-describe Benry::CmdApp::Application do
+topic Benry::CmdApp::Application do
   include CommonTestingHelper
 
   class AppTest < Benry::CmdApp::Action
@@ -1372,15 +1357,15 @@ describe Benry::CmdApp::Application do
   end
 
   def _run_app(*args)
-    sout, serr = capture_io { @app.run(*args) }
+    sout, serr = capture_sio { @app.run(*args) }
     ok {serr} == ""
     return sout
   end
 
 
-  describe '#initialize()' do
+  topic '#initialize()' do
 
-    it "[!jkprn] creates option schema object according to config." do
+    spec "[!jkprn] creates option schema object according to config." do
       c = Benry::CmdApp::Config.new("test", "1.0.0", option_debug: true)
       app = Benry::CmdApp::Application.new(c)
       schema = app.instance_variable_get('@schema')
@@ -1396,7 +1381,7 @@ describe Benry::CmdApp::Application do
 END
     end
 
-    it "[!h786g] acceps callback block." do
+    spec "[!h786g] acceps callback block." do
       config = Benry::CmdApp::Config.new("test app")
       n = 0
       app = Benry::CmdApp::Application.new(config) do |args|
@@ -1413,25 +1398,25 @@ END
   end
 
 
-  describe '#main()' do
+  topic '#main()' do
 
     after do
       $cmdapp_config = nil
     end
 
-    it "[!y6q9z] runs action with options." do
-      sout, serr = capture_io { @app.main(["sayhello", "-l", "it", "Alice"]) }
+    spec "[!y6q9z] runs action with options." do
+      sout, serr = capture_sio { @app.main(["sayhello", "-l", "it", "Alice"]) }
       ok {serr} == ""
       ok {sout} == "Ciao, Alice!\n"
     end
 
-    it "[!a7d4w] prints error message with '[ERROR]' prompt." do
-      sout, serr = capture_io { @app.main(["sayhello", "Alice", "Bob"]) }
+    spec "[!a7d4w] prints error message with '[ERROR]' prompt." do
+      sout, serr = capture_sio { @app.main(["sayhello", "Alice", "Bob"]) }
       ok {serr} == "\e[0;31m[ERROR]\e[0m sayhello: too much arguments (at most 1).\n"
       ok {sout} == ""
     end
 
-    it "[!r7opi] prints filename and line number on where error raised if DefinitionError." do
+    spec "[!r7opi] prints filename and line number on where error raised if DefinitionError." do
       class MainTest1 < Benry::CmdApp::Action
         prefix "main1"
         @action.("test")
@@ -1445,7 +1430,7 @@ END
         end
       end
       lineno = __LINE__ - 5
-      sout, serr = capture_io { @app.main(["main1:err1"]) }
+      sout, serr = capture_sio { @app.main(["main1:err1"]) }
       ok {sout} == ""
       ok {serr} == <<"END"
 \e[0;31m[ERROR]\e[0m def err2(): should have keyword parameter 'foo' for '@option.(:foo)', but not.
@@ -1453,7 +1438,7 @@ END
 END
     end
 
-    it "[!v0zrf] error location can be filtered by block." do
+    spec "[!v0zrf] error location can be filtered by block." do
       class MainTest2 < Benry::CmdApp::Action
         prefix "main2"
         @action.("test")
@@ -1472,18 +1457,18 @@ END
       lineno1 = __LINE__ - 5
       lineno2 = lineno1 - 3
       ## no filter
-      sout, serr = capture_io { @app.main(["main2:err2"]) }
+      sout, serr = capture_sio { @app.main(["main2:err2"]) }
       ok {sout} == ""
       ok {serr} =~ /\t\(file: .*\/cmdapp_test\.rb, line: #{lineno1}\)\n/
       ## filter by block
-      sout, serr = capture_io {
+      sout, serr = capture_sio {
         @app.main(["main2:err2"]) {|exc| exc.lineno == lineno2 }
       }
       ok {sout} == ""
       ok {serr} =~ /\t\(file: .*\/cmdapp_test\.rb, line: #{lineno2}\)\n/
     end
 
-    it "[!6ro6n] not catch error when $DEBUG_MODE is on." do
+    spec "[!6ro6n] not catch error when $DEBUG_MODE is on." do
       bkup = $DEBUG_MODE
       begin
         pr = proc { @app.main(["-D", "sayhello", "Alice", "Bob"]) }
@@ -1494,9 +1479,9 @@ END
       end
     end
 
-    it "[!5oypr] returns 0 as exit code when no errors occurred." do
+    spec "[!5oypr] returns 0 as exit code when no errors occurred." do
       ret = nil
-      sout, serr = capture_io do
+      sout, serr = capture_sio do
         ret = @app.main(["sayhello", "Alice", "-l", "it"])
       end
       ok {ret} == 0
@@ -1504,9 +1489,9 @@ END
       ok {sout} == "Ciao, Alice!\n"
     end
 
-    it "[!qk5q5] returns 1 as exit code when error occurred." do
+    spec "[!qk5q5] returns 1 as exit code when error occurred." do
       ret = nil
-      sout, serr = capture_io do
+      sout, serr = capture_sio do
         ret = @app.main(["sayhello", "Alice", "Bob"])
       end
       ok {ret} == 1
@@ -1517,7 +1502,7 @@ END
   end
 
 
-  describe '#run()' do
+  topic '#run()' do
 
     class AppRunTest < Benry::CmdApp::Action
       #
@@ -1560,19 +1545,19 @@ END
       end
     end
 
-    it "[!t4ypg] sets $cmdapp_config at beginning." do
-      sout, serr = capture_io { @app.run("check-config") }
+    spec "[!t4ypg] sets $cmdapp_config at beginning." do
+      sout, serr = capture_sio { @app.run("check-config") }
       ok {serr} == ""
       ok {sout} == "$cmdapp_config.class=Benry::CmdApp::Config\n"
     end
 
-    it "[!pyotc] sets global options to '@global_options'." do
+    spec "[!pyotc] sets global options to '@global_options'." do
       ok {@app.instance_variable_get('@global_options')} == nil
-      capture_io { @app.run("--help") }
+      capture_sio { @app.run("--help") }
       ok {@app.instance_variable_get('@global_options')} == {:help=>true}
     end
 
-    it "[!go9kk] sets global variables according to global options." do
+    spec "[!go9kk] sets global variables according to global options." do
       config = Benry::CmdApp::Config.new("test app", "1.0.0",
                                          option_verbose: true,
                                          option_quiet: true,
@@ -1583,30 +1568,30 @@ END
       begin
         ['-v', '--verbose'].each do |x|
           $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
-          capture_io { app.run(x, '-h') }
+          capture_sio { app.run(x, '-h') }
           ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [true, nil, nil, nil]
         end
         #
         ['-q', '--quiet'].each do |x|
           $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
-          capture_io { app.run(x, '-h') }
+          capture_sio { app.run(x, '-h') }
           ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, true, nil, nil]
         end
         #
         ['-D', '--debug'].each do |x|
           $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
-          capture_io { app.run(x, '-h') }
+          capture_sio { app.run(x, '-h') }
           ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, true, nil]
         end
         #
         ['--color', '--color=on'].each do |x|
           $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
-          capture_io { app.run(x, '-h') }
+          capture_sio { app.run(x, '-h') }
           ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, nil, true]
         end
         ['--color=off'].each do |x|
           $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
-          capture_io { app.run(x, '-h') }
+          capture_sio { app.run(x, '-h') }
           ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, nil, false]
         end
       ensure
@@ -1614,28 +1599,28 @@ END
       end
     end
 
-    it "[!5iczl] skip actions if help option or version option specified." do
+    spec "[!5iczl] skip actions if help option or version option specified." do
       def @app.do_callback(args, global_opts)
         @_called_ = args.dup
       end
-      capture_io { @app.run("--help") }
+      capture_sio { @app.run("--help") }
       ok {@app.instance_variable_get('@_called_')} == nil
-      capture_io { @app.run("--version") }
+      capture_sio { @app.run("--version") }
       ok {@app.instance_variable_get('@_called_')} == nil
-      capture_io { @app.run("sayhello") }
+      capture_sio { @app.run("sayhello") }
       ok {@app.instance_variable_get('@_called_')} == ["sayhello"]
     end
 
-    it "[!w584g] calls callback method." do
+    spec "[!w584g] calls callback method." do
       def @app.do_callback(args, global_opts)
         @_called_ = args.dup
       end
       ok {@app.instance_variable_get('@_called_')} == nil
-      capture_io { @app.run("sayhello") }
+      capture_sio { @app.run("sayhello") }
       ok {@app.instance_variable_get('@_called_')} == ["sayhello"]
     end
 
-    it "[!pbug7] skip actions if callback method returns `:SKIP` value." do
+    spec "[!pbug7] skip actions if callback method returns `:SKIP` value." do
       def @app.do_callback(args, global_opts)
         @_called1 = args.dup
         return :SKIP
@@ -1646,12 +1631,12 @@ END
       end
       ok {@app.instance_variable_get('@_called1')} == nil
       ok {@app.instance_variable_get('@_called2')} == nil
-      capture_io { @app.run("sayhello") }
+      capture_sio { @app.run("sayhello") }
       ok {@app.instance_variable_get('@_called1')} == ["sayhello"]
       ok {@app.instance_variable_get('@_called2')} == nil
     end
 
-    it "[!avxos] prints candidate actions if action name ends with ':'." do
+    spec "[!avxos] prints candidate actions if action name ends with ':'." do
       class CandidateTest1 < Benry::CmdApp::Action
         prefix "candi:date1"
         @action.("test")
@@ -1677,7 +1662,7 @@ END
 END
     end
 
-    it "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
+    spec "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
       def @app.do_find_action(args, global_opts)
         ret = super
         @_args1 = args.dup
@@ -1690,61 +1675,61 @@ END
         ret
       end
       @app.config.default_help = true
-      capture_io { @app.run() }
+      capture_sio { @app.run() }
       ok {@app.instance_variable_get('@_args1')} == []
       ok {@app.instance_variable_get('@_result')} == nil
       ok {@app.instance_variable_get('@_args2')} == nil
     end
 
-    it "[!x1xgc] run action with options and arguments." do
-      sout, serr = capture_io { @app.run("sayhello", "Alice", "-l", "it") }
+    spec "[!x1xgc] run action with options and arguments." do
+      sout, serr = capture_sio { @app.run("sayhello", "Alice", "-l", "it") }
       ok {serr} == ""
       ok {sout} == "Ciao, Alice!\n"
     end
 
-    it "[!agfdi] reports error when action not found." do
+    spec "[!agfdi] reports error when action not found." do
       pr = proc { @app.run("xxx-yyy") }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "xxx-yyy: unknown action.")
     end
 
-    it "[!v5k56] runs default action if action not specified." do
+    spec "[!v5k56] runs default action if action not specified." do
       @config.default_action = "sayhello"
-      sout, serr = capture_io { @app.run() }
+      sout, serr = capture_sio { @app.run() }
       ok {serr} == ""
       ok {sout} == "Hello, world!\n"
     end
 
-    it "[!o5i3w] reports error when default action not found." do
+    spec "[!o5i3w] reports error when default action not found." do
       @config.default_action = "xxx-zzz"
       pr = proc { @app.run() }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "xxx-zzz: unknown default action.")
     end
 
-    it "[!7h0ku] prints help if no action but 'config.default_help' is true." do
-      expected, serr = capture_io { @app.run("-h") }
+    spec "[!7h0ku] prints help if no action but 'config.default_help' is true." do
+      expected, serr = capture_sio { @app.run("-h") }
       ok {serr} == ""
       ok {expected} =~ /^Usage:/
       #
       @config.default_help = true
-      sout, serr = capture_io { @app.run() }
+      sout, serr = capture_sio { @app.run() }
       ok {serr} == ""
       ok {sout} == expected
     end
 
-    it "[!n60o0] reports error when action nor default action not specified." do
+    spec "[!n60o0] reports error when action nor default action not specified." do
       @config.default_action = nil
       pr = proc { @app.run() }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "testapp: action name required (run `testapp -h` for details).")
     end
 
-    it "[!hk6iu] unsets $cmdapp_config at end." do
+    spec "[!hk6iu] unsets $cmdapp_config at end." do
       bkup = $cmdapp_config
       $cmdapp_config = nil
       begin
-        sout, serr = capture_io { @app.run("check-config") }
+        sout, serr = capture_sio { @app.run("check-config") }
         ok {sout} == "$cmdapp_config.class=Benry::CmdApp::Config\n"
         ok {$cmdapp_config} == nil
       ensure
@@ -1752,31 +1737,32 @@ END
       end
     end
 
-    it "[!wv22u] calls teardown method at end of running action." do
+    spec "[!wv22u] calls teardown method at end of running action." do
       def @app.do_teardown(*args)
         @_args = args
       end
       ok {@app.instance_variable_get('@_args')} == nil
-      sout, serr = capture_io { @app.run("check-config") }
+      sout, serr = capture_sio { @app.run("check-config") }
       ok {@app.instance_variable_get('@_args')} == [nil]
     end
 
-    it "[!dhba4] calls teardown method even if exception raised." do
+    spec "[!dhba4] calls teardown method even if exception raised." do
       def @app.do_teardown(*args)
         @_args = args
       end
       ok {@app.instance_variable_get('@_args')} == nil
       pr = proc { @app.run("test-exception1") }
-      exc = ok {pr}.raise?(ZeroDivisionError)
-      ok {@app.instance_variable_get('@_args')} == [exc]
+      ok {pr}.raise?(ZeroDivisionError) do |exc|
+        ok {@app.instance_variable_get('@_args')} == [exc]
+      end
     end
 
   end
 
 
-  describe '#help_message()' do
+  topic '#help_message()' do
 
-    it "[!owg9y] returns help message." do
+    spec "[!owg9y] returns help message." do
       msg = @app.help_message()
       msg = uncolorize(msg)
       ok {msg}.start_with?(<<END)
@@ -1798,9 +1784,9 @@ END
   end
 
 
-  describe '#do_create_global_option_schema()' do
+  topic '#do_create_global_option_schema()' do
 
-    it "[!u3zdg] creates global option schema object according to config." do
+    spec "[!u3zdg] creates global option schema object according to config." do
       config = Benry::CmdApp::Config.new("test app", "1.0.0",
                                          option_all: true, option_quiet: true)
       app = Benry::CmdApp::Application.new(config)
@@ -1815,9 +1801,9 @@ END
   end
 
 
-  describe '#do_create_help_message_builder()' do
+  topic '#do_create_help_message_builder()' do
 
-    it "[!pk5da] creates help message builder object." do
+    spec "[!pk5da] creates help message builder object." do
       config = Benry::CmdApp::Config.new("test app", "1.0.0",
                                          option_all: true, option_quiet: true)
       app = Benry::CmdApp::Application.new(config)
@@ -1828,15 +1814,15 @@ END
   end
 
 
-  describe '#do_parse_global_options()' do
+  topic '#do_parse_global_options()' do
 
-    it "[!5br6t] parses only global options and not parse action options." do
-      sout, serr = capture_io { @app.run("test-globalopt", "--help") }
+    spec "[!5br6t] parses only global options and not parse action options." do
+      sout, serr = capture_sio { @app.run("test-globalopt", "--help") }
       ok {serr} == ""
       ok {sout} == "help=true\n"
     end
 
-    it "[!kklah] raises InvalidOptionError if global option value is invalid." do
+    spec "[!kklah] raises InvalidOptionError if global option value is invalid." do
       pr = proc { @app.run("-hoge", "test-globalopt") }
       ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-o: unknown option.")
     end
@@ -1844,7 +1830,7 @@ END
   end
 
 
-  describe '#do_toggle_global_switches()' do
+  topic '#do_toggle_global_switches()' do
 
     before do
       @config = Benry::CmdApp::Config.new("test app", "1.0.0",
@@ -1856,12 +1842,12 @@ END
       @app = Benry::CmdApp::Application.new(@config)
     end
 
-    it "[!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified." do
+    spec "[!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified." do
       bkup = $VERBOSE_MODE
       begin
         ["-v", "--verbose"].each do |opt|
           $VERBOSE_MODE = false
-          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          sout, serr = capture_sio { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
           ok {$VERBOSE_MODE} == true
         end
@@ -1870,12 +1856,12 @@ END
       end
     end
 
-    it "[!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified." do
+    spec "[!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified." do
       bkup = $QUIET_MODE
       begin
         ["-q", "--quiet"].each do |opt|
           $QUIET_MODE = false
-          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          sout, serr = capture_sio { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
           ok {$QUIET_MODE} == true
         end
@@ -1884,12 +1870,12 @@ END
       end
     end
 
-    it "[!2zvf9] sets $COLOR_MODE to true/false according to '--color' option." do
+    spec "[!2zvf9] sets $COLOR_MODE to true/false according to '--color' option." do
       bkup = $COLOR_MODE
       begin
         [["--color", true], ["--color=on", true], ["--color=off", false]].each do |opt, val|
           $COLOR_MODE = !val
-          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          sout, serr = capture_sio { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
           ok {$COLOR_MODE} == val
         end
@@ -1898,12 +1884,12 @@ END
       end
     end
 
-    it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
+    spec "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
       bkup = $DEBUG_MODE
       begin
         ["-D", "--debug"].each do |opt|
           $DEBUG_MODE = false
-          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          sout, serr = capture_sio { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
           ok {sout} == "$DEBUG_MODE=true\n"
           ok {$DEBUG_MODE} == true
@@ -1913,12 +1899,12 @@ END
       end
     end
 
-    it "[!8trmz] sets $TRACE_MODE to true if '-T' or '--trace' specified." do
+    spec "[!8trmz] sets $TRACE_MODE to true if '-T' or '--trace' specified." do
       bkup = $TRACE_MODE
       begin
         ["-T", "--trace"].each do |opt|
           $TRACE_MODE = false
-          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          sout, serr = capture_sio { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
           ok {$TRACE_MODE} == true
         end
@@ -1930,7 +1916,7 @@ END
   end
 
 
-  describe '#do_handle_global_options()' do
+  topic '#do_handle_global_options()' do
 
     def new_app()
       kws = {
@@ -1946,7 +1932,7 @@ END
       return Benry::CmdApp::Application.new(config)
     end
 
-    it "[!xvj6s] prints help message if '-h' or '--help' specified." do
+    spec "[!xvj6s] prints help message if '-h' or '--help' specified." do
       expected = <<"END"
 TestApp (1.0.0) -- test app
 
@@ -1966,13 +1952,13 @@ Actions:
 END
       app = new_app()
       ["-h", "--help"].each do |opt|
-        sout, serr = capture_io { app.run(opt) }
+        sout, serr = capture_sio { app.run(opt) }
         ok {serr} == ""
         ok {sout}.start_with?(expected)
       end
     end
 
-    it "[!lpoz7] prints help message of action if action name specified with help option." do
+    spec "[!lpoz7] prints help message of action if action name specified with help option." do
       expected = <<"END"
 testapp sayhello -- print greeting message
 
@@ -1984,16 +1970,16 @@ Options:
 END
       app = new_app()
       ["-h", "--help"].each do |opt|
-        sout, serr = capture_io { app.run(opt, "sayhello") }
+        sout, serr = capture_sio { app.run(opt, "sayhello") }
         ok {serr} == ""
         ok {sout} == expected
       end
     end
 
-    it "[!fslsy] prints version if '-V' or '--version' specified." do
+    spec "[!fslsy] prints version if '-V' or '--version' specified." do
       app = new_app()
       ["-V", "--version"].each do |opt|
-        sout, serr = capture_io { app.run(opt, "xxx") }
+        sout, serr = capture_sio { app.run(opt, "xxx") }
         ok {serr} == ""
         ok {sout} == "1.0.0\n"
       end
@@ -2002,14 +1988,14 @@ END
   end
 
 
-  describe '#do_callback()' do
+  topic '#do_callback()' do
 
     def new_app(&block)
       @config = Benry::CmdApp::Config.new("test app", "1.0.0")
       return Benry::CmdApp::Application.new(@config, &block)
     end
 
-    it "[!xwo0v] calls callback if provided." do
+    spec "[!xwo0v] calls callback if provided." do
       called = nil
       app = new_app do |args, global_opts, config|
         called = [args.dup, global_opts, config]
@@ -2022,7 +2008,7 @@ END
       ok {called[2]} == @config
     end
 
-    it "[!lljs1] calls callback only once." do
+    spec "[!lljs1] calls callback only once." do
       n = 0
       app = new_app do |args, global_opts, config|
         n += 1
@@ -2039,42 +2025,42 @@ END
   end
 
 
-  describe '#do_find_action()' do
+  topic '#do_find_action()' do
 
-    it "[!bm8np] returns action metadata." do
+    spec "[!bm8np] returns action metadata." do
       x = @app.__send__(:do_find_action, ["sayhello"], {})
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "sayhello"
     end
 
-    it "[!vl0zr] error when action not found." do
+    spec "[!vl0zr] error when action not found." do
       pr = proc { @app.__send__(:do_find_action, ["hiyo"], {}) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "hiyo: unknown action.")
     end
 
-    it "[!gucj7] if no action specified, finds default action instead." do
+    spec "[!gucj7] if no action specified, finds default action instead." do
       @app.config.default_action = "sayhello"
       x = @app.__send__(:do_find_action, [], {})
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "sayhello"
     end
 
-    it "[!388rs] error when default action not found." do
+    spec "[!388rs] error when default action not found." do
       @app.config.default_action = "hiyo"
       pr = proc { @app.__send__(:do_find_action, [], {}) }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "hiyo: unknown default action.")
     end
 
-    it "[!drmls] returns nil if no action specified but 'config.default_help' is set." do
+    spec "[!drmls] returns nil if no action specified but 'config.default_help' is set." do
       @app.config.default_action = nil
       @app.config.default_help = true
       x = @app.__send__(:do_find_action, [], {})
       ok {x} == nil
     end
 
-    it "[!hs589] error when action nor default action not specified." do
+    spec "[!hs589] error when action nor default action not specified." do
       @app.config.default_action = nil
       @app.config.default_help = false
       pr = proc { @app.__send__(:do_find_action, [], {}) }
@@ -2085,46 +2071,46 @@ END
   end
 
 
-  describe '#do_run_action()' do
+  topic '#do_run_action()' do
 
-    it "[!62gv9] parses action options even if specified after args." do
-      sout, serr = capture_io { @app.run("sayhello", "Alice", "-l", "it") }
+    spec "[!62gv9] parses action options even if specified after args." do
+      sout, serr = capture_sio { @app.run("sayhello", "Alice", "-l", "it") }
       ok {serr} == ""
       ok {sout} == "Ciao, Alice!\n"
     end
 
-    it "[!6mlol] reports error if action requries argument but nothing specified." do
+    spec "[!6mlol] reports error if action requries argument but nothing specified." do
       pr = proc { @app.run("test-arity1") }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "test-arity1: argument required.")
     end
 
-    it "[!72jla] reports error if action requires N args but specified less than N args." do
+    spec "[!72jla] reports error if action requires N args but specified less than N args." do
       pr = proc { @app.run("test-arity1", "foo") }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "test-arity1: too less arguments (at least 2).")
     end
 
-    it "[!zawxe] reports error if action requires N args but specified over than N args." do
+    spec "[!zawxe] reports error if action requires N args but specified over than N args." do
       pr = proc { @app.run("test-arity1", "foo", "bar", "baz", "boo") }
       ok {pr}.raise?(Benry::CmdApp::CommandError,
                      "test-arity1: too much arguments (at most 3).")
     end
 
-    it "[!y97o3] action can take any much args if action has variable arg." do
+    spec "[!y97o3] action can take any much args if action has variable arg." do
       pr = proc {
-        capture_io { @app.run("test-arity2", "foo", "bar", "baz", "boo") }
+        capture_sio { @app.run("test-arity2", "foo", "bar", "baz", "boo") }
       }
       ok {pr}.NOT.raise?(Exception)
     end
 
-    it "[!cf45e] runs action with arguments and options." do
-      sout, serr = capture_io { @app.run("sayhello", "-l", "it", "Bob") }
+    spec "[!cf45e] runs action with arguments and options." do
+      sout, serr = capture_sio { @app.run("sayhello", "-l", "it", "Bob") }
       ok {serr} == ""
       ok {sout} == "Ciao, Bob!\n"
     end
 
-    it "[!tsal4] detects looped action." do
+    spec "[!tsal4] detects looped action." do
       pr = proc { @app.run("test-loop1") }
       ok {pr}.raise?(Benry::CmdApp::LoopedActionError,
                      "test-loop1: looped action detected.")
@@ -2133,10 +2119,10 @@ END
   end
 
 
-  describe '#do_print_help_message()' do
+  topic '#do_print_help_message()' do
 
-    it "[!eabis] prints help message of action if action name provided." do
-      sout, serr = capture_io { @app.run("-h", "sayhello") }
+    spec "[!eabis] prints help message of action if action name provided." do
+      sout, serr = capture_sio { @app.run("-h", "sayhello") }
       ok {serr} == ""
       ok {sout} == <<'END'
 testapp sayhello -- print greeting message
@@ -2149,7 +2135,7 @@ Options:
 END
     end
 
-    it "[!cgxkb] error if action for help option not found." do
+    spec "[!cgxkb] error if action for help option not found." do
       ["-h", "--help"].each do |opt|
         pr = proc { @app.run(opt, "xhello") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
@@ -2157,8 +2143,8 @@ END
       end
     end
 
-    it "[!nv0x3] prints help message of command if action name not provided." do
-      sout, serr = capture_io { @app.run("-h") }
+    spec "[!nv0x3] prints help message of command if action name not provided." do
+      sout, serr = capture_sio { @app.run("-h") }
       ok {serr} == ""
       ok {sout}.start_with?(<<'END')
 TestApp (1.0.0) -- test app
@@ -2176,7 +2162,7 @@ Actions:
 END
     end
 
-    it "[!4qs7y] shows private (hidden) actions/options if '--all' option specified." do
+    spec "[!4qs7y] shows private (hidden) actions/options if '--all' option specified." do
       class HiddenTest < Benry::CmdApp::Action
         private
         @action.("hidden test")
@@ -2194,7 +2180,7 @@ END
       ok {_run_app("--help", "hidden1")}      !~ /^  -T +: enable tracing$/
     end
 
-    it "[!l4d6n] `all` flag should be true or false, not nil." do
+    spec "[!l4d6n] `all` flag should be true or false, not nil." do
       config = Benry::CmdApp::Config.new("test app", "1.0.0", option_all: true)
       app = Benry::CmdApp::Application.new(config)
       def app.help_message(all)
@@ -2210,7 +2196,7 @@ END
       ok {app.instance_variable_get('@_all_')} == true
     end
 
-    it "[!efaws] prints colorized help message when stdout is a tty." do
+    spec "[!efaws] prints colorized help message when stdout is a tty." do
       sout, serr = capture_sio(tty: true) { @app.run("-h") }
       ok {serr} == ""
       ok {sout}.include?(<<"END")
@@ -2227,7 +2213,7 @@ END
 END
     end
 
-    it "[!9vdy1] prints non-colorized help message when stdout is not a tty." do
+    spec "[!9vdy1] prints non-colorized help message when stdout is not a tty." do
       sout, serr = capture_sio(tty: false) { @app.run("-h") }
       ok {serr} == ""
       ok {sout}.include?(<<"END")
@@ -2244,7 +2230,7 @@ Actions:
 END
     end
 
-    it "[!gsdcu] prints colorized help message when '--color[=on]' specified." do
+    spec "[!gsdcu] prints colorized help message when '--color[=on]' specified." do
       @config.option_color = true
       app = Benry::CmdApp::Application.new(@config)
       bkup = $COLOR_MODE
@@ -2268,7 +2254,7 @@ END
       end
     end
 
-    it "[!be8y2] prints non-colorized help message when '--color=off' specified." do
+    spec "[!be8y2] prints non-colorized help message when '--color=off' specified." do
       @config.option_color = true
       app = Benry::CmdApp::Application.new(@config)
       bkup = $COLOR_MODE
@@ -2295,9 +2281,9 @@ END
   end
 
 
-  describe '#do_validate_actions()' do
+  topic '#do_validate_actions()' do
 
-    it "[!6xhvt] reports warning at end of help message." do
+    spec "[!6xhvt] reports warning at end of help message." do
       class ValidateActionTest1 < Benry::CmdApp::Action
         prefix "validate1", alias_of: :test
         @action.("test")
@@ -2306,7 +2292,7 @@ END
       @app.config.default_help = true
       begin
         [["-h"], []].each do |args|
-          sout, serr = capture_io { @app.run(*args) }
+          sout, serr = capture_sio { @app.run(*args) }
           ok {serr} == <<'END'
 
 ** [warning] in 'ValidateActionTest1' class, `alias_of: :test` specified but corresponding action not exist.
@@ -2317,14 +2303,14 @@ END
       end
     end
 
-    it "[!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist." do
+    spec "[!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist." do
       class ValidateActionTest2 < Benry::CmdApp::Action
         prefix "validate2", alias_of: :test2
         @action.("test")
         def test(); end
       end
       begin
-        sout, serr = capture_io { @app.__send__(:do_validate_actions, [], {}) }
+        sout, serr = capture_sio { @app.__send__(:do_validate_actions, [], {}) }
         ok {serr} == <<'END'
 
 ** [warning] in 'ValidateActionTest2' class, `alias_of: :test2` specified but corresponding action not exist.
@@ -2334,14 +2320,14 @@ END
       end
     end
 
-    it "[!h7lon] reports warning if `default:` specified in action class but corresponding action not exist." do
+    spec "[!h7lon] reports warning if `default:` specified in action class but corresponding action not exist." do
       class ValidateActionTest3 < Benry::CmdApp::Action
         prefix "validate3", default: :test3
         @action.("test")
         def test(); end
       end
       begin
-        sout, serr = capture_io { @app.__send__(:do_validate_actions, [], {}) }
+        sout, serr = capture_sio { @app.__send__(:do_validate_actions, [], {}) }
         ok {serr} == <<'END'
 
 ** [warning] in 'ValidateActionTest3' class, `default: :test3` specified but corresponding action not exist.
@@ -2354,9 +2340,9 @@ END
   end
 
 
-  describe '#do_print_candidates()' do
+  topic '#do_print_candidates()' do
 
-    it "[!0e8vt] prints candidate action names including prefix name without tailing ':'." do
+    spec "[!0e8vt] prints candidate action names including prefix name without tailing ':'." do
       class CandidateTest2 < Benry::CmdApp::Action
         prefix "candi:date2", default: :eee
         @action.("test1")
@@ -2366,7 +2352,7 @@ END
         @action.("test3")
         def eee(); end
       end
-      sout, serr = capture_io do
+      sout, serr = capture_sio do
         @app.__send__(:do_print_candidates, ["candi:date2:"], {})
       end
       ok {serr} == ""
@@ -2378,7 +2364,7 @@ Actions:
 END
     end
 
-    it "[!85i5m] candidate actions should include alias names." do
+    spec "[!85i5m] candidate actions should include alias names." do
       class CandidateTest3 < Benry::CmdApp::Action
         prefix "candi:date3", default: :ggg
         @action.("test1")
@@ -2391,7 +2377,7 @@ END
       Benry::CmdApp.action_alias("pupu", "candi:date3:fff")
       Benry::CmdApp.action_alias("popo", "candi:date3:fff")
       Benry::CmdApp.action_alias("candi:date3:xxx", "candi:date3:hhh")
-      sout, serr = capture_io do
+      sout, serr = capture_sio do
         @app.__send__(:do_print_candidates, ["candi:date3:"], {})
       end
       ok {serr} == ""
@@ -2406,7 +2392,7 @@ Actions:
 END
     end
 
-    it "[!i2azi] raises error when no candidate actions found." do
+    spec "[!i2azi] raises error when no candidate actions found." do
       pr = proc do
         @app.__send__(:do_print_candidates, ["candi:date9:"], {})
       end
@@ -2414,7 +2400,7 @@ END
                      "No actions starting with 'candi:date9:'.")
     end
 
-    it "[!k3lw0] private (hidden) action should not be printed as candidates." do
+    spec "[!k3lw0] private (hidden) action should not be printed as candidates." do
       class CandidateTest4 < Benry::CmdApp::Action
         prefix "candi:date4"
         @action.("test1")
@@ -2426,7 +2412,7 @@ END
         @action.("test3")
         def jjj(); end
       end
-      sout, serr = capture_io do
+      sout, serr = capture_sio do
         @app.__send__(:do_print_candidates, ["candi:date4:"], {})
       end
       ok {serr} == ""
@@ -2440,9 +2426,9 @@ END
   end
 
 
-  describe '#do_setup()' do
+  topic '#do_setup()' do
 
-    it "[!pkio4] sets config object to '$cmdapp_config'." do
+    spec "[!pkio4] sets config object to '$cmdapp_config'." do
       $cmdapp_config = nil
       @app.__send__(:do_setup,)
       ok {$cmdapp_config} != nil
@@ -2452,9 +2438,9 @@ END
   end
 
 
-  describe '#do_teardown()' do
+  topic '#do_teardown()' do
 
-    it "[!zxeo7] clears '$cmdapp_config'." do
+    spec "[!zxeo7] clears '$cmdapp_config'." do
       $cmdapp_config = "AAA"
       @app.__send__(:do_teardown, nil)
       ok {$cmdapp_config} == nil
@@ -2466,7 +2452,7 @@ END
 end
 
 
-describe Benry::CmdApp::CommandHelpBuilder do
+topic Benry::CmdApp::CommandHelpBuilder do
   include CommonTestingHelper
 
   before do
@@ -2480,7 +2466,7 @@ describe Benry::CmdApp::CommandHelpBuilder do
     @builder = Benry::CmdApp::CommandHelpBuilder.new(@config, @schema)
   end
 
-  describe '#build_help_message()' do
+  topic '#build_help_message()' do
 
     class HelpMessageTest < Benry::CmdApp::Action
       @action.("greeting #1")
@@ -2548,7 +2534,7 @@ Actions:
   yo-yo              : greeting #1
 END
 
-    it "[!rvpdb] returns help message." do
+    spec "[!rvpdb] returns help message." do
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
       ok {msg} == expected_mono
@@ -2562,21 +2548,21 @@ END
       $COLOR_MODE = bkup
     end
 
-    it "[!34y8e] includes application name specified by config." do
+    spec "[!34y8e] includes application name specified by config." do
       @config.app_name = "MyGreatApp"
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
       ok {msg} =~ /^MyGreatApp \(1\.0\.0\) -- test app$/
     end
 
-    it "[!744lx] includes application description specified by config." do
+    spec "[!744lx] includes application description specified by config." do
       @config.app_desc = "my great app"
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
       ok {msg} =~ /^TestApp \(1\.0\.0\) -- my great app$/
     end
 
-    it "[!d1xz4] includes version number if specified by config." do
+    spec "[!d1xz4] includes version number if specified by config." do
       @config.app_version = "1.2.3"
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
@@ -2588,7 +2574,7 @@ END
       ok {msg} =~ /^TestApp -- test app$/
     end
 
-    it "[!775jb] includes detail text if specified by config." do
+    spec "[!775jb] includes detail text if specified by config." do
       @config.app_detail = "See https://example.com/doc.html"
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
@@ -2610,7 +2596,7 @@ Usage:
 END
     end
 
-    it "[!t3tbi] adds '\n' before detail text only when app desc specified." do
+    spec "[!t3tbi] adds '\\n' before detail text only when app desc specified." do
       @config.app_desc   = nil
       @config.app_detail = "See https://..."
       msg = @builder.build_help_message()
@@ -2624,7 +2610,7 @@ Usage:
 END
     end
 
-    it "[!rvhzd] no preamble when neigher app desc nor detail specified." do
+    spec "[!rvhzd] no preamble when neigher app desc nor detail specified." do
       @config.app_desc   = nil
       @config.app_detail = nil
       msg = @builder.build_help_message()
@@ -2636,7 +2622,7 @@ Usage:
 END
     end
 
-    it "[!o176w] includes command name specified by config." do
+    spec "[!o176w] includes command name specified by config." do
       @config.app_name = "GreatCommand"
       @config.app_command = "greatcmd"
       msg = @builder.build_help_message()
@@ -2651,7 +2637,7 @@ Options:
 END
     end
 
-    it "[!proa4] includes description of global options." do
+    spec "[!proa4] includes description of global options." do
       @config.app_version = "1.0.0"
       @config.option_debug = true
       app = Benry::CmdApp::Application.new(@config)
@@ -2681,7 +2667,7 @@ Actions:
 END
     end
 
-    it "[!in3kf] ignores private (hidden) options." do
+    spec "[!in3kf] ignores private (hidden) options." do
       @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
@@ -2699,7 +2685,7 @@ Actions:
 END
     end
 
-    it "[!ywarr] not ignore private (hidden) options if 'all' flag is true." do
+    spec "[!ywarr] not ignore private (hidden) options if 'all' flag is true." do
       @config.app_version = nil
       @config.option_debug = false
       app = Benry::CmdApp::Application.new(@config)
@@ -2718,7 +2704,7 @@ Actions:
 END
     end
 
-    it "[!bm71g] ignores 'Options:' section if no options exist." do
+    spec "[!bm71g] ignores 'Options:' section if no options exist." do
       @config.option_help = false
       @config.option_all = false
       @config.app_version = nil
@@ -2731,7 +2717,7 @@ END
       ok {msg} !~ /^Options:$/
     end
 
-    it "[!jat15] includes action names ordered by name." do
+    spec "[!jat15] includes action names ordered by name." do
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
       ok {msg}.end_with?(<<'END')
@@ -2742,7 +2728,7 @@ Actions:
 END
     end
 
-    it "[!df13s] includes default action name if specified by config." do
+    spec "[!df13s] includes default action name if specified by config." do
       @config.default_action = nil
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
@@ -2754,7 +2740,7 @@ END
       ok {msg} =~ /^Actions: \(default: yo-yo\)$/
     end
 
-    it "[!b3l3m] not show private (hidden) action names in default." do
+    spec "[!b3l3m] not show private (hidden) action names in default." do
       msg = @builder.build_help_message()
       msg = uncolorize(msg)
       ok {msg} !~ /^  _aha /
@@ -2767,7 +2753,7 @@ Actions:
 END
     end
 
-    it "[!yigf3] shows private (hidden) action names if 'all' flag is true." do
+    spec "[!yigf3] shows private (hidden) action names if 'all' flag is true." do
       msg = @builder.build_help_message(true)
       msg = uncolorize(msg)
       ok {msg} =~ /^  _aha /
@@ -2782,7 +2768,7 @@ Actions:
 END
     end
 
-    it "[!cfijh] includes section title and content if specified by config." do
+    spec "[!cfijh] includes section title and content if specified by config." do
       @config.help_sections = [
         ["Example", "  $ echo 'Hello, world!'"],
         ["Tips"   , "  * Try `--help` option.\n"],
@@ -2798,7 +2784,7 @@ END
 END
     end
 
-    it "[!i04hh] includes postamble text if specified by config." do
+    spec "[!i04hh] includes postamble text if specified by config." do
       @config.help_postamble = "Home:\n  https://example.com/\n"
       msg = @builder.build_help_message()
       ok {msg}.end_with?(<<"END")
@@ -2807,13 +2793,16 @@ Home:
 END
     end
 
-    it "[!ckagw] adds '\n' at end of postamble text if it doesn't end with '\n'." do
+    spec "[!ckagw] adds '\\n' at end of postamble text if it doesn't end with '\\n'." do
       @config.help_postamble = "END"
       msg = @builder.build_help_message()
       ok {msg}.end_with?("\nEND\n")
     end
 
   end
+
+
+end
 
 
 end
