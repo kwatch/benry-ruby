@@ -628,6 +628,8 @@ module Benry::CmdApp
       do_setup()
       #; [!pyotc] sets global options to '@global_options'.
       @global_options = do_parse_global_options(args)
+      #; [!go9kk] sets global variables according to global options.
+      do_toggle_global_switches(args)
       #; [!5iczl] skip actions if help option or version option specified.
       result = do_handle_global_options(args)
       return if result == :SKIP
@@ -685,16 +687,24 @@ module Benry::CmdApp
       raise InvalidOptionError.new(exc.message)
     end
 
-    def do_handle_global_options(args)
-      global_opts = @global_options
+    def do_toggle_global_switches(_args)
       #; [!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified.
       #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
       #; [!2zvf9] sets $COLOR_MODE to true/false according to '--color' option.
       #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
-      [:verbose, :quiet, :color, :debug].each do |key|
-        do_set_global_switch(key, global_opts[key])
-        ## not return
+      @global_options.each do |key, val|
+        case key
+        when :quiet   ; $QUIET_MODE   = val
+        when :verbose ; $VERBOSE_MODE = val
+        when :color   ; $COLOR_MODE   = val
+        when :debug   ; $DEBUG_MODE   = val
+        else          ; # do nothing
+        end
       end
+    end
+
+    def do_handle_global_options(args)
+      global_opts = @global_options
       #; [!xvj6s] prints help message if '-h' or '--help' specified.
       if global_opts[:help]
         #; [!lpoz7] prints help message of action if action name specified with help option.
@@ -709,17 +719,6 @@ module Benry::CmdApp
       end
       #
       return nil
-    end
-
-    def do_set_global_switch(key, val)
-      #; [!go9kk] sets global variable according to key.
-      case key
-      when :quiet   ; $QUIET_MODE   = val
-      when :verbose ; $VERBOSE_MODE = val
-      when :color   ; $COLOR_MODE   = val
-      when :debug   ; $DEBUG_MODE   = val   # or $DEBUG = val
-      else          ; # do nothing
-      end
     end
 
     def do_callback(args)

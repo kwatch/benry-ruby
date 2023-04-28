@@ -1570,6 +1570,48 @@ END
       ok {@app.instance_variable_get('@global_options')} == {:help=>true}
     end
 
+    it "[!go9kk] sets global variables according to global options." do
+      config = Benry::CmdApp::Config.new("test app", "1.0.0",
+                                         option_verbose: true,
+                                         option_quiet: true,
+                                         option_debug: true,
+                                         option_color: true)
+      app = Benry::CmdApp::Application.new(config)
+      bkup = [$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]
+      begin
+        ['-v', '--verbose'].each do |x|
+          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          capture_io { app.run(x, '-h') }
+          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [true, nil, nil, nil]
+        end
+        #
+        ['-q', '--quiet'].each do |x|
+          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          capture_io { app.run(x, '-h') }
+          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, true, nil, nil]
+        end
+        #
+        ['-D', '--debug'].each do |x|
+          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          capture_io { app.run(x, '-h') }
+          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, true, nil]
+        end
+        #
+        ['--color', '--color=on'].each do |x|
+          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          capture_io { app.run(x, '-h') }
+          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, nil, true]
+        end
+        ['--color=off'].each do |x|
+          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          capture_io { app.run(x, '-h') }
+          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, nil, false]
+        end
+      ensure
+        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = bkup
+      end
+    end
+
     it "[!5iczl] skip actions if help option or version option specified." do
       def @app.do_callback(args)
         @_called_ = args.dup
@@ -1800,6 +1842,76 @@ END
   end
 
 
+  describe '#do_toggle_global_switches()' do
+
+    before do
+      @config = Benry::CmdApp::Config.new("test app", "1.0.0",
+                                          option_verbose: true,
+                                          option_quiet: true,
+                                          option_debug: true,
+                                          option_color: true)
+      @app = Benry::CmdApp::Application.new(@config)
+    end
+
+    it "[!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified." do
+      bkup = $VERBOSE_MODE
+      begin
+        ["-v", "--verbose"].each do |opt|
+          $VERBOSE_MODE = false
+          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$VERBOSE_MODE} == true
+        end
+      ensure
+        $VERBOSE_MODE = bkup
+      end
+    end
+
+    it "[!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified." do
+      bkup = $QUIET_MODE
+      begin
+        ["-q", "--quiet"].each do |opt|
+          $QUIET_MODE = false
+          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$QUIET_MODE} == true
+        end
+      ensure
+        $QUIET_MODE = bkup
+      end
+    end
+
+    it "[!2zvf9] sets $COLOR_MODE to true/false according to '--color' option." do
+      bkup = $COLOR_MODE
+      begin
+        [["--color", true], ["--color=on", true], ["--color=off", false]].each do |opt, val|
+          $COLOR_MODE = !val
+          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {$COLOR_MODE} == val
+        end
+      ensure
+        $COLOR_MODE = bkup
+      end
+    end
+
+    it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
+      bkup = $DEBUG_MODE
+      begin
+        ["-D", "--debug"].each do |opt|
+          $DEBUG_MODE = false
+          sout, serr = capture_io { @app.run(opt, "test-debugopt") }
+          ok {serr} == ""
+          ok {sout} == "$DEBUG_MODE=true\n"
+        end
+      ensure
+        $DEBUG_MODE = bkup
+      end
+    end
+
+  end
+
+
   describe '#do_handle_global_options()' do
 
     def new_app()
@@ -1814,67 +1926,6 @@ END
       }
       config = Benry::CmdApp::Config.new("test app", "1.0.0", **kws)
       return Benry::CmdApp::Application.new(config)
-    end
-
-
-    it "[!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified." do
-      app = new_app()
-      bkup = $VERBOSE_MODE
-      begin
-        ["-v", "--verbose"].each do |opt|
-          $VERBOSE_MODE = false
-          sout, serr = capture_io { app.run(opt, "test-debugopt") }
-          ok {serr} == ""
-          ok {$VERBOSE_MODE} == true
-        end
-      ensure
-        $VERBOSE_MODE = bkup
-      end
-    end
-
-    it "[!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified." do
-      app = new_app()
-      bkup = $QUIET_MODE
-      begin
-        ["-q", "--quiet"].each do |opt|
-          $QUIET_MODE = false
-          sout, serr = capture_io { app.run(opt, "test-debugopt") }
-          ok {serr} == ""
-          ok {$QUIET_MODE} == true
-        end
-      ensure
-        $QUIET_MODE = bkup
-      end
-    end
-
-    it "[!2zvf9] sets $COLOR_MODE to true/false according to '--color' option." do
-      app = new_app()
-      bkup = $COLOR_MODE
-      begin
-        [["--color", true], ["--color=on", true], ["--color=off", false]].each do |opt, val|
-          $COLOR_MODE = !val
-          sout, serr = capture_io { app.run(opt, "test-debugopt") }
-          ok {serr} == ""
-          ok {$COLOR_MODE} == val
-        end
-      ensure
-        $COLOR_MODE = bkup
-      end
-    end
-
-    it "[!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified." do
-      app = new_app()
-      bkup = $DEBUG_MODE
-      begin
-        ["-D", "--debug"].each do |opt|
-          $DEBUG_MODE = false
-          sout, serr = capture_io { app.run(opt, "test-debugopt") }
-          ok {serr} == ""
-          ok {sout} == "$DEBUG_MODE=true\n"
-        end
-      ensure
-        $DEBUG_MODE = bkup
-      end
     end
 
     it "[!xvj6s] prints help message if '-h' or '--help' specified." do
@@ -1927,30 +1978,6 @@ END
         sout, serr = capture_io { app.run(opt, "xxx") }
         ok {serr} == ""
         ok {sout} == "1.0.0\n"
-      end
-    end
-
-  end
-
-
-  describe '#do_set_global_switch()' do
-
-    it "[!go9kk] sets global variable according to key." do
-      bkup = [$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]
-      begin
-        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = nil, nil, nil
-        @app.__send__(:do_set_global_switch, :verbose, true)
-        ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]} == [true, nil, nil]
-        #
-        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = nil, nil, nil
-        @app.__send__(:do_set_global_switch, :quiet, true)
-        ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]} == [nil, true, nil]
-        #
-        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = nil, nil, nil
-        @app.__send__(:do_set_global_switch, :debug, true)
-        ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE]} == [nil, nil, true]
-      ensure
-        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE = bkup
       end
     end
 
