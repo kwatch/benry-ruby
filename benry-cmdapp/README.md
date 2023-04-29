@@ -1036,6 +1036,54 @@ Actions:
   test               : alias to 'foo:bar:test1' action
 ```
 
+* Alias can include positional and keyword arguments in definition.
+
+File: ex16.rb
+
+```ruby
+#!/usr/bin/env ruby
+require 'benry/cmdapp'
+
+class MyAction < Benry::CmdApp::Action
+
+  @action.("print greeting message")
+  @option.(:lang, "--lang=<lang>", "language", enum: ["en", "fr", "it"])
+  def hello(user="world", lang: "en")
+    case lang
+    when "en" ; puts "Hello, #{user}!"
+    when "fr" ; puts "Bonjour, #{user}!"
+    when "it" ; puts "Ciao, #{user}!"
+    else
+      raise "#{lang}: unknown language."
+    end
+  end
+
+end
+
+Benry::CmdApp.action_alias("bonjour", "hello", []     , {lang: "fr"})  # !!!!
+Benry::CmdApp.action_alias("ciao"   , "hello", ["Bob"], {lang: "it"})  # !!!!
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Output:
+
+```console
+[bash]$ ruby ex16.rb hello
+Hello, world!
+
+[bash]$ ruby ex16.rb bonjour           # !!!!
+Bonjour, world!
+
+[bash]$ ruby ex16.rb bonjour Alice     # !!!!
+Bonjour, Alice!
+
+[bash]$ ruby ex16.rb ciao              # !!!!
+Ciao, Bob!
+```
+
 
 Default Action
 --------------
