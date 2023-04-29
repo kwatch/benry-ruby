@@ -20,17 +20,18 @@ Table of Contents
 * <a href="#why-not-optparserb">Why not `optparse.rb`?</a>
 * <a href="#install">Install</a>
 * <a href="#usage">Usage</a>
-  * <a href="#define-parse-and-print-help">Define, parse, and print help</a>
-  * <a href="#command-option-parameter">Command option parameter</a>
-  * <a href="#argument-validation">Argument validation</a>
-  * <a href="#available-types">Available types</a>
-  * <a href="#boolean-onoff-option">Boolean (on/off) option</a>
-  * <a href="#alternative-value">Alternative value</a>
-  * <a href="#multiple-option">Multiple option</a>
-  * <a href="#hidden-option">Hidden option</a>
-  * <a href="#global-options-with-sub-commands">Global options with sub-commands</a>
-  * <a href="#not-supported">Not supported</a>
-* <a href="#internal-classes">Internal classes</a>
+  * <a href="#define-parse-and-print-help">Define, Parse, and Print Help</a>
+  * <a href="#command-option-parameter">Command Option Parameter</a>
+  * <a href="#argument-validation">Argument Validation</a>
+  * <a href="#boolean-onoff-option">Boolean (on/off) Option</a>
+  * <a href="#alternative-value">Alternative Value</a>
+  * <a href="#multiple-option">Multiple Option</a>
+  * <a href="#hidden-option">Hidden Option</a>
+  * <a href="#global-options-with-sub-commands">Global Options with Sub-Commands</a>
+  * <a href="#detailed-description-of-option">Detailed Description of Option</a>
+  * <a href="#option-tag">Option Tag</a>
+  * <a href="#not-supported">Not Supported</a>
+* <a href="#internal-classes">Internal Classes</a>
 * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
@@ -151,6 +152,8 @@ puts 'xxx'   #<== not printed because current process alreay terminated
 * `optparse.rb` adds `-v` and `--version` options automatically, and
   terminates current process when `-v` or `--version` specified in terminal.
   It is hard to remove these options.
+  This behaviour is not desirable because `optparse.rb` is just a library,
+  not framework.
 
   In contract, `benry/cmdopt.rb` does not add these options.
   `benry/cmdopt.rb` does nothing superfluous.
@@ -170,9 +173,9 @@ puts 'xxx'   #<== not printed because current process alreay terminated
   contain `-h`, `--help`, `-v`, nor `--version`.
   These options are available but not shown in help message. Strange.
 
-* `optparse.rb` can generate help message, but it contains command usage
-  string such as `Usage: <command> [options]`. `optparse.rb` should NOT
-  include it in help message because it is just a library, not framework.
+* `optparse.rb` generate help message which contains command usage string
+  such as `Usage: <command> [options]`. `optparse.rb` should NOT include
+  it in help message because it is just a library, not framework.
   If you want to change '[options]' to '[<options>]', you must manipulate
   help message string by yourself.
 
@@ -244,7 +247,7 @@ end
   `OptParse` class does everything about command option parsing.
   It is hard to customize or extend `OptionParser` class.
 
-  On the other hand, `benry/cmdopt.rb` consists of several classes
+  In contract, `benry/cmdopt.rb` consists of several classes
   (schema class, parser class, and facade class).
   Therefore it is easy to understand and extend these classes.
 
@@ -295,7 +298,7 @@ if options[:help]
   ## or: puts cmdopt.to_s("  %-20s : %s")  # format
   ## or:
   #format = "  %-20s : %s"
-  #cmdopt.each_option_help {|opt, help| puts format % [opt, help] }
+  #cmdopt.each_option_and_desc {|opt, help| puts format % [opt, help] }
 end
 ```
 
@@ -556,6 +559,38 @@ end
 sub_opts = cmdopt.parse(argv, true)       # !!!true!!!
 p sub_opts          #=> {:message => "yyy"}
 p argv              #=> ["xxx"]
+```
+
+
+Detailed Description of Option
+------------------------------
+
+`#add()` method in `Benry::Cmdopt` or `Benry::Cmdopt::Schema` supports `detail:` keyword argument which takes detailed description of option.
+
+```ruby
+require 'benry/cmdopt'
+
+cmdopt = Benry::CmdOpt.new()
+cmdopt.add(:mode, "-m, --mode=<MODE>", "output mode", detail: <<"END")
+  v, verbose: print many output
+  q, quiet:   print litte output
+  c, compact: print summary output
+END
+puts cmdopt.to_s()
+## or:
+#cmdopt.each_option_and_desc do |optstr, desc, detail|
+#  puts "  %-20s : %s\n" % [optstr, desc]
+#  puts detail.gsub(/^/, ' ' * 25) if detail
+#end
+```
+
+Output:
+
+```
+  -m, --mode=<MODE>    : output mode
+                           v, verbose: print many output
+                           q, quiet:   print litte output
+                           c, compact: print summary output
 ```
 
 

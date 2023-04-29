@@ -17,6 +17,7 @@ Release 2.0.0 (????-??-??)
 * [enhance] define `#to_s()` which is alias of `#option_help()`.
 * [enhance] `Facade#add()` and `Schema#add()` supports `range:` keyword arg which validates option value.
 * [enhance] `Facade#add()` and `Schema#add()` supports `value:` keyword arg for additional value.
+* [enhance] `Facade#add()` and `Schema#add()` supports `detail:` keyword arg for detailed description.
 * [enhance] `Facade#add()` and `Schema#add()` supports `tag:` keyword arg which accepts arbitrary value.
 * [enhance] regard options which key name starts with '_' as hidden, as well as options which description is nil.
 * [enhance] add `Schema#get()` which finds option item by key name.
