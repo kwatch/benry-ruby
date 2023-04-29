@@ -39,11 +39,11 @@ module Benry
 
       attr_reader :schema
 
-      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, tag: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!vmb3r] defines command option.
         #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
-        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, tag: tag, &callback)
+        @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: tag, &callback)
         #; [!tu4k3] returns self.
         self
       end
@@ -102,7 +102,7 @@ module Benry
         self
       end
 
-      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, tag: nil, &callback)
+      def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         #; [!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
         rest.each do |x|
@@ -210,7 +210,7 @@ module Benry
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                   type: type, rexp: rexp, enum: enum, range: range, value: value, tag: tag, &callback)
+                   type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: tag, &callback)
         @items << item
         item
       end
@@ -358,7 +358,7 @@ module Benry
 
     class SchemaItem    # avoid Struct
 
-      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, tag: nil, &callback)
+      def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
@@ -371,6 +371,7 @@ module Benry
         @rexp     = rexp      unless rexp.nil?
         @enum     = enum      unless enum.nil?
         @range    = range     unless range.nil?
+        @detail   = detail    unless detail.nil?
         @value    = value     unless value.nil?
         @tag      = tag       unless tag.nil?
         @callback = callback  unless callback.nil?
@@ -378,7 +379,7 @@ module Benry
         @enum.freeze() if @enum
       end
 
-      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :value, :tag, :callback
+      attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :detail, :value, :tag, :callback
       alias pattern rexp   # for backward compatibility
       alias help desc      # for backward compatibility
 

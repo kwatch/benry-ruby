@@ -191,6 +191,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
     it "[!yht0v] keeps command option definitions." do
       sc = @schema
       sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width",
+                      range: (1..2), value: 8, detail: "(description)", tag: :ab,
                       type: Integer, rexp: /\A\d+\z/, enum: [2, 4, 8]) {|v| v.to_i }
       items = sc.instance_eval { @items }
       ok {items.length} == 1
@@ -203,6 +204,10 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
       ok {items[0].type} == Integer
       ok {items[0].rexp} == /\A\d+\z/
       ok {items[0].enum} == [2, 4, 8]
+      ok {items[0].range} == (1..2)
+      ok {items[0].detail} == "(description)"
+      ok {items[0].value} == 8
+      ok {items[0].tag} == :ab
       ok {items[0].callback}.is_a?(Proc)
       ok {items[0].callback.arity} == 1
     end
@@ -1439,7 +1444,7 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
 
     it "[!vmb3r] defines command option." do
       cmdopt = Benry::CmdOpt.new()
-      cmdopt.add(:help, "-h, --help", "show help message", tag: :important)
+      cmdopt.add(:help, "-h, --help", "show help message", detail: "(text)", tag: :important)
       items = cmdopt.instance_eval { @schema.instance_variable_get('@items') }
       ok {items}.is_a?(Array)
       ok {items.length} == 1
@@ -1447,6 +1452,7 @@ class Benry::CmdOpt::Facade::Test < MiniTest::Test
       ok {items[0].short} == 'h'
       ok {items[0].long} == 'help'
       ok {items[0].desc} == 'show help message'
+      ok {items[0].detail} == '(text)'
       ok {items[0].tag} == :important
     end
 
