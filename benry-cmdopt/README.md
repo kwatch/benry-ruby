@@ -56,13 +56,14 @@ Why not `optparse.rb`?
   This feature is hard-coded in `OptionParser#parse_in_order()`
   and hard to be disabled.
 
-  On the other hand, `benry/cmdopt.rb` doesn't behave this way.
+  In contact, `benry/cmdopt.rb` doesn't behave this way.
   `-x` option is available only when `-x` is defined.
+  `benry/cmdopt.rb` does nothing superfluous.
 
 * `optparse.rb` uses long option name as hash key automatically, but
-  it doesn't provide the way to specify hash key of short-only option.
+  it doesn't provide the way to specify hash key for short-only option.
 
-  `benry/cmdopt.rb` can specify hash key of short-only option.
+  `benry/cmdopt.rb` can specify hash key for short-only option.
 
 ```ruby
 ### optparse.rb
@@ -92,12 +93,49 @@ opts = cmdopt.parse(['-q'])   # short option
 p opts  #=> {:quiet=>true}    # independent hash key of option name
 ```
 
+* `optparse.rb` provides severay ways to validate option values, such as
+  type class, Regexp as pattern, or Array/Set as enum. But it doesn't
+  accept Range object. This means that, for examle, it is not simple to
+  validate whether integer or float value is positive or not.
+
+  In contract, `benry/cmdopt.rb` accepts Range object so it is very simple
+  to validate whether integer or float value is positive or not.
+
+```ruby
+### optparse.rb
+parser = OptionParser.new
+parser.on('-n <N>', "number", Integer, (1..))  #=> NoMethodError
+
+### benry/cmdopt.rb
+require 'benry/cmdopt'
+cmdopt = Benry::CmdOpt.new
+cmdopt.add(:number, "-n <N>", "number", type: Integer, range: (1..)) #=> ok
+```
+
+* `optparse.rb` accepts Array or Set object as enum values. But values
+  of enum should be a String in spite that type class specified.
+  This seems very strange and not intuitive.
+
+  `benry/cmdopt.rb` accepts integer values as enum when type class is Integer.
+
+```ruby
+### optparse.rb
+parser = OptionParser.new
+parser.on('-n <N>', "number", Integer, [1, 2, 3])      # wrong
+parser.on('-n <N>', "number", Integer, ['1','2','3'])  # ok (but not intuitive)
+
+### benry/cmdopt.rb
+require 'benry/cmdopt'
+cmdopt = Benry::CmdOpt.new
+cmdopt.add(:number, "-n <N>", "number", type: Integer, enum: [1, 2, 3]) # very intuitive
+```
+
 * `optparse.rb` adds `-h` and `--help` options automatically, and
-  terminates current process when `-h` or `--help` specified in terminal.
+  terminates current process when `-h` or `--help` specified in command-line.
   It is hard to remove these options.
 
-  On the other hand, `benry/cmdopt.rb` does not add these options.
-  `benry/cmdopt.rb` does nothing extra.
+  In contract, `benry/cmdopt.rb` does not add these options.
+  `benry/cmdopt.rb` does nothing superfluous.
 
 ```ruby
 require 'optparse'
@@ -114,8 +152,8 @@ puts 'xxx'   #<== not printed because current process alreay terminated
   terminates current process when `-v` or `--version` specified in terminal.
   It is hard to remove these options.
 
-  On the other hand, `benry/cmdopt.rb` does not add these options.
-  `benry/cmdopt.rb` does nothing extra.
+  In contract, `benry/cmdopt.rb` does not add these options.
+  `benry/cmdopt.rb` does nothing superfluous.
 
 ```ruby
 require 'optparse'
@@ -131,6 +169,15 @@ puts 'xxx'   #<== not printed because current process alreay terminated
 * `optparse.rb` generates help message automatically, but it doesn't
   contain `-h`, `--help`, `-v`, nor `--version`.
   These options are available but not shown in help message. Strange.
+
+* `optparse.rb` can generate help message, but it contains command usage
+  string such as `Usage: <command> [options]`. `optparse.rb` should NOT
+  include it in help message because it is just a library, not framework.
+  If you want to change '[options]' to '[<options>]', you must manipulate
+  help message string by yourself.
+
+  `benry/cmdopt.rb` doesn't include extra text (such as usage text) into
+  help message. `benry/cmdopt.rb` does nothing superfluous.
 
 * `optparse.rb` generates help message with too wide option name
   by default. You must specify proper width.
@@ -266,14 +313,14 @@ Command Option Parameter
 
 ```ruby
 ## required parameter
-cmdopt.add(:file, '-f, --file=<FILE>', "filename")
-cmdopt.add(:file, '    --file=<FILE>', "filename")
-cmdopt.add(:file, '-f <FILE>'        , "filename")
+cmdopt.add(:file, '-f, --file=<FILE>', "filename")   # short & long
+cmdopt.add(:file, '    --file=<FILE>', "filename")   # long only
+cmdopt.add(:file, '-f <FILE>'        , "filename")   # short only
 
 ## optional parameter
-cmdopt.add(:file, '-f, --file[=<FILE>]', "filename")
-cmdopt.add(:file, '    --file[=<FILE>]', "filename")
-cmdopt.add(:file, '-f[<FILE>]'         , "filename")
+cmdopt.add(:indent, '-i, --indent[=<N>]', "indent width")  # short & long
+cmdopt.add(:indent, '    --indent[=<N>]', "indent width")  # long only
+cmdopt.add(:indent, '-i[<N>]'           , "indent width")  # short only
 ```
 
 Notice that `"--file <FILE>"` style is not supported for usability reason.
@@ -295,7 +342,7 @@ cmdopt.add(:indent , '-i <N>', "indent width", rexp: /\A\d+\z/)
 ## enum (Array or Set)
 cmdopt.add(:indent , '-i <N>', "indent width", enum: ["2", "4", "8"])
 ## range (endless range such as `1..` available)
-cmdopt.add(:indent , '-i <N>', "indent width", range: (1..8))
+cmdopt.add(:indent , '-i <N>', "indent width", range: (0..8))
 ## callback
 cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   val =~ /\A\d+\z/  or
@@ -306,10 +353,6 @@ cmdopt.add(:indent , '-i <N>', "indent width") {|val|
 
 (For backward compatibilidy, keyword parameter `pattern:` is available
  which is same as `rexp:`.)
-
-
-Available Types
----------------
 
 `type:` keyword argument accepts the following classes.
 
@@ -327,7 +370,7 @@ In addition:
 ## ok
 cmdopt.add(:lang, '-l <lang>', "language", enum: ["en", "fr", "it"])
 
-## error: enum values are not String
+## error: enum values are not Integer
 cmdopt.add(:lang, '-l <lang>', "language", enum: ["en", "fr", "it"], type: Integer)
 
 ## ok
@@ -341,7 +384,7 @@ cmdopt.add(:indent, '-i <N>', "indent", range: (0..))
 Boolean (on/off) Option
 -----------------------
 
-Benry::CmdOpt doens't support `--no-xxx` style option.
+Benry::CmdOpt doens't support `--no-xxx` style option for usability reason.
 Use boolean option instead.
 
 ex3.rb:
