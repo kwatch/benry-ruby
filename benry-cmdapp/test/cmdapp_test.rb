@@ -165,7 +165,7 @@ topic Benry::CmdApp::Index do
       Benry::CmdApp::Index::ACTIONS.delete_if {|_, x| x.klass != IndexTestAction }
       anames = Benry::CmdApp::Index::ACTIONS.keys()
       @_bkup_aliases = Benry::CmdApp::Index::ALIASES.dup()
-      Benry::CmdApp::Index::ALIASES.delete_if {|_, x| ! anames.include?(x) }
+      Benry::CmdApp::Index::ALIASES.delete_if {|_, x| ! anames.include?(x.action_name) }
     end
 
     after do
@@ -1125,14 +1125,16 @@ topic Benry::CmdApp::Action do
         @action.("test")
         def bla1(); end
       end
-      ok {Benry::CmdApp::Index::ALIASES["blabla1"]} == "blabla1:bla1"
+      ok {Benry::CmdApp::Index::ALIASES["blabla1"]} != nil
+      ok {Benry::CmdApp::Index::ALIASES["blabla1"].action_name} == "blabla1:bla1"
       ## when string
       class AliasOfTest2 < Benry::CmdApp::Action
         prefix "bla:bla2", alias_of: "blala"    # string
         @action.("test")
         def blala(); end
       end
-      ok {Benry::CmdApp::Index::ALIASES["bla:bla2"]} == "bla:bla2:blala"
+      ok {Benry::CmdApp::Index::ALIASES["bla:bla2"]} != nil
+      ok {Benry::CmdApp::Index::ALIASES["bla:bla2"].action_name} == "bla:bla2:blala"
     end
 
     spec "[!tvjb0] clears '@__aliasof__' only when alias created." do
@@ -1217,13 +1219,13 @@ topic Benry::CmdApp do
     spec "[!vzlrb] registers alias name with action name." do
       Benry::CmdApp.action_alias("a4", "alias1:a1")
       ok {Benry::CmdApp::Index::ALIASES}.key?("a4")
-      ok {Benry::CmdApp::Index::ALIASES["a4"]} == "alias1:a1"
+      ok {Benry::CmdApp::Index::ALIASES["a4"].action_name} == "alias1:a1"
     end
 
     spec "[!5immb] convers both alias name and action name into string." do
       Benry::CmdApp.action_alias(:a5, :'alias1:a2')
       ok {Benry::CmdApp::Index::ALIASES}.key?("a5")
-      ok {Benry::CmdApp::Index::ALIASES["a5"]} == "alias1:a2"
+      ok {Benry::CmdApp::Index::ALIASES["a5"].action_name} == "alias1:a2"
     end
 
     spec "[!nrz3d] error if action not found." do
@@ -2543,7 +2545,7 @@ topic Benry::CmdApp::CommandHelpBuilder do
       Benry::CmdApp::Index::ACTIONS.delete_if {|_, x| x.klass != HelpMessageTest }
       anames = Benry::CmdApp::Index::ACTIONS.keys()
       @_bkup_aliases = Benry::CmdApp::Index::ALIASES.dup()
-      Benry::CmdApp::Index::ALIASES.delete_if {|_, a| ! anames.include?(a) }
+      Benry::CmdApp::Index::ALIASES.delete_if {|_, a| ! anames.include?(a.action_name) }
     end
 
     after do

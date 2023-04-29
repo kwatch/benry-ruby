@@ -99,7 +99,7 @@ module Benry::CmdApp
       #; [!vivoa] returns action metadata object.
       #; [!tnwq0] supports alias name.
       name = name.to_s
-      name = ALIASES[name] if ALIASES[name]
+      name = ALIASES[name].action_name if ALIASES[name]
       metadata = ACTIONS[name]
       return metadata
     end
@@ -113,7 +113,7 @@ module Benry::CmdApp
       metadatas = ACTIONS.values()
       metadatas = metadatas.reject {|ameta| ameta.hidden? } if ! all
       pairs = metadatas.collect {|ameta| [ameta.name, ameta.desc] }
-      pairs += ALIASES.collect {|ali, act| [ali, Util.alias_desc(act)] } if include_alias
+      pairs += ALIASES.collect {|ali, act| [ali, Util.alias_desc(act.action_name)] } if include_alias
       pairs.sort_by {|name, _| name }.each(&block)
     end
 
@@ -502,7 +502,19 @@ module Benry::CmdApp
     ! Index::ALIASES[alias_]  or
       raise AliasDefError.new("#{invocation}: alias name duplicated.")
     #; [!vzlrb] registers alias name with action name.
-    Index::ALIASES[alias_] = action_
+    Index::ALIASES[alias_] = Alias.new(alias_, action_)
+  end
+
+
+  class Alias
+
+    def initialize(alias_name, action_name)
+      @alias_name  = alias_name
+      @action_name = action_name
+    end
+
+    attr_reader :alias_name, :action_name
+
   end
 
 
@@ -855,15 +867,15 @@ module Benry::CmdApp
         aname2aliases[aname] = []
       end
       #; [!85i5m] candidate actions should include alias names.
-      Index::ALIASES.each do |alias_, aname|
+      Index::ALIASES.each do |alias_, act|
         next unless alias_.start_with?(prefix) || alias_ == prefix2
-        pairs << [alias_, Util.alias_desc(aname)]
+        pairs << [alias_, Util.alias_desc(act.action_name)]
       end
       #; [!i2azi] raises error when no candidate actions found.
       ! pairs.empty?  or
         raise CommandError.new("No actions starting with '#{prefix}'.")
-      Index::ALIASES.each do |alias_, aname|
-        aname2aliases[aname] << alias_ if aname2aliases.key?(aname)
+      Index::ALIASES.each do |alias_, act|
+        aname2aliases[act.action_name] << alias_ if aname2aliases.key?(act.action_name)
       end
       sb = []
       sb << @config.format_heading % "Actions:" << "\n"
