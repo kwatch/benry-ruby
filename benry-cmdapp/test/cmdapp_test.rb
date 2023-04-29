@@ -122,7 +122,7 @@ topic Benry::CmdApp::Index do
 
   class IndexTestAction < Benry::CmdApp::Action
     @action.("lookup test #1")
-    def lookup1(); end
+    def lookup1(user="world", repeat: nil); end
     #
     @action.("lookup test #2")
     def lookup2(); end
@@ -153,6 +153,18 @@ topic Benry::CmdApp::Index do
       ok {x.name} == "lookup2"
       ok {x.klass} == IndexTestAction
       ok {x.method} == :lookup2
+    end
+
+    spec "[!z15vu] returns ActionWithArgs object if alias has args and/or kwargs." do
+      Benry::CmdApp.action_alias("findyy1", "lookup1", ["Alice"], {repeat: 3})
+      x = Benry::CmdApp::Index.lookup_action("findyy1")
+      ok {x} != nil
+      ok {x}.is_a?(Benry::CmdApp::ActionWithArgs)
+      ok {x.args} == ["Alice"]
+      ok {x.kwargs} == {repeat: 3}
+      ok {x.name} == "lookup1"
+      ok {x.klass} == IndexTestAction
+      ok {x.method} == :lookup1
     end
 
   end
@@ -187,6 +199,7 @@ topic Benry::CmdApp::Index do
       Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == [
         ["findxx", "alias of 'lookup2' action"],
+        ["findyy1", "alias of 'lookup1' action"],
         ["lookup1", "lookup test #1"],
         ["lookup2", "lookup test #2"],
       ]
@@ -473,6 +486,73 @@ Usage:
 Options:
   -l, --lang=<en|fr|it> : language
 END
+    end
+
+  end
+
+
+end
+
+
+topic Benry::CmdApp::ActionWithArgs do
+  include ActionMetadataTestingHelper
+
+
+  topic '#initialize()' do
+
+    spec "[!6jklb] keeps ActionMetadata, args, and kwargs." do
+      ameta = new_metadata(new_schema())
+      wrapper = Benry::CmdApp::ActionWithArgs.new(ameta, ["Alice"], {lang: "fr"})
+      ok {wrapper.action_metadata} == ameta
+      ok {wrapper.args}   == ["Alice"]
+      ok {wrapper.kwargs} == {lang: "fr"}
+    end
+
+  end
+
+
+  topic '#method_missing()' do
+
+    spec "[!14li3] behaves as ActionMetadata." do
+      ameta = new_metadata(new_schema())
+      wrapper = Benry::CmdApp::ActionWithArgs.new(ameta, ["Alice"], {lang: "fr"})
+      ok {wrapper.name} == ameta.name
+      ok {wrapper.klass} == ameta.klass
+      ok {wrapper.schema} == ameta.schema
+      ok {wrapper.method_arity()} == ameta.method_arity()
+    end
+
+  end
+
+
+  topic '#run_action()' do
+
+    class ActionWithArgsTest < Benry::CmdApp::Action
+      @action.("hello")
+      @option.(:lang, "-l <lang>", "language")
+      @option.(:repeat, "-r <N>", "repeat <N> times")
+      def hellowithargs(user1="alice", user2="bob", lang: nil, repeat: nil)
+        puts "user1=#{user1}, user2=#{user2}, lang=#{lang.inspect}, repeat=#{repeat.inspect}"
+      end
+    end
+
+    spec "[!fl26i] invokes action with args and kwargs." do
+      ameta = Benry::CmdApp::Index::ACTIONS["hellowithargs"]
+      #
+      wrapper = Benry::CmdApp::ActionWithArgs.new(ameta, ["bill"], {repeat: 3})
+      sout, serr = capture_sio() { wrapper.run_action() }
+      ok {serr} == ""
+      ok {sout} == "user1=bill, user2=bob, lang=nil, repeat=3\n"
+      #
+      wrapper = Benry::CmdApp::ActionWithArgs.new(ameta, ["bill"], nil)
+      sout, serr = capture_sio() { wrapper.run_action() }
+      ok {serr} == ""
+      ok {sout} == "user1=bill, user2=bob, lang=nil, repeat=nil\n"
+      #
+      wrapper = Benry::CmdApp::ActionWithArgs.new(ameta, nil, {repeat: 3})
+      sout, serr = capture_sio() { wrapper.run_action() }
+      ok {serr} == ""
+      ok {sout} == "user1=alice, user2=bob, lang=nil, repeat=3\n"
     end
 
   end
@@ -1220,6 +1300,14 @@ topic Benry::CmdApp do
       Benry::CmdApp.action_alias("a4", "alias1:a1")
       ok {Benry::CmdApp::Index::ALIASES}.key?("a4")
       ok {Benry::CmdApp::Index::ALIASES["a4"].action_name} == "alias1:a1"
+    end
+
+    spec "[!0cq6o] supports args and kwargs." do
+      Benry::CmdApp.action_alias("a8", "alias1:a1", ["Alice"], {lang: "it"})
+      ok {Benry::CmdApp::Index::ALIASES}.key?("a8")
+      ok {Benry::CmdApp::Index::ALIASES["a8"].action_name} == "alias1:a1"
+      ok {Benry::CmdApp::Index::ALIASES["a8"].args}   == ["Alice"]
+      ok {Benry::CmdApp::Index::ALIASES["a8"].kwargs} == {lang: "it"}
     end
 
     spec "[!4wtxj] supports 'tag:' keyword arg." do

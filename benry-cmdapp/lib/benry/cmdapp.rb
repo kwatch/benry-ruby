@@ -96,12 +96,21 @@ module Benry::CmdApp
     DONE      = {}   # {action_name => Object}
 
     def self.lookup_action(name)
-      #; [!vivoa] returns action metadata object.
-      #; [!tnwq0] supports alias name.
       name = name.to_s
-      name = ALIASES[name].action_name if ALIASES[name]
+      #; [!tnwq0] supports alias name.
+      alias_obj = nil
+      if ALIASES[name]
+        alias_obj = ALIASES[name]
+        name = alias_obj.action_name
+      end
+      #; [!vivoa] returns action metadata object.
+      #; [!z15vu] returns ActionWithArgs object if alias has args and/or kwargs.
       metadata = ACTIONS[name]
-      return metadata
+      if alias_obj && (alias_obj.args || alias_obj.kwargs)
+        return ActionWithArgs.new(metadata, alias_obj.args, alias_obj.kwargs)
+      else
+        return metadata
+      end
     end
 
     def self.each_action_name_and_desc(include_alias=true, all: false, &block)
@@ -211,6 +220,36 @@ module Benry::CmdApp
       #; [!i7siu] returns help message of action.
       builder = ACTION_HELP_BUILDER_CLASS.new(self)
       return builder.build_help_message(command, all)
+    end
+
+  end
+
+
+  class ActionWithArgs
+
+    def initialize(action_metadata, args, kwargs)
+      #; [!6jklb] keeps ActionMetadata, args, and kwargs.
+      @action_metadata = action_metadata
+      @args   = args
+      @kwargs = kwargs
+    end
+
+    attr_reader :action_metadata, :args, :kwargs
+
+    def method_missing(meth, *args, **kwargs)
+      #; [!14li3] behaves as ActionMetadata.
+      return @action_metadata.__send__(meth, *args, **kwargs)
+    end
+
+    def method()
+      return @action_metadata.method
+    end
+
+    def run_action(*args, **kwargs)
+      #; [!fl26i] invokes action with args and kwargs.
+      args = @args + args if @args
+      kwargs = @kwargs.merge(kwargs) if @kwargs
+      super(*args, **kwargs)
     end
 
   end
@@ -487,7 +526,7 @@ module Benry::CmdApp
   end
 
 
-  def self.action_alias(alias_name, action_name, tag: nil)
+  def self.action_alias(alias_name, action_name, args=nil, kwargs=nil, tag: nil)
     invocation = "action_alias(#{alias_name.inspect}, #{action_name.inspect})"
     #; [!5immb] convers both alias name and action name into string.
     alias_  = alias_name.to_s
@@ -502,20 +541,23 @@ module Benry::CmdApp
     ! Index::ALIASES[alias_]  or
       raise AliasDefError.new("#{invocation}: alias name duplicated.")
     #; [!vzlrb] registers alias name with action name.
+    #; [!0cq6o] supports args and kwargs.
     #; [!4wtxj] supports 'tag:' keyword arg.
-    Index::ALIASES[alias_] = Alias.new(alias_, action_, tag: tag)
+    Index::ALIASES[alias_] = Alias.new(alias_, action_, args, kwargs, tag: tag)
   end
 
 
   class Alias
 
-    def initialize(alias_name, action_name, tag: nil)
+    def initialize(alias_name, action_name, args=nil, kwargs=nil,tag: nil)
       @alias_name  = alias_name
       @action_name = action_name
+      @args        = args.freeze   if args != nil
+      @kwargs      = kwargs.freeze if kwargs != nil
       @tag         = tag
     end
 
-    attr_reader :alias_name, :action_name, :tag
+    attr_reader :alias_name, :action_name, :args, :kwargs, :tag
 
   end
 
