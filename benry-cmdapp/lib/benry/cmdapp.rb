@@ -487,7 +487,7 @@ module Benry::CmdApp
   end
 
 
-  def self.action_alias(alias_name, action_name)
+  def self.action_alias(alias_name, action_name, tag: nil)
     invocation = "action_alias(#{alias_name.inspect}, #{action_name.inspect})"
     #; [!5immb] convers both alias name and action name into string.
     alias_  = alias_name.to_s
@@ -502,18 +502,20 @@ module Benry::CmdApp
     ! Index::ALIASES[alias_]  or
       raise AliasDefError.new("#{invocation}: alias name duplicated.")
     #; [!vzlrb] registers alias name with action name.
-    Index::ALIASES[alias_] = Alias.new(alias_, action_)
+    #; [!4wtxj] supports 'tag:' keyword arg.
+    Index::ALIASES[alias_] = Alias.new(alias_, action_, tag: tag)
   end
 
 
   class Alias
 
-    def initialize(alias_name, action_name)
+    def initialize(alias_name, action_name, tag: nil)
       @alias_name  = alias_name
       @action_name = action_name
+      @tag         = tag
     end
 
-    attr_reader :alias_name, :action_name
+    attr_reader :alias_name, :action_name, :tag
 
   end
 

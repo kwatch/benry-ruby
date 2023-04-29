@@ -1222,6 +1222,13 @@ topic Benry::CmdApp do
       ok {Benry::CmdApp::Index::ALIASES["a4"].action_name} == "alias1:a1"
     end
 
+    spec "[!4wtxj] supports 'tag:' keyword arg." do
+      Benry::CmdApp.action_alias("a7", "alias1:a1", tag: :important)
+      ok {Benry::CmdApp::Index::ALIASES}.key?("a7")
+      ok {Benry::CmdApp::Index::ALIASES["a7"].action_name} == "alias1:a1"
+      ok {Benry::CmdApp::Index::ALIASES["a7"].tag} == :important
+    end
+
     spec "[!5immb] convers both alias name and action name into string." do
       Benry::CmdApp.action_alias(:a5, :'alias1:a2')
       ok {Benry::CmdApp::Index::ALIASES}.key?("a5")
