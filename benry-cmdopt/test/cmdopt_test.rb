@@ -513,8 +513,8 @@ END
 
     it "[!848rm] supports multi-lines help message." do
       sc = Benry::CmdOpt::Schema.new
-      sc.add(:mode, "-m, --mode=<MODE>", <<END)
-output mode
+      sc.add(:mode, "-m, --mode=<MODE>", "output mode",
+                    detail: <<"END")
   v, verbose: print many output
   q, quiet:   print litte output
   c, compact: print summary output

@@ -228,21 +228,17 @@ module Benry
         end
         #; [!v7z4x] skips option help if help message is not specified.
         #; [!to1th] includes all option help when `all` is true.
+        #; [!a4qe4] option should not be hidden if description is empty string.
         sb = []
-        width = nil
-        each_option_and_desc(all: all) do |opt, desc|
-          #; [!a4qe4] option should not be hidden if description is empty string.
-          desc = "\n" if desc.nil? || desc.empty?
+        width = nil; indent = nil
+        each_option_and_desc(all: all) do |opt, desc, detail|
+          sb << format % [opt, desc || ""] << "\n"
           #; [!848rm] supports multi-lines help message.
-          is_first = true
-          desc.each_line do |line|
-            if is_first
-              sb << format % [opt, line.chomp] << "\n"
-              is_first = false
-            else
-              width ||= (format % ['', '']).length
-              sb << (' ' * width) << line.chomp << "\n"
-            end
+          if detail
+            width  ||= (format % ['', '']).length
+            indent ||= ' ' * width
+            sb << detail.gsub(/^/, indent)
+            sb << "\n" unless detail.end_with?("\n")
           end
         end
         return sb.join()
@@ -258,7 +254,7 @@ module Benry
         @items.each do |item|
           #; [!cl8zy] when 'all' flag is false, not yield hidden items.
           #; [!tc4bk] when 'all' flag is true, yields even hidden items.
-          yield item.optdef, item.desc if all || ! item.hidden?
+          yield item.optdef, item.desc, item.detail if all || ! item.hidden?
         end
         #; [!zbxyv] returns self.
         self
