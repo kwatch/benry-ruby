@@ -562,6 +562,20 @@ END
       ok {msg}.NOT.include?("Options:\n")
     end
 
+    spec "[!dukm7] includes detailed description of option." do
+      schema = new_schema(lang: false)
+      schema.add(:lang, "-l, --lang=<lang>", "language",
+                 detail: "detailed description1\ndetailed description2")
+      msg = new_metadata(schema).help_message("testapp")
+      msg = uncolorize(msg)
+      ok {msg}.end_with?(<<"END")
+Options:
+  -l, --lang=<lang>  : language
+                       detailed description1
+                       detailed description2
+END
+    end
+
     spec "[!0p2gt] adds postamble text if specified." do
       postamble = "Tips: `testapp -h <action>` print help message of action."
       schema = new_schema(lang: false)

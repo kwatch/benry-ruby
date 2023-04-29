@@ -265,12 +265,20 @@ module Benry::CmdApp
       format = config ? config.format_help : Config::FORMAT_HELP
       format += "\n"
       #; [!g2ju5] adds 'Options:' section.
-      #; [!pvu56] ignores 'Options:' section when no options exist.
-      #; [!hghuj] ignores 'Options:' section when only hidden options speicified.
-      sb = []
+      sb = []; width = nil; indent = nil
       @am.schema.each do |item|
-        sb << format % [item.optdef, item.desc] if all || ! item.hidden?
+        #; [!hghuj] ignores 'Options:' section when only hidden options speicified.
+        next unless all || ! item.hidden?
+        sb << format % [item.optdef, item.desc]
+        #; [!dukm7] includes detailed description of option.
+        if item.detail
+          width  ||= (Util.del_escape_seq(format % ["", ""])).length
+          indent ||= " " * (width - 1)    # `-1` means "\n"
+          sb << item.detail.gsub(/^/, indent)
+          sb << "\n" unless item.detail.end_with?("\n")
+        end
       end
+      #; [!pvu56] ignores 'Options:' section when no options exist.
       return nil if sb.empty?
       return heading('Options:') + "\n" + sb.join()
     end
@@ -392,14 +400,14 @@ module Benry::CmdApp
           @__action__ = [desc, {detail: detail, postamble: postamble, tag: tag}]
         end
         #; [!33ma7] @option is a Proc object and saves args.
-        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, tag: nil, &block|
+        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &block|
           #; [!gxybo] '@option.()' raises error when '@action.()' not called.
           @__action__ != nil  or
             raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` required but not called.")
           schema = (@__option__ ||= SCHEMA_CLASS.new)
           #; [!ga6zh] '@option.()' raises error when invalid option info specified.
           begin
-            schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, tag: nil, &block)
+            schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: nil, &block)
           rescue Benry::CmdOpt::SchemaError => exc
             raise OptionDefError.new(exc.message)
           end
