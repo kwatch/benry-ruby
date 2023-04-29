@@ -56,6 +56,8 @@ Table of Contents
   * <a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a>
   * <a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a>
   * <a href="#q-how-to-enabledisable-color-mode">Q: How to Enable/Disable Color Mode?</a>
+  * <a href="#q-how-to-define-multiple-option-like--i-option-of-ruby">Q: How to Define Multiple Option like '-I' Option of Ruby?</a>
+  * <a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a>
   * <a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a>
   * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixdefault">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(default:)`?</a>
   * <a href="#q-is-it-possible-to-add-add-metadata-to-action-or-option">Q: Is It Possible to Add Add Metadata to Action or Option?</a>
@@ -1968,12 +1970,97 @@ Actions:
 ```
 
 
+Q: How to Define Multiple Option like '-I' Option of Ruby?
+----------------------------------------------------------
+
+A: Provide block parameter on `@option.()`.
+
+File: ex44.rb
+
+```ruby
+require 'benry/cmdapp'
+
+class TestAction < Benry::CmdApp::Action
+
+  @action.("multiple option test")
+  @option.(:path, "-I <path>", "path") {|options, key, val|  # !!!!
+    arr = options[key] || []                                 # !!!!
+    arr << val                                               # !!!!
+    arr                                                      # !!!!
+    ## or:                                                   # !!!!
+    #(options[key] || []) << val                             # !!!!
+  }                                                          # !!!!
+  def test(path: [])
+    puts "path=#{path.inspect}"     #=> path=["/tmp", "/var/tmp"]
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("test app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Output:
+
+```console
+[bash]$ ruby ex44.rb test -I /tmp -I /var/tmp     # !!!!
+path=["/tmp", "/var/tmp"]                         # !!!!
+```
+
+
+Q: How to Specify Detailed Description of Option?
+-------------------------------------------------
+
+A: Add `detail:` keyword argument to `@option.()`.
+
+File: ex45.rb
+
+```ruby
+require 'benry/cmdapp'
+
+class TestAction < Benry::CmdApp::Action
+
+  @action.("detailed description test")
+  @option.(:mode, "-m <mode>", "output mode", detail: <<"END")
+    v, verbose: print many output
+    q, quiet:   print litte output
+    c, compact: print summary output
+END
+  def test(mode: nil)
+    puts "mode=#{mode.inspect}"
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("test app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Help message:
+
+```console
+[bash]$ ruby ex45.rb -h test
+ex45.rb test -- detailed description test
+
+Usage:
+  $ ex45.rb test [<options>]
+
+Options:
+  -m <mode>          : output mode
+                           v, verbose: print many output
+                           q, quiet:   print litte output
+                           c, compact: print summary output
+```
+
+
 Q: How to Copy All Options from Other Action?
 ---------------------------------------------
 
 A: Use `@copy_options.()`.
 
-File: ex44.rb
+File: ex46.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2005,11 +2092,11 @@ exit app.main()
 Help message of `test2` action:
 
 ```console
-[bash]$ ruby ex44.rb -h test2
-ex44.rb test2 -- test action #2
+[bash]$ ruby ex46.rb -h test2
+ex46.rb test2 -- test action #2
 
 Usage:
-  $ ex44.rb test2 [<options>]
+  $ ex46.rb test2 [<options>]
 
 Options:
   -v, --verbose      : verbose mode     # copied!!
@@ -2024,7 +2111,7 @@ Q: What is the Difference Between `prefix(alias_of:)` and `prefix(default:)`?
 
 A: The former defines an alias, and the latter doesn't.
 
-File: ex45.rb
+File: ex47.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2057,11 +2144,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex45.rb
-ex45.rb -- sample app
+[bash]$ ruby ex47.rb
+ex47.rb -- sample app
 
 Usage:
-  $ ex45.rb [<options>] [<action> [<arguments>...]]
+  $ ex47.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2085,7 +2172,7 @@ A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 * Currenty, Benry::CmdApp doesn't provide the good way to use it effectively.
   This feature is supported for command-line application or framework based on Benry::CmdApp.
 
-File: ex46.rb
+File: ex48.rb
 
 ```ruby
 require 'benry/cmdapp'
