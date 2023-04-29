@@ -1691,6 +1691,30 @@ END
 END
     end
 
+    spec "[!eeh0y] candidates are not printed if 'config.feat_candidate' is false." do
+      class CandidateTest5 < Benry::CmdApp::Action
+        prefix "candi:date5"
+        @action.("test b")
+        def bbb(); end
+        @action.("test a")
+        def aaa(); end
+      end
+      ## flag is on
+      @app.config.feat_candidate = false
+      pr = proc { @app.run("candi:date5:") }
+      ok {pr}.raise?(Benry::CmdApp::CommandError,
+                     "candi:date5:: unknown action.")
+      ## flag is off
+      @app.config.feat_candidate = true
+      sout, serr = capture_sio(tty: false) { @app.run("candi:date5:") }
+      ok {serr} == ""
+      ok {sout} == <<"END"
+Actions:
+  candi:date5:aaa    : test a
+  candi:date5:bbb    : test b
+END
+    end
+
     spec "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
       def @app.do_find_action(args, global_opts)
         ret = super

@@ -529,7 +529,8 @@ module Benry::CmdApp
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: false, option_trace: false,
                    help_sections: [], help_postamble: nil,
-                   format_help: nil, format_usage: nil, format_heading: nil)
+                   format_help: nil, format_usage: nil, format_heading: nil,
+                   feat_candidate: true)
       #; [!uve4e] sets command name automatically if not provided.
       @app_desc       = app_desc        # ex: "sample application"
       @app_version    = app_version     # ex: "1.0.0"
@@ -550,6 +551,7 @@ module Benry::CmdApp
       @format_help    = format_help    || FORMAT_HELP
       @format_usage   = format_usage   || FORMAT_USAGE
       @format_heading = format_heading || FORMAT_HEADING
+      @feat_candidate = feat_candidate  # if arg is 'foo:', list actions starting with 'foo:'
     end
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail
@@ -559,6 +561,7 @@ module Benry::CmdApp
     attr_accessor :option_debug, :option_trace
     attr_accessor :help_sections, :help_postamble
     attr_accessor :format_help, :format_usage, :format_heading
+    attr_accessor :feat_candidate
 
   end
 
@@ -652,7 +655,8 @@ module Benry::CmdApp
       result = do_callback(args, global_opts)
       return if result == :SKIP
       #; [!avxos] prints candidate actions if action name ends with ':'.
-      if ! args.empty? && args[0].end_with?(':')
+      #; [!eeh0y] candidates are not printed if 'config.feat_candidate' is false.
+      if ! args.empty? && args[0].end_with?(':') && @config.feat_candidate
         do_print_candidates(args, global_opts)
         return
       end
