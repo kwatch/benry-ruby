@@ -402,8 +402,11 @@ module Benry::CmdApp
     private
 
     def __run_action(action_name, once, args, kwargs)
+      #; [!lbp9r] invokes action name with prefix if prefix defined.
       #; [!7vszf] raises error if action specified not found.
-      metadata = Index.lookup_action(action_name)  or
+      prefix = self.class.instance_variable_get('@__prefix__')
+      metadata = Index.lookup_action("#{prefix}#{action_name}") || \
+                 Index.lookup_action(action_name)  or
         raise ActionNotFoundError.new("#{action_name}: action not found.")
       name = metadata.name
       #; [!u8mit] raises error if action flow is looped.

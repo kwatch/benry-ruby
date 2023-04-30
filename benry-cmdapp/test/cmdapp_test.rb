@@ -821,6 +821,13 @@ topic Benry::CmdApp::Action do
       action.__send__(:__run_action, action_name, once, args, kwargs)
     end
 
+    spec "[!lbp9r] invokes action name with prefix if prefix defined." do
+      sout, serr = capture_sio() do
+        @action.run_action_once("invoke2", "Alice", lang: "fr")
+      end
+      ok {sout} == "Bonjour, Alice!\n"
+    end
+
     spec "[!7vszf] raises error if action specified not found." do
       pr = proc { __run_action("loop9", nil, ["Alice"], {}) }
       ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError, "loop9: action not found.")
