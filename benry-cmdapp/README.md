@@ -1047,7 +1047,7 @@ require 'benry/cmdapp'
 class MyAction < Benry::CmdApp::Action
 
   @action.("print greeting message")
-  @option.(:lang, "--lang=<lang>", "language", enum: ["en", "fr", "it"])
+  @option.(:lang, "-l, --lang=<lang>", "language", enum: ["en", "fr", "it"])
   def hello(user="world", lang: "en")
     case lang
     when "en" ; puts "Hello, #{user}!"
@@ -1060,8 +1060,8 @@ class MyAction < Benry::CmdApp::Action
 
 end
 
-Benry::CmdApp.action_alias("bonjour", "hello", []     , {lang: "fr"})  # !!!!
-Benry::CmdApp.action_alias("ciao"   , "hello", ["Bob"], {lang: "it"})  # !!!!
+Benry::CmdApp.action_alias("bonjour", "hello", "--lang=fr")        # !!!!
+Benry::CmdApp.action_alias("ciao"   , "hello", "Bob", "-l", "it")  # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
