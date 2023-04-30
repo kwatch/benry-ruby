@@ -122,6 +122,7 @@ topic Benry::CmdApp::Index do
 
   class IndexTestAction < Benry::CmdApp::Action
     @action.("lookup test #1")
+    @option.(:repeat, "-r <N>", "repeat", type: Integer)
     def lookup1(user="world", repeat: nil); end
     #
     @action.("lookup test #2")
@@ -156,7 +157,7 @@ topic Benry::CmdApp::Index do
     end
 
     spec "[!z15vu] returns ActionWithArgs object if alias has args and/or kwargs." do
-      Benry::CmdApp.action_alias("findyy1", "lookup1", ["Alice"], {repeat: 3})
+      Benry::CmdApp.action_alias("findyy1", "lookup1", "Alice", "-r3")
       x = Benry::CmdApp::Index.lookup_action("findyy1")
       ok {x} != nil
       ok {x}.is_a?(Benry::CmdApp::ActionWithArgs)
@@ -199,7 +200,7 @@ topic Benry::CmdApp::Index do
       Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == [
         ["findxx", "alias of 'lookup2' action"],
-        ["findyy1", "alias of 'lookup1' action"],
+        ["findyy1", "alias of 'lookup1 Alice -r3'"],
         ["lookup1", "lookup test #1"],
         ["lookup2", "lookup test #2"],
       ]
@@ -1299,15 +1300,16 @@ topic Benry::CmdApp do
     spec "[!vzlrb] registers alias name with action name." do
       Benry::CmdApp.action_alias("a4", "alias1:a1")
       ok {Benry::CmdApp::Index::ALIASES}.key?("a4")
+      ok {Benry::CmdApp::Index::ALIASES["a4"].alias_name} == "a4"
       ok {Benry::CmdApp::Index::ALIASES["a4"].action_name} == "alias1:a1"
     end
 
-    spec "[!0cq6o] supports args and kwargs." do
-      Benry::CmdApp.action_alias("a8", "alias1:a1", ["Alice"], {lang: "it"})
+    spec "[!0cq6o] supports args." do
+      Benry::CmdApp.action_alias("a8", "alias1:a1", "Alice", "-l", "it")
       ok {Benry::CmdApp::Index::ALIASES}.key?("a8")
+      ok {Benry::CmdApp::Index::ALIASES["a8"].alias_name} == "a8"
       ok {Benry::CmdApp::Index::ALIASES["a8"].action_name} == "alias1:a1"
-      ok {Benry::CmdApp::Index::ALIASES["a8"].args}   == ["Alice"]
-      ok {Benry::CmdApp::Index::ALIASES["a8"].kwargs} == {lang: "it"}
+      ok {Benry::CmdApp::Index::ALIASES["a8"].args} == ["Alice", "-l", "it"]
     end
 
     spec "[!4wtxj] supports 'tag:' keyword arg." do
@@ -1320,6 +1322,7 @@ topic Benry::CmdApp do
     spec "[!5immb] convers both alias name and action name into string." do
       Benry::CmdApp.action_alias(:a5, :'alias1:a2')
       ok {Benry::CmdApp::Index::ALIASES}.key?("a5")
+      ok {Benry::CmdApp::Index::ALIASES["a5"].alias_name} == "a5"
       ok {Benry::CmdApp::Index::ALIASES["a5"].action_name} == "alias1:a2"
     end
 

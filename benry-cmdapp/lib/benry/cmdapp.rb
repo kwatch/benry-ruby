@@ -102,8 +102,10 @@ module Benry::CmdApp
       #; [!vivoa] returns action metadata object.
       #; [!z15vu] returns ActionWithArgs object if alias has args and/or kwargs.
       metadata = ACTIONS[name]
-      if alias_obj && (alias_obj.args || alias_obj.kwargs)
-        return ActionWithArgs.new(metadata, alias_obj.args, alias_obj.kwargs)
+      if alias_obj && alias_obj.args && ! alias_obj.args.empty?
+        args = alias_obj.args.dup()
+        opts = metadata.parse_options(args)
+        return ActionWithArgs.new(metadata, args, opts)
       else
         return metadata
       end
@@ -528,7 +530,7 @@ module Benry::CmdApp
   end
 
 
-  def self.action_alias(alias_name, action_name, args=nil, kwargs=nil, tag: nil)
+  def self.action_alias(alias_name, action_name, *args, tag: nil)
     invocation = "action_alias(#{alias_name.inspect}, #{action_name.inspect})"
     #; [!5immb] convers both alias name and action name into string.
     alias_  = alias_name.to_s
@@ -543,26 +545,29 @@ module Benry::CmdApp
     ! Index::ALIASES[alias_]  or
       raise AliasDefError.new("#{invocation}: alias name duplicated.")
     #; [!vzlrb] registers alias name with action name.
-    #; [!0cq6o] supports args and kwargs.
+    #; [!0cq6o] supports args.
     #; [!4wtxj] supports 'tag:' keyword arg.
-    Index::ALIASES[alias_] = Alias.new(alias_, action_, args, kwargs, tag: tag)
+    Index::ALIASES[alias_] = Alias.new(alias_, action_, *args, tag: tag)
   end
 
 
   class Alias
 
-    def initialize(alias_name, action_name, args=nil, kwargs=nil,tag: nil)
+    def initialize(alias_name, action_name, *args ,tag: nil)
       @alias_name  = alias_name
       @action_name = action_name
-      @args        = args.freeze   if args != nil
-      @kwargs      = kwargs.freeze if kwargs != nil
+      @args        = args.freeze   if ! args.empty?
       @tag         = tag
     end
 
-    attr_reader :alias_name, :action_name, :args, :kwargs, :tag
+    attr_reader :alias_name, :action_name, :args, :tag
 
     def desc()
-      return "alias of '#{@action_name}' action"
+      if @args && ! @args.empty?
+        return "alias of '#{@action_name} #{@args.join(' ')}'"
+      else
+        return "alias of '#{@action_name}' action"
+      end
     end
 
   end
