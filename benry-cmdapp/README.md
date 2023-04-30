@@ -51,7 +51,8 @@ Table of Contents
   * <a href="#custom-hook-of-application">Custom Hook of Application</a>
   * <a href="#customization-of-command-help-message">Customization of Command Help Message</a>
   * <a href="#customization-of-action-help-message">Customization of Action Help Message</a>
-  * <a href="#changing-behaviour-of-global-options">Changing Behaviour of Global Options</a>
+  * <a href="#customization-of-global-options">Customization of Global Options</a>
+  * <a href="#customization-of-global-option-behaviour">Customization of Global Option Behaviour</a>
 * <a href="#q--a">Q &amp; A</a>
   * <a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a>
   * <a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a>
@@ -1799,12 +1800,14 @@ exit app.main()
 ```
 
 
-Changing Behaviour of Global Options
-------------------------------------
+Customization of Global Options
+-------------------------------
 
-To change behaviour of global options (such as `-v/--verbose`,
-`-q/--quiet`, `-D/--debug`, `-T/--trace`, and `--color`), override
-`#do_toggle_global_switches()` of `Benry::CmdApp::Application` class.
+To customize global options entirely:
+
+* (1) Create empty `GlobalOptionSchema` object.
+* (2) Add global options as you want.
+* (3) Create and execute Application object with it.
 
 File: ex31.rb
 
@@ -1812,8 +1815,43 @@ File: ex31.rb
 #!/usr/bin/env ruby
 require 'benry/cmdapp'
 
+## (1) Create empty `GlobalOptionSchema` object.
+schema = Benry::CmdApp::GlobalOptionSchema.new(nil)   # !!!!
+
+## (2) Add global options as you want.
+schema.add(:help   , "-h, --help"   , "print help message")
+schema.add(:version, "-V, --version", "print version")
+schema.add(:all    , "-a, --all"    , "list all actions/options")
+schema.add(:verbose, "-v, --verbose", "verbose mode")
+schema.add(:quiet  , "-q, --quiet"  , "quiet mode")
+schema.add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass)
+schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true")
+schema.add(:trace  , "-T, --trace"  , "report enter into and exit from action")
+
+## (3) Create and execute Application object with it.
+config = Benry::CmdApp::Config.new("sample app")
+app = MyApplication.new(config, schema)               # !!!!
+exit app.main()
+```
+
+
+Customization of Global Option Behaviour
+----------------------------------------
+
+* (1) Define subclass of `Application` class.
+* (2) Override `#do_toggle_global_switches()` method.
+* (3) Create and execute subclass object of `Application`.
+
+File: ex32.rb
+
+```ruby
+#!/usr/bin/env ruby
+require 'benry/cmdapp'
+
+## (1) Define subclass of `Application` class.
 class MyApplication < Benry::CmdApp::Application
 
+  ## (2) Override `#do_toggle_global_switches()` method.
   def do_toggle_global_switches(_args, global_opts)
     ## here is original code
     #global_opts.each do |key, val|
@@ -1830,6 +1868,7 @@ class MyApplication < Benry::CmdApp::Application
 
 end
 
+## (3) Create and execute subclass object of `Application`.
 config = Benry::CmdApp::Config.new("sample app")
 app = MyApplication.new(config)            # !!!!
 exit app.main()
@@ -1837,7 +1876,7 @@ exit app.main()
 
 Of course, prepending custom module to Application class is also effective way.
 
-File: ex32.rb
+File: ex33.rb
 
 ```ruby
 #!/usr/bin/env ruby
