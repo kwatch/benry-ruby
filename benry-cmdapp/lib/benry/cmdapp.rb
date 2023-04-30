@@ -229,6 +229,9 @@ module Benry::CmdApp
   end
 
 
+  ACTION_METADATA_CLASS = ActionMetadata
+
+
   class ActionWithArgs
 
     def initialize(action_metadata, args, kwargs)
@@ -479,7 +482,7 @@ module Benry::CmdApp
       @__action__ = @__option__ = nil
       #; [!n8tem] creates ActionMetadata object if '@__action__' is not nil.
       name = __method2action(method)
-      metadata = ActionMetadata.new(name, self, method, desc, schema, **kws)
+      metadata = ACTION_METADATA_CLASS.new(name, self, method, desc, schema, **kws)
       #; [!4pbsc] raises error if keyword param for option not exist in method.
       errmsg = metadata.validate_method_params()
       errmsg == nil  or
