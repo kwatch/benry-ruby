@@ -173,13 +173,18 @@ module Benry::CmdApp
 
     def _run_action(*args, **kwargs)
       #; [!veass] runs action with args and kwargs.
-      action_obj = @klass.new
+      action_obj = _new_action_object()
       if kwargs.empty?                        # for Ruby < 2.7
         action_obj.__send__(@method, *args)   # for Ruby < 2.7
       else
         action_obj.__send__(@method, *args, **kwargs)
       end
     end
+
+    def _new_action_object()
+      return @klass.new
+    end
+    protected :_new_action_object
 
     def method_arity()
       #; [!7v4tp] returns min and max number of positional arguments.
