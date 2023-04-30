@@ -2605,6 +2605,19 @@ end
 topic Benry::CmdApp::CommandHelpBuilder do
   include CommonTestingHelper
 
+  def _clear_index_except(klass)
+    @_bkup_actions = Benry::CmdApp::Index::ACTIONS.dup()
+    Benry::CmdApp::Index::ACTIONS.delete_if {|_, x| x.klass != klass }
+    anames = Benry::CmdApp::Index::ACTIONS.keys()
+    @_bkup_aliases = Benry::CmdApp::Index::ALIASES.dup()
+    Benry::CmdApp::Index::ALIASES.delete_if {|_, a| ! anames.include?(a.action_name) }
+  end
+
+  def _restore_index()
+    Benry::CmdApp::Index::ACTIONS.update(@_bkup_actions)
+    Benry::CmdApp::Index::ALIASES.update(@_bkup_aliases)
+  end
+
   before do
     @config = Benry::CmdApp::Config.new("test app", "1.0.0").tap do |config|
       config.app_name     = "TestApp"
@@ -2636,16 +2649,11 @@ topic Benry::CmdApp::CommandHelpBuilder do
     Benry::CmdApp.action_alias("yes", "yo-yo")
 
     before do
-      @_bkup_actions = Benry::CmdApp::Index::ACTIONS.dup()
-      Benry::CmdApp::Index::ACTIONS.delete_if {|_, x| x.klass != HelpMessageTest }
-      anames = Benry::CmdApp::Index::ACTIONS.keys()
-      @_bkup_aliases = Benry::CmdApp::Index::ALIASES.dup()
-      Benry::CmdApp::Index::ALIASES.delete_if {|_, a| ! anames.include?(a.action_name) }
+      _clear_index_except(HelpMessageTest)
     end
 
     after do
-      Benry::CmdApp::Index::ACTIONS.update(@_bkup_actions)
-      Benry::CmdApp::Index::ALIASES.update(@_bkup_aliases)
+      _restore_index()
     end
 
     expected_color = <<"END"
@@ -2947,6 +2955,114 @@ END
       @config.help_postamble = "END"
       msg = @builder.build_help_message()
       ok {msg}.end_with?("\nEND\n")
+    end
+
+    spec "[!oxpda] prints 'Aliases:' section only when 'config.help_aliases' is true." do
+      app = Benry::CmdApp::Application.new(@config)
+      #
+      @config.help_aliases = true
+      msg = app.help_message()
+      msg = Benry::CmdApp::Util.del_escape_seq(msg)
+      ok {msg}.end_with?(<<'END')
+Actions:
+  ya:ya              : greeting #2
+  yo-yo              : greeting #1
+
+Aliases:
+  yes                : alias of 'yo-yo' action
+END
+      #
+      @config.help_aliases = false
+      msg = app.help_message()
+      msg = Benry::CmdApp::Util.del_escape_seq(msg)
+      ok {msg}.end_with?(<<'END')
+Actions:
+  ya:ya              : greeting #2
+  yes                : alias of 'yo-yo' action
+  yo-yo              : greeting #1
+END
+    end
+
+  end
+
+
+  topic '#build_aliases()' do
+
+    class BuildAliasTest < Benry::CmdApp::Action
+      prefix "help25"
+      @action.("test #1")
+      def test1; end
+      @action.("test #2")
+      def test2; end
+      @action.("test #3")
+      def test3; end
+      @action.("test #4")
+      def test4; end
+    end
+
+    Benry::CmdApp.action_alias "h25t3", "help25:test3"
+    Benry::CmdApp.action_alias "h25t1", "help25:test1"
+    Benry::CmdApp.action_alias "_h25t4", "help25:test4"
+
+    before do
+      _clear_index_except(BuildAliasTest)
+    end
+
+    after do
+      _restore_index()
+    end
+
+    def new_help_builder(**kws)
+      config  = Benry::CmdApp::Config.new("test app", "1.2.3", **kws)
+      schema  = Benry::CmdApp::GlobalOptionSchema.new(config)
+      builder = Benry::CmdApp::CommandHelpBuilder.new(config, schema)
+      return builder
+    end
+
+    spec "[!tri8x] includes alias names in order of registration." do
+      hb = new_help_builder(help_aliases: true)
+      msg = hb.__send__(:build_aliases)
+      ok {msg} == <<"END"
+\e[34mAliases:\e[0m
+  \e[1mh25t3             \e[0m : alias of 'help25:test3' action
+  \e[1mh25t1             \e[0m : alias of 'help25:test1' action
+END
+    end
+
+    spec "[!5g72a] not show hidden alias names in default." do
+      hb = new_help_builder(help_aliases: true)
+      msg = hb.__send__(:build_aliases)
+      ok {msg} !~ /_h25t4/
+    end
+
+    spec "[!ekuqm] shows all alias names including private ones if 'all' flag is true." do
+      hb = new_help_builder(help_aliases: true)
+      msg = hb.__send__(:build_aliases, true)
+      ok {msg} =~ /_h25t4/
+      ok {msg} == <<"END"
+\e[34mAliases:\e[0m
+  \e[1mh25t3             \e[0m : alias of 'help25:test3' action
+  \e[1mh25t1             \e[0m : alias of 'help25:test1' action
+  \e[1m_h25t4            \e[0m : alias of 'help25:test4' action
+END
+    end
+
+    spec "[!p3oh6] now show 'Aliases:' section if no aliases defined." do
+      Benry::CmdApp::Index::ALIASES.clear()
+      hb = new_help_builder(help_aliases: true)
+      msg = hb.__send__(:build_aliases)
+      ok {msg} == nil
+    end
+
+    spec "[!we1l8] shows 'Aliases:' section if any aliases defined." do
+      hb = new_help_builder(help_aliases: true)
+      msg = hb.__send__(:build_aliases)
+      ok {msg} != nil
+      ok {msg} == <<"END"
+\e[34mAliases:\e[0m
+  \e[1mh25t3             \e[0m : alias of 'help25:test3' action
+  \e[1mh25t1             \e[0m : alias of 'help25:test1' action
+END
     end
 
   end

@@ -584,7 +584,7 @@ module Benry::CmdApp
                    option_help: true, option_all: false,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: false, option_trace: false,
-                   help_sections: [], help_postamble: nil,
+                   help_aliases: false, help_sections: [], help_postamble: nil,
                    format_help: nil, format_usage: nil, format_heading: nil,
                    feat_candidate: true)
       #; [!uve4e] sets command name automatically if not provided.
@@ -602,6 +602,7 @@ module Benry::CmdApp
       @option_color   = option_color    # '--color[=<on|off>]' enabled when true
       @option_debug   = option_debug    # '-D' and '--debug' are enabled when true
       @option_trace   = option_trace    # '-T' and '--trace' are enabled when true
+      @help_aliases   = help_aliases    # 'Aliases:' section printed when true
       @help_sections  = help_sections   # ex: [["Example", "..text.."], ...]
       @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
       @format_help    = format_help    || FORMAT_HELP
@@ -615,7 +616,7 @@ module Benry::CmdApp
     attr_accessor :option_help, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
-    attr_accessor :help_sections, :help_postamble
+    attr_accessor :help_aliases, :help_sections, :help_postamble
     attr_accessor :format_help, :format_usage, :format_heading
     attr_accessor :feat_candidate
 
@@ -973,7 +974,8 @@ module Benry::CmdApp
       sb << build_usage(all)
       sb << build_options(all, format)
       sb << build_actions(all, format)
-      #sb << build_aliases(all, format)
+      #; [!oxpda] prints 'Aliases:' section only when 'config.help_aliases' is true.
+      sb << build_aliases(all, format) if @config.help_aliases
       @config.help_sections.each do |title, content|
         sb << build_section(title, content, all)
       end if @config.help_sections
@@ -1040,13 +1042,29 @@ module Benry::CmdApp
       sb << " (default: #{c.default_action})" if c.default_action
       sb << "\n"
       #; [!jat15] includes action names ordered by name.
-      include_alias = true
+      include_alias = ! @config.help_aliases
       Index.each_action_name_and_desc(include_alias, all: all) do |name, desc|
         #; [!b3l3m] not show private (hidden) action names in default.
         #; [!yigf3] shows private (hidden) action names if 'all' flag is true.
         sb << format % [name, desc] if all || ! Util.hidden_name?(name)
       end
       return sb.join()
+    end
+
+    def build_aliases(all=false, format=nil)
+      format ||= @config.format_help
+      format += "\n"
+      #; [!tri8x] includes alias names in order of registration.
+      sb = []
+      Index::ALIASES.each do |alias_name, alias_obj|
+        #; [!5g72a] not show hidden alias names in default.
+        #; [!ekuqm] shows all alias names including private ones if 'all' flag is true.
+        sb << format % [alias_name, alias_obj.desc()] if all || ! Util.hidden_name?(alias_name)
+      end
+      #; [!p3oh6] now show 'Aliases:' section if no aliases defined.
+      return nil if sb.empty?
+      #; [!we1l8] shows 'Aliases:' section if any aliases defined.
+      return heading("Aliases:") + "\n" + sb.join()
     end
 
     def build_section(title, content, all=false)
