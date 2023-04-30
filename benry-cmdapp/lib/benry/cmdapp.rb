@@ -156,14 +156,14 @@ module Benry::CmdApp
 
     def run_action(*args, **kwargs)
       if ! $TRACE_MODE
-        _run_action(*args, **kwargs)
+        __run_action(*args, **kwargs)
       else
         #; [!tubhv] if $TRACE_MODE is on, prints tracing info.
         #; [!zgp14] tracing info is colored when stdout is a tty.
         s = "## enter: #{@name}"
         s = "\e[33m#{s}\e[0m" if Util.colorize?
         puts s
-        _run_action(*args, **kwargs)
+        __run_action(*args, **kwargs)
         s = "## exit:  #{@name}"
         s = "\e[33m#{s}\e[0m" if Util.colorize?
         puts s
@@ -171,7 +171,7 @@ module Benry::CmdApp
       nil
     end
 
-    def _run_action(*args, **kwargs)
+    def __run_action(*args, **kwargs)
       #; [!veass] runs action with args and kwargs.
       action_obj = _new_action_object()
       if kwargs.empty?                        # for Ruby < 2.7
@@ -180,6 +180,7 @@ module Benry::CmdApp
         action_obj.__send__(@method, *args, **kwargs)
       end
     end
+    private :__run_action
 
     def _new_action_object()
       return @klass.new
