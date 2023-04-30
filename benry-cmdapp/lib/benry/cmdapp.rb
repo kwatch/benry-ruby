@@ -646,7 +646,7 @@ module Benry::CmdApp
 
   class GlobalOptionSchema < Benry::CmdOpt::Schema
 
-    def initialize(config)
+    def initialize(config=nil)
       super()
       #; [!3ihzx] do nothing when config is nil.
       c = config
