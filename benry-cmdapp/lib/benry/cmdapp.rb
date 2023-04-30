@@ -242,7 +242,11 @@ module Benry::CmdApp
 
     def method_missing(meth, *args, **kwargs)
       #; [!14li3] behaves as ActionMetadata.
-      return @action_metadata.__send__(meth, *args, **kwargs)
+      if kwargs.empty?                                  # Ruby < 2.7
+        return @action_metadata.__send__(meth, *args)   # Ruby < 2.7
+      else
+        return @action_metadata.__send__(meth, *args, **kwargs)
+      end
     end
 
     def method()
