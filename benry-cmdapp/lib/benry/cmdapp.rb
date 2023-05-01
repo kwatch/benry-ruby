@@ -485,7 +485,7 @@ module Benry::CmdApp
       return ret
     end
 
-    def self.prefix(str, alias_of: nil, default: nil)
+    def self.prefix(str, alias_of: nil, action: nil)
       #; [!1gwyv] converts symbol into string.
       str = str.to_s
       #; [!pz46w] error if prefix contains extra '_'.
@@ -495,7 +495,7 @@ module Benry::CmdApp
       str += ':' unless str.end_with?(':')
       @__prefix__  = str
       @__aliasof__ = alias_of  # method name if symbol, or action name if string
-      @__default__ = default   # method name if symbol, or action name if string
+      @__default__ = action    # method name if symbol, or action name if string
     end
 
     SUBCLASSES = []
@@ -971,10 +971,10 @@ module Benry::CmdApp
           warn "#{nl}** [warning] in '#{klass.name}' class, `alias_of: #{alias_of.inspect}` specified but corresponding action not exist."
           nl = ""
         end
-        #; [!h7lon] reports warning if `default:` specified in action class but corresponding action not exist.
+        #; [!h7lon] reports warning if `action:` specified in action class but corresponding action not exist.
         default = klass.instance_variable_get(:@__default__)
         if default
-          warn "#{nl}** [warning] in '#{klass.name}' class, `default: #{default.inspect}` specified but corresponding action not exist."
+          warn "#{nl}** [warning] in '#{klass.name}' class, `action: #{default.inspect}` specified but corresponding action not exist."
           nl = ""
         end
       end

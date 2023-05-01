@@ -1095,7 +1095,7 @@ topic Benry::CmdApp::Action do
       spec "[!myj3p] uses prefix name (expect last char ':') as action name." do
         new_names, x = defined_actions() do
           class Added6Test < Benry::CmdApp::Action
-            prefix "added6", default: :hello6
+            prefix "added6", action: :hello6
             @action.("test")
             def hello6(); end
           end
@@ -1107,7 +1107,7 @@ topic Benry::CmdApp::Action do
 
       spec "[!j5oto] clears '@__default__'." do
         class ClearDefaultTest1 < Benry::CmdApp::Action
-          prefix "cleardefault1", default: :test2_   # symbol
+          prefix "cleardefault1", action: :test2_   # symbol
           @__default__ != nil  or
             raise MiniTest::Assertion, "@__default__ should NOT be nil"
           #
@@ -1178,7 +1178,7 @@ topic Benry::CmdApp::Action do
       spec "[!8hlni] when action name is same as default name, uses prefix as action name." do
         new_names, x = defined_actions() do
           class Added11Test < Benry::CmdApp::Action
-            prefix "added11", default: "hello11"
+            prefix "added11", action: "hello11"
             @action.("test")
             def hello11(); end
           end
@@ -1190,7 +1190,7 @@ topic Benry::CmdApp::Action do
 
       spec "[!q8oxi] clears '@__default__' when default name matched to action name." do
         class ClearDefaultTest2 < Benry::CmdApp::Action
-          prefix "cleardefault2", default: "test2"   # string
+          prefix "cleardefault2", action: "test2"   # string
           @__default__ != nil  or
             raise MiniTest::Assertion, "@__default__ should NOT be nil"
           #
@@ -2495,9 +2495,9 @@ END
       end
     end
 
-    spec "[!h7lon] reports warning if `default:` specified in action class but corresponding action not exist." do
+    spec "[!h7lon] reports warning if `action:` specified in action class but corresponding action not exist." do
       class ValidateActionTest3 < Benry::CmdApp::Action
-        prefix "validate3", default: :test3
+        prefix "validate3", action: :test3
         @action.("test")
         def test(); end
       end
@@ -2505,7 +2505,7 @@ END
         sout, serr = capture_sio { @app.__send__(:do_validate_actions, [], {}) }
         ok {serr} == <<'END'
 
-** [warning] in 'ValidateActionTest3' class, `default: :test3` specified but corresponding action not exist.
+** [warning] in 'ValidateActionTest3' class, `action: :test3` specified but corresponding action not exist.
 END
       ensure
         ValidateActionTest3.class_eval { @__default__ = nil }
@@ -2519,7 +2519,7 @@ END
 
     spec "[!0e8vt] prints candidate action names including prefix name without tailing ':'." do
       class CandidateTest2 < Benry::CmdApp::Action
-        prefix "candi:date2", default: :eee
+        prefix "candi:date2", action: :eee
         @action.("test1")
         def ddd(); end
         @action.("test2")
@@ -2541,7 +2541,7 @@ END
 
     spec "[!85i5m] candidate actions should include alias names." do
       class CandidateTest3 < Benry::CmdApp::Action
-        prefix "candi:date3", default: :ggg
+        prefix "candi:date3", action: :ggg
         @action.("test1")
         def hhh(); end
         @action.("test2")
