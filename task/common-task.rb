@@ -85,7 +85,7 @@ unless Rake::Task.task_defined?(:'test:all')
     error  = proc {|s| "\033[0;31m** #{s}\033[0m" }
     comp = proc {|x, y| x.to_s.split('.').map(&:to_i) <=> y.to_s.split('.').map(&:to_i) }
     RUBY_VERSIONS.each do |ver|
-      dir = Dir.glob("#{vs_home}/ruby/#{ver}.*").sort_by(&comp).last
+      dir = Dir.glob("#{vs_home}/ruby/#{ver}.*/").sort_by(&comp).last
       puts ""
       unless dir
         puts header.(ver)
