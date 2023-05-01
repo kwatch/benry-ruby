@@ -622,6 +622,7 @@ Not Supported
 * default value
 * `--no-xxx` style option
 * bash/zsh completion
+* I18N of error message (may be supported in the future)
 
 
 
