@@ -59,8 +59,9 @@ Table of Contents
   * <a href="#q-how-to-define-multiple-option-like--i-option-of-ruby">Q: How to Define Multiple Option like '-I' Option of Ruby?</a>
   * <a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a>
   * <a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a>
-  * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixdefault">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(default:)`?</a>
+  * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?</a>
   * <a href="#q-is-it-possible-to-add-add-metadata-to-action-or-option">Q: Is It Possible to Add Add Metadata to Action or Option?</a>
+  * <a href="#q-how-to-make-error-messages-i18ned">Q: How to Make Error Messages I18Ned?</a>
 * <a href="#license-and-copyright">License and Copyright</a>
 
 <!-- /TOC -->
@@ -831,7 +832,7 @@ Actions:
   foo:bar:test1      : test action #1
 ```
 
-* `prefix: "foo:bar", default: :test` defines `foo:bar` action (intead of `foo:bar:test`) with `test()` method.
+* `prefix: "foo:bar", action: :test` defines `foo:bar` action (intead of `foo:bar:test`) with `test()` method.
 
 File: ex12.rb
 
@@ -840,9 +841,9 @@ File: ex12.rb
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
-  prefix "foo:bar", default: :test3_      # !!!!
+  prefix "foo:bar", action: :test3_      # !!!!
   ## or:
-  #prefix "foo:bar", default: "test3"     # !!!!
+  #prefix "foo:bar", action: "test3"     # !!!!
 
   @action.("test action #1")
   def test1()                 # action name: 'foo:bar:test1'
@@ -2247,7 +2248,7 @@ Options:
 ```
 
 
-Q: What is the Difference Between `prefix(alias_of:)` and `prefix(default:)`?
+Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?
 -----------------------------------------------------------------------------
 
 A: The former defines an alias, and the latter doesn't.
@@ -2268,7 +2269,7 @@ class AaaAction < Benry::CmdApp::Action
 end
 
 class BbbAction < Benry::CmdApp::Action
-  prefix "bbb", default: :print_         # (or) default: "print"
+  prefix "bbb", action: :print_         # (or) action: "print"
 
   @action.("test #2")
   def print_()
@@ -2301,7 +2302,7 @@ Actions:
 ```
 
 In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
-and action `bbb` is not an alias due to `prefix(default:)`.
+and action `bbb` is not an alias due to `prefix(action:)`.
 
 
 Q: Is It Possible to Add Add Metadata to Action or Option?
@@ -2334,6 +2335,13 @@ config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 ```
+
+
+Q: How to Make Error Messages I18Ned?
+-------------------------------------
+
+A: Current not supported. May be supported in the future release.
+
 
 
 
