@@ -5,7 +5,7 @@ Benry::CmdApp README
 
 Benry::CmdApp is a framework to create command-line application.
 If you want create command-line application which takes sub-commands
-like `git`, `docker`, or `npm`, Benry:CmdApp is the solution.
+like `git`, `docker`, or `npm`, Benry::CmdApp is the solution.
 
 Base idea:
 
@@ -47,12 +47,11 @@ Table of Contents
   * <a href="#private-hidden-option">Private (Hidden) Option</a>
 * <a href="#configuratoin-and-customization">Configuratoin and Customization</a>
   * <a href="#application-configuration">Application Configuration</a>
-  * <a href="#custom-global-options">Custom Global Options</a>
+  * <a href="#customization-of-global-options">Customization of Global Options</a>
+  * <a href="#customization-of-global-option-behaviour">Customization of Global Option Behaviour</a>
   * <a href="#custom-hook-of-application">Custom Hook of Application</a>
   * <a href="#customization-of-command-help-message">Customization of Command Help Message</a>
   * <a href="#customization-of-action-help-message">Customization of Action Help Message</a>
-  * <a href="#customization-of-global-options">Customization of Global Options</a>
-  * <a href="#customization-of-global-option-behaviour">Customization of Global Option Behaviour</a>
 * <a href="#q--a">Q &amp; A</a>
   * <a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a>
   * <a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a>
@@ -1394,8 +1393,10 @@ config.format_heading     = "\e[34m%s\e[0m"
 ```
 
 
-Custom Global Options
----------------------
+Customization of Global Options
+-------------------------------
+
+To add custom global options:
 
 * (1) Create global option schema object.
 * (2) Add custom options to it.
@@ -1418,7 +1419,7 @@ end
 
 ## (1) create global option shema
 config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::GlobalOptionSchema.new(config)  # !!!!
+schema = Benry::CmdApp::AppOptionSchema.new(config)  # !!!!
 
 ## (2) add custom options to it
 schema.add(:logging, "--logging", "enable logging")    # !!!!
@@ -1446,6 +1447,101 @@ Actions:
   test1              : test action
 ```
 
+To customize global options entirely:
+
+* (1) Create empty `AppOptionSchema` object.
+* (2) Add global options as you want.
+* (3) Create and execute Application object with it.
+
+File: ex24.rb
+
+```ruby
+#!/usr/bin/env ruby
+require 'benry/cmdapp'
+
+## (1) Create empty `AppOptionSchema` object.
+schema = Benry::CmdApp::AppOptionSchema.new(nil)   # !!!!
+
+## (2) Add global options as you want.
+schema.add(:help   , "-h, --help"   , "print help message")
+schema.add(:version, "-V, --version", "print version")
+schema.add(:all    , "-a, --all"    , "list all actions/options")
+schema.add(:verbose, "-v, --verbose", "verbose mode")
+schema.add(:quiet  , "-q, --quiet"  , "quiet mode")
+schema.add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass)
+schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true")
+schema.add(:trace  , "-T, --trace"  , "report enter into and exit from action")
+
+## (3) Create and execute Application object with it.
+config = Benry::CmdApp::Config.new("sample app")
+app = MyApplication.new(config, schema)               # !!!!
+exit app.main()
+```
+
+
+Customization of Global Option Behaviour
+----------------------------------------
+
+* (1) Define subclass of `Application` class.
+* (2) Override `#do_toggle_global_switches()` method.
+* (3) Create and execute subclass object of `Application`.
+
+File: ex25.rb
+
+```ruby
+#!/usr/bin/env ruby
+require 'benry/cmdapp'
+
+## (1) Define subclass of `Application` class.
+class MyApplication < Benry::CmdApp::Application
+
+  ## (2) Override `#do_toggle_global_switches()` method.
+  def do_toggle_global_switches(_args, global_opts)
+    super
+    ## here is original behaviour
+    #global_opts.each do |key, val|
+    #  case key
+    #  when :verbose ; $VERBOSE_MODE = val
+    #  when :quiet   ; $VERBOSE_MODE = !val
+    #  when :color   ; $COLOR_MODE   = val
+    #  when :debug   ; $DEBUG_MODE   = val
+    #  when :trace   ; $TRACE_MODE   = val
+    #  else          ; # do nothing
+    #  end
+    #end
+  end
+
+end
+
+## (3) Create and execute subclass object of `Application`.
+config = Benry::CmdApp::Config.new("sample app")
+app = MyApplication.new(config)            # !!!!
+exit app.main()
+```
+
+Of course, prepending custom module to Application class is also effective way.
+
+File: ex26.rb
+
+```ruby
+#!/usr/bin/env ruby
+require 'benry/cmdapp'
+
+module MyApplicationMod
+
+  def do_toggle_global_switches(_args, global_opts)
+    # ....
+  end
+
+end
+
+Benry::CmdApp::Application.prepend(MyApplicationMod)   # !!!!
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
 
 Custom Hook of Application
 --------------------------
@@ -1454,7 +1550,7 @@ Custom Hook of Application
 * (2) Override callback method.
 * (3) Create and execute custom application object.
 
-File: ex24.rb
+File: ex27.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1497,7 +1593,7 @@ end
 
 ## (3) create and execute custom application object
 config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::GlobalOptionSchema.new(config)
+schema = Benry::CmdApp::AppOptionSchema.new(config)
 schema.add(:logging, "--logging", "enable logging")
 app = MyApplication.new(config, schema)             # !!!!
 exit app.main()
@@ -1505,7 +1601,7 @@ exit app.main()
 
 * [EXPERIMENTAL] Instead of defining subclass of Application, you can pass callback block to Application object.
 
-File: ex25.rb
+File: ex28.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1521,7 +1617,7 @@ class SampleAction < Benry::CmdApp::Action
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::GlobalOptionSchema.new(config)
+schema = Benry::CmdApp::AppOptionSchema.new(config)
 schema.add(:logging, "--logging", "enable logging")
 app = MyApplication.new(config, schema) do   # !!!!
   |args, global_opts, config|                # !!!!
@@ -1541,7 +1637,7 @@ Customization of Command Help Message
 If you want to just add more text into command help message,
 set `config.app_detail`, `config.help_sections`, and/or `config.help_postamble`.
 
-File: ex26.rb
+File: ex29.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1569,13 +1665,13 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex26.rb -h
-ex26.rb -- sample app
+[bash]$ ruby ex29.rb -h
+ex29.rb -- sample app
 
 Document: https://....                      # !!!!
 
 Usage:
-  $ ex26.rb [<options>] [<action> [<arguments>...]]
+  $ ex29.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -1591,12 +1687,12 @@ Example:                                    # !!!!
 
 If you want to change behaviour of building command help message:
 
-* (1) Define subclass of `Benry::CmdApp::CommandHelpBuilder` class.
+* (1) Define subclass of `Benry::CmdApp::AppHelpBuilder` class.
 * (2) Override methods.
 * (3) Create an instance object of the class.
 * (4) Pass it to Application object.
 
-File: ex27.rb
+File: ex30.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1611,8 +1707,8 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-## (1) Define subclass of `Benry::CmdApp::CommandHelpBuilder` class.
-class MyCommandHelpBuilder < Benry::CmdApp::CommandHelpBuilder
+## (1) Define subclass of `Benry::CmdApp::AppHelpBuilder` class.
+class MyAppHelpBuilder < Benry::CmdApp::AppHelpBuilder
 
   ## (2) Override methods.
   def build_help_message(all=false, format=nil)
@@ -1640,9 +1736,9 @@ end
 
 ## (3) Create an instance object of the class.
 config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::GlobalOptionSchema.new(config)
+schema = Benry::CmdApp::AppOptionSchema.new(config)
 schema.add(:logging, "--logging", "enable logging")
-help_builder = MyCommandHelpBuilder.new(config, schema)     # !!!!
+help_builder = MyAppHelpBuilder.new(config, schema)     # !!!!
 
 ## (4) Pass it to Application object.
 app = Benry::CmdApp::Application.new(config, schema, help_builder) # !!!!
@@ -1651,11 +1747,11 @@ exit app.main()
 
 More simple way:
 
-* (1) Create a module and override methods of `Benry::CmdApp::CommandHelpBuilder` class.
-* (2) Prepend it to `Benry::CmdApp::CommandHelpBuilder` class.
+* (1) Create a module and override methods of `Benry::CmdApp::AppHelpBuilder` class.
+* (2) Prepend it to `Benry::CmdApp::AppHelpBuilder` class.
 * (3) Create and execute Application object.
 
-File: ex28.rb
+File: ex31.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1670,8 +1766,8 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-## (1) Create a module and override methods of `CommandHelpBuilder` class.
-module MyCommandHelpBuilder
+## (1) Create a module and override methods of `AppHelpBuilder` class.
+module MyHelpBuilderMod
   def build_help_message(all=false, format=nil)
     super
   end
@@ -1695,8 +1791,8 @@ module MyCommandHelpBuilder
   end
 end
 
-## (2) Prepend it to `Benry::CmdApp::CommandHelpBuilder` class.
-Benry::CmdApp::CommandHelpBuilder.prepend(MyCommandHelpBuilder)
+## (2) Prepend it to `Benry::CmdApp::AppHelpBuilder` class.
+Benry::CmdApp::AppHelpBuilder.prepend(MyHelpBuilderMod)
 
 ## (3) Create and execute Application object.
 config = Benry::CmdApp::Config.new("sample app")
@@ -1706,12 +1802,12 @@ exit app.main()
 
 
 Customization of Action Help Message
--------------------------------------
+------------------------------------
 
 If you want to just add more text into action help message,
 pass `detail:` and/or `postamble:` keyword arguments to `@action.()`.
 
-File: ex29.rb
+File: ex32.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1736,13 +1832,13 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex29.rb -h
-ex29.rb hello -- test action #1
+[bash]$ ruby ex32.rb -h
+ex32.rb hello -- test action #1
 
 Document: https://....                  # !!!!
 
 Usage:
-  $ ex29.rb hello [<user>]
+  $ ex32.rb hello [<user>]
 
 (Tips: ....)                            # !!!!
 ```
@@ -1753,7 +1849,7 @@ If you want to change behaviour of building action help message:
 * (2) Prepend it to `Benry::CmdApp::ActionHelpBuilder` class.
 * (3) Create and execute Application object.
 
-File: ex30.rb
+File: ex33.rb
 
 ```ruby
 #!/usr/bin/env ruby
@@ -1769,7 +1865,7 @@ class SampleAction < Benry::CmdApp::Action
 end
 
 ## (1) Create a module and override methods of `ActionHelpBuilder` class.
-module MyActionHelpBuilder
+module MyActionHelpBuilderMod
   def build_help_message(command, all=false)
     super
   end
@@ -1791,7 +1887,7 @@ module MyActionHelpBuilder
 end
 
 ## (2) Prepend it to `Benry::CmdApp::ActionHelpBuilder` class.
-Benry::CmdApp::ActionHelpBuilder.prepend(MyActionHelpBuilder)
+Benry::CmdApp::ActionHelpBuilder.prepend(MyActionHelpBuilderMod)  # !!!!
 
 ## (3) Create and execute Application object.
 config = Benry::CmdApp::Config.new("sample app")
@@ -1799,103 +1895,61 @@ app = Benry::CmdApp::Application.new(config)
 exit app.main()
 ```
 
+Another way:
 
-Customization of Global Options
--------------------------------
+* (1) Define subclass of `ActionHelpBuilder` class.
+* (2) Set it to `ACTION_HELP_BUILDER_CLASS` constant value.
+* (3) Create and execute Application object.
 
-To customize global options entirely:
-
-* (1) Create empty `GlobalOptionSchema` object.
-* (2) Add global options as you want.
-* (3) Create and execute Application object with it.
-
-File: ex31.rb
+File: ex34.rb
 
 ```ruby
 #!/usr/bin/env ruby
 require 'benry/cmdapp'
 
-## (1) Create empty `GlobalOptionSchema` object.
-schema = Benry::CmdApp::GlobalOptionSchema.new(nil)   # !!!!
+class SampleAction < Benry::CmdApp::Action
 
-## (2) Add global options as you want.
-schema.add(:help   , "-h, --help"   , "print help message")
-schema.add(:version, "-V, --version", "print version")
-schema.add(:all    , "-a, --all"    , "list all actions/options")
-schema.add(:verbose, "-v, --verbose", "verbose mode")
-schema.add(:quiet  , "-q, --quiet"  , "quiet mode")
-schema.add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass)
-schema.add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true")
-schema.add(:trace  , "-T, --trace"  , "report enter into and exit from action")
-
-## (3) Create and execute Application object with it.
-config = Benry::CmdApp::Config.new("sample app")
-app = MyApplication.new(config, schema)               # !!!!
-exit app.main()
-```
-
-
-Customization of Global Option Behaviour
-----------------------------------------
-
-* (1) Define subclass of `Application` class.
-* (2) Override `#do_toggle_global_switches()` method.
-* (3) Create and execute subclass object of `Application`.
-
-File: ex32.rb
-
-```ruby
-#!/usr/bin/env ruby
-require 'benry/cmdapp'
-
-## (1) Define subclass of `Application` class.
-class MyApplication < Benry::CmdApp::Application
-
-  ## (2) Override `#do_toggle_global_switches()` method.
-  def do_toggle_global_switches(_args, global_opts)
-    ## here is original code
-    #global_opts.each do |key, val|
-    #  case key
-    #  when :quiet   ; $QUIET_MODE   = val
-    #  when :verbose ; $VERBOSE_MODE = val
-    #  when :color   ; $COLOR_MODE   = val
-    #  when :debug   ; $DEBUG_MODE   = val
-    #  when :trace   ; $TRACE_MODE   = val
-    #  else          ; # do nothing
-    #  end
-    #end
+  @action.("greeting message")
+  def hello(user="world")
+    puts "Hello, #{user}!"
   end
 
 end
 
-## (3) Create and execute subclass object of `Application`.
-config = Benry::CmdApp::Config.new("sample app")
-app = MyApplication.new(config)            # !!!!
-exit app.main()
-```
-
-Of course, prepending custom module to Application class is also effective way.
-
-File: ex33.rb
-
-```ruby
-#!/usr/bin/env ruby
-require 'benry/cmdapp'
-
-module MyApplicationMod
-
-  def do_toggle_global_switches(_args, global_opts)
-    # ....
+## (1) Define subclass of `ActionHelpBuilder` class.
+class MyActionHelpBuilder < Benry::CmdApp::ActionHelpBuilder
+  def build_help_message(command, all=false)
+    super
   end
-
+  def build_preamble(command, all=false)
+    super
+  end
+  def build_usage(command, all=false)
+    super
+  end
+  def build_options(command, all=false)
+    super
+  end
+  def build_postamble(command, all=false)
+    super
+  end
+  def heading(str)
+    super
+  end
 end
 
-Benry::CmdApp::Application.prepend(MyApplicationMod)   # !!!!
+## (2) Set it to `ACTION_HELP_BUILDER_CLASS` constant value.
+Benry::CmdApp.module_eval do
+  remove_const :ACTION_HELP_BUILDER_CLASS
+  const_set :ACTION_HELP_BUILDER_CLASS, MyActionHelpBuilder
+end
 
+## (3) Create and execute Application object.
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 ```
+
 
 
 Q & A
