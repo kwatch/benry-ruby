@@ -1715,38 +1715,38 @@ END
                                          option_debug: true,
                                          option_color: true)
       app = Benry::CmdApp::Application.new(config)
-      bkup = [$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]
+      bkup = [$VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE]
       begin
         ['-v', '--verbose'].each do |x|
-          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          $VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil
           capture_sio { app.run(x, '-h') }
-          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [true, nil, nil, nil]
+          ok {[$VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE]} == [true, nil, nil]
         end
         #
         ['-q', '--quiet'].each do |x|
-          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          $VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil
           capture_sio { app.run(x, '-h') }
-          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, true, nil, nil]
+          ok {[$VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE]} == [false, nil, nil]
         end
         #
         ['-D', '--debug'].each do |x|
-          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          $VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil
           capture_sio { app.run(x, '-h') }
-          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, true, nil]
+          ok {[$VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, true, nil]
         end
         #
         ['--color', '--color=on'].each do |x|
-          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          $VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil
           capture_sio { app.run(x, '-h') }
-          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, nil, true]
+          ok {[$VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, true]
         end
         ['--color=off'].each do |x|
-          $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil, nil
+          $VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE = nil, nil, nil
           capture_sio { app.run(x, '-h') }
-          ok {[$VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, nil, false]
+          ok {[$VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE]} == [nil, nil, false]
         end
       ensure
-        $VERBOSE_MODE, $QUIET_MODE, $DEBUG_MODE, $COLOR_MODE = bkup
+        $VERBOSE_MODE, $DEBUG_MODE, $COLOR_MODE = bkup
       end
     end
 
@@ -2032,16 +2032,16 @@ END
     end
 
     spec "[!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified." do
-      bkup = $QUIET_MODE
+      bkup = $VERBOSE_MODE
       begin
         ["-q", "--quiet"].each do |opt|
-          $QUIET_MODE = false
+          $VERBOSE_MODE = nil
           sout, serr = capture_sio { @app.run(opt, "test-debugopt") }
           ok {serr} == ""
-          ok {$QUIET_MODE} == true
+          ok {$VERBOSE_MODE} == false
         end
       ensure
-        $QUIET_MODE = bkup
+        $VERBOSE_MODE = bkup
       end
     end
 

@@ -847,14 +847,14 @@ module Benry::CmdApp
 
     def do_toggle_global_switches(_args, global_opts)
       #; [!j6u5x] sets $VERBOSE_MODE to true if '-v' or '--verbose' specified.
-      #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
+      #; [!p1l1i] sets $VERBOSE_MODE to false if '-q' or '--quiet' specified.
       #; [!2zvf9] sets $COLOR_MODE to true/false according to '--color' option.
       #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
       #; [!8trmz] sets $TRACE_MODE to true if '-T' or '--trace' specified.
       global_opts.each do |key, val|
         case key
-        when :quiet   ; $QUIET_MODE   = val
         when :verbose ; $VERBOSE_MODE = val
+        when :quiet   ; $VERBOSE_MODE = ! val
         when :color   ; $COLOR_MODE   = val
         when :debug   ; $DEBUG_MODE   = val
         when :trace   ; $TRACE_MODE   = val
