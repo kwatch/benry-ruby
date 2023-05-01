@@ -1390,22 +1390,22 @@ topic Benry::CmdApp::Config do
 end
 
 
-topic Benry::CmdApp::GlobalOptionSchema do
+topic Benry::CmdApp::AppOptionSchema do
 
 
   topic '#initialize()' do
 
     def new_gschema(desc="", version=nil, **kwargs)
       config = Benry::CmdApp::Config.new(desc, version, **kwargs)
-      x = Benry::CmdApp::GlobalOptionSchema.new(config)
+      x = Benry::CmdApp::AppOptionSchema.new(config)
       return x
     end
 
     spec "[!3ihzx] do nothing when config is nil." do
       x = nil
-      pr = proc { x = Benry::CmdApp::GlobalOptionSchema.new(nil) }
+      pr = proc { x = Benry::CmdApp::AppOptionSchema.new(nil) }
       ok {pr}.NOT.raise?(Exception)
-      ok {x}.is_a?(Benry::CmdApp::GlobalOptionSchema)
+      ok {x}.is_a?(Benry::CmdApp::AppOptionSchema)
     end
 
     spec "[!tq2ol] adds '-h, --help' option if 'config.option_help' is set." do
@@ -1966,7 +1966,7 @@ END
                                          option_all: true, option_quiet: true)
       app = Benry::CmdApp::Application.new(config)
       x = app.__send__(:do_create_global_option_schema, config)
-      ok {x}.is_a?(Benry::CmdApp::GlobalOptionSchema)
+      ok {x}.is_a?(Benry::CmdApp::AppOptionSchema)
       ok {x.find_long_option("all")}     != nil
       ok {x.find_long_option("quiet")}   != nil
       ok {x.find_long_option("verbose")} == nil
@@ -2637,7 +2637,7 @@ topic Benry::CmdApp::AppHelpBuilder do
       config.option_all   = true
       config.option_debug = true
     end
-    @schema = Benry::CmdApp::GlobalOptionSchema.new(@config)
+    @schema = Benry::CmdApp::AppOptionSchema.new(@config)
     @builder = Benry::CmdApp::AppHelpBuilder.new(@config, @schema)
   end
 
@@ -3026,7 +3026,7 @@ END
 
     def new_help_builder(**kws)
       config  = Benry::CmdApp::Config.new("test app", "1.2.3", **kws)
-      schema  = Benry::CmdApp::GlobalOptionSchema.new(config)
+      schema  = Benry::CmdApp::AppOptionSchema.new(config)
       builder = Benry::CmdApp::AppHelpBuilder.new(config, schema)
       return builder
     end

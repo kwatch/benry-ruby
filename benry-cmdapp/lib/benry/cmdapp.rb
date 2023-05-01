@@ -706,7 +706,7 @@ module Benry::CmdApp
   end
 
 
-  class GlobalOptionSchema < Benry::CmdOpt::Schema
+  class AppOptionSchema < Benry::CmdOpt::Schema
 
     def initialize(config=nil)
       super()
@@ -734,7 +734,7 @@ module Benry::CmdApp
   end
 
 
-  GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
+  APP_OPTION_SCHEMA_CLASS = AppOptionSchema
 
 
   class Application
@@ -827,7 +827,7 @@ module Benry::CmdApp
 
     def do_create_global_option_schema(config)
       #; [!u3zdg] creates global option schema object according to config.
-      return GLOBAL_OPTION_SCHEMA_CLASS.new(config)
+      return APP_OPTION_SCHEMA_CLASS.new(config)
     end
 
     def do_create_help_message_builder(config, schema)
