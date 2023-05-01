@@ -832,7 +832,7 @@ module Benry::CmdApp
 
     def do_create_help_message_builder(config, schema)
       #; [!pk5da] creates help message builder object.
-      return COMMAND_HELP_BUILDER_CLASS.new(config, schema)
+      return APP_HELP_BUILDER_CLASS.new(config, schema)
     end
 
     def do_parse_global_options(args)
@@ -1046,7 +1046,7 @@ module Benry::CmdApp
   end
 
 
-  class CommandHelpBuilder
+  class AppHelpBuilder
 
     def initialize(config, schema)
       @config = config
@@ -1181,7 +1181,7 @@ module Benry::CmdApp
   end
 
 
-  COMMAND_HELP_BUILDER_CLASS = CommandHelpBuilder
+  APP_HELP_BUILDER_CLASS = AppHelpBuilder
 
 
 end

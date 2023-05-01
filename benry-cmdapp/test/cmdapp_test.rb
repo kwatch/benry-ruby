@@ -1983,7 +1983,7 @@ END
                                          option_all: true, option_quiet: true)
       app = Benry::CmdApp::Application.new(config)
       x = app.__send__(:do_create_help_message_builder, config, app.schema)
-      ok {x}.is_a?(Benry::CmdApp::CommandHelpBuilder)
+      ok {x}.is_a?(Benry::CmdApp::AppHelpBuilder)
     end
 
   end
@@ -2627,7 +2627,7 @@ END
 end
 
 
-topic Benry::CmdApp::CommandHelpBuilder do
+topic Benry::CmdApp::AppHelpBuilder do
   include CommonTestingHelper
 
   before do
@@ -2638,7 +2638,7 @@ topic Benry::CmdApp::CommandHelpBuilder do
       config.option_debug = true
     end
     @schema = Benry::CmdApp::GlobalOptionSchema.new(@config)
-    @builder = Benry::CmdApp::CommandHelpBuilder.new(@config, @schema)
+    @builder = Benry::CmdApp::AppHelpBuilder.new(@config, @schema)
   end
 
   topic '#build_help_message()' do
@@ -3027,7 +3027,7 @@ END
     def new_help_builder(**kws)
       config  = Benry::CmdApp::Config.new("test app", "1.2.3", **kws)
       schema  = Benry::CmdApp::GlobalOptionSchema.new(config)
-      builder = Benry::CmdApp::CommandHelpBuilder.new(config, schema)
+      builder = Benry::CmdApp::AppHelpBuilder.new(config, schema)
       return builder
     end
 
