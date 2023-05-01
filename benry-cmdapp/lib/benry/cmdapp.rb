@@ -87,21 +87,23 @@ module Benry::CmdApp
 
   class Index
 
-    ACTIONS   = {}   # {action_name => ActionMetadata}
-    ALIASES   = {}   # {alias_name  => action_name}
-    DONE      = {}   # {action_name => Object}
+    def initialize()
+      @actions   = {}   # {action_name => ActionMetadata}
+      @aliases   = {}   # {alias_name  => Alias}
+      @done      = {}   # {action_name => (Object|DOING)}
+    end
 
-    def self.lookup_action(name)
-      name = name.to_s
+    def lookup_action(action_name)
+      name = action_name.to_s
       #; [!tnwq0] supports alias name.
       alias_obj = nil
-      if ALIASES[name]
-        alias_obj = ALIASES[name]
+      if @aliases[name]
+        alias_obj = @aliases[name]
         name = alias_obj.action_name
       end
       #; [!vivoa] returns action metadata object.
       #; [!z15vu] returns ActionWithArgs object if alias has args and/or kwargs.
-      metadata = ACTIONS[name]
+      metadata = @actions[name]
       if alias_obj && alias_obj.args && ! alias_obj.args.empty?
         args = alias_obj.args.dup()
         opts = metadata.parse_options(args)
@@ -111,20 +113,80 @@ module Benry::CmdApp
       end
     end
 
-    def self.each_action_name_and_desc(include_alias=true, all: false, &block)
+    def each_action_name_and_desc(include_alias=true, all: false, &block)
       #; [!5lahm] yields action name and description.
       #; [!27j8b] includes alias names when the first arg is true.
       #; [!8xt8s] rejects hidden actions if 'all: false' kwarg specified.
       #; [!5h7s5] includes hidden actions if 'all: true' kwarg specified.
       #; [!arcia] action names are sorted.
-      metadatas = ACTIONS.values()
+      metadatas = @actions.values()
       metadatas = metadatas.reject {|ameta| ameta.hidden? } if ! all
       pairs = metadatas.collect {|ameta| [ameta.name, ameta.desc] }
-      pairs += ALIASES.collect {|name, aliobj| [name, aliobj.desc()] } if include_alias
+      pairs += @aliases.collect {|name, aliobj| [name, aliobj.desc()] } if include_alias
       pairs.sort_by {|name, _| name }.each(&block)
     end
 
+    def get_action(action_name)
+      return @actions[action_name.to_s]
+    end
+
+    def register_action(action_name, action_metadata)
+      @actions[action_name.to_s] = action_metadata
+      action_metadata
+    end
+
+    def action_exist?(action_name)
+      return @actions.key?(action_name.to_s)
+    end
+
+    def each_action(&block)
+      @actions.values().each(&block)
+      nil
+    end
+
+    def action_result(action_name)
+      return @done[action_name.to_s]
+    end
+
+    def action_done(action_name, val)
+      @done[action_name.to_s] = val
+      val
+    end
+
+    def action_done?(action_name)
+      return @done.key?(action_name.to_s) && ! action_doing?(action_name)
+    end
+
+    def action_doing(action_name)
+      @done[action_name.to_s] = Util::DOING
+      nil
+    end
+
+    def action_doing?(action_name)
+      return action_result(action_name) == Util::DOING
+    end
+
+    def register_alias(alias_name, alias_obj)
+      @aliases[alias_name.to_s] = alias_obj
+      alias_obj
+    end
+
+    def get_alias(alias_name)
+      return @aliases[alias_name.to_s]
+    end
+
+    def alias_exist?(alias_name)
+      return @aliases.key?(alias_name)
+    end
+
+    def each_alias(&block)
+      @aliases.values().each(&block)
+    end
+
   end
+
+
+  INDEX = Index.new
 
 
   class ActionMetadata
@@ -405,21 +467,21 @@ module Benry::CmdApp
       #; [!lbp9r] invokes action name with prefix if prefix defined.
       #; [!7vszf] raises error if action specified not found.
       prefix = self.class.instance_variable_get('@__prefix__')
-      metadata = Index.lookup_action("#{prefix}#{action_name}") || \
-                 Index.lookup_action(action_name)  or
+      metadata = INDEX.lookup_action("#{prefix}#{action_name}") || \
+                 INDEX.lookup_action(action_name)  or
         raise ActionNotFoundError.new("#{action_name}: action not found.")
       name = metadata.name
       #; [!u8mit] raises error if action flow is looped.
-      if Index::DONE.key?(name)
-        Index::DONE[name] != Util::DOING  or
+      ! INDEX.action_doing?(name)  or
           raise LoopedActionError.new("#{name}: looped action detected.")
-        #; [!vhdo9] don't invoke action twice if 'once' arg is true.
-        return Index::DONE[name] if once
+      #; [!vhdo9] don't invoke action twice if 'once' arg is true.
+      if INDEX.action_done?(name)
+        return INDEX.action_result(name) if once
       end
       #; [!r8fbn] invokes action.
-      Index::DONE[name] = Util::DOING
+      INDEX.action_doing(name)
       ret = metadata.run_action(*args, **kwargs)
-      Index::DONE[name] = ret
+      INDEX.action_done(name, ret)
       return ret
     end
 
@@ -468,7 +530,7 @@ module Benry::CmdApp
         #; [!yrkxn] @copy_options is a Proc object and copies options from other action.
         @copy_options = proc do |action_name, except: nil|
           #; [!mhhn2] '@copy_options.()' raises error when action not found.
-          metadata = Index::ACTIONS[action_name.to_s]  or
+          metadata = INDEX.get_action(action_name)  or
             raise OptionDefError.new("@copy_options.(#{action_name.inspect}): action not found.")
           @__option__ ||= SCHEMA_CLASS.new
           @__option__.copy_from(metadata.schema, except: except)
@@ -490,7 +552,7 @@ module Benry::CmdApp
       errmsg = metadata.validate_method_params()
       errmsg == nil  or
         raise ActionDefError.new("def #{method}(): #{errmsg}")
-      Index::ACTIONS[name] = metadata
+      INDEX.register_action(name, metadata)
       #; [!jpzbi] defines same name alias of action as prefix.
       #; [!997gs] not raise error when action not found.
       self.__define_alias_of_action(method, name)
@@ -546,18 +608,18 @@ module Benry::CmdApp
     alias_  = alias_name.to_s
     action_ = action_name.to_s
     #; [!nrz3d] error if action not found.
-    Index::ACTIONS[action_]  or
+    INDEX.action_exist?(action_)  or
       raise AliasDefError.new("#{invocation}: action not found.")
     #; [!vvmwd] error when action with same name as alias exists.
-    ! Index::ACTIONS[alias_]  or
+    ! INDEX.action_exist?(alias_)  or
       raise AliasDefError.new("#{invocation}: not allowed to define same name alias as existing action.")
     #; [!i9726] error if alias already defined.
-    ! Index::ALIASES[alias_]  or
+    ! INDEX.alias_exist?(alias_)  or
       raise AliasDefError.new("#{invocation}: alias name duplicated.")
     #; [!vzlrb] registers alias name with action name.
     #; [!0cq6o] supports args.
     #; [!4wtxj] supports 'tag:' keyword arg.
-    Index::ALIASES[alias_] = Alias.new(alias_, action_, *args, tag: tag)
+    INDEX.register_alias(alias_, Alias.new(alias_, action_, *args, tag: tag))
   end
 
 
@@ -833,13 +895,13 @@ module Benry::CmdApp
       if ! args.empty?
         action_name = args.shift()
         #; [!vl0zr] error when action not found.
-        metadata = Index.lookup_action(action_name)  or
+        metadata = INDEX.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: unknown action.")
       #; [!gucj7] if no action specified, finds default action instead.
       elsif c.default_action
         action_name = c.default_action
         #; [!388rs] error when default action not found.
-        metadata = Index.lookup_action(action_name)  or
+        metadata = INDEX.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: unknown default action.")
       #; [!drmls] returns nil if no action specified but 'config.default_help' is set.
       elsif c.default_help
@@ -870,9 +932,9 @@ module Benry::CmdApp
       end
       #; [!cf45e] runs action with arguments and options.
       #; [!tsal4] detects looped action.
-      Index::DONE[action_name] = Util::DOING
+      INDEX.action_doing(action_name)
       ret = metadata.run_action(*args, **options)
-      Index::DONE[action_name] = ret
+      INDEX.action_done(action_name, ret)
       return ret
     end
 
@@ -884,7 +946,7 @@ module Benry::CmdApp
       action_name = args[0]
       if action_name
         #; [!cgxkb] error if action for help option not found.
-        metadata = Index.lookup_action(action_name)  or
+        metadata = INDEX.lookup_action(action_name)  or
           raise CommandError.new("#{action_name}: action not found.")
         msg = metadata.help_message(@config.app_command, all)
       #; [!nv0x3] prints help message of command if action name not provided.
@@ -924,7 +986,8 @@ module Benry::CmdApp
       prefix2 = prefix.chomp(':')
       pairs = []
       aname2aliases = {}
-      Index::ACTIONS.each do |aname, ameta|
+      INDEX.each_action do |ameta|
+        aname = ameta.name
         next unless aname.start_with?(prefix) || aname == prefix2
         #; [!k3lw0] private (hidden) action should not be printed as candidates.
         next if ameta.hidden?
@@ -933,15 +996,18 @@ module Benry::CmdApp
         aname2aliases[aname] = []
       end
       #; [!85i5m] candidate actions should include alias names.
-      Index::ALIASES.each do |ali_name, ali_obj|
+      INDEX.each_alias do |ali_obj|
+        ali_name = ali_obj.alias_name
         next unless ali_name.start_with?(prefix) || ali_name == prefix2
         pairs << [ali_name, ali_obj.desc()]
       end
       #; [!i2azi] raises error when no candidate actions found.
       ! pairs.empty?  or
         raise CommandError.new("No actions starting with '#{prefix}'.")
-      Index::ALIASES.each do |alias_, act|
-        aname2aliases[act.action_name] << alias_ if aname2aliases.key?(act.action_name)
+      INDEX.each_alias do |alias_obj|
+        alias_  = alias_obj.alias_name
+        action_ = alias_obj.action_name
+        aname2aliases[action_] << alias_ if aname2aliases.key?(action_)
       end
       sb = []
       sb << @config.format_heading % "Actions:" << "\n"
@@ -1064,7 +1130,7 @@ module Benry::CmdApp
       sb << "\n"
       #; [!jat15] includes action names ordered by name.
       include_alias = ! @config.help_aliases
-      Index.each_action_name_and_desc(include_alias, all: all) do |name, desc|
+      INDEX.each_action_name_and_desc(include_alias, all: all) do |name, desc|
         #; [!b3l3m] not show private (hidden) action names in default.
         #; [!yigf3] shows private (hidden) action names if 'all' flag is true.
         sb << format % [name, desc] if all || ! Util.hidden_name?(name)
@@ -1077,7 +1143,8 @@ module Benry::CmdApp
       format += "\n"
       #; [!tri8x] includes alias names in order of registration.
       sb = []
-      Index::ALIASES.each do |alias_name, alias_obj|
+      INDEX.each_alias do |alias_obj|
+        alias_name = alias_obj.alias_name
         #; [!5g72a] not show hidden alias names in default.
         #; [!ekuqm] shows all alias names including private ones if 'all' flag is true.
         sb << format % [alias_name, alias_obj.desc()] if all || ! Util.hidden_name?(alias_name)

@@ -8,6 +8,46 @@ require 'benry/cmdapp'
 Oktest.scope do
 
 
+module CommonTestingHelper
+
+  def uncolorize(str)
+    return str.gsub(/\e\[.*?m/, '')
+  end
+
+  def without_tty(&block)
+    result = nil
+    capture_sio(tty: false) { result = yield }
+    return result
+  end
+
+  def with_tty(&block)
+    result = nil
+    capture_sio(tty: true) { result = yield }
+    return result
+  end
+
+  module_function
+
+  def clear_index_except(klass)  # XXXX
+    actions = Benry::CmdApp::INDEX.instance_variable_get('@actions')
+    aliases = Benry::CmdApp::INDEX.instance_variable_get('@aliases')
+    @_bkup_actions = actions.dup()
+    actions.delete_if {|_, x| x.klass != klass }
+    anames = actions.keys()
+    @_bkup_aliases = aliases.dup()
+    aliases.delete_if {|_, x| ! anames.include?(x.action_name) }
+  end
+
+  def restore_index()
+    actions = Benry::CmdApp::INDEX.instance_variable_get('@actions')
+    aliases = Benry::CmdApp::INDEX.instance_variable_get('@aliases')
+    actions.update(@_bkup_actions)
+    aliases.update(@_bkup_aliases)
+  end
+
+end
+
+
 topic Benry::CmdApp::Util do
 
 
@@ -118,7 +158,7 @@ end
 
 
 topic Benry::CmdApp::Index do
-
+  include CommonTestingHelper
 
   class IndexTestAction < Benry::CmdApp::Action
     @action.("lookup test #1")
@@ -139,7 +179,7 @@ topic Benry::CmdApp::Index do
   topic '.lookup_action()' do
 
     spec "[!vivoa] returns action metadata object." do
-      x = Benry::CmdApp::Index.lookup_action("lookup1")
+      x = Benry::CmdApp::INDEX.lookup_action("lookup1")
       ok {x} != nil
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "lookup1"
@@ -148,7 +188,7 @@ topic Benry::CmdApp::Index do
     end
 
     spec "[!tnwq0] supports alias name." do
-      x = Benry::CmdApp::Index.lookup_action("findxx")
+      x = Benry::CmdApp::INDEX.lookup_action("findxx")
       ok {x} != nil
       ok {x}.is_a?(Benry::CmdApp::ActionMetadata)
       ok {x.name} == "lookup2"
@@ -158,7 +198,7 @@ topic Benry::CmdApp::Index do
 
     spec "[!z15vu] returns ActionWithArgs object if alias has args and/or kwargs." do
       Benry::CmdApp.action_alias("findyy1", "lookup1", "Alice", "-r3")
-      x = Benry::CmdApp::Index.lookup_action("findyy1")
+      x = Benry::CmdApp::INDEX.lookup_action("findyy1")
       ok {x} != nil
       ok {x}.is_a?(Benry::CmdApp::ActionWithArgs)
       ok {x.args} == ["Alice"]
@@ -174,21 +214,16 @@ topic Benry::CmdApp::Index do
   topic '.each_action_name_and_desc()' do
 
     before do
-      @_bkup_actions = Benry::CmdApp::Index::ACTIONS.dup()
-      Benry::CmdApp::Index::ACTIONS.delete_if {|_, x| x.klass != IndexTestAction }
-      anames = Benry::CmdApp::Index::ACTIONS.keys()
-      @_bkup_aliases = Benry::CmdApp::Index::ALIASES.dup()
-      Benry::CmdApp::Index::ALIASES.delete_if {|_, x| ! anames.include?(x.action_name) }
+      clear_index_except(IndexTestAction)
     end
 
     after do
-      Benry::CmdApp::Index::ACTIONS.update(@_bkup_actions)
-      Benry::CmdApp::Index::ALIASES.update(@_bkup_aliases)
+      restore_index()
     end
 
     spec "[!5lahm] yields action name and description." do
       arr = []
-      Benry::CmdApp::Index.each_action_name_and_desc(false) {|a| arr << a }
+      Benry::CmdApp::INDEX.each_action_name_and_desc(false) {|a| arr << a }
       ok {arr} == [
         ["lookup1", "lookup test #1"],
         ["lookup2", "lookup test #2"],
@@ -197,7 +232,7 @@ topic Benry::CmdApp::Index do
 
     spec "[!27j8b] includes alias names when the first arg is true." do
       arr = []
-      Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
+      Benry::CmdApp::INDEX.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == [
         ["findxx", "alias of 'lookup2' action"],
         ["findyy1", "alias of 'lookup1 Alice -r3'"],
@@ -208,7 +243,7 @@ topic Benry::CmdApp::Index do
 
     spec "[!8xt8s] rejects hidden actions if 'all: false' kwarg specified." do
       arr = []
-      Benry::CmdApp::Index.each_action_name_and_desc(false, all: false) {|a| arr << a }
+      Benry::CmdApp::INDEX.each_action_name_and_desc(false, all: false) {|a| arr << a }
       ok {arr} == [
         ["lookup1", "lookup test #1"],
         ["lookup2", "lookup test #2"],
@@ -217,7 +252,7 @@ topic Benry::CmdApp::Index do
 
     spec "[!5h7s5] includes hidden actions if 'all: true' kwarg specified." do
       arr = []
-      Benry::CmdApp::Index.each_action_name_and_desc(false, all: true) {|a| arr << a }
+      Benry::CmdApp::INDEX.each_action_name_and_desc(false, all: true) {|a| arr << a }
       ok {arr} == [
         ["lookup1", "lookup test #1"],
         ["lookup2", "lookup test #2"],
@@ -227,33 +262,12 @@ topic Benry::CmdApp::Index do
 
     spec "[!arcia] action names are sorted." do
       arr = []
-      Benry::CmdApp::Index.each_action_name_and_desc(true) {|a| arr << a }
+      Benry::CmdApp::INDEX.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == arr.sort_by(&:first)
     end
 
   end
 
-
-end
-
-
-module CommonTestingHelper
-
-  def uncolorize(str)
-    return str.gsub(/\e\[.*?m/, '')
-  end
-
-  def without_tty(&block)
-    result = nil
-    capture_sio(tty: false) { result = yield }
-    return result
-  end
-
-  def with_tty(&block)
-    result = nil
-    capture_sio(tty: true) { result = yield }
-    return result
-  end
 
 end
 
@@ -336,14 +350,14 @@ topic Benry::CmdApp::ActionMetadata do
     end
 
     spec "[!kp10p] returns true when action method is private." do
-      ameta = Benry::CmdApp::Index::ACTIONS["pphidden3"]
+      ameta = Benry::CmdApp::INDEX.get_action("pphidden3")
       ok {ameta.hidden?} == true
-      ameta = Benry::CmdApp::Index::ACTIONS["pphidden2"]
+      ameta = Benry::CmdApp::INDEX.get_action("pphidden2")
       ok {ameta.hidden?} == true
     end
 
     spec "[!nw322] returns false when action method is not private." do
-      ameta = Benry::CmdApp::Index::ACTIONS["pphidden1"]
+      ameta = Benry::CmdApp::INDEX.get_action("pphidden1")
       ok {ameta.hidden?} == false
     end
 
@@ -538,7 +552,7 @@ topic Benry::CmdApp::ActionWithArgs do
     end
 
     spec "[!fl26i] invokes action with args and kwargs." do
-      ameta = Benry::CmdApp::Index::ACTIONS["hellowithargs"]
+      ameta = Benry::CmdApp::INDEX.get_action("hellowithargs")
       #
       wrapper = Benry::CmdApp::ActionWithArgs.new(ameta, ["bill"], {repeat: 3})
       sout, serr = capture_sio() { wrapper.run_action() }
@@ -769,7 +783,7 @@ topic Benry::CmdApp::Action do
 
   before do
     @action = InvokeTestAction.new()
-    Benry::CmdApp::Index::DONE.clear()
+    Benry::CmdApp::INDEX.instance_variable_get('@done').clear()
   end
 
 
@@ -1010,10 +1024,11 @@ topic Benry::CmdApp::Action do
   topic '.method_added()' do
 
     def defined_actions()
-      action_names = Benry::CmdApp::Index::ACTIONS.keys()
+      actions = Benry::CmdApp::INDEX.instance_variable_get('@actions')
+      action_names = actions.keys()
       yield
-      new_names = Benry::CmdApp::Index::ACTIONS.keys() - action_names
-      metadata = new_names.length > 0 ? Benry::CmdApp::Index::ACTIONS[new_names[0]] : nil
+      new_names = actions.keys() - action_names
+      metadata = new_names.length > 0 ? Benry::CmdApp::INDEX.get_action(new_names[0]) : nil
       return new_names, metadata
     end
 
@@ -1213,16 +1228,16 @@ topic Benry::CmdApp::Action do
         @action.("test")
         def bla1(); end
       end
-      ok {Benry::CmdApp::Index::ALIASES["blabla1"]} != nil
-      ok {Benry::CmdApp::Index::ALIASES["blabla1"].action_name} == "blabla1:bla1"
+      ok {Benry::CmdApp::INDEX.get_alias("blabla1")} != nil
+      ok {Benry::CmdApp::INDEX.get_alias("blabla1").action_name} == "blabla1:bla1"
       ## when string
       class AliasOfTest2 < Benry::CmdApp::Action
         prefix "bla:bla2", alias_of: "blala"    # string
         @action.("test")
         def blala(); end
       end
-      ok {Benry::CmdApp::Index::ALIASES["bla:bla2"]} != nil
-      ok {Benry::CmdApp::Index::ALIASES["bla:bla2"].action_name} == "bla:bla2:blala"
+      ok {Benry::CmdApp::INDEX.get_alias("bla:bla2")} != nil
+      ok {Benry::CmdApp::INDEX.get_alias("bla:bla2").action_name} == "bla:bla2:blala"
     end
 
     spec "[!tvjb0] clears '@__aliasof__' only when alias created." do
@@ -1306,31 +1321,31 @@ topic Benry::CmdApp do
 
     spec "[!vzlrb] registers alias name with action name." do
       Benry::CmdApp.action_alias("a4", "alias1:a1")
-      ok {Benry::CmdApp::Index::ALIASES}.key?("a4")
-      ok {Benry::CmdApp::Index::ALIASES["a4"].alias_name} == "a4"
-      ok {Benry::CmdApp::Index::ALIASES["a4"].action_name} == "alias1:a1"
+      ok {Benry::CmdApp::INDEX.alias_exist?("a4")} == true
+      ok {Benry::CmdApp::INDEX.get_alias("a4").alias_name} == "a4"
+      ok {Benry::CmdApp::INDEX.get_alias("a4").action_name} == "alias1:a1"
     end
 
     spec "[!0cq6o] supports args." do
       Benry::CmdApp.action_alias("a8", "alias1:a1", "Alice", "-l", "it")
-      ok {Benry::CmdApp::Index::ALIASES}.key?("a8")
-      ok {Benry::CmdApp::Index::ALIASES["a8"].alias_name} == "a8"
-      ok {Benry::CmdApp::Index::ALIASES["a8"].action_name} == "alias1:a1"
-      ok {Benry::CmdApp::Index::ALIASES["a8"].args} == ["Alice", "-l", "it"]
+      ok {Benry::CmdApp::INDEX.alias_exist?("a8")} == true
+      ok {Benry::CmdApp::INDEX.get_alias("a8").alias_name} == "a8"
+      ok {Benry::CmdApp::INDEX.get_alias("a8").action_name} == "alias1:a1"
+      ok {Benry::CmdApp::INDEX.get_alias("a8").args} == ["Alice", "-l", "it"]
     end
 
     spec "[!4wtxj] supports 'tag:' keyword arg." do
       Benry::CmdApp.action_alias("a7", "alias1:a1", tag: :important)
-      ok {Benry::CmdApp::Index::ALIASES}.key?("a7")
-      ok {Benry::CmdApp::Index::ALIASES["a7"].action_name} == "alias1:a1"
-      ok {Benry::CmdApp::Index::ALIASES["a7"].tag} == :important
+      ok {Benry::CmdApp::INDEX.alias_exist?("a7")} == true
+      ok {Benry::CmdApp::INDEX.get_alias("a7").action_name} == "alias1:a1"
+      ok {Benry::CmdApp::INDEX.get_alias("a7").tag} == :important
     end
 
     spec "[!5immb] convers both alias name and action name into string." do
       Benry::CmdApp.action_alias(:a5, :'alias1:a2')
-      ok {Benry::CmdApp::Index::ALIASES}.key?("a5")
-      ok {Benry::CmdApp::Index::ALIASES["a5"].alias_name} == "a5"
-      ok {Benry::CmdApp::Index::ALIASES["a5"].action_name} == "alias1:a2"
+      ok {Benry::CmdApp::INDEX.alias_exist?("a5")} == true
+      ok {Benry::CmdApp::INDEX.get_alias("a5").alias_name} == "a5"
+      ok {Benry::CmdApp::INDEX.get_alias("a5").action_name} == "alias1:a2"
     end
 
     spec "[!nrz3d] error if action not found." do
@@ -2615,19 +2630,6 @@ end
 topic Benry::CmdApp::CommandHelpBuilder do
   include CommonTestingHelper
 
-  def _clear_index_except(klass)
-    @_bkup_actions = Benry::CmdApp::Index::ACTIONS.dup()
-    Benry::CmdApp::Index::ACTIONS.delete_if {|_, x| x.klass != klass }
-    anames = Benry::CmdApp::Index::ACTIONS.keys()
-    @_bkup_aliases = Benry::CmdApp::Index::ALIASES.dup()
-    Benry::CmdApp::Index::ALIASES.delete_if {|_, a| ! anames.include?(a.action_name) }
-  end
-
-  def _restore_index()
-    Benry::CmdApp::Index::ACTIONS.update(@_bkup_actions)
-    Benry::CmdApp::Index::ALIASES.update(@_bkup_aliases)
-  end
-
   before do
     @config = Benry::CmdApp::Config.new("test app", "1.0.0").tap do |config|
       config.app_name     = "TestApp"
@@ -2659,11 +2661,11 @@ topic Benry::CmdApp::CommandHelpBuilder do
     Benry::CmdApp.action_alias("yes", "yo-yo")
 
     before do
-      _clear_index_except(HelpMessageTest)
+      clear_index_except(HelpMessageTest)
     end
 
     after do
-      _restore_index()
+      restore_index()
     end
 
     expected_color = <<"END"
@@ -3015,11 +3017,11 @@ END
     Benry::CmdApp.action_alias "_h25t4", "help25:test4"
 
     before do
-      _clear_index_except(BuildAliasTest)
+      clear_index_except(BuildAliasTest)
     end
 
     after do
-      _restore_index()
+      restore_index()
     end
 
     def new_help_builder(**kws)
@@ -3058,7 +3060,7 @@ END
     end
 
     spec "[!p3oh6] now show 'Aliases:' section if no aliases defined." do
-      Benry::CmdApp::Index::ALIASES.clear()
+      Benry::CmdApp::INDEX.instance_variable_get('@aliases').clear()
       hb = new_help_builder(help_aliases: true)
       msg = hb.__send__(:build_aliases)
       ok {msg} == nil
