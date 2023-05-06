@@ -2669,7 +2669,7 @@ topic Benry::CmdApp::AppHelpBuilder do
     end
 
     expected_color = <<"END"
-TestApp (1.0.0) -- test app
+\e[1mTestApp\e[0m (1.0.0) -- test app
 
 \e[34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]
@@ -2706,8 +2706,10 @@ END
 
     spec "[!rvpdb] returns help message." do
       msg = @builder.build_help_message()
-      msg = uncolorize(msg)
-      ok {msg} == expected_mono
+      msg_color = msg
+      msg_mono  = uncolorize(msg)
+      ok {msg_mono}  == expected_mono
+      ok {msg_color} == expected_color
     end
 
     def _with_color_mode(val, &b)
