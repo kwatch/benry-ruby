@@ -15,9 +15,9 @@ Base idea:
 
 For example:
 
-* `<command> action1` in command-line invokes action method `action1()` in Ruby.
-* `<command> action1 arg1 arg2` invokes `action1("arg1", "arg2")`.
-* `<command> action1 arg --opt=val` invokes `action1("arg", opt: "val")`.
+* `<command> foo` in command-line invokes action method `foo()` in Ruby.
+* `<command> foo arg1 arg2` invokes `foo("arg1", "arg2")`.
+* `<command> foo arg --opt=val` invokes `foo("arg", opt: "val")`.
 
 (Benry::CmdApp requires Ruby >= 2.3)
 
@@ -37,7 +37,6 @@ Table of Contents
   * <a href="#option-value-validation">Option Value Validation</a>
   * <a href="#callback-for-option-value">Callback for Option Value</a>
   * <a href="#boolean-onoff-option">Boolean (On/Off) Option</a>
-  * <a href="#substitue-value-instead-of-true">Substitue Value Instead of True</a>
   * <a href="#prefix-of-action-name">Prefix of Action Name</a>
   * <a href="#invoke-other-action">Invoke Other Action</a>
   * <a href="#action-alias">Action Alias</a>
@@ -663,66 +662,51 @@ File: ex09.rb
 #!/usr/bin/env ruby
 require 'benry/cmdapp'
 
-## action
-class MyAction < Benry::CmdApp::Action
+class SampleAction < Benry::CmdApp::Action
 
-  @action.("print greeting message")
-  @option.(:lang  , "-l, --lang=<en|fr|it>", "language",
-                  enum: ["en", "fr", "it", "EN", "FR", "IT"],
-		  rexp: /\A\w\w\z/)
-  @option.(:repeat, "    --repeat=<N>", "repeat <N> times",
-                  type: Integer)
-  @option.(:upper,  "-U, --upper[=<on|off>]", "upper case",     # !!!!
-                  type: TrueClass)                              # !!!!
-  def hello(user="world", lang: "en", repeat: 1, upper: false)  # !!!!
-    repeat.times do
-      case lang
-      when "en" ; s = "Hello, #{user}!"
-      when "fr" ; s = "Bonjour, #{user}!"
-      when "it" ; s = "Ciao, #{user}!"
-      else
-        raise "#{lang}: unknown language."
-      end
-      puts(upper ? s.upcase : s)               # !!!!
-    end
+  @action.("flag test")
+  @option.(:verbose, "--verbose[=<on|off>]",  # !!!!
+                     "verbose mode",
+                     type: TrueClass)         # !!!!
+  def flagtest(verbose: false)                # !!!!
+    puts "verbose=#{verbose}"
   end
 
 end
 
-## configuration
 config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-config.default_help = true
-
-## run application
 app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit app.main()
 ```
 
 Output:
 
 ```console
-[bash]$ ruby ex09.rb --upper         # on
-HELLO, WORLD!
+[bash]$ ruby ex09.rb flagtest --verbose=on       # on
+verbose=true
 
-[bash]$ ruby ex09.rb --upper=on      # on
-HELLO, WORLD!
+[bash]$ ruby ex09.rb flagtest --verbose=off      # off
+verbose=false
 
-[bash]$ ruby ex09.rb --upper=off     # off
-Hello, world!
+[bash]$ ruby ex09.rb flagtest --verbose=true     # on
+verbose=true
 
-[bash]$ ruby ex09.rb --upper=off     # off
-Hello, world!
+[bash]$ ruby ex09.rb flagtest --verbose=false    # off
+verbose=false
 
-[bash]$ ruby ex09.rb --upper=abc     # error
-[ERROR] --upper=abc: boolean expected.
+[bash]$ ruby ex09.rb flagtest --verbose=yes      # on
+verbose=true
+
+[bash]$ ruby ex09.rb flagtest --verbose=no       # off
+verbose=false
+
+[bash]$ ruby ex09.rb flagtest --verbose=abc      # error
+[ERROR] --verbose=abc: boolean expected.
 ```
 
+If you want default value of flag to `true`, use `value:` keyword argument.
 
-Substitue Value Instead of True
--------------------------------
-
-* `value:` keyword arg in `@option.()` specifies the substitute value
+* `value:` keyword argument in `@option.()` specifies the substitute value
   instead of `true` when no option value specified in command-line.
 
 File: ex10.rb
@@ -733,20 +717,11 @@ require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
 
-  ## when '-x' option specified in command-line, `true` will be
-  ## passed to `flag` paramer. this is an ordinal behaviour.
-  @action.("flag test #1")
-  @option.(:flag, "-x", "ON/off")
-  def flagtest1(flag: false)
-    puts "flag=#{flag.inspect}"
-  end
-
-  ## when '-x' option specified in command-line, `false` will be
-  ## passed to `flag` paramer due to `value: false`.
-  @action.("flag test #2")
-  @option.(:flag, "-x", "on/OFF", value: false)       # !!!!
-  def flagtest2(flag: true)                           # !!!!
-    puts "flag=#{flag.inspect}"
+  @action.("flag test")
+  @option.(:verbose, "-q, --quiet", "quiet mode",
+                     value: false)                 # !!!!
+  def flagtest2(verbose: true)                     # !!!!
+    puts "verbose=#{verbose.inspect}"
   end
 
 end
@@ -759,17 +734,32 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex10.rb flagtest1          # false if '-x' NOT specified
-flag=false
+[bash]$ ruby ex10.rb flagtest2           # true if '--quiet' NOT specified
+verbose=true
 
-[bash]$ ruby ex10.rb flagtest1 -x       # true if '-x' specified
-flag=true
+[bash]$ ruby ex10.rb flagtest2 --quiet   # false if '--quiet' specified
+verbose=false
 
-[bash]$ ruby ex10.rb flagtest2          # true if '-x' NOT specified
-flag=true
+[bash]$ ruby ex10.rb flagtest2 --quiet=on   # error
+[ERROR] --quiet=on: unexpected argument.
+```
 
-[bash]$ ruby ex10.rb flagtest2 -x       # false if '-x' specified
-flag=false
+In above example, `--quiet=on` will be error because option is defined as
+`@option.(:verbose, "-q, --quiet", ...)` which means this option takes no arguments.
+If you want to allow `--quiet=on`, specify option argument and `type: TrueClass`.
+
+
+```ruby
+  ...(snip)...
+
+  @action.("flag test")
+  @option.(:verbose, "-q, --quiet[=<on|off]", "quiet mode",  # !!!!
+                     type: TrueClass, value: false)          # !!!!
+  def flagtest2(verbose: true)
+    puts "verbose=#{verbose.inspect}"
+  end
+
+  ...(snip)...
 ```
 
 
