@@ -59,7 +59,8 @@ Table of Contents
   * <a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a>
   * <a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a>
   * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?</a>
-  * <a href="#q-is-it-possible-to-add-add-metadata-to-action-or-option">Q: Is It Possible to Add Add Metadata to Action or Option?</a>
+  * <a href="#q-is-it-possible-to-make-action-names-emphasised-or-weaken">Q: Is It Possible to Make Action Names Emphasised or Weaken?</a>
+  * <a href="#q-is-it-possible-to-add-metadata-to-action-or-option">Q: Is It Possible to Add Metadata to Action or Option?</a>
   * <a href="#q-how-to-make-error-messages-i18ned">Q: How to Make Error Messages I18Ned?</a>
 * <a href="#license-and-copyright">License and Copyright</a>
 
@@ -1331,12 +1332,14 @@ Application Configuration
 * `config.option_help = true` enables `-h` and `--help` options. (default: `true`)
 * `config.option_all = true` enables `-a` and `--all` options which shows private (hidden) actions and options into help message. (default: `false`)
 * `config.option_verbose = true` enables `-v` and `--verbose` options which sets `$VERBOSE_MODE = true`. (default: `false`)
-* `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$QUIET_MODE = true`. (default: `false`)
+* `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$VERBOSE_MODE = false`. (default: `false`)
 * `config.option_color = true` enables `--color[=<on|off>]` option which sets `$COLOR_MODE = true/false`. This affects to help message colorized or not. (default: `false`)
 * `config.option_debug = true` enables `-D` and `--debug` options which sets `$DEBUG_MODE = true`. (default: `false`)
 * `config.option_trace = true` enables `-T` and `--trace` options which sets `$TRACE_MODE = true`. Entering into and exitting from action are reported when trace mode is on. (default: `false`)
-* `config.help_sections = [["title", "<text>"], ...]` adds section title and text into help message. (default: `[]`)
+* `config.help_aliases = true` adds `Aliases:` section in help message. (default: `false`)
+* `config.help_sections = [["<title>", "<text>"], ...]` adds section title and text into help message. (default: `[]`)
 * `config.help_postamble = "<text>"` sets postamble text in help message, such as 'Examples:' or 'Tips:'. (default: `nil`)
+* `config.feat_candidate = true` enables feature to list action names starting with 'foo:' when action name specified in command-line is `foo:`. (default: `true`)
 * `config.format_help = "  %-18s : %s"` sets format of options and actions in help message. (default: `"  \e[1m%-18s\e[0m : %s"`)
 * `config.format_usage = "  $ %s %s"` sets format of usage in help message. (default: `"  $ \e[1m%s\e[0m %s"`)
 * `config.format_heading = "[%s]"` sets format of heading in help message. (default: `"\e[34m%s\e[0m"`)
@@ -1371,16 +1374,19 @@ config.default_action     = nil
 config.default_help       = false
 config.option_help        = true
 config.option_all         = false
-config.option_debug       = false
 config.option_verbose     = false
 config.option_quiet       = false
 config.option_color       = false
+config.option_debug       = false
 config.option_trace       = false
+config.help_aliases       = false
 config.help_sections      = []
 config.help_postamble     = nil
+config.feat_candidate     = true
 config.format_help        = "  \e[1m%-18s\e[0m : %s"
 config.format_usage       = "  $ \e[1m%s\e[0m %s"
 config.format_heading     = "\e[34m%s\e[0m"
+config.format_appname     = "\e[1m%s\e[0m"
 ```
 
 
@@ -2295,7 +2301,52 @@ In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
 and action `bbb` is not an alias due to `prefix(action:)`.
 
 
-Q: Is It Possible to Add Add Metadata to Action or Option?
+Q: Is It Possible to Make Action Names Emphasised or Weaken?
+------------------------------------------------------------
+
+A: Yes. When you pass `important: true` to `@action.()`, that action will be printed with unerline in help message. When you pass `important: false`, that action will be printed in gray color.
+
+File: ex48.rb
+
+```ruby
+require 'benry/cmdapp'
+
+class SampleAction < Benry::CmdApp::Action
+
+  @action.("empasized", important: true)   # !!!!
+  def test1()
+  end
+
+  @action.("weaken", important: false)   # !!!!
+  def test2()
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Help message:
+
+```console
+[bash]$ ruby ex48.rb -h
+ex48.rb -- sample app
+
+Usage:
+  $ ex48.rb [<options>] [<action> [<arguments>...]]
+
+Options:
+  -h, --help         : print help message (of action if action specified)
+
+Actions:
+  test1              : empasized     # !!!! printed with underline !!!!
+  test2              : weaken        # !!!! printed in gray color !!!!
+```
+
+
+Q: Is It Possible to Add Metadata to Action or Option?
 ----------------------------------------------------------
 
 A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
@@ -2304,7 +2355,7 @@ A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 * Currenty, Benry::CmdApp doesn't provide the good way to use it effectively.
   This feature is supported for command-line application or framework based on Benry::CmdApp.
 
-File: ex48.rb
+File: ex49.rb
 
 ```ruby
 require 'benry/cmdapp'
