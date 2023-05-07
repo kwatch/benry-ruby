@@ -506,10 +506,8 @@ module Benry::CmdApp
       return s
     end
 
-    def heading(str)
-      config = $cmdapp_config
-      format = config ? config.format_heading : Config::FORMAT_HEADING
-      return format % str
+    def config()
+      return @cmdapp_config
     end
 
     private
@@ -1291,10 +1289,6 @@ module Benry::CmdApp
         s += "\n" unless s.end_with?("\n")
       end
       return s
-    end
-
-    def heading(str)
-      return @config.format_heading % str
     end
 
   end
