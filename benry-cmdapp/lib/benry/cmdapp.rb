@@ -82,7 +82,8 @@ module Benry::CmdApp
 
     DOING = Doing.new   # :nodoc:
 
-    def important?(tag)
+    ## (obsolete)
+    def _important?(tag)  # :nodoc:
       #; [!0yz2h] returns nil if tag == nil.
       #; [!h5pid] returns true if tag == :important.
       #; [!7zval] returns false if tag == :unimportant.
@@ -451,9 +452,7 @@ module Benry::CmdApp
         #; [!hghuj] ignores 'Options:' section when only hidden options speicified.
         next unless all || ! item.hidden?
         #; [!vqqq1] hidden option should be shown in weak format.
-        #; [!ra5ei] option should be shown in strong format if `tag == :important`.
-        #; [!rmx85] option should be shown in weak format if `tag == :unimportant`.
-        important = item.hidden? ? false : Util.important?(item.tag)
+        important = item.hidden? ? false : nil
         sb << Util.format_help_line(format, item.optdef, item.desc, important)
         #; [!dukm7] includes detailed description of option.
         if item.detail
@@ -1202,9 +1201,7 @@ module Benry::CmdApp
       @schema.each do |item|
         if all || ! item.hidden?
           #; [!p1tu9] prints option in weak format if option is hidden.
-          #; [!dancj] prints option in strong format if `tag == :important.`
-          #; [!8exfp] prints option in weak format if `tag == :unimportant.`
-          important = item.hidden? ? false : Util.important?(item.tag)
+          important = item.hidden? ? false : nil
           sb << Util.format_help_line(format, item.optdef, item.desc, important)
         end
       end

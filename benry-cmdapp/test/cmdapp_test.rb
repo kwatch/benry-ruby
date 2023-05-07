@@ -171,25 +171,25 @@ topic Benry::CmdApp::Util do
   end
 
 
-  topic '.important?()' do
+  topic '._important?()' do
 
     spec "[!0yz2h] returns nil if tag == nil." do
-      ok {Benry::CmdApp::Util.important?(nil)} == nil
+      ok {Benry::CmdApp::Util._important?(nil)} == nil
     end
 
     spec "[!h5pid] returns true if tag == :important." do
-      ok {Benry::CmdApp::Util.important?(:important)} == true
-      ok {Benry::CmdApp::Util.important?("important")} == true
+      ok {Benry::CmdApp::Util._important?(:important)} == true
+      ok {Benry::CmdApp::Util._important?("important")} == true
     end
 
     spec "[!7zval] returns false if tag == :unimportant." do
-      ok {Benry::CmdApp::Util.important?(:unimportant)} == false
-      ok {Benry::CmdApp::Util.important?("unimportant")} == false
+      ok {Benry::CmdApp::Util._important?(:unimportant)} == false
+      ok {Benry::CmdApp::Util._important?("unimportant")} == false
     end
 
     spec "[!z1ygi] supports nested tag." do
-      ok {Benry::CmdApp::Util.important?([:important, :foo])} == true
-      ok {Benry::CmdApp::Util.important?([:bar, :unimportant])} == false
+      ok {Benry::CmdApp::Util._important?([:important, :foo])} == true
+      ok {Benry::CmdApp::Util._important?([:bar, :unimportant])} == false
     end
 
   end
@@ -785,30 +785,6 @@ END
       schema.add(:file , "-f, --file=<file>", "filename")
       schema.add(:_lang, "-l, --lang=<lang>", "language")  # hidden option
       msg = new_metadata(schema).help_message("testapp", true)
-      ok {msg}.end_with?(<<"END")
-\e[34mOptions:\e[0m
-  \e[1m-f, --file=<file> \e[0m : filename
-  \e[1m\e[2m-l, --lang=<lang>\e[0m \e[0m : language
-END
-    end
-
-    spec "[!ra5ei] option should be shown in strong format if `tag == :important`." do
-      schema = new_schema(lang: false)
-      schema.add(:file, "-f, --file=<file>", "filename")
-      schema.add(:lang, "-l, --lang=<lang>", "language", tag: :important)
-      msg = new_metadata(schema).help_message("testapp")
-      ok {msg}.end_with?(<<"END")
-\e[34mOptions:\e[0m
-  \e[1m-f, --file=<file> \e[0m : filename
-  \e[1m\e[4m-l, --lang=<lang>\e[0m \e[0m : language
-END
-    end
-
-    spec "[!rmx85] option should be shown in weak format if `tag == :unimportant`." do
-      schema = new_schema(lang: false)
-      schema.add(:file, "-f, --file=<file>", "filename")
-      schema.add(:lang, "-l, --lang=<lang>", "language", tag: :unimportant)
-      msg = new_metadata(schema).help_message("testapp")
       ok {msg}.end_with?(<<"END")
 \e[34mOptions:\e[0m
   \e[1m-f, --file=<file> \e[0m : filename
@@ -3139,30 +3115,6 @@ END
 \e[34mOptions:\e[0m
   \e[1m-h, --help        \e[0m : print help message
   \e[1m\e[2m-L\e[0m                \e[0m : private option
-
-END
-    end
-
-    spec "[!dancj] prints option in strong format if `tag == :important.`" do
-      |app3|
-      app3.schema.add(:log , "-L", "important option", tag: :important)  # !!!
-      msg = app3.help_message(true)
-      ok {msg}.include?(<<END)
-\e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message
-  \e[1m\e[4m-L\e[0m                \e[0m : important option
-
-END
-    end
-
-    spec "[!8exfp] prints option in weak format if `tag == :unimportant.`" do
-      |app3|
-      app3.schema.add(:log , "-L", "important option", tag: :unimportant)  # !!!
-      msg = app3.help_message(true)
-      ok {msg}.include?(<<END)
-\e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message
-  \e[1m\e[2m-L\e[0m                \e[0m : important option
 
 END
     end
