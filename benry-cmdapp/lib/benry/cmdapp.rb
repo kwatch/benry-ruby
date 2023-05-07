@@ -1186,12 +1186,11 @@ module Benry::CmdApp
 
     def build_usage(all=false)
       c = @config
-      format = c.format_usage
+      format = c.format_usage + "\n"
       #; [!o176w] includes command name specified by config.
       sb = []
-      sb << "#{heading('Usage:')}\n"
-      sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"]) << "\n"
-      return sb.join()
+      sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"])
+      return build_section("Usage:", nil, sb.join())
     end
 
     def build_options(all=false, format=nil)
@@ -1210,7 +1209,7 @@ module Benry::CmdApp
       #; [!bm71g] ignores 'Options:' section if no options exist.
       return nil if sb.empty?
       #; [!proa4] includes description of global options.
-      return heading('Options:') + "\n" + sb.join()
+      return build_section("Options:", nil, sb.join())
     end
 
     def build_actions(all=false, format=nil)
@@ -1218,10 +1217,8 @@ module Benry::CmdApp
       format ||= c.format_help
       format += "\n"
       sb = []
-      sb << heading("Actions:")
       #; [!df13s] includes default action name if specified by config.
-      sb << " (default: #{c.default_action})" if c.default_action
-      sb << "\n"
+      desc = c.default_action ? "(default: #{c.default_action})" : nil
       #; [!jat15] includes action names ordered by name.
       include_alias = ! @config.help_aliases
       INDEX.each_action_name_and_desc(include_alias, all: all) do |name, desc, important|
@@ -1234,7 +1231,7 @@ module Benry::CmdApp
           sb << Util.format_help_line(format, name, desc, important)
         end
       end
-      return sb.join()
+      return build_section("Actions:", desc, sb.join())
     end
 
     def build_aliases(all=false, format=nil)
@@ -1254,7 +1251,7 @@ module Benry::CmdApp
       #; [!p3oh6] now show 'Aliases:' section if no aliases defined.
       return nil if sb.empty?
       #; [!we1l8] shows 'Aliases:' section if any aliases defined.
-      return heading("Aliases:") + "\n" + sb.join()
+      return build_section("Aliases:", nil, sb.join())
     end
 
     def build_section(title, desc, content, all=false)
