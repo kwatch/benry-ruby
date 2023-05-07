@@ -26,19 +26,19 @@ module CommonTestingHelper
     return result
   end
 
-  def with_tag(keyval={}, &block)
+  def with_important(keyval={}, &block)
     bkup = {}
-    keyval.each do |name, tag|
+    keyval.each do |name, val|
       action = Benry::CmdApp::INDEX.get_action(name)
-      bkup[name] = action.tag
-      action.instance_variable_set('@tag', tag)
+      bkup[name] = action.important
+      action.instance_variable_set('@important', val)
     end
     begin
       yield
     ensure
-      bkup.each do |name, tag|
+      bkup.each do |name, val|
         action = Benry::CmdApp::INDEX.get_action(name)
-        action.instance_variable_set('@tag', tag)
+        action.instance_variable_set('@important', val)
       end
     end
   end
@@ -314,7 +314,7 @@ topic Benry::CmdApp::Index do
         ["lookup2", "lookup test #2", nil],
       ]
       #
-      with_tag("lookup1"=>:important, "lookup2"=>:unimportant) do
+      with_important("lookup1"=>true, "lookup2"=>false) do
         arr = []
         Benry::CmdApp::INDEX.each_action_name_and_desc(false) {|a| arr << a }
         ok {arr} == [
@@ -460,27 +460,27 @@ topic Benry::CmdApp::ActionMetadata do
 
   topic '#importance?()' do
 
-    spec "[!j3trl] returns false if hidden action." do
+    spec "[!52znh] returns true if `@important == true`." do
+      ameta = @metadata
+      ameta.instance_variable_set('@important', true)
+      ok {ameta.important?} == true
+    end
+
+    spec "[!rlfac] returns false if `@important == false`." do
+      ameta = @metadata
+      ameta.instance_variable_set('@important', false)
+      ok {ameta.important?} == false
+    end
+
+    spec "[!j3trl] returns false if `@important == nil`. and action is hidden." do
       ameta = @metadata
       def ameta.hidden?; true; end
       ok {ameta.important?} == false
     end
 
-    spec "[!52znh] returns true if `tag == :important`." do
+    spec "[!hhef8] returns nil if `@important == nil`." do
       ameta = @metadata
-      ameta.instance_variable_set('@tag', :important)
-      ok {ameta.important?} == true
-    end
-
-    spec "[!rlfac] returns false if `tag == :unimportant`." do
-      ameta = @metadata
-      ameta.instance_variable_set('@tag', :unimportant)
-      ok {ameta.important?} == false
-    end
-
-    spec "[!rlsyj] returns nil if `tag == nil`." do
-      ameta = @metadata
-      ameta.instance_variable_set('@tag', nil)
+      ameta.instance_variable_set('@important', nil)
       ok {ameta.important?} == nil
     end
 
@@ -1084,10 +1084,10 @@ topic Benry::CmdApp::Action do
 
     spec "[!1qv12] @action is a Proc object and saves args." do
       class InheritedTest2 < Benry::CmdApp::Action
-        @action.("description", detail: "xxx", postamble: "yyy", tag: "zzz")
+        @action.("description", detail: "xxx", postamble: "yyy", important: true, tag: "zzz")
       end
       x = InheritedTest2.instance_variable_get('@__action__')
-      ok {x} == ["description", {detail: "xxx", postamble: "yyy", tag: "zzz"}]
+      ok {x} == ["description", {detail: "xxx", postamble: "yyy", important: true, tag: "zzz"}]
     end
 
     spec "[!33ma7] @option is a Proc object and saves args." do
@@ -1540,10 +1540,10 @@ topic Benry::CmdApp::Alias do
     @action.("alias test")
     def a1(); end
     #
-    @action.("alias test", tag: :important)
+    @action.("alias test", important: true)
     def a2(); end
     #
-    @action.("alias test", tag: :unimportant)
+    @action.("alias test", important: false)
     def a3(); end
     #
     private
@@ -1554,18 +1554,18 @@ topic Benry::CmdApp::Alias do
 
   topic '#important?()' do
 
-    spec "[!5juwq] returns true if `@tag == :important`." do
-      ali = Benry::CmdApp::Alias.new("a2-1", "alias2:a1", tag: :important)
+    spec "[!5juwq] returns true if `@important == true`." do
+      ali = Benry::CmdApp::Alias.new("a2-1", "alias2:a1", important: true)
       ok {ali.important?} == true
     end
 
-    spec "[!1gnbc] returns false if `@tag == :unimportant`." do
-      ali = Benry::CmdApp::Alias.new("a2-2", "alias2:a1", tag: :unimportant)
+    spec "[!1gnbc] returns false if `@important == false`." do
+      ali = Benry::CmdApp::Alias.new("a2-2", "alias2:a1", important: false)
       ok {ali.important?} == false
     end
 
-    spec "[!h3nm3] returns true or false according to action object if `@tag == nil`." do
-      ok {Benry::CmdApp::Alias.new("ali1", "alias2:a1", tag: nil).important?} == nil
+    spec "[!h3nm3] returns true or false according to action object if `@important == nil`." do
+      ok {Benry::CmdApp::Alias.new("ali1", "alias2:a1").important?} == nil
       ok {Benry::CmdApp::Alias.new("ali1", "alias2:a2").important?} == true
       ok {Benry::CmdApp::Alias.new("ali1", "alias2:a3").important?} == false
       ok {Benry::CmdApp::Alias.new("ali1", "alias2:a4").important?} == false
@@ -2807,7 +2807,7 @@ END
         prefix "candi:date6"
         @action.("test1")
         def t1(); end
-        @action.("test2", tag: :important)
+        @action.("test2", important: true)
         def t2(); end
       end
       Benry::CmdApp.action_alias("candi:date6", "candi:date6:t2")
@@ -2829,7 +2829,7 @@ END
         prefix "candi:date7"
         @action.("test1")
         def t1(); end
-        @action.("test2", tag: :unimportant)
+        @action.("test2", important: false)
         def t2(); end
       end
       Benry::CmdApp.action_alias("candi:date7", "candi:date7:t2")
@@ -3250,7 +3250,7 @@ END
     end
 
     spec "[!awk3l] shows important action in strong format." do
-      with_tag("yo-yo"=>:important) do
+      with_important("yo-yo"=>true) do
         msg = @builder.build_help_message()
         ok {msg}.end_with?(<<END)
 \e[34mActions:\e[0m
@@ -3262,7 +3262,7 @@ END
     end
 
     spec "[!9k4dv] shows unimportant action in weak fomrat." do
-      with_tag("yo-yo"=>:unimportant) do
+      with_important("yo-yo"=>false) do
         msg = @builder.build_help_message()
         ok {msg}.end_with?(<<END)
 \e[34mActions:\e[0m
@@ -3395,7 +3395,7 @@ END
     end
 
     spec "[!aey2k] shows alias in strong or weak format according to action." do
-      with_tag("help25:test1"=>:important, "help25:test3"=>:unimportant) do
+      with_important("help25:test1"=>true, "help25:test3"=>false) do
         hb = new_help_builder(help_aliases: true)
         msg = hb.__send__(:build_aliases, true)
         ok {msg} == <<"END"

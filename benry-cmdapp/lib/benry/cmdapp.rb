@@ -249,7 +249,7 @@ module Benry::CmdApp
 
   class ActionMetadata
 
-    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, tag: nil)
+    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, important: nil, tag: nil)
       @name   = name
       @klass  = klass
       @method = method
@@ -257,10 +257,11 @@ module Benry::CmdApp
       @desc   = desc
       @detail = detail       if detail != nil
       @postamble = postamble if postamble != nil
+      @important = important if important != nil
       @tag    = tag          if tag != nil
     end
 
-    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble, :tag
+    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble, :important, :tag
 
     def hidden?()
       #; [!kp10p] returns true when action method is private.
@@ -269,12 +270,13 @@ module Benry::CmdApp
     end
 
     def important?()
-      #; [!j3trl] returns false if hidden action.
-      #; [!52znh] returns true if `tag == :important`.
-      #; [!rlfac] returns false if `tag == :unimportant`.
-      #; [!rlsyj] returns nil if `tag == nil`.
+      #; [!52znh] returns true if `@important == true`.
+      #; [!rlfac] returns false if `@important == false`.
+      #; [!j3trl] returns false if `@important == nil`. and action is hidden.
+      #; [!hhef8] returns nil if `@important == nil`.
+      return @important if @important != nil
       return false if hidden?()
-      return Util.important?(@tag)
+      return nil
     end
 
     def parse_options(argv, all=true)
@@ -582,8 +584,8 @@ module Benry::CmdApp
         @__aliasof__  = nil    # ex: :method_name or "action-name"
         @__default__  = nil    # ex: :method_name or "action-name"
         #; [!1qv12] @action is a Proc object and saves args.
-        @action = proc do |desc, detail: nil, postamble: nil, tag: nil|
-          @__action__ = [desc, {detail: detail, postamble: postamble, tag: tag}]
+        @action = proc do |desc, detail: nil, postamble: nil, important: nil, tag: nil|
+          @__action__ = [desc, {detail: detail, postamble: postamble, important: important, tag: tag}]
         end
         #; [!33ma7] @option is a Proc object and saves args.
         @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &block|
@@ -673,7 +675,7 @@ module Benry::CmdApp
   end
 
 
-  def self.action_alias(alias_name, action_name, *args, tag: nil)
+  def self.action_alias(alias_name, action_name, *args, important: nil, tag: nil)
     invocation = "action_alias(#{alias_name.inspect}, #{action_name.inspect})"
     #; [!5immb] convers both alias name and action name into string.
     alias_  = alias_name.to_s
@@ -690,20 +692,21 @@ module Benry::CmdApp
     #; [!vzlrb] registers alias name with action name.
     #; [!0cq6o] supports args.
     #; [!4wtxj] supports 'tag:' keyword arg.
-    INDEX.register_alias(alias_, Alias.new(alias_, action_, *args, tag: tag))
+    INDEX.register_alias(alias_, Alias.new(alias_, action_, *args, important: important, tag: tag))
   end
 
 
   class Alias
 
-    def initialize(alias_name, action_name, *args, tag: nil)
+    def initialize(alias_name, action_name, *args, important: nil, tag: nil)
       @alias_name  = alias_name
       @action_name = action_name
       @args        = args.freeze   if ! args.empty?
-      @tag         = tag
+      @important   = important     if important != nil
+      @tag         = tag           if tag != nil
     end
 
-    attr_reader :alias_name, :action_name, :args, :tag
+    attr_reader :alias_name, :action_name, :args, :important, :tag
 
     def desc()
       if @args && ! @args.empty?
@@ -714,11 +717,10 @@ module Benry::CmdApp
     end
 
     def important?()
-      #; [!5juwq] returns true if `@tag == :important`.
-      #; [!1gnbc] returns false if `@tag == :unimportant`.
-      v = Util.important?(@tag)
-      return v if v != nil
-      #; [!h3nm3] returns true or false according to action object if `@tag == nil`.
+      #; [!5juwq] returns true if `@important == true`.
+      #; [!1gnbc] returns false if `@important == false`.
+      return @important if @important != nil
+      #; [!h3nm3] returns true or false according to action object if `@important == nil`.
       action_obj = INDEX.get_action(@action_name)
       return action_obj.important?
     end
