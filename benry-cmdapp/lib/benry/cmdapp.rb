@@ -398,7 +398,36 @@ module Benry::CmdApp
   end
 
 
-  class ActionHelpBuilder
+  class HelpBuilder
+
+    def build_section(title, desc, content, all=false)
+      #; [!cfijh] includes section title and content if specified by config.
+      #; [!09jzn] second argument can be nil.
+      sb = []
+      if desc
+        sb << heading(title) << " " << desc << "\n"
+      else
+        sb << heading(title) << "\n"
+      end
+      sb << content
+      sb << "\n" unless content.end_with?("\n")
+      return sb.join()
+    end
+
+    def config()
+      nil
+    end
+
+    def heading(title)
+      c = config()
+      format = c ? c.format_heading : Config::FORMAT_HEADING
+      return format % title
+    end
+
+  end
+
+
+  class ActionHelpBuilder < HelpBuilder
 
     def initialize(action_metadata)
       @am = action_metadata
@@ -1133,7 +1162,7 @@ module Benry::CmdApp
   end
 
 
-  class AppHelpBuilder
+  class AppHelpBuilder < HelpBuilder
 
     def initialize(config, schema)
       @config = config
@@ -1252,20 +1281,6 @@ module Benry::CmdApp
       return nil if sb.empty?
       #; [!we1l8] shows 'Aliases:' section if any aliases defined.
       return build_section("Aliases:", nil, sb.join())
-    end
-
-    def build_section(title, desc, content, all=false)
-      #; [!cfijh] includes section title and content if specified by config.
-      #; [!09jzn] second argument can be nil.
-      sb = []
-      if desc
-        sb << heading(title) << " " << desc << "\n"
-      else
-        sb << heading(title) << "\n"
-      end
-      sb << content
-      sb << "\n" unless content.end_with?("\n")
-      return sb.join()
     end
 
     def build_postamble(all=false)

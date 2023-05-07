@@ -699,6 +699,38 @@ topic Benry::CmdApp::ActionWithArgs do
 end
 
 
+topic Benry::CmdApp::HelpBuilder do
+
+
+  before do
+    @builder = Benry::CmdApp::HelpBuilder.new()
+  end
+
+
+  topic '#build_section()' do
+
+    spec "[!cfijh] includes section title and content if specified by config." do
+      msg = @builder.build_section("Example", nil, "  $ echo 'Hello, world!'")
+      ok {msg} == <<"END"
+\e[34mExample\e[0m
+  $ echo 'Hello, world!'
+END
+    end
+
+    spec "[!09jzn] second argument can be nil." do
+      msg = @builder.build_section("Example", "(see https://...)", "  $ echo 'Hello, world!'")
+      ok {msg} == <<"END"
+\e[34mExample\e[0m (see https://...)
+  $ echo 'Hello, world!'
+END
+    end
+
+  end
+
+
+end
+
+
 topic Benry::CmdApp::ActionHelpBuilder do
   include ActionMetadataTestingHelper
 
@@ -3223,38 +3255,6 @@ END
   \e[1m\e[2myo-yo\e[0m             \e[0m : greeting #1
 END
       end
-    end
-
-    spec "[!cfijh] includes section title and content if specified by config." do
-      @config.help_sections = [
-        ["Example", "  $ echo 'Hello, world!'"],
-        ["Tips"   , "  * Try `--help` option.\n"],
-      ]
-      msg = @builder.build_help_message()
-      ok {msg}.end_with?(<<"END")
-
-\e[34mExample\e[0m
-  $ echo 'Hello, world!'
-
-\e[34mTips\e[0m
-  * Try `--help` option.
-END
-    end
-
-    spec "[!09jzn] second argument can be nil." do
-      @config.help_sections = [
-        ["Example:", "(see https://...)", "  $ echo 'Hello, world!'"],
-        ["Tips:"   , nil                , "  * Try `--help` option.\n"],
-      ]
-      msg = @builder.build_help_message()
-      ok {msg}.end_with?(<<"END")
-
-\e[34mExample:\e[0m (see https://...)
-  $ echo 'Hello, world!'
-
-\e[34mTips:\e[0m
-  * Try `--help` option.
-END
     end
 
     spec "[!i04hh] includes postamble text if specified by config." do
