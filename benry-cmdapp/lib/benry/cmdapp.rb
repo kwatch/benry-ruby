@@ -1150,8 +1150,10 @@ module Benry::CmdApp
       sb << build_actions(all, format)
       #; [!oxpda] prints 'Aliases:' section only when 'config.help_aliases' is true.
       sb << build_aliases(all, format) if @config.help_aliases
-      @config.help_sections.each do |title, content|
-        sb << build_section(title, content, all)
+      @config.help_sections.each do |title, desc, content|
+        #; [!kqnxl] array of section may have two or three elements.
+        content, desc = desc, nil if content == nil
+        sb << build_section(title, desc, content, all)
       end if @config.help_sections
       sb << build_postamble(all)
       return sb.reject {|s| s.nil? || s.empty? }.join("\n")
@@ -1255,12 +1257,12 @@ module Benry::CmdApp
       return heading("Aliases:") + "\n" + sb.join()
     end
 
-    def build_section(title, content, all=false)
+    def build_section(title, desc, content, all=false)
       #; [!cfijh] includes section title and content if specified by config.
-      #; [!09jzn] senction title can be an array of title and description.
+      #; [!09jzn] second argument can be nil.
       sb = []
-      if title.is_a?(Array)
-        sb << heading(title[0]) << " " << title[1] << "\n"
+      if desc
+        sb << heading(title) << " " << desc << "\n"
       else
         sb << heading(title) << "\n"
       end

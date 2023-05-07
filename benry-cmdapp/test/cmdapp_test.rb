@@ -3241,15 +3241,19 @@ END
 END
     end
 
-    spec "[!09jzn] senction title can be an array of title and description." do
+    spec "[!09jzn] second argument can be nil." do
       @config.help_sections = [
-        [["Example:", "(see https://...)"], "  $ echo 'Hello, world!'"],
+        ["Example:", "(see https://...)", "  $ echo 'Hello, world!'"],
+        ["Tips:"   , nil                , "  * Try `--help` option.\n"],
       ]
       msg = @builder.build_help_message()
       ok {msg}.end_with?(<<"END")
 
 \e[34mExample:\e[0m (see https://...)
   $ echo 'Hello, world!'
+
+\e[34mTips:\e[0m
+  * Try `--help` option.
 END
     end
 
@@ -3291,6 +3295,23 @@ Actions:
   ya:ya              : greeting #2
   yes                : alias of 'yo-yo' action
   yo-yo              : greeting #1
+END
+    end
+
+    spec "[!kqnxl] array of section may have two or three elements." do
+      @config.help_sections = [
+        ["Example:", "(see https://...)", "  $ echo foobar"],
+        ["Tips:", "  * foobar"],
+      ]
+      app = Benry::CmdApp::Application.new(@config)
+      msg = app.help_message()
+      ok {msg}.end_with?(<<"END")
+
+\e[34mExample:\e[0m (see https://...)
+  $ echo foobar
+
+\e[34mTips:\e[0m
+  * foobar
 END
     end
 
