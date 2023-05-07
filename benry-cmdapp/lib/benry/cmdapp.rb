@@ -466,9 +466,8 @@ module Benry::CmdApp
       s = "[<options>] " + s unless Util.schema_empty?(@am.schema, all)
       s = s.rstrip()
       sb = []
-      sb << "#{heading('Usage:')}\n"
       sb << (format % ["#{command} #{@am.name}", s]) << "\n"
-      return sb.join()
+      return build_section("Usage:", nil, sb.join())
     end
 
     def build_options(command, all=false)
@@ -493,7 +492,7 @@ module Benry::CmdApp
       end
       #; [!pvu56] ignores 'Options:' section when no options exist.
       return nil if sb.empty?
-      return heading('Options:') + "\n" + sb.join()
+      return build_section("Options:", nil, sb.join())
     end
 
     def build_postamble(command, all=false)
