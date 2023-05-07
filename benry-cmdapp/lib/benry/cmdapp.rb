@@ -82,6 +82,60 @@ module Benry::CmdApp
 
     DOING = Doing.new   # :nodoc:
 
+    def important?(tag)
+      #; [!0yz2h] returns nil if tag == nil.
+      #; [!h5pid] returns true if tag == :important.
+      #; [!7zval] returns false if tag == :unimportant.
+      #; [!z1ygi] supports nested tag.
+      case tag
+      when nil                         ; return nil
+      when :important, "important"     ; return true
+      when :unimportant, "unimportant" ; return false
+      when Array
+        return true  if tag.include?(:important)
+        return false if tag.include?(:unimportant)
+        return nil
+      else
+        return nil
+      end
+    end
+
+    def str_strong(s)
+      return "\e[4m#{s}\e[0m"
+    end
+
+    def str_weak(s)
+       return "\e[2m#{s}\e[0m"
+    end
+
+    def format_help_line(format, name, desc, important)
+      #; [!xx1vj] if `important == nil` then format help line with no decoration.
+      #; [!oaxp1] if `important == true` then format help line with strong decoration.
+      #; [!bdhh6] if `important == false` then format help line with weak decoration.
+      if important != nil
+        name = fill_with_decoration(format, name) {|s|
+          important ? str_strong(s) : str_weak(s)
+        }
+        format = format.sub(/%-?(\d+)s/, '%s')
+      end
+      return format % [name, desc]
+    end
+
+    def fill_with_decoration(format, name, &block)
+      #; [!udrbj] returns decorated string with padding by white spaces.
+      if format =~ /%(-)?(\d+)s/
+        leftside = !! $1
+        width = $2.to_i
+        n = width - name.length
+        n = 0 if n < 0
+        s = " " * n
+        #; [!7bl2b] considers minus sign in format.
+        return leftside ? (yield name) + s : s + (yield name)
+      else
+        return yield name
+      end
+    end
+
   end
 
 
@@ -114,16 +168,20 @@ module Benry::CmdApp
     end
 
     def each_action_name_and_desc(include_alias=true, all: false, &block)
-      #; [!5lahm] yields action name and description.
+      #; [!5lahm] yields action name, description, and important flag.
       #; [!27j8b] includes alias names when the first arg is true.
       #; [!8xt8s] rejects hidden actions if 'all: false' kwarg specified.
       #; [!5h7s5] includes hidden actions if 'all: true' kwarg specified.
       #; [!arcia] action names are sorted.
       metadatas = @actions.values()
       metadatas = metadatas.reject {|ameta| ameta.hidden? } if ! all
-      pairs = metadatas.collect {|ameta| [ameta.name, ameta.desc] }
-      pairs += @aliases.collect {|name, aliobj| [name, aliobj.desc()] } if include_alias
-      pairs.sort_by {|name, _| name }.each(&block)
+      pairs = metadatas.collect {|ameta|
+        [ameta.name, ameta.desc, ameta.important?]
+      }
+      pairs += @aliases.collect {|name, aliobj|
+        [name, aliobj.desc, aliobj.important?]
+      } if include_alias
+      pairs.sort_by {|name, _, _| name }.each(&block)
     end
 
     def get_action(action_name)
@@ -208,6 +266,15 @@ module Benry::CmdApp
       #; [!kp10p] returns true when action method is private.
       #; [!nw322] returns false when action method is not private.
       return ! @klass.method_defined?(@method)
+    end
+
+    def important?()
+      #; [!j3trl] returns false if hidden action.
+      #; [!52znh] returns true if `tag == :important`.
+      #; [!rlfac] returns false if `tag == :unimportant`.
+      #; [!rlsyj] returns nil if `tag == nil`.
+      return false if hidden?()
+      return Util.important?(@tag)
     end
 
     def parse_options(argv, all=true)
@@ -381,7 +448,11 @@ module Benry::CmdApp
       @am.schema.each do |item|
         #; [!hghuj] ignores 'Options:' section when only hidden options speicified.
         next unless all || ! item.hidden?
-        sb << format % [item.optdef, item.desc]
+        #; [!vqqq1] hidden option should be shown in weak format.
+        #; [!ra5ei] option should be shown in strong format if `tag == :important`.
+        #; [!rmx85] option should be shown in weak format if `tag == :unimportant`.
+        important = item.hidden? ? false : Util.important?(item.tag)
+        sb << Util.format_help_line(format, item.optdef, item.desc, important)
         #; [!dukm7] includes detailed description of option.
         if item.detail
           width  ||= (Util.del_escape_seq(format % ["", ""])).length
@@ -625,7 +696,7 @@ module Benry::CmdApp
 
   class Alias
 
-    def initialize(alias_name, action_name, *args ,tag: nil)
+    def initialize(alias_name, action_name, *args, tag: nil)
       @alias_name  = alias_name
       @action_name = action_name
       @args        = args.freeze   if ! args.empty?
@@ -640,6 +711,16 @@ module Benry::CmdApp
       else
         return "alias of '#{@action_name}' action"
       end
+    end
+
+    def important?()
+      #; [!5juwq] returns true if `@tag == :important`.
+      #; [!1gnbc] returns false if `@tag == :unimportant`.
+      v = Util.important?(@tag)
+      return v if v != nil
+      #; [!h3nm3] returns true or false according to action object if `@tag == nil`.
+      action_obj = INDEX.get_action(@action_name)
+      return action_obj.important?
     end
 
   end
@@ -995,14 +1076,14 @@ module Benry::CmdApp
         #; [!k3lw0] private (hidden) action should not be printed as candidates.
         next if ameta.hidden?
         #
-        pairs << [aname, ameta.desc]
+        pairs << [aname, ameta.desc, ameta.important?]
         aname2aliases[aname] = []
       end
       #; [!85i5m] candidate actions should include alias names.
       INDEX.each_alias do |ali_obj|
         ali_name = ali_obj.alias_name
         next unless ali_name.start_with?(prefix) || ali_name == prefix2
-        pairs << [ali_name, ali_obj.desc()]
+        pairs << [ali_name, ali_obj.desc(), ali_obj.important?]
       end
       #; [!i2azi] raises error when no candidate actions found.
       ! pairs.empty?  or
@@ -1016,8 +1097,10 @@ module Benry::CmdApp
       sb << @config.format_heading % "Actions:" << "\n"
       format = @config.format_help
       indent = " " * (Util.del_escape_seq(format) % ['', '']).length
-      pairs.sort_by {|aname, _| aname }.each do |aname, adesc|
-        sb << format % [aname, adesc] << "\n"
+      pairs.sort_by {|aname, _, _| aname }.each do |aname, adesc, important|
+        #; [!j4b54] shows candidates in strong format if important.
+        #; [!q3819] shows candidates in weak format if not important.
+        sb << Util.format_help_line(format, aname, adesc, important) << "\n"
         aliases = aname2aliases[aname]
         if aliases && ! aliases.empty?
           sb << indent << "(alias: " << aliases.join(", ") << ")\n"
@@ -1115,7 +1198,13 @@ module Benry::CmdApp
       #; [!ywarr] not ignore private (hidden) options if 'all' flag is true.
       sb = []
       @schema.each do |item|
-        sb << format % [item.optdef, item.desc] if all || ! item.hidden?
+        if all || ! item.hidden?
+          #; [!p1tu9] prints option in weak format if option is hidden.
+          #; [!dancj] prints option in strong format if `tag == :important.`
+          #; [!8exfp] prints option in weak format if `tag == :unimportant.`
+          important = item.hidden? ? false : Util.important?(item.tag)
+          sb << Util.format_help_line(format, item.optdef, item.desc, important)
+        end
       end
       #; [!bm71g] ignores 'Options:' section if no options exist.
       return nil if sb.empty?
@@ -1134,10 +1223,15 @@ module Benry::CmdApp
       sb << "\n"
       #; [!jat15] includes action names ordered by name.
       include_alias = ! @config.help_aliases
-      INDEX.each_action_name_and_desc(include_alias, all: all) do |name, desc|
+      INDEX.each_action_name_and_desc(include_alias, all: all) do |name, desc, important|
         #; [!b3l3m] not show private (hidden) action names in default.
         #; [!yigf3] shows private (hidden) action names if 'all' flag is true.
-        sb << format % [name, desc] if all || ! Util.hidden_name?(name)
+        if all || ! Util.hidden_name?(name)
+          #; [!5d9mc] shows hidden action in weak format.
+          #; [!awk3l] shows important action in strong format.
+          #; [!9k4dv] shows unimportant action in weak fomrat.
+          sb << Util.format_help_line(format, name, desc, important)
+        end
       end
       return sb.join()
     end
@@ -1151,7 +1245,10 @@ module Benry::CmdApp
         alias_name = alias_obj.alias_name
         #; [!5g72a] not show hidden alias names in default.
         #; [!ekuqm] shows all alias names including private ones if 'all' flag is true.
-        sb << format % [alias_name, alias_obj.desc()] if all || ! Util.hidden_name?(alias_name)
+        if all || ! Util.hidden_name?(alias_name)
+          #; [!aey2k] shows alias in strong or weak format according to action.
+          sb << Util.format_help_line(format, alias_name, alias_obj.desc(), alias_obj.important?)
+        end
       end
       #; [!p3oh6] now show 'Aliases:' section if no aliases defined.
       return nil if sb.empty?

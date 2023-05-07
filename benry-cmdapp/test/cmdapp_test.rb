@@ -26,6 +26,23 @@ module CommonTestingHelper
     return result
   end
 
+  def with_tag(keyval={}, &block)
+    bkup = {}
+    keyval.each do |name, tag|
+      action = Benry::CmdApp::INDEX.get_action(name)
+      bkup[name] = action.tag
+      action.instance_variable_set('@tag', tag)
+    end
+    begin
+      yield
+    ensure
+      bkup.each do |name, tag|
+        action = Benry::CmdApp::INDEX.get_action(name)
+        action.instance_variable_set('@tag', tag)
+      end
+    end
+  end
+
   module_function
 
   def clear_index_except(klass)  # XXXX
@@ -154,6 +171,74 @@ topic Benry::CmdApp::Util do
   end
 
 
+  topic '.important?()' do
+
+    spec "[!0yz2h] returns nil if tag == nil." do
+      ok {Benry::CmdApp::Util.important?(nil)} == nil
+    end
+
+    spec "[!h5pid] returns true if tag == :important." do
+      ok {Benry::CmdApp::Util.important?(:important)} == true
+      ok {Benry::CmdApp::Util.important?("important")} == true
+    end
+
+    spec "[!7zval] returns false if tag == :unimportant." do
+      ok {Benry::CmdApp::Util.important?(:unimportant)} == false
+      ok {Benry::CmdApp::Util.important?("unimportant")} == false
+    end
+
+    spec "[!z1ygi] supports nested tag." do
+      ok {Benry::CmdApp::Util.important?([:important, :foo])} == true
+      ok {Benry::CmdApp::Util.important?([:bar, :unimportant])} == false
+    end
+
+  end
+
+
+  topic '.format_help_line()' do
+
+    fixture :format do
+      "  [[%-10s]] : %s"
+    end
+
+    spec "[!xx1vj] if `important == nil` then format help line with no decoration." do
+      |format|
+      s = Benry::CmdApp::Util.format_help_line(format, "<action>", "<desc>", nil)
+      ok {s} == "  [[<action>  ]] : <desc>"
+    end
+
+    spec "[!oaxp1] if `important == true` then format help line with strong decoration." do
+      |format|
+      s = Benry::CmdApp::Util.format_help_line(format, "<action>", "<desc>", true)
+      ok {s} == "  [[\e[4m<action>\e[0m  ]] : <desc>"
+    end
+
+    spec "[!bdhh6] if `important == false` then format help line with weak decoration." do
+      |format|
+      s = Benry::CmdApp::Util.format_help_line(format, "<action>", "<desc>", false)
+      ok {s} == "  [[\e[2m<action>\e[0m  ]] : <desc>"
+    end
+
+  end
+
+
+  topic '.fill_with_decoration()' do
+
+    spec "[!udrbj] returns decorated string with padding by white spaces." do
+      format = "  [[%-10s]] : %s"
+      s = Benry::CmdApp::Util.fill_with_decoration(format, "<action>") {|s| "\e[1m#{s}\e[0m" }
+      ok {s} == "\e[1m<action>\e[0m  "
+    end
+
+    spec "[!7bl2b] considers minus sign in format." do
+      format = "  [[%10s]] : %s"
+      s = Benry::CmdApp::Util.fill_with_decoration(format, "<action>") {|s| "\e[1m#{s}\e[0m" }
+      ok {s} == "  \e[1m<action>\e[0m"
+    end
+
+  end
+
+
 end
 
 
@@ -221,23 +306,32 @@ topic Benry::CmdApp::Index do
       restore_index()
     end
 
-    spec "[!5lahm] yields action name and description." do
+    spec "[!5lahm] yields action name, description, and important flag." do
       arr = []
       Benry::CmdApp::INDEX.each_action_name_and_desc(false) {|a| arr << a }
       ok {arr} == [
-        ["lookup1", "lookup test #1"],
-        ["lookup2", "lookup test #2"],
+        ["lookup1", "lookup test #1", nil],
+        ["lookup2", "lookup test #2", nil],
       ]
+      #
+      with_tag("lookup1"=>:important, "lookup2"=>:unimportant) do
+        arr = []
+        Benry::CmdApp::INDEX.each_action_name_and_desc(false) {|a| arr << a }
+        ok {arr} == [
+          ["lookup1", "lookup test #1", true],
+          ["lookup2", "lookup test #2", false],
+        ]
+      end
     end
 
     spec "[!27j8b] includes alias names when the first arg is true." do
       arr = []
       Benry::CmdApp::INDEX.each_action_name_and_desc(true) {|a| arr << a }
       ok {arr} == [
-        ["findxx", "alias of 'lookup2' action"],
-        ["findyy1", "alias of 'lookup1 Alice -r3'"],
-        ["lookup1", "lookup test #1"],
-        ["lookup2", "lookup test #2"],
+        ["findxx", "alias of 'lookup2' action", nil],
+        ["findyy1", "alias of 'lookup1 Alice -r3'", nil],
+        ["lookup1", "lookup test #1", nil],
+        ["lookup2", "lookup test #2", nil],
       ]
     end
 
@@ -245,8 +339,8 @@ topic Benry::CmdApp::Index do
       arr = []
       Benry::CmdApp::INDEX.each_action_name_and_desc(false, all: false) {|a| arr << a }
       ok {arr} == [
-        ["lookup1", "lookup test #1"],
-        ["lookup2", "lookup test #2"],
+        ["lookup1", "lookup test #1", nil],
+        ["lookup2", "lookup test #2", nil],
       ]
     end
 
@@ -254,9 +348,9 @@ topic Benry::CmdApp::Index do
       arr = []
       Benry::CmdApp::INDEX.each_action_name_and_desc(false, all: true) {|a| arr << a }
       ok {arr} == [
-        ["lookup1", "lookup test #1"],
-        ["lookup2", "lookup test #2"],
-        ["lookup3", "lookup test #3"],   # hidden action
+        ["lookup1", "lookup test #1", nil],
+        ["lookup2", "lookup test #2", nil],
+        ["lookup3", "lookup test #3", false],   # hidden action
       ]
     end
 
@@ -359,6 +453,35 @@ topic Benry::CmdApp::ActionMetadata do
     spec "[!nw322] returns false when action method is not private." do
       ameta = Benry::CmdApp::INDEX.get_action("pphidden1")
       ok {ameta.hidden?} == false
+    end
+
+  end
+
+
+  topic '#importance?()' do
+
+    spec "[!j3trl] returns false if hidden action." do
+      ameta = @metadata
+      def ameta.hidden?; true; end
+      ok {ameta.important?} == false
+    end
+
+    spec "[!52znh] returns true if `tag == :important`." do
+      ameta = @metadata
+      ameta.instance_variable_set('@tag', :important)
+      ok {ameta.important?} == true
+    end
+
+    spec "[!rlfac] returns false if `tag == :unimportant`." do
+      ameta = @metadata
+      ameta.instance_variable_set('@tag', :unimportant)
+      ok {ameta.important?} == false
+    end
+
+    spec "[!rlsyj] returns nil if `tag == nil`." do
+      ameta = @metadata
+      ameta.instance_variable_set('@tag', nil)
+      ok {ameta.important?} == nil
     end
 
   end
@@ -655,6 +778,42 @@ END
       msg = new_metadata(schema).help_message("testapp")
       msg = uncolorize(msg)
       ok {msg}.NOT.include?("Options:\n")
+    end
+
+    spec "[!vqqq1] hidden option should be shown in weak format." do
+      schema = new_schema(lang: false)
+      schema.add(:file , "-f, --file=<file>", "filename")
+      schema.add(:_lang, "-l, --lang=<lang>", "language")  # hidden option
+      msg = new_metadata(schema).help_message("testapp", true)
+      ok {msg}.end_with?(<<"END")
+\e[34mOptions:\e[0m
+  \e[1m-f, --file=<file> \e[0m : filename
+  \e[1m\e[2m-l, --lang=<lang>\e[0m \e[0m : language
+END
+    end
+
+    spec "[!ra5ei] option should be shown in strong format if `tag == :important`." do
+      schema = new_schema(lang: false)
+      schema.add(:file, "-f, --file=<file>", "filename")
+      schema.add(:lang, "-l, --lang=<lang>", "language", tag: :important)
+      msg = new_metadata(schema).help_message("testapp")
+      ok {msg}.end_with?(<<"END")
+\e[34mOptions:\e[0m
+  \e[1m-f, --file=<file> \e[0m : filename
+  \e[1m\e[4m-l, --lang=<lang>\e[0m \e[0m : language
+END
+    end
+
+    spec "[!rmx85] option should be shown in weak format if `tag == :unimportant`." do
+      schema = new_schema(lang: false)
+      schema.add(:file, "-f, --file=<file>", "filename")
+      schema.add(:lang, "-l, --lang=<lang>", "language", tag: :unimportant)
+      msg = new_metadata(schema).help_message("testapp")
+      ok {msg}.end_with?(<<"END")
+\e[34mOptions:\e[0m
+  \e[1m-f, --file=<file> \e[0m : filename
+  \e[1m\e[2m-l, --lang=<lang>\e[0m \e[0m : language
+END
     end
 
     spec "[!dukm7] includes detailed description of option." do
@@ -1369,6 +1528,51 @@ topic Benry::CmdApp do
     end
 
   end
+
+end
+
+
+topic Benry::CmdApp::Alias do
+
+  class Alias2Test < Benry::CmdApp::Action
+    prefix "alias2"
+    #
+    @action.("alias test")
+    def a1(); end
+    #
+    @action.("alias test", tag: :important)
+    def a2(); end
+    #
+    @action.("alias test", tag: :unimportant)
+    def a3(); end
+    #
+    private
+    @action.("alias test")
+    def a4(); end
+  end
+
+
+  topic '#important?()' do
+
+    spec "[!5juwq] returns true if `@tag == :important`." do
+      ali = Benry::CmdApp::Alias.new("a2-1", "alias2:a1", tag: :important)
+      ok {ali.important?} == true
+    end
+
+    spec "[!1gnbc] returns false if `@tag == :unimportant`." do
+      ali = Benry::CmdApp::Alias.new("a2-2", "alias2:a1", tag: :unimportant)
+      ok {ali.important?} == false
+    end
+
+    spec "[!h3nm3] returns true or false according to action object if `@tag == nil`." do
+      ok {Benry::CmdApp::Alias.new("ali1", "alias2:a1", tag: nil).important?} == nil
+      ok {Benry::CmdApp::Alias.new("ali1", "alias2:a2").important?} == true
+      ok {Benry::CmdApp::Alias.new("ali1", "alias2:a3").important?} == false
+      ok {Benry::CmdApp::Alias.new("ali1", "alias2:a4").important?} == false
+    end
+
+  end
+
 
 end
 
@@ -2598,6 +2802,50 @@ Actions:
 END
     end
 
+    spec "[!j4b54] shows candidates in strong format if important." do
+      class CandidateTest6 < Benry::CmdApp::Action
+        prefix "candi:date6"
+        @action.("test1")
+        def t1(); end
+        @action.("test2", tag: :important)
+        def t2(); end
+      end
+      Benry::CmdApp.action_alias("candi:date6", "candi:date6:t2")
+      sout, serr = capture_sio(tty: true) do
+        @app.__send__(:do_print_candidates, ["candi:date6:"], {})
+      end
+      ok {serr} == ""
+      ok {sout} == <<END
+\e[34mActions:\e[0m
+  \e[1m\e[4mcandi:date6\e[0m       \e[0m : alias of 'candi:date6:t2' action
+  \e[1mcandi:date6:t1    \e[0m : test1
+  \e[1m\e[4mcandi:date6:t2\e[0m    \e[0m : test2
+                       (alias: candi:date6)
+END
+    end
+
+    spec "[!q3819] shows candidates in weak format if not important." do
+      class CandidateTest7 < Benry::CmdApp::Action
+        prefix "candi:date7"
+        @action.("test1")
+        def t1(); end
+        @action.("test2", tag: :unimportant)
+        def t2(); end
+      end
+      Benry::CmdApp.action_alias("candi:date7", "candi:date7:t2")
+      sout, serr = capture_sio(tty: true) do
+        @app.__send__(:do_print_candidates, ["candi:date7:"], {})
+      end
+      ok {serr} == ""
+      ok {sout} == <<END
+\e[34mActions:\e[0m
+  \e[1m\e[2mcandi:date7\e[0m       \e[0m : alias of 'candi:date7:t2' action
+  \e[1mcandi:date7:t1    \e[0m : test1
+  \e[1m\e[2mcandi:date7:t2\e[0m    \e[0m : test2
+                       (alias: candi:date7)
+END
+    end
+
   end
 
 
@@ -2876,6 +3124,49 @@ Actions:
 END
     end
 
+    fixture :app3 do
+      config = Benry::CmdApp::Config.new(nil)
+      schema = Benry::CmdApp::AppOptionSchema.new(nil)
+      schema.add(:help, "-h, --help", "print help message")
+      app = Benry::CmdApp::Application.new(config, schema)
+    end
+
+    spec "[!p1tu9] prints option in weak format if option is hidden." do
+      |app3|
+      app3.schema.add(:_log, "-L", "private option")   # !!!
+      msg = app3.help_message(true)
+      ok {msg}.include?(<<END)
+\e[34mOptions:\e[0m
+  \e[1m-h, --help        \e[0m : print help message
+  \e[1m\e[2m-L\e[0m                \e[0m : private option
+
+END
+    end
+
+    spec "[!dancj] prints option in strong format if `tag == :important.`" do
+      |app3|
+      app3.schema.add(:log , "-L", "important option", tag: :important)  # !!!
+      msg = app3.help_message(true)
+      ok {msg}.include?(<<END)
+\e[34mOptions:\e[0m
+  \e[1m-h, --help        \e[0m : print help message
+  \e[1m\e[4m-L\e[0m                \e[0m : important option
+
+END
+    end
+
+    spec "[!8exfp] prints option in weak format if `tag == :unimportant.`" do
+      |app3|
+      app3.schema.add(:log , "-L", "important option", tag: :unimportant)  # !!!
+      msg = app3.help_message(true)
+      ok {msg}.include?(<<END)
+\e[34mOptions:\e[0m
+  \e[1m-h, --help        \e[0m : print help message
+  \e[1m\e[2m-L\e[0m                \e[0m : important option
+
+END
+    end
+
     spec "[!bm71g] ignores 'Options:' section if no options exist." do
       @config.option_help = false
       @config.option_all = false
@@ -2938,6 +3229,48 @@ Actions:
   yes                : alias of 'yo-yo' action
   yo-yo              : greeting #1
 END
+    end
+
+    spec "[!5d9mc] shows hidden action in weak format." do
+      HelpMessageTest.class_eval { private :yo_yo }
+      #
+      begin
+        msg = @builder.build_help_message(true)
+        ok {msg}.end_with?(<<END)
+\e[34mActions:\e[0m
+  \e[1m_aha              \e[0m : greeting #3
+  \e[1mya:_mada          \e[0m : greeting #4
+  \e[1mya:ya             \e[0m : greeting #2
+  \e[1m\e[2myes\e[0m               \e[0m : alias of 'yo-yo' action
+  \e[1m\e[2myo-yo\e[0m             \e[0m : greeting #1
+END
+      ensure
+        HelpMessageTest.class_eval { public :yo_yo }
+      end
+    end
+
+    spec "[!awk3l] shows important action in strong format." do
+      with_tag("yo-yo"=>:important) do
+        msg = @builder.build_help_message()
+        ok {msg}.end_with?(<<END)
+\e[34mActions:\e[0m
+  \e[1mya:ya             \e[0m : greeting #2
+  \e[1m\e[4myes\e[0m               \e[0m : alias of 'yo-yo' action
+  \e[1m\e[4myo-yo\e[0m             \e[0m : greeting #1
+END
+      end
+    end
+
+    spec "[!9k4dv] shows unimportant action in weak fomrat." do
+      with_tag("yo-yo"=>:unimportant) do
+        msg = @builder.build_help_message()
+        ok {msg}.end_with?(<<END)
+\e[34mActions:\e[0m
+  \e[1mya:ya             \e[0m : greeting #2
+  \e[1m\e[2myes\e[0m               \e[0m : alias of 'yo-yo' action
+  \e[1m\e[2myo-yo\e[0m             \e[0m : greeting #1
+END
+      end
     end
 
     spec "[!cfijh] includes section title and content if specified by config." do
@@ -3059,6 +3392,19 @@ END
   \e[1mh25t1             \e[0m : alias of 'help25:test1' action
   \e[1m_h25t4            \e[0m : alias of 'help25:test4' action
 END
+    end
+
+    spec "[!aey2k] shows alias in strong or weak format according to action." do
+      with_tag("help25:test1"=>:important, "help25:test3"=>:unimportant) do
+        hb = new_help_builder(help_aliases: true)
+        msg = hb.__send__(:build_aliases, true)
+        ok {msg} == <<"END"
+\e[34mAliases:\e[0m
+  \e[1m\e[2mh25t3\e[0m             \e[0m : alias of 'help25:test3' action
+  \e[1m\e[4mh25t1\e[0m             \e[0m : alias of 'help25:test1' action
+  \e[1m_h25t4            \e[0m : alias of 'help25:test4' action
+END
+      end
     end
 
     spec "[!p3oh6] now show 'Aliases:' section if no aliases defined." do
