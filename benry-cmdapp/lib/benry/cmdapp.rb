@@ -733,7 +733,7 @@ module Benry::CmdApp
     FORMAT_HELP       = "  \e[1m%-18s\e[0m : %s"   # bold
     #FORMAT_HELP      = "  \e[34m%-18s\e[0m : %s"  # blue
 
-    FORMAT_STRONG     = "\e[1m%s\e[0m"
+    FORMAT_APPNAME    = "\e[1m%s\e[0m"
 
     #FORMAT_USAGE     = "  $ %s %s"
     FORMAT_USAGE      = "  $ \e[1m%s\e[0m %s"      # bold
@@ -752,7 +752,7 @@ module Benry::CmdApp
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: false, option_trace: false,
                    help_aliases: false, help_sections: [], help_postamble: nil,
-                   format_help: nil, format_strong: nil, format_usage: nil, format_heading: nil,
+                   format_help: nil, format_appname: nil, format_usage: nil, format_heading: nil,
                    feat_candidate: true)
       #; [!uve4e] sets command name automatically if not provided.
       @app_desc       = app_desc        # ex: "sample application"
@@ -773,7 +773,7 @@ module Benry::CmdApp
       @help_sections  = help_sections   # ex: [["Example", "..text.."], ...]
       @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
       @format_help    = format_help    || FORMAT_HELP
-      @format_strong  = format_strong  || FORMAT_STRONG
+      @format_appname = format_appname || FORMAT_APPNAME
       @format_usage   = format_usage   || FORMAT_USAGE
       @format_heading = format_heading || FORMAT_HEADING
       @feat_candidate = feat_candidate  # if arg is 'foo:', list actions starting with 'foo:'
@@ -785,7 +785,7 @@ module Benry::CmdApp
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
     attr_accessor :help_aliases, :help_sections, :help_postamble
-    attr_accessor :format_help, :format_strong, :format_usage, :format_heading
+    attr_accessor :format_help, :format_appname, :format_usage, :format_heading
     attr_accessor :feat_candidate
 
   end
@@ -1166,7 +1166,7 @@ module Benry::CmdApp
       c = @config
       sb = []
       if c.app_desc
-        app_name = c.format_strong % c.app_name
+        app_name = c.format_appname % c.app_name
         ver = c.app_version ? " (#{c.app_version})" : ""
         sb << "#{app_name}#{ver} -- #{c.app_desc}\n"
       end
