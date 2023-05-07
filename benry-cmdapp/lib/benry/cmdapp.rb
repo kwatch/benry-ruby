@@ -1257,8 +1257,13 @@ module Benry::CmdApp
 
     def build_section(title, content, all=false)
       #; [!cfijh] includes section title and content if specified by config.
+      #; [!09jzn] senction title can be an array of title and description.
       sb = []
-      sb << heading(title) << "\n"
+      if title.is_a?(Array)
+        sb << heading(title[0]) << " " << title[1] << "\n"
+      else
+        sb << heading(title) << "\n"
+      end
       sb << content
       sb << "\n" unless content.end_with?("\n")
       return sb.join()

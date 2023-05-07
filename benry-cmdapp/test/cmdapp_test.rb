@@ -3241,6 +3241,18 @@ END
 END
     end
 
+    spec "[!09jzn] senction title can be an array of title and description." do
+      @config.help_sections = [
+        [["Example:", "(see https://...)"], "  $ echo 'Hello, world!'"],
+      ]
+      msg = @builder.build_help_message()
+      ok {msg}.end_with?(<<"END")
+
+\e[34mExample:\e[0m (see https://...)
+  $ echo 'Hello, world!'
+END
+    end
+
     spec "[!i04hh] includes postamble text if specified by config." do
       @config.help_postamble = "Home:\n  https://example.com/\n"
       msg = @builder.build_help_message()
