@@ -884,7 +884,7 @@ module Benry::CmdApp
       #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
       add(:version, "-V, --version", "print version") if c.app_version
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
-      add(:all    , "-a, --all"    , "list all actions/options including private (hidden) ones") if c.option_all
+      add(:all    , "-a, --all"    , "list all actions including private (hidden) ones") if c.option_all
       #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
       add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
       #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.

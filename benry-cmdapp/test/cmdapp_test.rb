@@ -2366,7 +2366,7 @@ Usage:
 Options:
   -h, --help         : print help message
   -V, --version      : print version
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
@@ -2535,7 +2535,7 @@ Usage:
 Options:
   -h, --help         : print help message
   -V, --version      : print version
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
   --color[=<on|off>] : enable/disable color
@@ -2748,14 +2748,14 @@ Usage:
 Options:
   -h, --help         : print help message
   -V, --version      : print version
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
 END
     end
 
-    spec "[!4qs7y] shows private (hidden) actions/options if '--all' option specified." do
+    spec "[!4qs7y] shows private (hidden) actions if '--all' option specified." do
       class HiddenTest < Benry::CmdApp::Action
         private
         @action.("hidden test")
@@ -3165,7 +3165,7 @@ topic Benry::CmdApp::AppHelpBuilder do
 \e[34mOptions:\e[0m
   \e[1m-h, --help        \e[0m : print help message
   \e[1m-V, --version     \e[0m : print version
-  \e[1m-a, --all         \e[0m : list all actions/options including private (hidden) ones
+  \e[1m-a, --all         \e[0m : list all actions including private (hidden) ones
   \e[1m-D, --debug       \e[0m : debug mode (set $DEBUG_MODE to true)
 
 \e[34mActions:\e[0m
@@ -3183,7 +3183,7 @@ Usage:
 Options:
   -h, --help         : print help message
   -V, --version      : print version
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
@@ -3307,7 +3307,7 @@ END
 Options:
   -h, --help         : print help message
   -V, --version      : print version
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
@@ -3321,7 +3321,7 @@ END
       ok {msg}.include?(<<END)
 Options:
   -h, --help         : print help message
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
 
 Actions:
 END
@@ -3339,7 +3339,7 @@ END
       ok {msg}.include?(<<END)
 Options:
   -h, --help         : print help message
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
 
 Actions:
 END
@@ -3357,7 +3357,7 @@ END
       ok {msg}.include?(<<END)
 Options:
   -h, --help         : print help message
-  -a, --all          : list all actions/options including private (hidden) ones
+  -a, --all          : list all actions including private (hidden) ones
   -L                 : private option
 
 Actions:
