@@ -1149,11 +1149,15 @@ module Benry::CmdApp
     def do_setup()
       #; [!pkio4] sets config object to '$cmdapp_config'.
       $cmdapp_config = @config
+      #; [!qwjjv] sets application object to '$cmdapp_application'.
+      $cmdapp_application = self
     end
 
     def do_teardown(exc)
       #; [!zxeo7] clears '$cmdapp_config'.
       $cmdapp_config = nil
+      #; [!ufm1d] clears '$cmdapp_application'.
+      $cmdapp_application = nil
     end
 
     public

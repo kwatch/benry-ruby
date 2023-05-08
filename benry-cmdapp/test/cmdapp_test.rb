@@ -2898,6 +2898,13 @@ END
       ok {$cmdapp_config} == @app.config
     end
 
+    spec "[!qwjjv] sets application object to '$cmdapp_application'." do
+      $cmdapp_application = nil
+      @app.__send__(:do_setup,)
+      ok {$cmdapp_application} != nil
+      ok {$cmdapp_application} == @app
+    end
+
   end
 
 
@@ -2907,6 +2914,12 @@ END
       $cmdapp_config = "AAA"
       @app.__send__(:do_teardown, nil)
       ok {$cmdapp_config} == nil
+    end
+
+    spec "[!ufm1d] clears '$cmdapp_application'." do
+      $cmdapp_application = @app
+      @app.__send__(:do_teardown, nil)
+      ok {$cmdapp_application} == nil
     end
 
   end
