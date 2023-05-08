@@ -262,6 +262,19 @@ module Benry::CmdApp
   INDEX = Index.new
 
 
+  def self.delete_action(action_name)
+    #; [!era7d] deletes action.
+    #; [!ifaj1] raises error if action not exist.
+    INDEX.delete_action(action_name)
+  end
+
+  def self.delete_alias(alias_name)
+    #; [!9g0x9] deletes alias.
+    #; [!r49vi] raises error if alias not exist.
+    INDEX.delete_alias(alias_name)
+  end
+
+
   class ActionMetadata
 
     def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, important: nil, tag: nil)

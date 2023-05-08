@@ -1589,6 +1589,64 @@ end
 topic Benry::CmdApp do
 
 
+  topic '.delete_action()' do
+
+    spec "[!era7d] deletes action." do
+      class DeleteAction2Test < Benry::CmdApp::Action
+        @action.("test")
+        def delaction2(); end
+      end
+      #
+      pr = proc {
+        class DeleteAction2Test
+          @action.("test")
+          def delaction2(); end
+        end
+      }
+      ok {pr}.raise?(Benry::CmdApp::ActionDefError,
+                     "def delaction2(): action 'delaction2' already exist.")
+      #
+      Benry::CmdApp.delete_action("delaction2")
+      ok {pr}.NOT.raise?(Exception)
+    end
+
+    spec "[!ifaj1] raises error if action not exist." do
+      pr = proc { Benry::CmdApp.delete_action("delaction91") }
+      ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError,
+                    "delete_action(\"delaction91\"): action not found.")
+    end
+
+  end
+
+
+  topic '.delete_alias()' do
+
+    spec "[!9g0x9] deletes alias." do
+      class DeleteAlias2Test < Benry::CmdApp::Action
+        @action.("test")
+        def delalias2(); end
+      end
+      Benry::CmdApp.action_alias("delali2", "delalias2")
+      #
+      pr = proc {
+        Benry::CmdApp.action_alias("delali2", "delalias2")
+      }
+      ok {pr}.raise?(Benry::CmdApp::AliasDefError,
+                     "action_alias(\"delali2\", \"delalias2\"): alias name duplicated.")
+      #
+      Benry::CmdApp.delete_alias("delali2")
+      ok {pr}.NOT.raise?(Exception)
+    end
+
+    spec "[!r49vi] raises error if alias not exist." do
+      pr = proc { Benry::CmdApp.delete_alias("delalias91") }
+      ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError,
+                    "delete_alias(\"delalias91\"): alias not found.")
+    end
+
+  end
+
+
   topic '.action_alias()' do
 
     class Alias1Test < Benry::CmdApp::Action
