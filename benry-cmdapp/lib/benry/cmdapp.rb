@@ -748,6 +748,9 @@ module Benry::CmdApp
         app = $cmdapp_application
         msg = app.help_message(all)
       end
+      #; [!6g7jh] prints colorized help message when color mode is on.
+      #; [!ihr5u] prints non-colorized help message when color mode is off.
+      msg = Util.del_escape_seq(msg) unless Util.colorize?
       print msg
     end
 

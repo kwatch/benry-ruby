@@ -1567,7 +1567,41 @@ END
     spec "[!fhpjg] prints help message of command if action name not specified." do
       sout, serr = capture_sio { @app.run("help") }
       ok {serr} == ""
-      ok {uncolorize(sout)}.start_with?(<<"END")
+      ok {sout}.start_with?(<<"END")
+TestApp (1.0.0) -- test app
+
+Usage:
+  $ testapp [<options>] [<action> [<arguments>...]]
+
+Options:
+  -h, --help         : print help message
+  -V, --version      : print version
+
+Actions:
+END
+    end
+
+    spec "[!6g7jh] prints colorized help message when color mode is on." do
+      sout, serr = capture_sio(tty: true) { @app.run("help") }
+      ok {serr} == ""
+      ok {sout}.start_with?(<<"END")
+\e[1mTestApp\e[0m (1.0.0) -- test app
+
+\e[34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]
+
+\e[34mOptions:\e[0m
+  \e[1m-h, --help        \e[0m : print help message
+  \e[1m-V, --version     \e[0m : print version
+
+\e[34mActions:\e[0m
+END
+    end
+
+    spec "[!ihr5u] prints non-colorized help message when color mode is off." do
+      sout, serr = capture_sio(tty: false) { @app.run("help") }
+      ok {serr} == ""
+      ok {sout}.start_with?(<<"END")
 TestApp (1.0.0) -- test app
 
 Usage:
