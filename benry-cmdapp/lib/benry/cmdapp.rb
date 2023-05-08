@@ -880,7 +880,7 @@ module Benry::CmdApp
       c = config
       return nil if c == nil
       #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
-      add(:help   , "-h, --help"   , "print help message (of action if action specified)") if c.option_help
+      add(:help   , "-h, --help"   , "print help message") if c.option_help
       #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
       add(:version, "-V, --version", "print version") if c.app_version
       #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.

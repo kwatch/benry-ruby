@@ -1574,7 +1574,7 @@ Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
 
 Actions:
@@ -1943,7 +1943,7 @@ topic Benry::CmdApp::Application do
       ok {items[1].key} == :version
       ok {items[2].key} == :debug
       ok {schema.option_help()} == <<END
-  -h, --help     : print help message (of action if action specified)
+  -h, --help     : print help message
   -V, --version  : print version
   -D, --debug    : debug mode (set $DEBUG_MODE to true)
 END
@@ -2364,7 +2364,7 @@ Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
@@ -2533,7 +2533,7 @@ Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
   -v, --verbose      : verbose mode
@@ -2746,7 +2746,7 @@ Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
@@ -2798,7 +2798,7 @@ END
 END
       ok {sout}.include?(<<"END")
 \e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message (of action if action specified)
+  \e[1m-h, --help        \e[0m : print help message
   \e[1m-V, --version     \e[0m : print version
 END
       ok {sout}.include?(<<"END")
@@ -2815,7 +2815,7 @@ Usage:
 END
       ok {sout}.include?(<<"END")
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
 END
       ok {sout}.include?(<<"END")
@@ -2836,7 +2836,7 @@ END
 END
         ok {sout}.include?(<<"END")
 \e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message (of action if action specified)
+  \e[1m-h, --help        \e[0m : print help message
   \e[1m-V, --version     \e[0m : print version
 END
         ok {sout}.include?(<<"END")
@@ -2860,7 +2860,7 @@ Usage:
 END
         ok {sout}.include?(<<"END")
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
 END
         ok {sout}.include?(<<"END")
@@ -3163,7 +3163,7 @@ topic Benry::CmdApp::AppHelpBuilder do
   $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]
 
 \e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message (of action if action specified)
+  \e[1m-h, --help        \e[0m : print help message
   \e[1m-V, --version     \e[0m : print version
   \e[1m-a, --all         \e[0m : list all actions/options including private (hidden) ones
   \e[1m-D, --debug       \e[0m : debug mode (set $DEBUG_MODE to true)
@@ -3181,7 +3181,7 @@ Usage:
   $ testapp [<options>] [<action> [<arguments>...]]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
@@ -3305,7 +3305,7 @@ END
       msg = uncolorize(msg)
       ok {msg}.include?(<<END)
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
   -D, --debug        : debug mode (set $DEBUG_MODE to true)
@@ -3320,7 +3320,7 @@ END
       msg = uncolorize(msg)
       ok {msg}.include?(<<END)
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -a, --all          : list all actions/options including private (hidden) ones
 
 Actions:
@@ -3338,7 +3338,7 @@ END
       ok {msg} !~ /^  -L /
       ok {msg}.include?(<<END)
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -a, --all          : list all actions/options including private (hidden) ones
 
 Actions:
@@ -3356,7 +3356,7 @@ END
       ok {msg} =~ /^  -L /
       ok {msg}.include?(<<END)
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message
   -a, --all          : list all actions/options including private (hidden) ones
   -L                 : private option
 
