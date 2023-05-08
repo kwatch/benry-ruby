@@ -1772,7 +1772,7 @@ topic Benry::CmdApp::Application do
       ok {schema.option_help()} == <<END
   -h, --help     : print help message (of action if action specified)
   -V, --version  : print version
-  -D, --debug    : set $DEBUG_MODE to true
+  -D, --debug    : debug mode (set $DEBUG_MODE to true)
 END
     end
 
@@ -2194,7 +2194,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG_MODE to true
+  -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
 END
@@ -2365,7 +2365,7 @@ Options:
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
   --color[=<on|off>] : enable/disable color
-  -D, --debug        : set $DEBUG_MODE to true
+  -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
 END
@@ -2575,7 +2575,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG_MODE to true
+  -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
 END
@@ -2966,7 +2966,7 @@ topic Benry::CmdApp::AppHelpBuilder do
   \e[1m-h, --help        \e[0m : print help message (of action if action specified)
   \e[1m-V, --version     \e[0m : print version
   \e[1m-a, --all         \e[0m : list all actions/options including private (hidden) ones
-  \e[1m-D, --debug       \e[0m : set $DEBUG_MODE to true
+  \e[1m-D, --debug       \e[0m : debug mode (set $DEBUG_MODE to true)
 
 \e[34mActions:\e[0m
   \e[1mya:ya             \e[0m : greeting #2
@@ -2984,7 +2984,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG_MODE to true
+  -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
   ya:ya              : greeting #2
@@ -3108,7 +3108,7 @@ Options:
   -h, --help         : print help message (of action if action specified)
   -V, --version      : print version
   -a, --all          : list all actions/options including private (hidden) ones
-  -D, --debug        : set $DEBUG_MODE to true
+  -D, --debug        : debug mode (set $DEBUG_MODE to true)
 
 Actions:
 END

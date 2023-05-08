@@ -837,7 +837,7 @@ module Benry::CmdApp
       #; [!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set.
       add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass) if c.option_color
       #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
-      add(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true") if c.option_debug
+      add(:debug  , "-D, --debug"  , "debug mode (set $DEBUG_MODE to true)") if c.option_debug
       #; [!s97go] adds '-T, --trace' option if 'config.option_trace' is set.
       add(:trace  , "-T, --trace"  , "report enter into and exit from actions") if c.option_trace
     end
