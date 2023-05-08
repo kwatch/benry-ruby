@@ -299,6 +299,13 @@ module Benry
         return @items.find {|item| item.long == long }
       end
 
+      def sort_in_this_order(*keys)
+        #; [!iuq6p] sort items in order of keys specified.
+        #; [!6zzwi] options which key doesn't appear in keys are moved at end.
+        @items.sort_by! {|item| keys.index(item.key) || Float::INFINITY }
+        nil
+      end
+
       private
 
       def error(msg)
