@@ -363,6 +363,55 @@ topic Benry::CmdApp::Index do
   end
 
 
+  topic '#delete_action()' do
+
+    spec "[!08e1s] unregisters action." do
+      class DeleteActionTest < Benry::CmdApp::Action
+        @action.("test")
+        def delaction1(); end
+      end
+      name = "delaction1"
+      ok {Benry::CmdApp::INDEX.action_exist?(name)} == true
+      Benry::CmdApp::INDEX.delete_action(name)
+      ok {Benry::CmdApp::INDEX.action_exist?(name)} == false
+    end
+
+    spec "[!zjpq0] raises error if action not registered." do
+      name = "delaction99"
+      ok {Benry::CmdApp::INDEX.action_exist?(name)} == false
+      pr = proc { Benry::CmdApp::INDEX.delete_action(name) }
+      ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError,
+                     "delete_action(\"delaction99\"): action not found.")
+    end
+
+  end
+
+
+  topic '#delete_alias()' do
+
+    spec "[!8ls45] unregisters alias." do
+      class DeleteAliasTest < Benry::CmdApp::Action
+        @action.("test")
+        def delalias1(); end
+      end
+      Benry::CmdApp.action_alias("delali1", "delalias1")
+      name = "delali1"
+      ok {Benry::CmdApp::INDEX.alias_exist?(name)} == true
+      Benry::CmdApp::INDEX.delete_alias(name)
+      ok {Benry::CmdApp::INDEX.alias_exist?(name)} == false
+    end
+
+    spec "[!fdfyq] raises error if alias not registered." do
+      name = "delalias99"
+      ok {Benry::CmdApp::INDEX.alias_exist?(name)} == false
+      pr = proc { Benry::CmdApp::INDEX.delete_alias(name) }
+      ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError,
+                     "delete_alias(\"delalias99\"): alias not found.")
+    end
+
+  end
+
+
 end
 
 

@@ -194,6 +194,13 @@ module Benry::CmdApp
       action_metadata
     end
 
+    def delete_action(action_name)
+      #; [!08e1s] unregisters action.
+      #; [!zjpq0] raises error if action not registered.
+      @actions.delete(action_name.to_s)  or
+        raise ActionNotFoundError.new("delete_action(#{action_name.inspect}): action not found.")
+    end
+
     def action_exist?(action_name)
       return @actions.key?(action_name.to_s)
     end
@@ -228,6 +235,13 @@ module Benry::CmdApp
     def register_alias(alias_name, alias_obj)
       @aliases[alias_name.to_s] = alias_obj
       alias_obj
+    end
+
+    def delete_alias(alias_name)
+      #; [!8ls45] unregisters alias.
+      #; [!fdfyq] raises error if alias not registered.
+      @aliases.delete(alias_name.to_s)  or
+        raise ActionNotFoundError.new("delete_alias(#{alias_name.inspect}): alias not found.")
     end
 
     def get_alias(alias_name)
