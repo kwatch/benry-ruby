@@ -45,7 +45,7 @@ module CommonTestingHelper
 
   module_function
 
-  def clear_index_except(klass)  # XXXX
+  def clear_index_except(klass)
     actions = Benry::CmdApp::INDEX.instance_variable_get('@actions')
     aliases = Benry::CmdApp::INDEX.instance_variable_get('@aliases')
     @_bkup_actions = actions.dup()
@@ -1465,6 +1465,56 @@ topic Benry::CmdApp::Action do
       ensure
         AliasOfTest5b.class_eval { @__aliasof__ = nil }
       end
+    end
+
+  end
+
+
+end
+
+
+topic Benry::CmdApp::BuiltInAction do
+  include CommonTestingHelper
+
+  before do
+    @config = Benry::CmdApp::Config.new("test app", "1.0.0")
+    @config.app_name = "TestApp"
+    @config.app_command = "testapp"
+    @app = Benry::CmdApp::Application.new(@config)
+  end
+
+
+  topic '#help()' do
+
+    spec "[!jfgsy] prints help message of action if action name specified." do
+      sout, serr = capture_sio { @app.run("help", "help") }
+      ok {serr} == ""
+      ok {uncolorize(sout)} == <<"END"
+testapp help -- print help message (of action)
+
+Usage:
+  $ testapp help [<options>] [<action>]
+
+Options:
+  -a, --all          : show private (hidden) options, too
+END
+    end
+
+    spec "[!fhpjg] prints help message of command if action name not specified." do
+      sout, serr = capture_sio { @app.run("help") }
+      ok {serr} == ""
+      ok {uncolorize(sout)}.start_with?(<<"END")
+TestApp (1.0.0) -- test app
+
+Usage:
+  $ testapp [<options>] [<action> [<arguments>...]]
+
+Options:
+  -h, --help         : print help message (of action if action specified)
+  -V, --version      : print version
+
+Actions:
+END
     end
 
   end

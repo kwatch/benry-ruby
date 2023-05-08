@@ -700,6 +700,30 @@ module Benry::CmdApp
   end
 
 
+  class BuiltInAction < Action
+
+    @action.("print help message (of action)")
+    @option.(:all, "-a, --all", "show private (hidden) options, too")
+    def help(action=nil, all: false)
+      action_name = action
+      #; [!jfgsy] prints help message of action if action name specified.
+      if action_name
+        action_metadata = INDEX.get_action(action_name)  or
+          raise ActionNotFoundError.new("#{action}: action not found.")
+        help_builder = ACTION_HELP_BUILDER_CLASS.new(action_metadata)
+        config = $cmdapp_config
+        msg = help_builder.build_help_message(config.app_command, all)
+      #; [!fhpjg] prints help message of command if action name not specified.
+      else
+        app = $cmdapp_application
+        msg = app.help_message(all)
+      end
+      print msg
+    end
+
+  end
+
+
   def self.action_alias(alias_name, action_name, *args, important: nil, tag: nil)
     invocation = "action_alias(#{alias_name.inspect}, #{action_name.inspect})"
     #; [!5immb] convers both alias name and action name into string.
