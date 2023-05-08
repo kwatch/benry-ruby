@@ -427,7 +427,7 @@ module Benry::CmdApp
 
   class HelpBuilder
 
-    def build_section(title, desc, content, all=false)
+    def build_section(title, desc, content)
       #; [!cfijh] includes section title and content if specified by config.
       #; [!09jzn] second argument can be nil.
       sb = []
@@ -1253,7 +1253,7 @@ module Benry::CmdApp
       @config.help_sections.each do |title, desc, content|
         #; [!kqnxl] array of section may have two or three elements.
         content, desc = desc, nil if content == nil
-        sb << build_section(title, desc, content, all)
+        sb << build_section(title, desc, content)
       end if @config.help_sections
       sb << build_postamble(all)
       return sb.reject {|s| s.nil? || s.empty? }.join("\n")
