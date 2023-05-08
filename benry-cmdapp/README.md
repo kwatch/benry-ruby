@@ -59,6 +59,7 @@ Table of Contents
   * <a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a>
   * <a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a>
   * <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?</a>
+  * <a href="#q-how-to-change-order-of-options-in-help-message">Q: How to Change Order of Options in Help Message?</a>
   * <a href="#q-is-it-possible-to-make-action-names-emphasised-or-weaken">Q: Is It Possible to Make Action Names Emphasised or Weaken?</a>
   * <a href="#q-is-it-possible-to-add-metadata-to-action-or-option">Q: Is It Possible to Add Metadata to Action or Option?</a>
   * <a href="#q-how-to-make-error-messages-i18ned">Q: How to Make Error Messages I18Ned?</a>
@@ -1331,8 +1332,8 @@ Application Configuration
 * `config.default_help = true` prints help message if no action names specified in command-line. (default: `false`)
 * `config.option_help = true` enables `-h` and `--help` options. (default: `true`)
 * `config.option_all = true` enables `-a` and `--all` options which shows private (hidden) actions and options into help message. (default: `false`)
-* `config.option_verbose = true` enables `-v` and `--verbose` options which sets `$VERBOSE_MODE = true`. (default: `false`)
-* `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$VERBOSE_MODE = false`. (default: `false`)
+* `config.option_verbose = true` enables `-v` and `--verbose` options which sets `$QUIET_MODE = false`. (default: `false`)
+* `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$QUIET_MODE = true`. (default: `false`)
 * `config.option_color = true` enables `--color[=<on|off>]` option which sets `$COLOR_MODE = true/false`. This affects to help message colorized or not. (default: `false`)
 * `config.option_debug = true` enables `-D` and `--debug` options which sets `$DEBUG_MODE = true`. (default: `false`)
 * `config.option_trace = true` enables `-T` and `--trace` options which sets `$TRACE_MODE = true`. Entering into and exitting from action are reported when trace mode is on. (default: `false`)
@@ -1498,11 +1499,11 @@ class MyApplication < Benry::CmdApp::Application
     ## here is original behaviour
     #global_opts.each do |key, val|
     #  case key
-    #  when :verbose ; $VERBOSE_MODE = val
-    #  when :quiet   ; $VERBOSE_MODE = !val
-    #  when :color   ; $COLOR_MODE   = val
-    #  when :debug   ; $DEBUG_MODE   = val
-    #  when :trace   ; $TRACE_MODE   = val
+    #  when :verbose ; $QUIET_MODE = ! val
+    #  when :quiet   ; $QUIET_MODE = val
+    #  when :color   ; $COLOR_MODE = val
+    #  when :debug   ; $DEBUG_MODE = val
+    #  when :trace   ; $TRACE_MODE = val
     #  else          ; # do nothing
     #  end
     #end
@@ -2301,12 +2302,58 @@ In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
 and action `bbb` is not an alias due to `prefix(action:)`.
 
 
+Q: How to Change Order of Options in Help Message?
+--------------------------------------------------
+
+A: Call `AppOptionSchema#sort_options_in_this_order()`.
+
+File: ex48.rb
+
+```ruby
+require 'benry/cmdapp'
+
+config = Benry::CmdApp::Config.new("sample app", "1.0.0",
+  option_all:       true,
+  option_quiet:     true,
+  option_color:     true,
+)
+schema = Benry::CmdApp::AppOptionSchema.new(config)
+keys = [:all, :quiet, :color, :help, :version]         # !!!!
+schema.sort_options_in_this_order(*keys)               # !!!!
+app = Benry::CmdApp::Application.new(config, schema)
+## or:
+#app = Benry::CmdApp::Application.new(config)
+#app.schema.sort_options_in_this_order(*keys)          # !!!!
+exit app.main()
+```
+
+Help message:
+
+```console
+[bash]$ ruby ex48.rb -h
+ex48.rb (1.0.0) -- sample app
+
+Usage:
+  $ ex48.rb [<options>] [<action> [<arguments>...]]
+
+Options:
+  -a, --all          : list all actions/options including private (hidden) ones
+  -q, --quiet        : quiet mode
+  --color[=<on|off>] : enable/disable color
+  -h, --help         : print help message (of action if action specified)
+  -V, --version      : print version
+
+Actions:
+
+```
+
+
 Q: Is It Possible to Make Action Names Emphasised or Weaken?
 ------------------------------------------------------------
 
 A: Yes. When you pass `important: true` to `@action.()`, that action will be printed with unerline in help message. When you pass `important: false`, that action will be printed in gray color.
 
-File: ex48.rb
+File: ex49.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2331,11 +2378,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex48.rb -h
-ex48.rb -- sample app
+[bash]$ ruby ex49.rb -h
+ex49.rb -- sample app
 
 Usage:
-  $ ex48.rb [<options>] [<action> [<arguments>...]]
+  $ ex49.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2347,7 +2394,7 @@ Actions:
 
 
 Q: Is It Possible to Add Metadata to Action or Option?
-----------------------------------------------------------
+------------------------------------------------------
 
 A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 
@@ -2355,7 +2402,7 @@ A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 * Currenty, Benry::CmdApp doesn't provide the good way to use it effectively.
   This feature is supported for command-line application or framework based on Benry::CmdApp.
 
-File: ex49.rb
+File: ex50.rb
 
 ```ruby
 require 'benry/cmdapp'
