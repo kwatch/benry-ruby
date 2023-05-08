@@ -427,9 +427,9 @@ module Benry::CmdApp
 
   class HelpBuilder
 
-    def build_section(title, desc, content)
+    def build_section(title, content, desc=nil)
       #; [!cfijh] includes section title and content if specified by config.
-      #; [!09jzn] second argument can be nil.
+      #; [!09jzn] third argument can be nil.
       sb = []
       if desc
         sb << heading(title) << " " << desc << "\n"
@@ -494,7 +494,7 @@ module Benry::CmdApp
       s = s.rstrip()
       sb = []
       sb << (format % ["#{command} #{@am.name}", s]) << "\n"
-      return build_section("Usage", nil, sb.join())
+      return build_section("Usage", sb.join(), nil)
     end
 
     def build_options(command, all=false)
@@ -519,7 +519,7 @@ module Benry::CmdApp
       end
       #; [!pvu56] ignores 'Options:' section when no options exist.
       return nil if sb.empty?
-      return build_section("Options", nil, sb.join())
+      return build_section("Options", sb.join(), nil)
     end
 
     def build_postamble(command, all=false)
@@ -1250,10 +1250,9 @@ module Benry::CmdApp
       sb << build_actions(all, format)
       #; [!oxpda] prints 'Aliases:' section only when 'config.help_aliases' is true.
       sb << build_aliases(all, format) if @config.help_aliases
-      @config.help_sections.each do |title, desc, content|
+      @config.help_sections.each do |title, content, desc|
         #; [!kqnxl] array of section may have two or three elements.
-        content, desc = desc, nil if content == nil
-        sb << build_section(title, desc, content)
+        sb << build_section(title, content, desc)
       end if @config.help_sections
       sb << build_postamble(all)
       return sb.reject {|s| s.nil? || s.empty? }.join("\n")
@@ -1290,7 +1289,7 @@ module Benry::CmdApp
       #; [!o176w] includes command name specified by config.
       sb = []
       sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"])
-      return build_section("Usage", nil, sb.join())
+      return build_section("Usage", sb.join(), nil)
     end
 
     def build_options(all=false, format=nil)
@@ -1309,7 +1308,7 @@ module Benry::CmdApp
       #; [!bm71g] ignores 'Options:' section if no options exist.
       return nil if sb.empty?
       #; [!proa4] includes description of global options.
-      return build_section("Options", nil, sb.join())
+      return build_section("Options", sb.join(), nil)
     end
 
     def build_actions(all=false, format=nil)
@@ -1331,7 +1330,7 @@ module Benry::CmdApp
           sb << Util.format_help_line(format, name, desc, important)
         end
       end
-      return build_section("Actions", desc, sb.join())
+      return build_section("Actions", sb.join(), desc)
     end
 
     def build_aliases(all=false, format=nil)
@@ -1351,7 +1350,7 @@ module Benry::CmdApp
       #; [!p3oh6] now show 'Aliases:' section if no aliases defined.
       return nil if sb.empty?
       #; [!we1l8] shows 'Aliases:' section if any aliases defined.
-      return build_section("Aliases", nil, sb.join())
+      return build_section("Aliases", sb.join(), nil)
     end
 
     def build_postamble(all=false)
