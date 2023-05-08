@@ -467,7 +467,7 @@ module Benry::CmdApp
       s = s.rstrip()
       sb = []
       sb << (format % ["#{command} #{@am.name}", s]) << "\n"
-      return build_section("Usage:", nil, sb.join())
+      return build_section("Usage", nil, sb.join())
     end
 
     def build_options(command, all=false)
@@ -492,7 +492,7 @@ module Benry::CmdApp
       end
       #; [!pvu56] ignores 'Options:' section when no options exist.
       return nil if sb.empty?
-      return build_section("Options:", nil, sb.join())
+      return build_section("Options", nil, sb.join())
     end
 
     def build_postamble(command, all=false)
@@ -765,11 +765,11 @@ module Benry::CmdApp
     FORMAT_USAGE      = "  $ \e[1m%s\e[0m %s"      # bold
     #FORMAT_USAGE     = "  $ \e[34m%s\e[0m %s"     # blue
 
-    #FORMAT_HEADING   = "%s"
-    #FORMAT_HEADING   = "\e[1m%s\e[0m"             # bold
-    #FORMAT_HEADING   = "\e[1;4m%s\e[0m"           # bold, underline
-    FORMAT_HEADING    = "\e[34m%s\e[0m"            # blue
-    #FORMAT_HEADING   = "\e[33;4m%s\e[0m"          # yellow, underline
+    #FORMAT_HEADING   = "%s:"
+    #FORMAT_HEADING   = "\e[1m%s:\e[0m"            # bold
+    #FORMAT_HEADING   = "\e[1;4m%s:\e[0m"          # bold, underline
+    FORMAT_HEADING    = "\e[34m%s:\e[0m"           # blue
+    #FORMAT_HEADING   = "\e[33;4m%s:\e[0m"         # yellow, underline
 
     def initialize(app_desc, app_version=nil,
                    app_name: nil, app_command: nil, app_detail: nil,
@@ -1121,7 +1121,7 @@ module Benry::CmdApp
         aname2aliases[action_] << alias_ if aname2aliases.key?(action_)
       end
       sb = []
-      sb << @config.format_heading % "Actions:" << "\n"
+      sb << @config.format_heading % "Actions" << "\n"
       format = @config.format_help
       indent = " " * (Util.del_escape_seq(format) % ['', '']).length
       pairs.sort_by {|aname, _, _| aname }.each do |aname, adesc, important|
@@ -1216,7 +1216,7 @@ module Benry::CmdApp
       #; [!o176w] includes command name specified by config.
       sb = []
       sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"])
-      return build_section("Usage:", nil, sb.join())
+      return build_section("Usage", nil, sb.join())
     end
 
     def build_options(all=false, format=nil)
@@ -1235,7 +1235,7 @@ module Benry::CmdApp
       #; [!bm71g] ignores 'Options:' section if no options exist.
       return nil if sb.empty?
       #; [!proa4] includes description of global options.
-      return build_section("Options:", nil, sb.join())
+      return build_section("Options", nil, sb.join())
     end
 
     def build_actions(all=false, format=nil)
@@ -1257,7 +1257,7 @@ module Benry::CmdApp
           sb << Util.format_help_line(format, name, desc, important)
         end
       end
-      return build_section("Actions:", desc, sb.join())
+      return build_section("Actions", desc, sb.join())
     end
 
     def build_aliases(all=false, format=nil)
@@ -1277,7 +1277,7 @@ module Benry::CmdApp
       #; [!p3oh6] now show 'Aliases:' section if no aliases defined.
       return nil if sb.empty?
       #; [!we1l8] shows 'Aliases:' section if any aliases defined.
-      return build_section("Aliases:", nil, sb.join())
+      return build_section("Aliases", nil, sb.join())
     end
 
     def build_postamble(all=false)

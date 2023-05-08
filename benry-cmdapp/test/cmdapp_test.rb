@@ -712,7 +712,7 @@ topic Benry::CmdApp::HelpBuilder do
     spec "[!cfijh] includes section title and content if specified by config." do
       msg = @builder.build_section("Example", nil, "  $ echo 'Hello, world!'")
       ok {msg} == <<"END"
-\e[34mExample\e[0m
+\e[34mExample:\e[0m
   $ echo 'Hello, world!'
 END
     end
@@ -720,7 +720,7 @@ END
     spec "[!09jzn] second argument can be nil." do
       msg = @builder.build_section("Example", "(see https://...)", "  $ echo 'Hello, world!'")
       ok {msg} == <<"END"
-\e[34mExample\e[0m (see https://...)
+\e[34mExample:\e[0m (see https://...)
   $ echo 'Hello, world!'
 END
     end
@@ -3300,8 +3300,8 @@ END
 
     spec "[!kqnxl] array of section may have two or three elements." do
       @config.help_sections = [
-        ["Example:", "(see https://...)", "  $ echo foobar"],
-        ["Tips:", "  * foobar"],
+        ["Example", "(see https://...)", "  $ echo foobar"],
+        ["Tips", "  * foobar"],
       ]
       app = Benry::CmdApp::Application.new(@config)
       msg = app.help_message()
