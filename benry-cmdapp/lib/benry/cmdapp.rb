@@ -842,6 +842,14 @@ module Benry::CmdApp
       add(:trace  , "-T, --trace"  , "report enter into and exit from actions") if c.option_trace
     end
 
+    def sort_options_in_this_order(*keys)
+      #; [!6udxr] sorts options in order of keys specified.
+      #; [!8hhuf] options which key doesn't appear in keys are moved at end of options.
+      len = @items.length
+      @items.sort_by! {|item| keys.index(item.key) || @items.index(item) + len }
+      nil
+    end
+
   end
 
 

@@ -1693,6 +1693,38 @@ topic Benry::CmdApp::AppOptionSchema do
   end
 
 
+  topic '#sort_options_in_this_order()' do
+
+    def new_gschema(desc="app test", version="1.0.0")
+      config = Benry::CmdApp::Config.new(desc, version)
+      config.option_all = true
+      config.option_verbose = true
+      config.option_quiet = true
+      config.option_debug = true
+      return Benry::CmdApp::AppOptionSchema.new(config)
+    end
+
+    spec "[!6udxr] sorts options in order of keys specified." do
+      x = new_gschema()
+      keys1 = x.each.collect(&:key)
+      ok {keys1} == [:help, :version, :all, :verbose, :quiet, :debug]
+      x.sort_options_in_this_order(:help, :quiet, :verbose, :all, :trace, :debug, :version)
+      keys2 = x.each.collect(&:key)
+      ok {keys2} == [:help, :quiet, :verbose, :all, :debug, :version]
+    end
+
+    spec "[!8hhuf] options which key doesn't appear in keys are moved at end of options." do
+      x = new_gschema()
+      x.sort_options_in_this_order(:quiet, :verbose, :all, :debug)  # missing :help and :version
+      keys = x.each.collect(&:key)
+      ok {keys[-2]} == :help
+      ok {keys[-1]} == :version
+      ok {keys} == [:quiet, :verbose, :all, :debug, :help, :version]
+    end
+
+  end
+
+
 end
 
 
