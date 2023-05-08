@@ -53,6 +53,8 @@ Table of Contents
   * <a href="#customization-of-action-help-message">Customization of Action Help Message</a>
 * <a href="#q--a">Q &amp; A</a>
   * <a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a>
+  * <a href="#q-how-to-re-define-existing-action">Q: How to Re-define Existing Action?</a>
+  * <a href="#q-how-to-delete-existing-actionalias">Q: How to Delete Existing Action/Alias?</a>
   * <a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a>
   * <a href="#q-how-to-enabledisable-color-mode">Q: How to Enable/Disable Color Mode?</a>
   * <a href="#q-how-to-define-multiple-option-like--i-option-of-ruby">Q: How to Define Multiple Option like '-I' Option of Ruby?</a>
@@ -2018,12 +2020,70 @@ Hi, Alice!
 ```
 
 
+Q: How to Re-define Existing Action?
+------------------------------------
+
+A: Remove existing action at first, and re-define action.
+
+File: ex42.rb
+
+```ruby
+require 'benry/cmdapp'
+
+class SampleAction < Benry::CmdApp::Action
+
+  @action.("sample action")
+  def hello()                               # !!!!
+    puts "Hello, world!"
+  end
+
+end
+
+Benry::CmdApp.delete_action("hello")        # !!!!
+
+class OtherAction < Benry::CmdApp::Action
+
+  @action.("other action")                  # !!!!
+  def hello()                               # !!!!
+    puts "Ciao, world!"
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Help message:
+
+```console
+[bash]$ ruby ex42.rb -h
+ex42.rb -- sample app
+
+Usage:
+  $ ex42.rb [<options>] [<action> [<arguments>...]]
+
+Options:
+  -h, --help         : print help message (of action if action specified)
+
+Actions:
+  hello              : other action       # !!!!
+```
+
+
+Q: How to Delete Existing Action/Alias?
+---------------------------------------
+
+A: Call `Benry::CmdApp.delete_action("<action>")` or `Benry::CmdApp.delete_alias("<alias>")`.
+
+
 Q: How to Show Entering Into or Exitting From Action?
 -----------------------------------------------------
 
 A: Set `config.option_trace = true` and pass `-T` (or `--trace`) option.
 
-File: ex42.rb
+File: ex43.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2052,7 +2112,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex42.rb -T build           # !!!!
+[bash]$ ruby ex43.rb -T build           # !!!!
 ## enter: build
 ## enter: prepare
 ... prepare something ...
@@ -2067,7 +2127,7 @@ Q: How to Enable/Disable Color Mode?
 
 A: Set `config.option_color = true` and pass `--color=on` or `--color=off` option.
 
-File: ex43.rb
+File: ex44.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2090,11 +2150,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex43.rb -h
-ex43.rb -- sample app
+[bash]$ ruby ex44.rb -h
+ex44.rb -- sample app
 
 Usage:
-  $ ex43.rb [<options>] [<action> [<arguments>...]]
+  $ ex44.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2103,9 +2163,9 @@ Options:
 Actions:
   hello              : greeting message
 
-[bash]$ ruby ex43.rb -h --color=off              # !!!!
+[bash]$ ruby ex44.rb -h --color=off              # !!!!
 
-[bash]$ ruby ex43.rb -h --color=on               # !!!!
+[bash]$ ruby ex44.rb -h --color=on               # !!!!
 ```
 
 
@@ -2114,7 +2174,7 @@ Q: How to Define Multiple Option like '-I' Option of Ruby?
 
 A: Provide block parameter on `@option.()`.
 
-File: ex44.rb
+File: ex45.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2143,7 +2203,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex44.rb test -I /tmp -I /var/tmp     # !!!!
+[bash]$ ruby ex45.rb test -I /tmp -I /var/tmp     # !!!!
 path=["/tmp", "/var/tmp"]                         # !!!!
 ```
 
@@ -2153,7 +2213,7 @@ Q: How to Specify Detailed Description of Option?
 
 A: Add `detail:` keyword argument to `@option.()`.
 
-File: ex45.rb
+File: ex46.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2180,11 +2240,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex45.rb -h test
-ex45.rb test -- detailed description test
+[bash]$ ruby ex46.rb -h test
+ex46.rb test -- detailed description test
 
 Usage:
-  $ ex45.rb test [<options>]
+  $ ex46.rb test [<options>]
 
 Options:
   -m <mode>          : output mode
@@ -2199,7 +2259,7 @@ Q: How to Copy All Options from Other Action?
 
 A: Use `@copy_options.()`.
 
-File: ex46.rb
+File: ex47.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2231,11 +2291,11 @@ exit app.main()
 Help message of `test2` action:
 
 ```console
-[bash]$ ruby ex46.rb -h test2
-ex46.rb test2 -- test action #2
+[bash]$ ruby ex47.rb -h test2
+ex47.rb test2 -- test action #2
 
 Usage:
-  $ ex46.rb test2 [<options>]
+  $ ex47.rb test2 [<options>]
 
 Options:
   -v, --verbose      : verbose mode     # copied!!
@@ -2250,7 +2310,7 @@ Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?
 
 A: The former defines an alias, and the latter doesn't.
 
-File: ex47.rb
+File: ex48.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2283,11 +2343,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex47.rb
-ex47.rb -- sample app
+[bash]$ ruby ex48.rb
+ex48.rb -- sample app
 
 Usage:
-  $ ex47.rb [<options>] [<action> [<arguments>...]]
+  $ ex48.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2307,7 +2367,7 @@ Q: How to Change Order of Options in Help Message?
 
 A: Call `AppOptionSchema#sort_options_in_this_order()`.
 
-File: ex48.rb
+File: ex49.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2330,11 +2390,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex48.rb -h
-ex48.rb (1.0.0) -- sample app
+[bash]$ ruby ex49.rb -h
+ex49.rb (1.0.0) -- sample app
 
 Usage:
-  $ ex48.rb [<options>] [<action> [<arguments>...]]
+  $ ex49.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -a, --all          : list all actions/options including private (hidden) ones
@@ -2353,7 +2413,7 @@ Q: Is It Possible to Make Action Names Emphasised or Weaken?
 
 A: Yes. When you pass `important: true` to `@action.()`, that action will be printed with unerline in help message. When you pass `important: false`, that action will be printed in gray color.
 
-File: ex49.rb
+File: ex50.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2378,11 +2438,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex49.rb -h
-ex49.rb -- sample app
+[bash]$ ruby ex50.rb -h
+ex50.rb -- sample app
 
 Usage:
-  $ ex49.rb [<options>] [<action> [<arguments>...]]
+  $ ex50.rb [<options>] [<action> [<arguments>...]]
 
 Options:
   -h, --help         : print help message (of action if action specified)
@@ -2402,7 +2462,7 @@ A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 * Currenty, Benry::CmdApp doesn't provide the good way to use it effectively.
   This feature is supported for command-line application or framework based on Benry::CmdApp.
 
-File: ex50.rb
+File: ex51.rb
 
 ```ruby
 require 'benry/cmdapp'
