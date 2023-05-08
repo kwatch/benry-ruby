@@ -664,6 +664,9 @@ module Benry::CmdApp
       errmsg = metadata.validate_method_params()
       errmsg == nil  or
         raise ActionDefError.new("def #{method}(): #{errmsg}")
+      #; [!t8vbf] raises error if action name duplicated.
+      ! INDEX.action_exist?(name)  or
+        raise ActionDefError.new("def #{method}(): action '#{name}' already exist.")
       INDEX.register_action(name, metadata)
       #; [!jpzbi] defines same name alias of action as prefix.
       #; [!997gs] not raise error when action not found.

@@ -1295,15 +1295,29 @@ topic Benry::CmdApp::Action do
 
     spec "[!4pbsc] raises error if keyword param for option not exist in method." do
       pr = proc do
+        class Added4Test < Benry::CmdApp::Action
+          prefix "added4"
+          @action.("test")
+          @option.(:flag, "--flag=<on|off>", nil, type: TrueClass)
+          def hello4(xx: nil); end
+        end
+      end
+      ok {pr}.raise?(Benry::CmdApp::ActionDefError,
+                     "def hello4(): should have keyword parameter 'flag' for '@option.(:flag)', but not.")
+    end
+
+    spec "[!t8vbf] raises error if action name duplicated." do
+      pr = proc do
         class Added5Test < Benry::CmdApp::Action
           prefix "added5"
           @action.("test")
-          @option.(:flag, "--flag=<on|off>", nil, type: TrueClass)
+          def hello5(xx: nil); end
+          @action.("test")
           def hello5(xx: nil); end
         end
       end
       ok {pr}.raise?(Benry::CmdApp::ActionDefError,
-                     "def hello5(): should have keyword parameter 'flag' for '@option.(:flag)', but not.")
+                     "def hello5(): action 'added5:hello5' already exist.")
     end
 
     topic '[!5e5o0] when method name is same as default action name...' do
