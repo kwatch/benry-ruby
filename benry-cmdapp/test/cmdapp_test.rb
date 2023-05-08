@@ -1543,6 +1543,7 @@ topic Benry::CmdApp::BuiltInAction do
     @config = Benry::CmdApp::Config.new("test app", "1.0.0")
     @config.app_name = "TestApp"
     @config.app_command = "testapp"
+    @config.default_action = nil
     @app = Benry::CmdApp::Application.new(@config)
   end
 
@@ -1918,6 +1919,7 @@ topic Benry::CmdApp::Application do
   before do
     @config = Benry::CmdApp::Config.new("test app", "1.0.0",
                                         app_name: "TestApp", app_command: "testapp",
+                                        default_action: nil,
                                         option_all: true, option_debug: true)
     @app = Benry::CmdApp::Application.new(@config)
   end
@@ -2517,6 +2519,7 @@ END
         option_quiet:   true,
         option_color:   true,
         option_debug:   true,
+        default_action: nil,
       }
       config = Benry::CmdApp::Config.new("test app", "1.0.0", **kws)
       return Benry::CmdApp::Application.new(config)
@@ -3120,6 +3123,7 @@ topic Benry::CmdApp::AppHelpBuilder do
       config.app_command  = "testapp"
       config.option_all   = true
       config.option_debug = true
+      config.default_action = nil
     end
     @schema = Benry::CmdApp::AppOptionSchema.new(@config)
     @builder = Benry::CmdApp::AppHelpBuilder.new(@config, @schema)

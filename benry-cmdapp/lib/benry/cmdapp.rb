@@ -827,7 +827,7 @@ module Benry::CmdApp
 
     def initialize(app_desc, app_version=nil,
                    app_name: nil, app_command: nil, app_detail: nil,
-                   default_action: nil, default_help: false,
+                   default_action: "help", default_help: false,
                    option_help: true, option_all: false,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: false, option_trace: false,
