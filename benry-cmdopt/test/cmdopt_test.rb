@@ -822,30 +822,6 @@ END
   end
 
 
-  describe '#sort_in_this_order()' do
-
-    it "[!iuq6p] sort items in order of keys specified." do
-      schema = new_sample_schema()
-      keys1 = schema.each.collect(&:key)
-      ok {keys1} == [:help, :version, :file, :indent, :mode, :libpath]
-      schema.sort_in_this_order(:help, :mode, :indent, :file, :libpath, :version)
-      keys2 = schema.each.collect(&:key)
-      ok {keys2} == [:help, :mode, :indent, :file, :libpath, :version]
-    end
-
-    it "[!6zzwi] options which key doesn't appear in keys are moved at end." do
-      schema = new_sample_schema()
-      keys1 = schema.each.collect(&:key)
-      ok {keys1} == [:help, :version, :file, :indent, :mode, :libpath]
-      schema.sort_in_this_order(:help, :mode, :indent, :file, :version)  # missing `:libpath`
-      keys2 = schema.each.collect(&:key)
-      ok {keys2[-1]} == :libpath
-      ok {keys2} == [:help, :mode, :indent, :file, :version, :libpath]
-    end
-
-  end
-
-
 end
 
 
