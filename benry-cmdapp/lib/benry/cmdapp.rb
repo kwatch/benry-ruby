@@ -831,7 +831,7 @@ module Benry::CmdApp
                    option_help: true, option_all: false,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: false, option_trace: false,
-                   help_aliases: false, help_sections: [], help_postamble: nil,
+                   help_action: true, help_aliases: false, help_sections: [], help_postamble: nil,
                    format_help: nil, format_appname: nil, format_usage: nil, format_heading: nil,
                    feat_candidate: true)
       #; [!uve4e] sets command name automatically if not provided.
@@ -849,6 +849,7 @@ module Benry::CmdApp
       @option_color   = option_color    # '--color[=<on|off>]' enabled when true
       @option_debug   = option_debug    # '-D' and '--debug' are enabled when true
       @option_trace   = option_trace    # '-T' and '--trace' are enabled when true
+      @help_action    = help_action     # define built-in 'help' action when true
       @help_aliases   = help_aliases    # 'Aliases:' section printed when true
       @help_sections  = help_sections   # ex: [["Example", "..text.."], ...]
       @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
@@ -864,7 +865,7 @@ module Benry::CmdApp
     attr_accessor :option_help, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
-    attr_accessor :help_aliases, :help_sections, :help_postamble
+    attr_accessor :help_action, :help_aliases, :help_sections, :help_postamble
     attr_accessor :format_help, :format_appname, :format_usage, :format_heading
     attr_accessor :feat_candidate
 
@@ -1205,6 +1206,10 @@ module Benry::CmdApp
       $cmdapp_config = @config
       #; [!qwjjv] sets application object to '$cmdapp_application'.
       $cmdapp_application = self
+      #; [!kqfn1] remove built-in 'help' action if `config.help_action == false`.
+      if ! @config.help_action
+        INDEX.delete_action("help") if INDEX.action_exist?("help")
+      end
     end
 
     def do_teardown(exc)

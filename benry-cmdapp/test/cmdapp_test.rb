@@ -3076,6 +3076,18 @@ END
       ok {$cmdapp_application} == @app
     end
 
+    spec "[!kqfn1] remove built-in 'help' action if `config.help_action == false`." do
+      ameta = Benry::CmdApp::INDEX.get_action("help")
+      ok {Benry::CmdApp::INDEX.action_exist?("help")} == true
+      begin
+        @config.help_action = false
+        @app.__send__(:do_setup,)
+        ok {Benry::CmdApp::INDEX.action_exist?("help")} == false
+      ensure
+        Benry::CmdApp::INDEX.register_action("help", ameta)
+      end
+    end
+
   end
 
 
