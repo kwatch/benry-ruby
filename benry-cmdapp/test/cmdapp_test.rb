@@ -2289,30 +2289,22 @@ END
     end
 
     spec "[!l0g1l] skip actions if no action specified and 'config.default_help' is set." do
-      @app.instance_variable_set('@_find_action_called', false)
-      @app.instance_variable_set('@_run_action_called', false)
       def @app.do_find_action(args, global_opts)
-        @_find_action_called = true
-        super
+        ret = super
+        @_args1 = args.dup
+        @_result = ret
+        ret
       end
       def @app.do_run_action(metadata, args, global_opts)
-        @_run_action_called = true
-        super
+        ret = super
+        @_args2 = args.dup
+        ret
       end
-      @app.config.default_action = nil
       @app.config.default_help = true
-      sout, serr = capture_sio { @app.run() }
-      ok {serr} == ""
-      ok {sout}.start_with?(<<"END")
-TestApp (1.0.0) -- test app
-
-Usage:
-  $ testapp [<options>] [<action> [<arguments>...]]
-
-Options:
-END
-      ok {@app.instance_variable_get('@_find_action_called')} == false
-      ok {@app.instance_variable_get('@_run_action_called')} == false
+      capture_sio { @app.run() }
+      ok {@app.instance_variable_get('@_args1')} == []
+      ok {@app.instance_variable_get('@_result')} == nil
+      ok {@app.instance_variable_get('@_args2')} == nil
     end
 
     spec "[!x1xgc] run action with options and arguments." do
