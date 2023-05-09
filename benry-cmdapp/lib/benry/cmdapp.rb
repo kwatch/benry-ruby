@@ -980,17 +980,17 @@ module Benry::CmdApp
         do_print_candidates(args, global_opts)
         return
       end
-      #; [!agfdi] reports error when action not found.
-      #; [!o5i3w] reports error when default action not found.
-      #; [!n60o0] reports error when action nor default action not specified.
       #; [!7h0ku] prints help if no action but 'config.default_help' is true.
       #; [!l0g1l] skip actions if no action specified and 'config.default_help' is set.
-      metadata = do_find_action(args, global_opts)
-      if metadata == nil
+      if args.empty? && @config.default_action == nil && @config.default_help
         do_print_help_message([], global_opts)
         do_validate_actions(args, global_opts)
         return
       end
+      #; [!agfdi] reports error when action not found.
+      #; [!o5i3w] reports error when default action not found.
+      #; [!n60o0] reports error when action nor default action not specified.
+      metadata = do_find_action(args, global_opts)
       #; [!x1xgc] run action with options and arguments.
       #; [!v5k56] runs default action if action not specified.
       do_run_action(metadata, args, global_opts)
