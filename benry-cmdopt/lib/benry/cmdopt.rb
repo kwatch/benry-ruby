@@ -134,80 +134,6 @@ module Benry
         if long.nil? && param =~ /\A--/
           raise error("add(#{key.inspect}, #{optdef.inspect}): missing ',' between short option and long options.")
         end
-        #; [!wy2iv] when 'type:' specified...
-        if type
-          #; [!7xmr5] raises SchemaError when type is not registered.
-          PARAM_TYPES.key?(type)  or
-            raise error("#{type.inspect}: unregistered type.")
-          #; [!s2aaj] raises SchemaError when option has no params but type specified.
-          #; [!sz8x2] not raise error when no params but value specified.
-          #; [!70ogf] not raise error when no params but TrueClass specified.
-          param || value != nil || type == TrueClass  or
-            raise error("#{type.inspect}: type specified in spite of option has no params.")
-        end
-        #; [!6y8s2] when 'rexp:' specified...
-        if rexp
-          #; [!bi2fh] raises SchemaError when pattern is not a regexp.
-          rexp.is_a?(Regexp)  or
-            raise error("#{rexp.inspect}: regexp pattern expected.")
-          #; [!01fmt] raises SchmeaError when option has no params but pattern specified.
-          param  or
-            raise error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
-        end
-        #; [!5nrvq] when 'enum:' specified...
-        if enum
-          #; [!melyd] raises SchemaError when enum is not an Array nor Set.
-          enum.is_a?(Array) || enum.is_a?(Set)  or
-            raise error("#{enum.inspect}: array or set expected.")
-          #; [!xqed8] raises SchemaError when enum specified for no param option.
-          param  or
-            raise error("#{enum.inspect}: enum specified in spite of option has no params.")
-          #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
-          enum.each do |x|
-            x.is_a?(type)  or
-              raise error("#{enum.inspect}: enum element value should be instance of #{type.name}, but #{x.inspect} is not.")
-          end if type
-        end
-        #; [!hk4nw] when 'range:' specified...
-        if range
-          #; [!z20ky] raises SchemaError when range is not a Range object.
-          range.is_a?(Range)  or
-            raise error("#{range.inspect}: range object expected.")
-          #; [!gp025] raises SchemaError when range specified with `type: TrueClass`.
-          if type == TrueClass
-            raise error("#{range.inspect}: range is not available with `type: TrueClass`.")
-          #; [!7njd5] range beginning/end value should be expected type.
-          else
-            #; [!uymig] range object can be endless.
-            type_ = type || String
-            ok1 = range.begin == nil || range.begin.is_a?(type_)
-            ok2 = range.end   == nil || range.end.is_a?(type_)
-            ok1 && ok2  or
-              raise error("#{range.inspect}: range value should be #{type_.name}, but not.")
-          end
-        end
-        #; [!a0g52] when 'value:' specified...
-        if value != nil
-          #; [!435t6] raises SchemaError when 'value:' is specified on argument-required option.
-          ! required  or
-            raise error("#{value.inspect}: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
-          if type == TrueClass
-            #; [!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false.
-            value == true || value == false  or
-              raise error("#{value.inspect}: value should be true or false when `type: TrueClass` specified.")
-          elsif type
-            #; [!c6i2o] raises SchemaError when value is not a kind of type.
-            value.is_a?(type)  or
-              raise error("type mismatched between `type: #{type.name}` and `value: #{value.inspect}`.")
-          else
-            #; [!lnhp6] not raise error when type is not specified.
-          end
-          if enum
-            #; [!6xb8o] value should be included in enum values.
-            enum.include?(value)  or
-              raise error("#{value}: value should be included in enum values, but not.")
-          end
-        end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, desc, short, long, param, required,
                    type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: tag, &callback)
@@ -356,6 +282,7 @@ module Benry
 
       def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
+        _init_validation(param, required, type, rexp, enum, range, value)
         @key      = key       unless key.nil?
         @optdef   = optdef    unless optdef.nil?
         @desc     = desc      unless desc.nil?
@@ -441,6 +368,89 @@ module Benry
         return @value if val == true && @value != nil
         #; [!x066l] returns new value.
         return val
+      end
+
+      private
+
+      def error(msg)
+        return SchemaError.new(msg)
+      end
+
+      def _init_validation(param, required, type, rexp, enum, range, value)
+        #; [!wy2iv] when 'type:' specified...
+        if type
+          #; [!7xmr5] raises SchemaError when type is not registered.
+          PARAM_TYPES.key?(type)  or
+            raise error("#{type.inspect}: unregistered type.")
+          #; [!s2aaj] raises SchemaError when option has no params but type specified.
+          #; [!sz8x2] not raise error when no params but value specified.
+          #; [!70ogf] not raise error when no params but TrueClass specified.
+          param || value != nil || type == TrueClass  or
+            raise error("#{type.inspect}: type specified in spite of option has no params.")
+        end
+        #; [!6y8s2] when 'rexp:' specified...
+        if rexp
+          #; [!bi2fh] raises SchemaError when pattern is not a regexp.
+          rexp.is_a?(Regexp)  or
+            raise error("#{rexp.inspect}: regexp pattern expected.")
+          #; [!01fmt] raises SchmeaError when option has no params but pattern specified.
+          param  or
+            raise error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
+        end
+        #; [!5nrvq] when 'enum:' specified...
+        if enum
+          #; [!melyd] raises SchemaError when enum is not an Array nor Set.
+          enum.is_a?(Array) || enum.is_a?(Set)  or
+            raise error("#{enum.inspect}: array or set expected.")
+          #; [!xqed8] raises SchemaError when enum specified for no param option.
+          param  or
+            raise error("#{enum.inspect}: enum specified in spite of option has no params.")
+          #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
+          enum.each do |x|
+            x.is_a?(type)  or
+              raise error("#{enum.inspect}: enum element value should be instance of #{type.name}, but #{x.inspect} is not.")
+          end if type
+        end
+        #; [!hk4nw] when 'range:' specified...
+        if range
+          #; [!z20ky] raises SchemaError when range is not a Range object.
+          range.is_a?(Range)  or
+            raise error("#{range.inspect}: range object expected.")
+          #; [!gp025] raises SchemaError when range specified with `type: TrueClass`.
+          if type == TrueClass
+            raise error("#{range.inspect}: range is not available with `type: TrueClass`.")
+          #; [!7njd5] range beginning/end value should be expected type.
+          else
+            #; [!uymig] range object can be endless.
+            type_ = type || String
+            ok1 = range.begin == nil || range.begin.is_a?(type_)
+            ok2 = range.end   == nil || range.end.is_a?(type_)
+            ok1 && ok2  or
+              raise error("#{range.inspect}: range value should be #{type_.name}, but not.")
+          end
+        end
+        #; [!a0g52] when 'value:' specified...
+        if value != nil
+          #; [!435t6] raises SchemaError when 'value:' is specified on argument-required option.
+          ! required  or
+            raise error("#{value.inspect}: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
+          if type == TrueClass
+            #; [!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false.
+            value == true || value == false  or
+              raise error("#{value.inspect}: value should be true or false when `type: TrueClass` specified.")
+          elsif type
+            #; [!c6i2o] raises SchemaError when value is not a kind of type.
+            value.is_a?(type)  or
+              raise error("type mismatched between `type: #{type.name}` and `value: #{value.inspect}`.")
+          else
+            #; [!lnhp6] not raise error when type is not specified.
+          end
+          if enum
+            #; [!6xb8o] value should be included in enum values.
+            enum.include?(value)  or
+              raise error("#{value}: value should be included in enum values, but not.")
+          end
+        end
       end
 
     end

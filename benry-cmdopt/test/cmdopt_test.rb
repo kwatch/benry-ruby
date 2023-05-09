@@ -251,197 +251,6 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
                      'add(:indent, "-i, --indent[=<WIDTH>]"): help message required as 3rd argument.')
     end
 
-    describe "[!wy2iv] when 'type:' specified..." do
-
-      it "[!7xmr5] raises SchemaError when type is not registered." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width", type: Array)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "Array: unregistered type.")
-      end
-
-      it "[!s2aaj] raises SchemaError when option has no params but type specified." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i, --indent", "indent width", type: Integer)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "Integer: type specified in spite of option has no params.")
-      end
-
-      it "[!sz8x2] not raise error when no params but value specified." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i, --indent", "indent width", type: Integer, value: 0)
-        }
-        ok {pr}.NOT.raise?(Exception)
-      end
-
-      it "[!70ogf] not raise error when no params but TrueClass specified." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i, --indent", "indent width", type: TrueClass)
-        }
-        ok {pr}.NOT.raise?(Exception)
-      end
-
-    end
-
-    describe "[!6y8s2] when 'rexp:' specified..." do
-
-      it "[!bi2fh] raises SchemaError when pattern is not a regexp." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-x, --indent[=<WIDTH>]", "indent width", rexp: '\A\d+\z')
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       '"\\\\A\\\\d+\\\\z": regexp pattern expected.')
-      end
-
-      it "[!01fmt] raises SchmeaError when option has no params but pattern specified." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i, --indent", "indent width", rexp: /\A\d+\z/)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       '/\A\d+\z/: regexp pattern specified in spite of option has no params.')
-      end
-
-    end
-
-    describe "[!5nrvq] when 'enum:' specified..." do
-
-      it "[!melyd] raises SchemaError when enum is not an Array nor Set." do
-        sc = @schema
-        sc.add(:indent, "-i <N>", "indent width", enum: ["2", "4", "8"])
-        sc.add(:indent, "-i <N>", "indent width", enum: Set.new(["2", "4", "8"]))
-        pr = proc {
-          sc.add(:indent, "-i <N>", "indent width", enum: "2,4,8")
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       '"2,4,8": array or set expected.')
-      end
-
-      it "[!xqed8] raises SchemaError when enum specified for no param option." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i", "enable indent", enum: [2, 4, 8])
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "[2, 4, 8]: enum specified in spite of option has no params.")
-      end
-
-      it "[!zuthh] raises SchemaError when enum element value is not instance of type class." do
-        sc = @schema
-        pr = proc {
-          sc.add(:indent, "-i <N>", "enable indent", type: Integer, enum: ['2', '4', '8'])
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       '["2", "4", "8"]: enum element value should be instance of Integer, but "2" is not.')
-      end
-
-    end
-
-    describe "[!hk4nw] when 'range:' specified..." do
-
-      it "[!z20ky] raises SchemaError when range is not a Range object." do
-        pr = proc {
-          @schema.add(:indent, "-i <N>", "indent", type: Integer, range: [1,8])
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "[1, 8]: range object expected.")
-      end
-
-      it "[!gp025] raises SchemaError when range specified with `type: TrueClass`." do
-        pr = proc {
-          @schema.add(:indent, "-i <N>", "indent", type: TrueClass, range: 0..1)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "0..1: range is not available with `type: TrueClass`.")
-      end
-
-      it "[!7njd5] range beginning/end value should be expected type." do
-        pr = proc {
-          @schema.add(:indent, "-i <N>", "indent", range: (1..8))
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "1..8: range value should be String, but not.")
-        pr = proc {
-          @schema.add(:indent, "-i <N>", "indent", type: Date, range: (1..8))
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "1..8: range value should be Date, but not.")
-      end
-
-      it "[!uymig] range object can be endless." do
-        begin
-          range1 = eval "(1..)"    # Ruby >= 2.6
-          range2 = eval "(..3)"    # Ruby >= 2.6
-        rescue SyntaxError
-          range1 = nil             # Ruby < 2.6
-          range2 = nil             # Ruby < 2.6
-        end
-        if range1
-          pr = proc {
-            @schema.add(:indent1, "-i <N>", "indent", type: Integer, range: range1)
-            @schema.add(:indent2, "-j <N>", "indent", type: Integer, range: range2)
-          }
-          pr.call
-          ok {pr}.NOT.raise?(Exception)
-        end
-      end
-
-    end
-
-    describe "[!a0g52] when 'value:' specified..." do
-
-      it "[!435t6] raises SchemaError when 'value:' is specified on argument-required option." do
-        sc = @schema
-        pr = proc {
-          sc.add(:flag, "--flag=<on|off>", "flag", type: TrueClass, value: true)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "true: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
-      end
-
-      it "[!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false." do
-        sc = @schema
-        pr = proc {
-          sc.add(:flag, "--flag[=<on|off>]", "flag", type: TrueClass, value: 0)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "0: value should be true or false when `type: TrueClass` specified.")
-      end
-
-      it "[!c6i2o] raises SchemaError when value is not a kind of type." do
-        sc = @schema
-        pr = proc {
-          sc.add(:flag, "--flag[=<on|off>]", "flag", type: Integer, value: false)
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "type mismatched between `type: Integer` and `value: false`.")
-      end
-
-      it "[!lnhp6] not raise error when type is not specified." do
-        sc = @schema
-        pr = proc {
-          sc.add(:flag, "--flag[=<on|off>]", "flag", value: false)
-        }
-        ok {pr}.NOT.raise?(Exception)
-      end
-
-      it "[!6xb8o] value should be included in enum values." do
-        sc = @schema
-        pr = proc {
-          sc.add(:lang, "--lang[=<en|fr|it>]", "language", enum: ["en", "fr", "it"], value: "ja")
-        }
-        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "ja: value should be included in enum values, but not.")
-      end
-
-    end
 
   end
 
@@ -840,11 +649,207 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
 
   describe '#initialize()' do
 
+    before do
+      @schema = Benry::CmdOpt::Schema.new
+    end
+
     it "[!nn4cp] freezes enum object." do
       item = Benry::CmdOpt::SchemaItem.new(:foo, "--foo", "desc", nil, "foo", "<val>",
                                            true, enum: ["x", "y", "z"])
       ok {item.enum} == ["x", "y", "z"]
       ok {item.enum}.frozen?
+    end
+
+    describe "[!wy2iv] when 'type:' specified..." do
+
+      it "[!7xmr5] raises SchemaError when type is not registered." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width", type: Array)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "Array: unregistered type.")
+      end
+
+      it "[!s2aaj] raises SchemaError when option has no params but type specified." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i, --indent", "indent width", type: Integer)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "Integer: type specified in spite of option has no params.")
+      end
+
+      it "[!sz8x2] not raise error when no params but value specified." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i, --indent", "indent width", type: Integer, value: 0)
+        }
+        ok {pr}.NOT.raise?(Exception)
+      end
+
+      it "[!70ogf] not raise error when no params but TrueClass specified." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i, --indent", "indent width", type: TrueClass)
+        }
+        ok {pr}.NOT.raise?(Exception)
+      end
+
+    end
+
+    describe "[!6y8s2] when 'rexp:' specified..." do
+
+      it "[!bi2fh] raises SchemaError when pattern is not a regexp." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-x, --indent[=<WIDTH>]", "indent width", rexp: '\A\d+\z')
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       '"\\\\A\\\\d+\\\\z": regexp pattern expected.')
+      end
+
+      it "[!01fmt] raises SchmeaError when option has no params but pattern specified." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i, --indent", "indent width", rexp: /\A\d+\z/)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       '/\A\d+\z/: regexp pattern specified in spite of option has no params.')
+      end
+
+    end
+
+    describe "[!5nrvq] when 'enum:' specified..." do
+
+      it "[!melyd] raises SchemaError when enum is not an Array nor Set." do
+        sc = @schema
+        sc.add(:indent, "-i <N>", "indent width", enum: ["2", "4", "8"])
+        sc.add(:indent, "-i <N>", "indent width", enum: Set.new(["2", "4", "8"]))
+        pr = proc {
+          sc.add(:indent, "-i <N>", "indent width", enum: "2,4,8")
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       '"2,4,8": array or set expected.')
+      end
+
+      it "[!xqed8] raises SchemaError when enum specified for no param option." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i", "enable indent", enum: [2, 4, 8])
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "[2, 4, 8]: enum specified in spite of option has no params.")
+      end
+
+      it "[!zuthh] raises SchemaError when enum element value is not instance of type class." do
+        sc = @schema
+        pr = proc {
+          sc.add(:indent, "-i <N>", "enable indent", type: Integer, enum: ['2', '4', '8'])
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       '["2", "4", "8"]: enum element value should be instance of Integer, but "2" is not.')
+      end
+
+    end
+
+    describe "[!hk4nw] when 'range:' specified..." do
+
+      it "[!z20ky] raises SchemaError when range is not a Range object." do
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", type: Integer, range: [1,8])
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "[1, 8]: range object expected.")
+      end
+
+      it "[!gp025] raises SchemaError when range specified with `type: TrueClass`." do
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", type: TrueClass, range: 0..1)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "0..1: range is not available with `type: TrueClass`.")
+      end
+
+      it "[!7njd5] range beginning/end value should be expected type." do
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", range: (1..8))
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "1..8: range value should be String, but not.")
+        pr = proc {
+          @schema.add(:indent, "-i <N>", "indent", type: Date, range: (1..8))
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "1..8: range value should be Date, but not.")
+      end
+
+      it "[!uymig] range object can be endless." do
+        begin
+          range1 = eval "(1..)"    # Ruby >= 2.6
+          range2 = eval "(..3)"    # Ruby >= 2.6
+        rescue SyntaxError
+          range1 = nil             # Ruby < 2.6
+          range2 = nil             # Ruby < 2.6
+        end
+        if range1
+          pr = proc {
+            @schema.add(:indent1, "-i <N>", "indent", type: Integer, range: range1)
+            @schema.add(:indent2, "-j <N>", "indent", type: Integer, range: range2)
+          }
+          pr.call
+          ok {pr}.NOT.raise?(Exception)
+        end
+      end
+
+    end
+
+    describe "[!a0g52] when 'value:' specified..." do
+
+      it "[!435t6] raises SchemaError when 'value:' is specified on argument-required option." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag=<on|off>", "flag", type: TrueClass, value: true)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "true: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
+      end
+
+      it "[!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag[=<on|off>]", "flag", type: TrueClass, value: 0)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "0: value should be true or false when `type: TrueClass` specified.")
+      end
+
+      it "[!c6i2o] raises SchemaError when value is not a kind of type." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag[=<on|off>]", "flag", type: Integer, value: false)
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "type mismatched between `type: Integer` and `value: false`.")
+      end
+
+      it "[!lnhp6] not raise error when type is not specified." do
+        sc = @schema
+        pr = proc {
+          sc.add(:flag, "--flag[=<on|off>]", "flag", value: false)
+        }
+        ok {pr}.NOT.raise?(Exception)
+      end
+
+      it "[!6xb8o] value should be included in enum values." do
+        sc = @schema
+        pr = proc {
+          sc.add(:lang, "--lang[=<en|fr|it>]", "language", enum: ["en", "fr", "it"], value: "ja")
+        }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "ja: value should be included in enum values, but not.")
+      end
+
     end
 
   end
@@ -1031,11 +1036,11 @@ class Benry::CmdOpt::SchemaItem::Test < MiniTest::Test
     end
 
     it "[!eafem] returns default value (if specified) instead of true value." do
-      x1 = new_item(:flag, "", "desc", "f", "flag", nil, true, value: nil)
+      x1 = new_item(:flag, "", "desc", "f", "flag", nil, false, value: nil)
       ok {x1.validate_and_convert(true, {})} == true
-      x2 = new_item(:flag, "", "desc", "f", "flag", nil, true, value: "blabla")
+      x2 = new_item(:flag, "", "desc", "f", "flag", nil, false, value: "blabla")
       ok {x2.validate_and_convert(true, {})} == "blabla"
-      x3 = new_item(:flag, "", "desc", "f", "flag", nil, true, value: false)
+      x3 = new_item(:flag, "", "desc", "f", "flag", nil, false, value: false)
       ok {x3.validate_and_convert(true, {})} == false
     end
 
