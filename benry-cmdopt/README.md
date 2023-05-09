@@ -252,7 +252,7 @@ end
   Therefore it is easy to understand and extend these classes.
 
   File `optparse.rb` (in Ruby 3.2) contains 1143 lines (except comments and blanks),
-  while `benry/cmdopt.rb` (v2.0) contains 423 lines (except both, too).
+  while `benry/cmdopt.rb` (v2.0) contains 427 lines (except both, too).
 
 
 
