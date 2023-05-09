@@ -2222,10 +2222,10 @@ END
       ok {@app.instance_variable_get('@_called_')} == ["sayhello"]
     end
 
-    spec "[!pbug7] skip actions if callback method returns `:SKIP` value." do
+    spec "[!pbug7] skip actions if callback method throws `:SKIP`." do
       def @app.do_callback(args, global_opts)
         @_called1 = args.dup
-        return :SKIP
+        throw :SKIP
       end
       def @app.do_find_action(args, global_opts)
         super

@@ -964,13 +964,16 @@ module Benry::CmdApp
       @global_options = global_opts
       #; [!go9kk] sets global variables according to global options.
       do_toggle_global_switches(args, global_opts)
-      #; [!5iczl] skip actions if help option or version option specified.
-      result = do_handle_global_options(args, global_opts)
-      return if result == :SKIP
-      #; [!w584g] calls callback method.
-      #; [!pbug7] skip actions if callback method returns `:SKIP` value.
-      result = do_callback(args, global_opts)
-      return if result == :SKIP
+      #; [!pbug7] skip actions if callback method throws `:SKIP`.
+      skip_action = true
+      catch :SKIP do
+        #; [!5iczl] skip actions if help option or version option specified.
+        do_handle_global_options(args, global_opts)
+        #; [!w584g] calls callback method.
+        do_callback(args, global_opts)
+        skip_action = false
+      end
+      return if skip_action
       #; [!avxos] prints candidate actions if action name ends with ':'.
       #; [!eeh0y] candidates are not printed if 'config.feat_candidate' is false.
       if ! args.empty? && args[0].end_with?(':') && @config.feat_candidate
@@ -1042,19 +1045,17 @@ module Benry::CmdApp
 
     def do_handle_global_options(args, global_opts)
       #; [!xvj6s] prints help message if '-h' or '--help' specified.
+      #; [!lpoz7] prints help message of action if action name specified with help option.
       if global_opts[:help]
-        #; [!lpoz7] prints help message of action if action name specified with help option.
         do_print_help_message(args, global_opts)
         do_validate_actions(args, global_opts)
-        return :SKIP
+        throw :SKIP  # done
       end
       #; [!fslsy] prints version if '-V' or '--version' specified.
       if global_opts[:version]
         puts @config.app_version
-        return :SKIP
+        throw :SKIP  # done
       end
-      #
-      return nil
     end
 
     def do_callback(args, global_opts)
