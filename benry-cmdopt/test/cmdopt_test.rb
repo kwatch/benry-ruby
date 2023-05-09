@@ -235,7 +235,7 @@ class Benry::CmdOpt::Schema::Test < MiniTest::Test
         sc.add("-i, --indent[=<WIDTH>]", "indent width", nil)
       }
       ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                     'add("-i, --indent[=<WIDTH>]"): 1st arg should be a Symbol as an option key.')
+                     'add("-i, --indent[=<WIDTH>]", "indent width"): the first arg should be a Symbol as an option key.')
     end
 
     it "[!vq6eq] raises SchemaError when help message is missing." do

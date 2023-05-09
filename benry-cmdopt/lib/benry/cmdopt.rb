@@ -118,7 +118,7 @@ module Benry
         end
         #; [!rhhji] raises SchemaError when key is not a Symbol.
         key.nil? || key.is_a?(Symbol)  or
-          raise error("add(#{key.inspect}): 1st arg should be a Symbol as an option key.")
+          raise error("add(#{key.inspect}, #{optdef.inspect}): the first arg should be a Symbol as an option key.")
         #; [!vq6eq] raises SchemaError when help message is missing."
         desc.nil? || desc.is_a?(String)  or
           raise error("add(#{key.inspect}, #{optdef.inspect}): help message required as 3rd argument.")
