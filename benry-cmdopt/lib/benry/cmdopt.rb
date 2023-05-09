@@ -113,26 +113,26 @@ module Benry
           when Range      ; range ||= x
           else
             #; [!e3emy] raises error when positional arg is not one of class, regexp, array, nor range.
-            raise error("#{x.inspect}: expected one of class, regexp, array or range, but got #{x.class.name}.")
+            raise _error("#{x.inspect}: expected one of class, regexp, array or range, but got #{x.class.name}.")
           end
         end
         #; [!rhhji] raises SchemaError when key is not a Symbol.
         key.nil? || key.is_a?(Symbol)  or
-          raise error("add(#{key.inspect}, #{optdef.inspect}): the first arg should be a Symbol as an option key.")
+          raise _error("add(#{key.inspect}, #{optdef.inspect}): the first arg should be a Symbol as an option key.")
         #; [!vq6eq] raises SchemaError when help message is missing."
         desc.nil? || desc.is_a?(String)  or
-          raise error("add(#{key.inspect}, #{optdef.inspect}): help message required as 3rd argument.")
+          raise _error("add(#{key.inspect}, #{optdef.inspect}): help message required as 3rd argument.")
         #; [!7hi2d] takes command option definition string.
         short, long, param, required = parse_optdef(optdef)
         #; [!p9924] option key is omittable only when long option specified.
         #; [!jtp7z] raises SchemaError when key is nil and no long option.
         key || long  or
-          raise error("add(#{key.inspect}, #{optdef.inspect}): long option required when option key (1st arg) not specified.")
+          raise _error("add(#{key.inspect}, #{optdef.inspect}): long option required when option key (1st arg) not specified.")
         #; [!rpl98] when long option is 'foo-bar' then key name is ':foo_bar'.
         key ||= long.gsub(/-/, '_').intern
         #; [!97sn0] raises SchemaError when ',' is missing between short and long options.
         if long.nil? && param =~ /\A--/
-          raise error("add(#{key.inspect}, #{optdef.inspect}): missing ',' between short option and long options.")
+          raise _error("add(#{key.inspect}, #{optdef.inspect}): missing ',' between short option and long options.")
         end
         #; [!yht0v] keeps command option definitions.
         item = SchemaItem.new(key, optdef, desc, short, long, param, required,
@@ -227,7 +227,7 @@ module Benry
 
       private
 
-      def error(msg)
+      def _error(msg)
         return SchemaError.new(msg)
       end
 
@@ -244,9 +244,9 @@ module Benry
         when /\A[ \t]*--(\w[-\w]*)(?:=(\S*?)|\[=(\S*?)\])?\z/
           short, long, param1, param2 = nil, $1, $2, $3
         when /(--\w[-\w])*[ \t]+(\S+)/
-          raise error("#{optdef}: invalid option definition (use '#{$1}=#{$2}' instead of '#{$1} #{$2}').")
+          raise _error("#{optdef}: invalid option definition (use '#{$1}=#{$2}' instead of '#{$1} #{$2}').")
         else
-          raise error("#{optdef}: invalid option definition.")
+          raise _error("#{optdef}: invalid option definition.")
         end
         required = param1 ? true : param2 ? false : nil
         return short, long, (param1 || param2), required
@@ -372,7 +372,7 @@ module Benry
 
       private
 
-      def error(msg)
+      def _error(msg)
         return SchemaError.new(msg)
       end
 
@@ -381,44 +381,44 @@ module Benry
         if type
           #; [!7xmr5] raises SchemaError when type is not registered.
           PARAM_TYPES.key?(type)  or
-            raise error("#{type.inspect}: unregistered type.")
+            raise _error("#{type.inspect}: unregistered type.")
           #; [!s2aaj] raises SchemaError when option has no params but type specified.
           #; [!sz8x2] not raise error when no params but value specified.
           #; [!70ogf] not raise error when no params but TrueClass specified.
           param || value != nil || type == TrueClass  or
-            raise error("#{type.inspect}: type specified in spite of option has no params.")
+            raise _error("#{type.inspect}: type specified in spite of option has no params.")
         end
         #; [!6y8s2] when 'rexp:' specified...
         if rexp
           #; [!bi2fh] raises SchemaError when pattern is not a regexp.
           rexp.is_a?(Regexp)  or
-            raise error("#{rexp.inspect}: regexp pattern expected.")
+            raise _error("#{rexp.inspect}: regexp pattern expected.")
           #; [!01fmt] raises SchmeaError when option has no params but pattern specified.
           param  or
-            raise error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
+            raise _error("#{rexp.inspect}: regexp pattern specified in spite of option has no params.")
         end
         #; [!5nrvq] when 'enum:' specified...
         if enum
           #; [!melyd] raises SchemaError when enum is not an Array nor Set.
           enum.is_a?(Array) || enum.is_a?(Set)  or
-            raise error("#{enum.inspect}: array or set expected.")
+            raise _error("#{enum.inspect}: array or set expected.")
           #; [!xqed8] raises SchemaError when enum specified for no param option.
           param  or
-            raise error("#{enum.inspect}: enum specified in spite of option has no params.")
+            raise _error("#{enum.inspect}: enum specified in spite of option has no params.")
           #; [!zuthh] raises SchemaError when enum element value is not instance of type class.
           enum.each do |x|
             x.is_a?(type)  or
-              raise error("#{enum.inspect}: enum element value should be instance of #{type.name}, but #{x.inspect} is not.")
+              raise _error("#{enum.inspect}: enum element value should be instance of #{type.name}, but #{x.inspect} is not.")
           end if type
         end
         #; [!hk4nw] when 'range:' specified...
         if range
           #; [!z20ky] raises SchemaError when range is not a Range object.
           range.is_a?(Range)  or
-            raise error("#{range.inspect}: range object expected.")
+            raise _error("#{range.inspect}: range object expected.")
           #; [!gp025] raises SchemaError when range specified with `type: TrueClass`.
           if type == TrueClass
-            raise error("#{range.inspect}: range is not available with `type: TrueClass`.")
+            raise _error("#{range.inspect}: range is not available with `type: TrueClass`.")
           #; [!7njd5] range beginning/end value should be expected type.
           else
             #; [!uymig] range object can be endless.
@@ -426,29 +426,29 @@ module Benry
             ok1 = range.begin == nil || range.begin.is_a?(type_)
             ok2 = range.end   == nil || range.end.is_a?(type_)
             ok1 && ok2  or
-              raise error("#{range.inspect}: range value should be #{type_.name}, but not.")
+              raise _error("#{range.inspect}: range value should be #{type_.name}, but not.")
           end
         end
         #; [!a0g52] when 'value:' specified...
         if value != nil
           #; [!435t6] raises SchemaError when 'value:' is specified on argument-required option.
           ! required  or
-            raise error("#{value.inspect}: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
+            raise _error("#{value.inspect}: 'value:' is meaningless when option has required argument (hint: change to optional argument instead).")
           if type == TrueClass
             #; [!6vwqv] raises SchemaError when type is TrueClass but value is not true nor false.
             value == true || value == false  or
-              raise error("#{value.inspect}: value should be true or false when `type: TrueClass` specified.")
+              raise _error("#{value.inspect}: value should be true or false when `type: TrueClass` specified.")
           elsif type
             #; [!c6i2o] raises SchemaError when value is not a kind of type.
             value.is_a?(type)  or
-              raise error("type mismatched between `type: #{type.name}` and `value: #{value.inspect}`.")
+              raise _error("type mismatched between `type: #{type.name}` and `value: #{value.inspect}`.")
           else
             #; [!lnhp6] not raise error when type is not specified.
           end
           if enum
             #; [!6xb8o] value should be included in enum values.
             enum.include?(value)  or
-              raise error("#{value}: value should be included in enum values, but not.")
+              raise _error("#{value}: value should be included in enum values, but not.")
           end
         end
       end
@@ -542,7 +542,7 @@ module Benry
         nil
       end
 
-      def error(msg)
+      def _error(msg)
         return OptionError.new(msg)
       end
 
@@ -551,7 +551,7 @@ module Benry
       def parse_long_option(optstr, optdict)
         #; [!3i994] raises OptionError when invalid long option format.
         optstr =~ /\A--(\w[-\w]*)(?:=(.*))?\z/  or
-          raise error("#{optstr}: invalid long option.")
+          raise _error("#{optstr}: invalid long option.")
         name = $1; val = $2
         #; [!1ab42] invokes error handler method when unknown long option.
         #; [!er7h4] default behavior is to raise OptionError when unknown long option.
@@ -561,9 +561,9 @@ module Benry
         #; [!qyq8n] raises optionError when an argument specified for no arg long option.
         case item.arg_requireness()
         when :none         # no arguments
-          val == nil  or raise error("#{optstr}: unexpected argument.")
+          val == nil  or raise _error("#{optstr}: unexpected argument.")
         when :required     # argument required
-          val  or raise error("#{optstr}: argument required.")
+          val  or raise _error("#{optstr}: argument required.")
         when :optional     # optonal argument
           # do nothing
         else
@@ -574,7 +574,7 @@ module Benry
         begin
           val = item.validate_and_convert(val, optdict)
         rescue RuntimeError => ex
-          raise error("#{optstr}: #{ex.message}")
+          raise _error("#{optstr}: #{ex.message}")
         end
         optdict[item.key] = val
       end
@@ -586,7 +586,7 @@ module Benry
           char = optstr[i]
           #; [!4eh49] raises OptionError when unknown short option specified.
           item = @schema.find_short_option(char)  or
-            raise error("-#{char}: unknown option.")
+            raise _error("-#{char}: unknown option.")
           #
           case item.arg_requireness()
           when :none         # no arguments
@@ -595,7 +595,7 @@ module Benry
             #; [!utdbf] raises OptionError when argument required but not specified.
             #; [!f63hf] short option arg can be specified without space separator.
             val = i+1 < n ? optstr[(i+1)..-1] : yield  or
-              raise error("-#{char}: argument required.")
+              raise _error("-#{char}: argument required.")
             i = n
           when :optional     # optonal argument
             #; [!yjq6b] optional arg should be specified without space separator.
@@ -610,10 +610,10 @@ module Benry
             val = item.validate_and_convert(val, optdict)
           rescue RuntimeError => ex
             if val == true
-              raise error("-#{char}: #{ex.message}")
+              raise _error("-#{char}: #{ex.message}")
             else
               sp = item.required? ? ' ' : ''
-              raise error("-#{char}#{sp}#{val}: #{ex.message}")
+              raise _error("-#{char}#{sp}#{val}: #{ex.message}")
             end
           end
           optdict[item.key] = val
@@ -627,7 +627,7 @@ module Benry
 
       def handle_unknown_long_option(optstr, name, val)
         #; [!0q78a] raises OptionError.
-        raise error("#{optstr}: unknown long option.")
+        raise _error("#{optstr}: unknown long option.")
       end
 
     end
