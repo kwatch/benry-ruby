@@ -26,17 +26,18 @@ module Benry
   ##       add :db_pass            , ABSTRACT
   ##       add :session_cooie      , "SESS"
   ##       add :session_secret     , SECRET
+  ##       add :env                , ABSTRACT['RACK_ENV']
   ##     end
   ##
   ##     #----- config/development.rb -----
   ##     require 'config/common'
-  ##     class Config < TestCommonConfig
+  ##     class Config < CommonConfig
   ##       set :db_pass            , "pass1"
   ##     end
   ##
   ##     #----- config/development.private -----
   ##     class Config
-  ##       set :session_secret     , "abc123"
+  ##       set :session_secret     , "YRjCIAiPlCBvwLUq5mnZ"
   ##     end
   ##
   ##     #----- main.rb -----
@@ -45,21 +46,39 @@ module Benry
   ##     load    "./config/#{rack_env}.private"
   ##     #
   ##     $config = Config.new.freeze
+  ##     #
   ##     p $config.db_user             #=> "user1"
   ##     p $config.db_pass             #=> "pass1"
   ##     p $config.session_cookie      #=> "SESS"
   ##     p $config.session_secret      #=> "abc123"
+  ##     p $config.env                 #=> "development" or "production" or "staging"
   ##     #
   ##     p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
-  ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"abc123"}
+  ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"YRjCIAiPlCBvwLUq5mnZ"}
   ##
   class BaseConfig
 
     class AbstractValue
+
+      def initialize(envvar=nil)
+        #; [!6hcf9] accepts environment variable name.
+        @envvar = envvar
+      end
+
+      attr_reader :envvar
+
+      def [](envvar)
+        #; [!p0acp] returns new object with environment variable name.
+        return self.class.new(envvar)
+      end
+
+    end
+
+    class SecretValue < AbstractValue
     end
 
     ABSTRACT = AbstractValue.new  # represents 'should be set in subclass'
-    SECRET   = AbstractValue.new  # represents 'should be set in private config file'
+    SECRET   = SecretValue.new    # represents 'should be set in private config file'
 
     def initialize
       #; [!7rdq4] traverses parent class and gathers config values.
@@ -69,11 +88,25 @@ module Benry
         d.each {|k, v| instance_variable_set("@#{k}", v) } if d
       }
       pr.call(self.class)
-      #; [!z9mno] raises ConfigError when ABSTRACT or SECRET is not overriden.
       instance_variables().each do |ivar|
         val = instance_variable_get(ivar)
-        ! val.is_a?(AbstractValue)  or
+        next unless val.is_a?(AbstractValue)
+        #; [!v9f3k] when envvar name not specified...
+        if val.envvar == nil
+          #; [!z9mno] raises ConfigError if ABSTRACT or SECRET is not overriden.
           raise ConfigError.new("config ':#{ivar.to_s[1..-1]}' should be set, but not.")
+        #; [!ida3r] when envvar name specified...
+        else
+          #; [!txl88] raises ConfigError when envvar not set.
+          envvar = val.envvar
+          begin
+            val = ENV.fetch(envvar.to_s)
+          rescue KeyError
+            raise ConfigError.new("environment variable '$#{envvar}' should be set for config item ':#{ivar.to_s[1..-1]}'.")
+          end
+          #; [!y47ul] sets envvar value as config value if envvar provided.
+          instance_variable_set(ivar, val)
+        end
       end
     end
 

@@ -31,6 +31,42 @@ class TestConfig3 < TestCommonConfig
   #set :session_secret     , "abc123"
 end
 
+class TestConfig4 < TestCommonConfig
+  set :db_pass            , ABSTRACT['DBPASS']
+  set :session_secret     , ABSTRACT['SESS_SECRET']
+end
+
+
+
+describe Benry::BaseConfig::AbstractValue do
+
+
+  describe '#initialize()' do
+
+    it "[!6hcf9] accepts environment variable name." do
+      v = Benry::BaseConfig::AbstractValue.new(:FOO)
+      ok {v.envvar} == :FOO
+    end
+
+  end
+
+
+  describe '#[]' do
+
+    it "[!p0acp] returns new object with environment variable name." do
+      foo = Benry::BaseConfig::ABSTRACT[:FOO]
+      ok {foo.class} == Benry::BaseConfig::AbstractValue
+      ok {foo.envvar} == :FOO
+      #
+      bar = Benry::BaseConfig::SECRET[:BAR]
+      ok {bar.class} == Benry::BaseConfig::SecretValue
+      ok {bar.envvar} == :BAR
+    end
+  end
+
+
+end
+
 
 
 describe Benry::BaseConfig do
@@ -46,14 +82,43 @@ describe Benry::BaseConfig do
       ok {config.session_secret} == "abc123"
     end
 
-    it "[!z9mno] raises ConfigError when ABSTRACT or SECRET is not overriden." do
-      pr = proc { TestConfig2.new }
-      ex = ok {pr}.raise?(Benry::ConfigError)
-      ok {ex.message} == "config ':db_pass' should be set, but not."
-      #
-      pr = proc { TestConfig3.new }
-      ex = ok {pr}.raise?(Benry::ConfigError)
-      ok {ex.message} == "config ':session_secret' should be set, but not."
+    describe "[!v9f3k] when envvar name not specified..." do
+
+      it "[!z9mno] raises ConfigError if ABSTRACT or SECRET is not overriden." do
+        pr = proc { TestConfig2.new }
+        ex = ok {pr}.raise?(Benry::ConfigError)
+        ok {ex.message} == "config ':db_pass' should be set, but not."
+        #
+        pr = proc { TestConfig3.new }
+        ex = ok {pr}.raise?(Benry::ConfigError)
+        ok {ex.message} == "config ':session_secret' should be set, but not."
+      end
+
+    end
+
+    describe "[!ida3r] when envvar name specified..." do
+
+      it "[!txl88] raises ConfigError when envvar not set." do
+        ENV['DBPASS'] = nil
+        ENV['SESS_SECRET'] = nil
+        pr = proc { TestConfig4.new }
+        ex = ok {pr}.raise?(Benry::ConfigError)
+        ok {ex.message} == "environment variable '$DBPASS' should be set for config item ':db_pass'."
+        #
+        ENV['DBPASS'] = "pass1"
+        pr = proc { TestConfig4.new }
+        ex = ok {pr}.raise?(Benry::ConfigError)
+        ok {ex.message} == "environment variable '$SESS_SECRET' should be set for config item ':session_secret'."
+      end
+
+      it "[!y47ul] sets envvar value as config value if envvar provided." do
+        ENV['DBPASS']      = "<PASS>"
+        ENV['SESS_SECRET'] = "<SECRETVALUE>"
+        conf = TestConfig4.new
+        ok {conf.db_pass}        == "<PASS>"
+        ok {conf.session_secret} == "<SECRETVALUE>"
+      end
+
     end
 
   end
