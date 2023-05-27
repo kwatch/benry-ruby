@@ -26,17 +26,18 @@ module Benry
   ##       add :db_pass            , ABSTRACT
   ##       add :session_cooie      , "SESS"
   ##       add :session_secret     , SECRET
+  ##       add :env                , ABSTRACT['RACK_ENV']
   ##     end
   ##
   ##     #----- config/development.rb -----
   ##     require 'config/common'
-  ##     class Config < TestCommonConfig
+  ##     class Config < CommonConfig
   ##       set :db_pass            , "pass1"
   ##     end
   ##
   ##     #----- config/development.private -----
   ##     class Config
-  ##       set :session_secret     , "abc123"
+  ##       set :session_secret     , "YRjCIAiPlCBvwLUq5mnZ"
   ##     end
   ##
   ##     #----- main.rb -----
@@ -45,13 +46,15 @@ module Benry
   ##     load    "./config/#{rack_env}.private"
   ##     #
   ##     $config = Config.new.freeze
+  ##     #
   ##     p $config.db_user             #=> "user1"
   ##     p $config.db_pass             #=> "pass1"
   ##     p $config.session_cookie      #=> "SESS"
   ##     p $config.session_secret      #=> "abc123"
+  ##     p $config.env                 #=> "development" or "production" or "staging"
   ##     #
   ##     p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
-  ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"abc123"}
+  ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"YRjCIAiPlCBvwLUq5mnZ"}
   ##
   class BaseConfig
 
