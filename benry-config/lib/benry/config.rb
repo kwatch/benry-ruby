@@ -85,11 +85,25 @@ module Benry
         d.each {|k, v| instance_variable_set("@#{k}", v) } if d
       }
       pr.call(self.class)
-      #; [!z9mno] raises ConfigError when ABSTRACT or SECRET is not overriden.
       instance_variables().each do |ivar|
         val = instance_variable_get(ivar)
-        ! val.is_a?(AbstractValue)  or
+        next unless val.is_a?(AbstractValue)
+        #; [!v9f3k] when envvar name not specified...
+        if val.envvar == nil
+          #; [!z9mno] raises ConfigError if ABSTRACT or SECRET is not overriden.
           raise ConfigError.new("config ':#{ivar.to_s[1..-1]}' should be set, but not.")
+        #; [!ida3r] when envvar name specified...
+        else
+          #; [!txl88] raises ConfigError when envvar not set.
+          envvar = val.envvar
+          begin
+            val = ENV.fetch(envvar.to_s)
+          rescue KeyError
+            raise ConfigError.new("environment variable '$#{envvar}' should be set for config item ':#{ivar.to_s[1..-1]}'.")
+          end
+          #; [!y47ul] sets envvar value as config value if envvar provided.
+          instance_variable_set(ivar, val)
+        end
       end
     end
 
