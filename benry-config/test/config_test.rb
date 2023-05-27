@@ -46,6 +46,20 @@ describe Benry::BaseConfig::AbstractValue do
   end
 
 
+  describe '#[]' do
+
+    it "[!p0acp] returns new object with environment variable name." do
+      foo = Benry::BaseConfig::ABSTRACT[:FOO]
+      ok {foo.class} == Benry::BaseConfig::AbstractValue
+      ok {foo.envvar} == :FOO
+      #
+      bar = Benry::BaseConfig::SECRET[:BAR]
+      ok {bar.class} == Benry::BaseConfig::SecretValue
+      ok {bar.envvar} == :BAR
+    end
+  end
+
+
 end
 
 

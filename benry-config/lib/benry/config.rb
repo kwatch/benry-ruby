@@ -64,6 +64,11 @@ module Benry
 
       attr_reader :envvar
 
+      def [](envvar)
+        #; [!p0acp] returns new object with environment variable name.
+        return self.class.new(envvar)
+      end
+
     end
 
     class SecretValue < AbstractValue
