@@ -66,8 +66,11 @@ module Benry
 
     end
 
+    class SecretValue < AbstractValue
+    end
+
     ABSTRACT = AbstractValue.new  # represents 'should be set in subclass'
-    SECRET   = AbstractValue.new  # represents 'should be set in private config file'
+    SECRET   = SecretValue.new    # represents 'should be set in private config file'
 
     def initialize
       #; [!7rdq4] traverses parent class and gathers config values.
