@@ -56,6 +56,14 @@ module Benry
   class BaseConfig
 
     class AbstractValue
+
+      def initialize(envvar=nil)
+        #; [!6hcf9] accepts environment variable name.
+        @envvar = envvar
+      end
+
+      attr_reader :envvar
+
     end
 
     ABSTRACT = AbstractValue.new  # represents 'should be set in subclass'

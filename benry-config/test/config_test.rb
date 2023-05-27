@@ -33,6 +33,23 @@ end
 
 
 
+describe Benry::BaseConfig::AbstractValue do
+
+
+  describe '#initialize()' do
+
+    it "[!6hcf9] accepts environment variable name." do
+      v = Benry::BaseConfig::AbstractValue.new(:FOO)
+      ok {v.envvar} == :FOO
+    end
+
+  end
+
+
+end
+
+
+
 describe Benry::BaseConfig do
 
 
