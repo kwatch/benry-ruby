@@ -25,8 +25,7 @@ module Benry
   ##       add :db_user            , "user1"
   ##       add :db_pass            , ABSTRACT
   ##       add :session_cooie      , "SESS"
-  ##       add :session_secret     , SECRET
-  ##       add :env                , ABSTRACT['RACK_ENV']
+  ##       add :session_secret     , SECRET   # or SECRET['SESSION_SECRET'] to read from ENV
   ##     end
   ##
   ##     #----- config/development.rb -----
@@ -51,10 +50,12 @@ module Benry
   ##     p $config.db_pass             #=> "pass1"
   ##     p $config.session_cookie      #=> "SESS"
   ##     p $config.session_secret      #=> "abc123"
-  ##     p $config.env                 #=> "development" or "production" or "staging"
   ##     #
   ##     p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
   ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"YRjCIAiPlCBvwLUq5mnZ"}
+  ##     #
+  ##     $config.each  {|k, v| puts "#{k}=#{v.inspect}" }   # hide secret values as "(secret)"
+  ##     $config.each! {|k, v| puts "#{k}=#{v.inspect}" }   # not hide secret values
   ##
   class BaseConfig
 
