@@ -244,4 +244,97 @@ describe Benry::BaseConfig do
   end
 
 
+  describe '#each()' do
+
+    it "[!f4ljv] returns Enumerator object if block not given." do
+      conf = TestConfig.new
+      ok {conf.each}.is_a?(Enumerator)
+    end
+
+    it "[!4wqpu] yields each key and val with hiding secret values." do
+      conf = TestConfig.new
+      d = {}
+      conf.each {|k, v| d[k] = v }
+      ok {d} == {:db_name=>"db1", :db_user=>"user1", :db_pass=>"pass1",
+                 :session_secret=>"(secret)"}  # !!!
+    end
+
+    it "[!a9glw] sorts keys if 'true' specified as the first argument." do
+      conf = TestConfig.new
+      keys1 = []
+      conf.each {|k, v| keys1 << k }
+      keys2 = []
+      conf.each(true) {|k, v| keys2 << k }
+      ok {keys1} == [:db_name, :db_user, :db_pass, :session_secret]
+      ok {keys2} == [:db_name, :db_pass, :db_user, :session_secret]
+    end
+
+    it "[!wggik] returns self if block given." do
+      conf = TestConfig.new
+      ok {conf.each {|k, v| nil }}.same?(conf)
+    end
+
+  end
+
+
+  describe '#each!()' do
+
+    it "[!zd9lk] returns Enumerator object if block not given." do
+      conf = TestConfig.new
+      ok {conf.each!}.is_a?(Enumerator)
+    end
+
+    it "[!7i5p2] yields each key and val without hiding secret values." do
+      conf = TestConfig.new
+      d = {}
+      conf.each! {|k, v| d[k] = v }
+      ok {d} == {:db_name=>"db1", :db_user=>"user1", :db_pass=>"pass1",
+                 :session_secret=>"abc123"}  # !!!
+    end
+
+    it "[!aib7c] sorts keys if 'true' specified as the first argument." do
+      conf = TestConfig.new
+      keys1 = []
+      conf.each! {|k, v| keys1 << k }
+      keys2 = []
+      conf.each(true) {|k, v| keys2 << k }
+      ok {keys1} == [:db_name, :db_user, :db_pass, :session_secret]
+      ok {keys2} == [:db_name, :db_pass, :db_user, :session_secret]
+    end
+
+    it "[!2abgb] returns self if block given." do
+      conf = TestConfig.new
+      ok {conf.each! {|k, v| nil }}.same?(conf)
+    end
+
+  end
+
+
+  describe '#_each()' do
+
+    it "[!6yvgd] sorts keys if 'sort' is true." do
+      keys1 = []
+      keys2 = []
+      TestConfig.new.instance_eval do
+        _each(false, false) {|k, v| keys1 << k }
+        _each(true, false)  {|k, v| keys2 << k }
+      end
+      ok {keys1} == [:db_name, :db_user, :db_pass, :session_secret]
+      ok {keys2} == [:db_name, :db_pass, :db_user, :session_secret]
+    end
+
+    it "[!5ledb] hides value if 'hide_secret' is true and value is Secretvalue object." do
+      d1 = {}
+      d2 = {}
+      TestConfig.new.instance_eval do
+        _each(false, true ) {|k, v| d1[k] = v }
+        _each(false, false) {|k, v| d2[k] = v }
+      end
+      ok {d1[:session_secret]} == "(secret)"
+      ok {d2[:session_secret]} == "abc123"
+    end
+
+  end
+
+
 end
