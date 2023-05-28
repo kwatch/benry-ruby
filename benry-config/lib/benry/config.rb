@@ -82,12 +82,7 @@ module Benry
 
     def initialize
       #; [!7rdq4] traverses parent class and gathers config values.
-      pr = proc {|cls|
-        pr.call(cls.superclass) if cls.superclass
-        d = cls.instance_variable_get('@__dict')
-        d.each {|k, v| instance_variable_set("@#{k}", v) } if d
-      }
-      pr.call(self.class)
+      _traverse(self.class) {|k, v| instance_variable_set("@#{k}", v) }
       instance_variables().each do |ivar|
         val = instance_variable_get(ivar)
         next unless val.is_a?(AbstractValue)
@@ -109,6 +104,13 @@ module Benry
         end
       end
     end
+
+    def _traverse(cls, &b)
+      _traverse(cls.superclass, &b) if cls.superclass && cls.superclass < BaseConfig
+      dict = cls.instance_variable_get(:@__dict)
+      dict.each(&b) if dict
+    end
+    private :_traverse
 
     ## Add new config. Raises ConfigError when already defined.
     def self.add(key, value, desc=nil)
