@@ -25,7 +25,8 @@ module Benry
   ##       add :db_user            , "user1"
   ##       add :db_pass            , ABSTRACT
   ##       add :session_cooie      , "SESS"
-  ##       add :session_secret     , SECRET   # or SECRET['SESSION_SECRET'] to read from ENV
+  ##       ## or:
+  ##       #add :session_secret    , SECRET['SESSION_SECRET']  # get secret value from ENV
   ##     end
   ##
   ##     #----- config/development.rb -----
@@ -53,6 +54,9 @@ module Benry
   ##     #
   ##     p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
   ##     p $config.get_all(:session_)  #=> {:cookie=>"SESS", :secret=>"YRjCIAiPlCBvwLUq5mnZ"}
+  ##     #
+  ##     p $config.defined?(:db_pass)      #=> true
+  ##     p $config.defined?(:db_password)  #=> false
   ##     #
   ##     $config.each  {|k, v| puts "#{k}=#{v.inspect}" }   # hide secret values as "(secret)"
   ##     $config.each! {|k, v| puts "#{k}=#{v.inspect}" }   # not hide secret values
