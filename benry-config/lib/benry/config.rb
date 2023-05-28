@@ -169,6 +169,46 @@ module Benry
       return d
     end
 
+    def each(sort=false, &b)
+      #; [!f4ljv] returns Enumerator object if block not given.
+      return to_enum(:each, sort) unless block_given?()
+      #; [!4wqpu] yields each key and val with hiding secret values.
+      #; [!a9glw] sorts keys if 'true' specified as the first argument.
+      _each(sort, true, &b)
+      #; [!wggik] returns self if block given.
+      return self
+    end
+
+    def each!(sort=false, &b)
+      #; [!zd9lk] returns Enumerator object if block not given.
+      return to_enum(:each!, sort) unless block_given?()
+      #; [!7i5p2] yields each key and val without hiding secret values.
+      #; [!aib7c] sorts keys if 'true' specified as the first argument.
+      _each(sort, false, &b)
+      #; [!2abgb] returns self if block given.
+      return self
+    end
+
+    private
+
+    def _each(sort, hide_secret, &b)
+      keys_d    = {}
+      secrets_d = {}
+      _traverse(self.class) do |key, val|
+        keys_d[key]    = true
+        secrets_d[key] = val if val.is_a?(SecretValue)
+      end
+      #; [!6yvgd] sorts keys if 'sort' is true.
+      keys = keys_d.keys()
+      keys.sort!() if sort
+      keys.each do |key|
+        #; [!5ledb] hides value if 'hide_secret' is true and value is Secretvalue object.
+        hide_p = hide_secret && secrets_d.key?(key)
+        val = hide_p ? "(secret)" : instance_variable_get("@#{key}".intern)
+        yield key, val
+      end
+    end
+
   end
 
 
