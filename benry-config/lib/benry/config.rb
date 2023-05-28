@@ -170,6 +170,12 @@ module Benry
       return d
     end
 
+    def defined?(key)
+      #; [!y1fsh] returns true if config key defined.
+      #; [!k1b5q] returns false if config key not defined.
+      return instance_variable_defined?("@#{key}")
+    end
+
     def each(sort=false, &b)
       #; [!f4ljv] returns Enumerator object if block not given.
       return to_enum(:each, sort) unless block_given?()

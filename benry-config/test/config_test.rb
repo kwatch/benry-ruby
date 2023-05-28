@@ -244,6 +244,21 @@ describe Benry::BaseConfig do
   end
 
 
+  describe '#defined?()' do
+
+    it "[!y1fsh] returns true if config key defined." do
+      conf = TestConfig.new()
+      ok {conf.defined?(:db_pass)} == true
+    end
+
+    it "[!k1b5q] returns false if config key not defined." do
+      conf = TestConfig.new()
+      ok {conf.defined?(:db_password)} == false
+    end
+
+  end
+
+
   describe '#each()' do
 
     it "[!f4ljv] returns Enumerator object if block not given." do
