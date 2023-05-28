@@ -3,8 +3,8 @@
 Gem::Specification.new do |spec|
   spec.name          = "benry-config"
   spec.version       = '$Release: 0.0.0 $'.split()[1]
-  spec.authors       = ["makoto kuwata"]
-  spec.email         = ["kwa(at)kuwata-lab.com"]
+  spec.authors       = ["kwatch"]
+  spec.email         = ["kwatch@gmail.com"]
 
   spec.summary       = "useful configuration class"
   spec.description   = <<'END'
@@ -14,9 +14,10 @@ END
   spec.license       = "MIT"
 
   spec.files         = Dir[*%w[
-                         README.md MIT-LICENSE.txt Rakefile
+                         README.md MIT-LICENSE.txt Rakefile.rb benry-config.gemspec
                          lib/**/*.rb
                          test/**/*_test.rb
+                         task/**/*.rb
                        ]]
   spec.require_paths = ["lib"]
 
