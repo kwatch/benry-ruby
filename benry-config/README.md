@@ -11,7 +11,7 @@ Utility class to support configuration.
 
 * Easy to define configuration for environments (production, development, ...).
 * Raises error when configuration name is wrong (typo).
-* Represents secret configurations which should be set in private file.
+* Represents secret configurations which should be set by environment var or in private file.
 
 
 Example
@@ -25,6 +25,8 @@ class CommonConfig < Benry::BaseConfig
   add :db_pass            , ABSTRACT
   add :session_cooie      , "sess"
   add :session_secret     , SECRET
+  ## or:
+  #add :session_secret    , SECRET['SESSION_SECRET']  # get secret value from ENV
 end
 
 #----- config/development.rb -----
@@ -35,7 +37,7 @@ end
 
 #----- config/development.private -----
 Config.class_eval do
-  set :session_secret     , "abc123"
+  set :session_secret     , "YRjCIAiPlCBvwLUq5mnZ"
 end
 
 #----- main.rb -----
@@ -50,10 +52,13 @@ $config = Config.new.freeze
 p $config.db_user             #=> "user1"
 p $config.db_pass             #=> "pass1"
 p $config.session_cookie      #=> "sess"
-p $config.session_secret      #=> "abc123"
+p $config.session_secret      #=> "YRjCIAiPlCBvwLUq5mnZ"
 #
 p $config.get_all(:db_)       #=> {:user=>"user1", :pass=>"pass1"}
-p $config.get_all(:session_)  #=> {:cookie=>"sess", :secret=>"abc123"}
+p $config.get_all(:session_)  #=> {:cookie=>"sess", :secret=>"YRjCIAiPlCBvwLUq5mnZ"}
+#
+$config.each  {|k, v| puts "#{k}=#{v.inspect}" }   # hide secret values as "(secret)"
+$config.each! {|k, v| puts "#{k}=#{v.inspect}" }   # not hide secret values
 ```
 
 
