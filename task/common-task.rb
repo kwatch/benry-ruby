@@ -92,12 +92,14 @@ unless Rake::Task.task_defined?(:'test:all')
       unless dir
         puts header.(ver)
         $stderr.puts error.("ruby #{ver} not found")
+        sleep 1.0
         next
       end
       puts header.("#{ver} (#{dir})")
       run_test("#{dir}/bin/ruby") do |ok, res|
         $stderr.puts error.("test failed") unless ok
       end
+      sleep 0.2
     end
   end
 end
