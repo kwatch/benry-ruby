@@ -66,10 +66,12 @@ unless respond_to?(:run_test, true)
 end
 
 
-desc "do test"
-task :test do
-  run_test()
-end unless Rake::Task.task_defined?(:test)
+unless Rake::Task.task_defined?(:test)
+  desc "do test"
+  task :test do
+    run_test()
+  end
+end
 
 
 unless Rake::Task.task_defined?(:'test:all')
