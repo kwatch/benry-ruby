@@ -1589,7 +1589,7 @@ END
       ok {ret} == nil
     end
 
-    it "[!za9at] parses options only before args when `parse_all=false`." do
+    it "[!za9at] parses options only before args when `all: false`." do
       argv = ["aaa", "-d3", "bbb"]
       #
       argv1 = argv.dup
@@ -1598,7 +1598,7 @@ END
       ok {argv1} == ["aaa", "bbb"]
       #
       argv2 = argv.dup
-      opts2 = @cmdopt.parse(argv2, false)
+      opts2 = @cmdopt.parse(argv2, all: false)
       ok {opts2} == {}
       ok {argv2} == ["aaa", "-d3", "bbb"]
     end
