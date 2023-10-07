@@ -1456,6 +1456,20 @@ end
 class Benry::CmdOpt::Facade::Test < MiniTest::Test
 
 
+  describe '#initialize()' do
+
+    it "[!winuc] accepts 'parse_all: true' keyword arg (default: true)." do
+      obj = Benry::CmdOpt::Facade.new(parse_all: true)
+      ok {obj.parse_all?} == true
+      obj = Benry::CmdOpt::Facade.new(parse_all: false)
+      ok {obj.parse_all?} == false
+      obj = Benry::CmdOpt::Facade.new()
+      ok {obj.parse_all?} == true
+    end
+
+  end
+
+
   describe '#add()' do
 
     it "[!vmb3r] defines command option." do
@@ -1574,12 +1588,17 @@ END
 
   describe '#parse()' do
 
-    before do
-      @cmdopt = Benry::CmdOpt.new()
-      @cmdopt.add(:file, "-f, --file=<FILE>", "file") do |val|
+    def new_cmdopt_obj(**kwargs)
+      cmdopt = Benry::CmdOpt.new(**kwargs)
+      cmdopt.add(:file, "-f, --file=<FILE>", "file") do |val|
         File.open(val) {|f| f.read }
       end
-      @cmdopt.add(:debug, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
+      cmdopt.add(:debug, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
+      return cmdopt
+    end
+
+    before do
+      @cmdopt = new_cmdopt_obj()
     end
 
     it "[!areof] handles only OptionError when block given." do
@@ -1603,16 +1622,16 @@ END
       ok {ret} == nil
     end
 
-    it "[!za9at] parses options only before args when `parse_all=false`." do
+    it "[!za9at] parses options only before args when `parse_all: false`." do
       argv = ["aaa", "-d3", "bbb"]
       #
       argv1 = argv.dup
-      opts1 = @cmdopt.parse(argv1)
+      opts1 = new_cmdopt_obj().parse(argv1)
       ok {opts1} == {:debug=>3}
       ok {argv1} == ["aaa", "bbb"]
       #
       argv2 = argv.dup
-      opts2 = @cmdopt.parse(argv2, false)
+      opts2 = new_cmdopt_obj(parse_all: false).parse(argv2)
       ok {opts2} == {}
       ok {argv2} == ["aaa", "-d3", "bbb"]
     end

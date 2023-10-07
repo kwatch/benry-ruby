@@ -33,11 +33,17 @@ module Benry
 
     class Facade
 
-      def initialize
+      def initialize(parse_all: true)
         @schema = SCHEMA_CLASS.new
+        #; [!winuc] accepts 'parse_all: true' keyword arg (default: true).
+        @parse_all = parse_all
       end
 
       attr_reader :schema
+
+      def parse_all?
+        return @parse_all
+      end
 
       def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
@@ -66,14 +72,14 @@ module Benry
       end
       alias each_option_help each_option_and_desc   # for backward compatibility
 
-      def parse(argv, parse_all=true, &error_handler)
+      def parse(argv, &error_handler)
         #; [!7gc2m] parses command options.
         #; [!no4xu] returns option values as dict.
         #; [!areof] handles only OptionError when block given.
         #; [!peuva] returns nil when OptionError handled.
-        #; [!za9at] parses options only before args when `parse_all=false`.
-        parser = PARSER_CLASS.new(@schema)
-        return parser.parse(argv, parse_all, &error_handler)
+        #; [!za9at] parses options only before args when `parse_all: false`.
+        parser = PARSER_CLASS.new(@schema, parse_all: @parse_all)
+        return parser.parse(argv, &error_handler)
       end
 
     end
