@@ -26,6 +26,7 @@ Release 2.0.0 (????-??-??)
 * [enhance] add `Schema#empty?(all: true)` which returns true if schema has no option items.
 * [enhance] add `Schema#dup()` which duplicates each object.
 * [enhance] add `Schema#copy_from(other)` which copies option items from other schema.
+* [change] switch testing library from MiniTest to Oktest.
 
 
 Release 1.1.0 (2021-01-18)
