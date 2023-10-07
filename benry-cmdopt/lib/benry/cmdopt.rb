@@ -502,22 +502,28 @@ module Benry
 
     class Parser
 
-      def initialize(schema)
+      def initialize(schema, parse_all: true)
         @schema = schema
+        #; [!eh3p3] accepts `parse_all:` kwarg (default: true).
+        @parse_all = parse_all
       end
 
-      def parse(argv, parse_all=true, &error_handler)
+      def parse_all?
+        return @parse_all
+      end
+
+      def parse(argv, &error_handler)
         optdict = new_options_dict()
         index = 0
         while index < argv.length
           #; [!5s5b6] treats '-' as an argument, not an option.
           if argv[index] =~ /\A-/ && argv[index] != "-"
             optstr = argv.delete_at(index)
-          #; [!q8356] parses options even after arguments when `parse_all=true`.
-          elsif parse_all
+          #; [!q8356] parses options even after arguments when `parse_all: true` specified in constructor.
+          elsif @parse_all
             index += 1
             next
-          #; [!ryra3] doesn't parse options after arguments when `parse_all=false`.
+          #; [!ryra3] doesn't parse options after arguments when `parse_all: false` specified in constructor.
           else
             break
           end
