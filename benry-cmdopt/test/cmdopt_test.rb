@@ -1084,26 +1084,23 @@ class Benry::CmdOpt::Parser::Test < MiniTest::Test
       ok {argv} == ["-", "xxx", "yyy"]
     end
 
-    it "[!q8356] parses options even after arguments when `parse_all=true`." do
-      pr1 = proc {|argv| @parser.parse(argv, false) }
-      pr2 = proc {|argv| @parser.parse(argv) }
-      [pr1, pr2].each do |pr|
-        argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
-        d = @parser.parse(argv, true)
-        ok {d} == {help: true, file: "foo.png", indent: 10}
-        ok {argv} == ["arg1", "arg2", "arg3"]
-      end
+    it "[!q8356] parses options even after arguments when `all: true`." do
+      argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
+      d = @parser.parse(argv, all: true)
+      ok {d} == {help: true, file: "foo.png", indent: 10}
+      ok {argv} == ["arg1", "arg2", "arg3"]
+      #
+      argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
+      d = @parser.parse(argv)
+      ok {d} == {help: true, file: "foo.png", indent: 10}
+      ok {argv} == ["arg1", "arg2", "arg3"]
     end
 
-    it "[!ryra3] doesn't parse options after arguments when `parse_all=false`." do
-      pr1 = proc {|argv| @parser.parse(argv, false) }
-      #pr2 = proc {|argv| @parser.parse(argv) }
-      [pr1].each do |pr|
-        argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
-        d = pr.call(argv)
-        ok {d} == {help: true}
-        ok {argv} == ["arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
-      end
+    it "[!ryra3] doesn't parse options after arguments when `all: false`." do
+      argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
+      d = @parser.parse(argv, all: false)
+      ok {d} == {help: true}
+      ok {argv} == ["arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
     end
 
     it "[!y04um] skips rest options when '--' found in argv." do
