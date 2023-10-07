@@ -25,9 +25,10 @@ module Benry
     VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
-    def self.new
+    def self.new(parse_all: true)
       #; [!7kkqv] creates Facade object.
-      return Facade.new
+      #; [!lnbep] accepts 'parse_all: true' keyword arg (default: true).
+      return Facade.new(parse_all: parse_all)
     end
 
 

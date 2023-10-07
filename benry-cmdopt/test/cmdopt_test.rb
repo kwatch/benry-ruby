@@ -1446,6 +1446,15 @@ class Benry::CmdOpt::Test < MiniTest::Test
       ok {obj}.is_a?(Benry::CmdOpt::Facade)
     end
 
+    it "[!lnbep] accepts 'parse_all: true' keyword arg (default: true)." do
+      obj = Benry::CmdOpt.new(parse_all: true)
+      ok {obj.parse_all?} == true
+      obj = Benry::CmdOpt.new(parse_all: false)
+      ok {obj.parse_all?} == false
+      obj = Benry::CmdOpt.new()
+      ok {obj.parse_all?} == true
+    end
+
   end
 
 
