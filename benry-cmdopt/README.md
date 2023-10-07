@@ -565,7 +565,7 @@ p argv              #=> ["xxx"]
 Detailed Description of Option
 ------------------------------
 
-`#add()` method in `Benry::Cmdopt` or `Benry::Cmdopt::Schema` supports `detail:` keyword argument which takes detailed description of option.
+`#add()` method in `Benry::CmdOpt` or `Benry::CmdOpt::Schema` supports `detail:` keyword argument which takes detailed description of option.
 
 ```ruby
 require 'benry/cmdopt'
@@ -597,7 +597,7 @@ Output:
 Option Tag
 ----------
 
-`#add()` method in `Benry::Cmdopt` or `Benry::Cmdopt::Schema` supports `tag:` keyword argument.
+`#add()` method in `Benry::CmdOpt` or `Benry::CmdOpt::Schema` supports `tag:` keyword argument.
 You can use it for any purpose.
 
 ```ruby
