@@ -8,7 +8,15 @@ defined? LICENSE    or abort "LICENSE required."
 
 RELEASE =~ /\A\d+\.\d+\.\d+/  or abort "RELEASE=#{RELEASE}: invalid release number."
 
-$ruby_versions ||= %w[2.4 2.5 2.6 2.7 3.0]
+unless defined?(RUBY_VERSIONS)
+  RUBY_VERSIONS = (
+    if ENV['RUBY_VERSIONS']
+      ENV['RUBY_VERSIONS'].split()
+    else
+      ["3.2", "3.1", "3.0", "2.7", "2.6", "2.5", "2.4", "2.3"]
+    end
+  )
+end
 
 
 require 'rake/clean'
@@ -79,10 +87,7 @@ unless Rake::Task.task_defined?(:'test:all')
   task :'test:all' do
     ENV['VS_HOME']  or
       abort "[ERROR] rake test:all: '$VS_HOME' environment var required."
-    ruby_versions = ENV['RUBY_VERSIONS']    ? ENV['RUBY_VERSIONS'].split() \
-                  : defined?(RUBY_VERSIONS) ? RUBY_VERSIONS : nil
-    ruby_versions  or
-      abort "[ERROR] rake test:all: '$RUBY_VERSIONS' environment var required."
+    ruby_versions = RUBY_VERSIONS
     vs_home = ENV['VS_HOME'].split(/[:;]/).first
     test_all(vs_home, ruby_versions)
   end
