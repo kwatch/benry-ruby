@@ -25,6 +25,5 @@ END
   spec.test_files      = Dir['test/**/*_test.rb']
   #spec.extra_rdoc_files = ['README.md', 'CHANGES.md']
 
-  spec.add_development_dependency 'minitest'    , '~> 5.8'
-  spec.add_development_dependency 'minitest-ok' , '~> 0.3'
+  spec.add_development_dependency 'oktest'      , '~> 1'
 end
