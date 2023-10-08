@@ -66,14 +66,14 @@ module Benry
       end
       alias each_option_help each_option_and_desc   # for backward compatibility
 
-      def parse(argv, parse_all=true, &error_handler)
+      def parse(argv, all: true, &error_handler)
         #; [!7gc2m] parses command options.
         #; [!no4xu] returns option values as dict.
         #; [!areof] handles only OptionError when block given.
         #; [!peuva] returns nil when OptionError handled.
-        #; [!za9at] parses options only before args when `parse_all=false`.
+        #; [!za9at] parses options only before args when `all: false`.
         parser = PARSER_CLASS.new(@schema)
-        return parser.parse(argv, parse_all, &error_handler)
+        return parser.parse(argv, all: all, &error_handler)
       end
 
     end
@@ -506,18 +506,18 @@ module Benry
         @schema = schema
       end
 
-      def parse(argv, parse_all=true, &error_handler)
+      def parse(argv, all: true, &error_handler)
         optdict = new_options_dict()
         index = 0
         while index < argv.length
           #; [!5s5b6] treats '-' as an argument, not an option.
           if argv[index] =~ /\A-/ && argv[index] != "-"
             optstr = argv.delete_at(index)
-          #; [!q8356] parses options even after arguments when `parse_all=true`.
-          elsif parse_all
+          #; [!q8356] parses options even after arguments when `all: true`.
+          elsif all
             index += 1
             next
-          #; [!ryra3] doesn't parse options after arguments when `parse_all=false`.
+          #; [!ryra3] doesn't parse options after arguments when `all: false`.
           else
             break
           end

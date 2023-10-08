@@ -505,28 +505,28 @@ puts cmdopt.to_s(all: true)   # or: cmdopt.to_s(nil, all: true)
 Global Options with Sub-Commands
 --------------------------------
 
-`parse()` accepts boolean flag as second argument.
+`parse()` accepts boolean keyword argument `all`.
 
-* `parse(argv, true)` parses options even after arguments. This is the default.
-* `parse(argv, false)` parses options only before arguments.
+* `parse(argv, all: true)` parses even options placed after arguments. This is the default.
+* `parse(argv, all: false)` only parses options placed before arguments.
 
 ```ruby
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:help   , '-h', "print help message")
-cmdopt.add(:version, '-v', "print version")
+cmdopt.add(:help   , '--help'   , "print help message")
+cmdopt.add(:version, '--version', "print version")
 
-## `parse(argv, true)` (default)
-argv = ["-h", "xx", "-v", "yy"]
-options = cmdopt.parse(argv, true)    # !!!
+## `parse(argv, all: true)` (default)
+argv = ["--help", "arg1", "--version", "arg2"]
+options = cmdopt.parse(argv, all: true)          # !!!
 p options       #=> {:help=>true, :version=>true}
-p argv          #=> ["xx", "yy"]
+p argv          #=> ["arg1", "arg2"]
 
-## `parse(argv, false)`
-argv = ["-h", "xx", "-v", "yy"]
-options = cmdopt.parse(argv, false)   # !!!
+## `parse(argv, all: false)`
+argv = ["--help", "arg1", "--version", "arg2"]
+options = cmdopt.parse(argv, all: false)         # !!!
 p options       #=> {:help=>true}
-p argv          #=> ["xx", "-v", "yy"]
+p argv          #=> ["arg1", "--version", "arg2"]
 ```
 
 This is useful when parsing global options of sub-commands, like Git command.
@@ -539,7 +539,7 @@ argv = ["-h", "commit", "xxx", "-m", "yyy"]
 ## parse global options
 cmdopt = Benry::CmdOpt.new()
 cmdopt.add(:help, '-h', "print help message")
-global_opts = cmdopt.parse(argv, false)   # !!!false!!!
+global_opts = cmdopt.parse(argv, all: false)   # !!!false!!!
 p global_opts       #=> {:help=>true}
 p argv              #=> ["commit", "xxx", "-m", "yyy"]
 
@@ -556,7 +556,7 @@ when "commit"
 else
   # ...
 end
-sub_opts = cmdopt.parse(argv, true)       # !!!true!!!
+sub_opts = cmdopt.parse(argv, all: true)       # !!!true!!!
 p sub_opts          #=> {:message => "yyy"}
 p argv              #=> ["xxx"]
 ```
