@@ -11,10 +11,11 @@ RUBY_VERSIONS = ["3.2", "3.1", "3.0", "2.7", "2.6", "2.5", "2.4", "2.3"]
 Dir.glob('./task/*-task.rb').each {|x| require x }
 
 def run_test(ruby=nil, &b)
+  argstr = "-r oktest -e Oktest.main -- test -sp"
   if ruby
-    sh "#{ruby} test/config_test.rb", &b
+    sh "#{ruby} #{argstr}", &b
   else
-    ruby "test/config_test.rb", &b
+    ruby argstr, &b
   end
 end
 
