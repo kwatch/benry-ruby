@@ -1,0 +1,5 @@
+## this file should be ignored by '.gitignore', and
+## file permission should be `600`.
+AppConfig.class_eval do
+  set :session_secret   , "YRjCIAiPlCBvwLUq5mnZ"  # set SECRET value
+end
