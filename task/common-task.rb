@@ -60,16 +60,29 @@ END
 end unless Rake::Task.task_defined?(:guide)
 
 
-unless respond_to?(:run_test, true)
-  def run_test(ruby=nil, &b)
-    files = File.exist?("test/run_all.rb") \
+def run_minitest(ruby=nil, &b)
+  files = File.exist?("test/run_all.rb") \
           ? ["test/run_all.rb"] \
           : Dir.glob("test/**/*_test.rb")
-    if ruby
-      sh(ruby, *files, &b)
-    else
-      ruby(*files, &b)
-    end
+  if ruby
+    sh(ruby, *files, &b)
+  else
+    ruby(*files, &b)
+  end
+end
+
+def run_oktest(ruby=nil, &b)
+  argstr = "-r oktest -e Oktest.main -- test -sp"
+  if ruby
+    sh("#{ruby} #{argstr}", &b)
+  else
+    ruby(argstr, &b)
+  end
+end
+
+unless respond_to?(:run_test, true)
+  def run_test(ruby=nil, &b)
+    run_minitest(ruby, &b)
   end
 end
 
