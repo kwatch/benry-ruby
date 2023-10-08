@@ -1,26 +1,33 @@
 # coding: utf-8
 
 Gem::Specification.new do |spec|
-  spec.name          = "benry-config"
-  spec.version       = '$Release: 0.0.0 $'.split()[1]
-  spec.authors       = ["kwatch"]
-  spec.email         = ["kwatch@gmail.com"]
+  spec.name            = "benry-config"
+  spec.version         = "$Release: 0.0.0 $".split()[1]
+  spec.author          = "kwatch"
+  spec.email           = "kwatch@gmail.com"
+  spec.platform        = Gem::Platform::RUBY
+  spec.homepage        = "https://github.com/kwatch/benry/tree/main/benry-config"
+  spec.summary         = "Useful configuration library"
+  spec.description     = <<"END"
+Small library for configuration of application.
 
-  spec.summary       = "useful configuration class"
-  spec.description   = <<'END'
-See https://github.com/kwatch/benry/tree/ruby/benry-config for details.
+See #{spec.homepage}#readme for details.
 END
-  spec.homepage      = "https://github.com/kwatch/benry/tree/ruby/benry-config"
-  spec.license       = "MIT"
+  spec.license         = "MIT"
+  spec.files           = Dir[
+                           "README.md", "MIT-LICENSE.txt", #"CHANGES.md",
+                           "Rakefile.rb", "benry-config.gemspec",
+                           #"bin/*",
+                           "lib/**/*.rb",
+                           "test/**/*_test.rb",
+                           "task/**/*.rb",
+                         ]
+  #spec.executables     = [""]
+  spec.bindir          = "bin"
+  spec.require_paths   = ["lib"]
+  spec.test_files      = Dir["test/**/*_test.rb"]
+  #spec.extra_rdoc_files = ["README.md", "CHANGES.md"]
 
-  spec.files         = Dir[*%w[
-                         README.md MIT-LICENSE.txt Rakefile.rb benry-config.gemspec
-                         lib/**/*.rb
-                         test/**/*_test.rb
-                         task/**/*.rb
-                       ]]
-  spec.require_paths = ["lib"]
-
-  spec.required_ruby_version = '>= 2.3'
-  spec.add_development_dependency 'oktest'          , '=> 1.2'
+  spec.required_ruby_version = ">= 2.3"
+  spec.add_development_dependency "oktest"          , "=> 1.2"
 end
