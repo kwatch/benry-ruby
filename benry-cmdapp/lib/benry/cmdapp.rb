@@ -309,7 +309,7 @@ module Benry::CmdApp
 
     def parse_options(argv, all=true)
       #; [!ab3j8] parses argv and returns options.
-      return PARSER_CLASS.new(@schema).parse(argv, all)
+      return PARSER_CLASS.new(@schema).parse(argv, all: all)
       #; [!56da8] raises InvalidOptionError if option value is invalid.
     rescue Benry::CmdOpt::OptionError => exc
       raise InvalidOptionError.new(exc.message)
@@ -1018,7 +1018,7 @@ module Benry::CmdApp
     def do_parse_global_options(args)
       #; [!5br6t] parses only global options and not parse action options.
       parser = PARSER_CLASS.new(@schema)
-      global_opts = parser.parse(args, false)
+      global_opts = parser.parse(args, all: false)
       return global_opts
       #; [!kklah] raises InvalidOptionError if global option value is invalid.
     rescue Benry::CmdOpt::OptionError => exc
