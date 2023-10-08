@@ -33,9 +33,12 @@ end unless Rake::Task.task_defined?(:default)
 desc "show release guide"
 task :guide do
   RELEASE != '0.0.0'  or abort "rake guide: 'RELEASE=X.X.X' required."
-  rel, proj = RELEASE, PROJECT
-  rel =~ /(\d+\.\d+)/
-  branch = "#{proj}_rel-#{$1}"
+  puts guide_message(PROJECT, RELEASE)
+end
+
+def guide_message(project, release)
+  target = "#{project}-#{release}"
+  tag    = "#{project}-#{release}"
   puts <<END
 How to release:
 
@@ -44,20 +47,20 @@ How to release:
   $ which ruby
   $ rake test
   $ rake test:all
-  $ rake readme:execute             # optional
-  $ rake readme:toc                 # optional
-  $ rake package RELEASE=#{rel}
-  $ rake package:extract            # confirm files in gem file
-  $ (cd #{proj}-#{rel}/data; find . -type f)
-  $ gem install #{proj}-#{rel}.gem  # confirm gem package
-  $ gem uninstall #{proj}
-  $ gem push #{proj}-#{rel}.gem     # publish gem to rubygems.org
-  $ git tag #{proj}-#{rel}          # or: git tag ruby-#{proj}-#{rel}
+  $ rake readme:execute			# optional
+  $ rake readme:toc			# optional
+  $ rake package RELEASE=#{release}
+  $ rake package:extract		# confirm files in gem file
+  $ (cd #{target}/data; find . -type f)
+  $ gem install #{target}.gem	# confirm gem package
+  $ gem uninstall #{project}
+  $ gem push #{target}.gem	# publish gem to rubygems.org
+  $ git tag #{tag}		# or: git tag ruby-#{tag}
   $ git push
   $ git push --tags
   $ rake clean
 END
-end unless Rake::Task.task_defined?(:guide)
+end
 
 
 def run_minitest(ruby=nil, &b)
