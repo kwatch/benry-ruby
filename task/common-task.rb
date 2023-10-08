@@ -80,10 +80,8 @@ def run_oktest(ruby=nil, &b)
   end
 end
 
-unless respond_to?(:run_test, true)
-  def run_test(ruby=nil, &b)
-    run_minitest(ruby, &b)
-  end
+def run_test(ruby=nil, &b)
+  run_oktest(ruby, &b)
 end
 
 
