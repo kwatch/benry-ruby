@@ -1053,6 +1053,21 @@ end
 class Benry::CmdOpt::Parser::Test < MiniTest::Test
 
 
+  describe '#initialize()' do
+
+    it "[!eh3p3] accepts `parse_all:` kwarg (default: true)." do
+      schema = new_sample_schema()
+      parser = Benry::CmdOpt::Parser.new(schema, parse_all: true)
+      ok {parser.parse_all?} == true
+      parser = Benry::CmdOpt::Parser.new(schema, parse_all: false)
+      ok {parser.parse_all?} == false
+      parser = Benry::CmdOpt::Parser.new(schema)
+      ok {parser.parse_all?} == true
+    end
+
+  end
+
+
   describe '#parse_options()' do
 
     before do
@@ -1084,26 +1099,22 @@ class Benry::CmdOpt::Parser::Test < MiniTest::Test
       ok {argv} == ["-", "xxx", "yyy"]
     end
 
-    it "[!q8356] parses options even after arguments when `parse_all=true`." do
-      pr1 = proc {|argv| @parser.parse(argv, false) }
-      pr2 = proc {|argv| @parser.parse(argv) }
-      [pr1, pr2].each do |pr|
-        argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
-        d = @parser.parse(argv, true)
-        ok {d} == {help: true, file: "foo.png", indent: 10}
-        ok {argv} == ["arg1", "arg2", "arg3"]
-      end
+    it "[!q8356] parses options even after arguments when `parse_all: true` specified in constructor." do
+      schema = new_sample_schema()
+      parser = Benry::CmdOpt::Parser.new(schema, parse_all: true)
+      argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
+      d = parser.parse(argv)
+      ok {d} == {help: true, file: "foo.png", indent: 10}
+      ok {argv} == ["arg1", "arg2", "arg3"]
     end
 
-    it "[!ryra3] doesn't parse options after arguments when `parse_all=false`." do
-      pr1 = proc {|argv| @parser.parse(argv, false) }
-      #pr2 = proc {|argv| @parser.parse(argv) }
-      [pr1].each do |pr|
-        argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
-        d = pr.call(argv)
-        ok {d} == {help: true}
-        ok {argv} == ["arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
-      end
+    it "[!ryra3] doesn't parse options after arguments when `parse_all: false` specified in constructor." do
+      schema = new_sample_schema()
+      parser = Benry::CmdOpt::Parser.new(schema, parse_all: false)
+      argv = ["-h", "arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
+      d = parser.parse(argv)
+      ok {d} == {help: true}
+      ok {argv} == ["arg1", "-f", "foo.png", "arg2", "-i10", "arg3"]
     end
 
     it "[!y04um] skips rest options when '--' found in argv." do
@@ -1435,6 +1446,15 @@ class Benry::CmdOpt::Test < MiniTest::Test
       ok {obj}.is_a?(Benry::CmdOpt::Facade)
     end
 
+    it "[!lnbep] accepts 'parse_all: true' keyword arg (default: true)." do
+      obj = Benry::CmdOpt.new(parse_all: true)
+      ok {obj.parse_all?} == true
+      obj = Benry::CmdOpt.new(parse_all: false)
+      ok {obj.parse_all?} == false
+      obj = Benry::CmdOpt.new()
+      ok {obj.parse_all?} == true
+    end
+
   end
 
 
@@ -1443,6 +1463,20 @@ end
 
 
 class Benry::CmdOpt::Facade::Test < MiniTest::Test
+
+
+  describe '#initialize()' do
+
+    it "[!winuc] accepts 'parse_all: true' keyword arg (default: true)." do
+      obj = Benry::CmdOpt::Facade.new(parse_all: true)
+      ok {obj.parse_all?} == true
+      obj = Benry::CmdOpt::Facade.new(parse_all: false)
+      ok {obj.parse_all?} == false
+      obj = Benry::CmdOpt::Facade.new()
+      ok {obj.parse_all?} == true
+    end
+
+  end
 
 
   describe '#add()' do
@@ -1563,12 +1597,17 @@ END
 
   describe '#parse()' do
 
-    before do
-      @cmdopt = Benry::CmdOpt.new()
-      @cmdopt.add(:file, "-f, --file=<FILE>", "file") do |val|
+    def new_cmdopt_obj(**kwargs)
+      cmdopt = Benry::CmdOpt.new(**kwargs)
+      cmdopt.add(:file, "-f, --file=<FILE>", "file") do |val|
         File.open(val) {|f| f.read }
       end
-      @cmdopt.add(:debug, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
+      cmdopt.add(:debug, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
+      return cmdopt
+    end
+
+    before do
+      @cmdopt = new_cmdopt_obj()
     end
 
     it "[!areof] handles only OptionError when block given." do
@@ -1592,16 +1631,16 @@ END
       ok {ret} == nil
     end
 
-    it "[!za9at] parses options only before args when `parse_all=false`." do
+    it "[!za9at] parses options only before args when `parse_all: false`." do
       argv = ["aaa", "-d3", "bbb"]
       #
       argv1 = argv.dup
-      opts1 = @cmdopt.parse(argv1)
+      opts1 = new_cmdopt_obj().parse(argv1)
       ok {opts1} == {:debug=>3}
       ok {argv1} == ["aaa", "bbb"]
       #
       argv2 = argv.dup
-      opts2 = @cmdopt.parse(argv2, false)
+      opts2 = new_cmdopt_obj(parse_all: false).parse(argv2)
       ok {opts2} == {}
       ok {argv2} == ["aaa", "-d3", "bbb"]
     end

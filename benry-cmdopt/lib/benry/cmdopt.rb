@@ -25,19 +25,26 @@ module Benry
     VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
-    def self.new
+    def self.new(parse_all: true)
       #; [!7kkqv] creates Facade object.
-      return Facade.new
+      #; [!lnbep] accepts 'parse_all: true' keyword arg (default: true).
+      return Facade.new(parse_all: parse_all)
     end
 
 
     class Facade
 
-      def initialize
+      def initialize(parse_all: true)
         @schema = SCHEMA_CLASS.new
+        #; [!winuc] accepts 'parse_all: true' keyword arg (default: true).
+        @parse_all = parse_all
       end
 
       attr_reader :schema
+
+      def parse_all?
+        return @parse_all
+      end
 
       def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &callback)
         rexp ||= pattern    # for backward compatibility
@@ -66,14 +73,14 @@ module Benry
       end
       alias each_option_help each_option_and_desc   # for backward compatibility
 
-      def parse(argv, parse_all=true, &error_handler)
+      def parse(argv, &error_handler)
         #; [!7gc2m] parses command options.
         #; [!no4xu] returns option values as dict.
         #; [!areof] handles only OptionError when block given.
         #; [!peuva] returns nil when OptionError handled.
-        #; [!za9at] parses options only before args when `parse_all=false`.
-        parser = PARSER_CLASS.new(@schema)
-        return parser.parse(argv, parse_all, &error_handler)
+        #; [!za9at] parses options only before args when `parse_all: false`.
+        parser = PARSER_CLASS.new(@schema, parse_all: @parse_all)
+        return parser.parse(argv, &error_handler)
       end
 
     end
@@ -502,22 +509,28 @@ module Benry
 
     class Parser
 
-      def initialize(schema)
+      def initialize(schema, parse_all: true)
         @schema = schema
+        #; [!eh3p3] accepts `parse_all:` kwarg (default: true).
+        @parse_all = parse_all
       end
 
-      def parse(argv, parse_all=true, &error_handler)
+      def parse_all?
+        return @parse_all
+      end
+
+      def parse(argv, &error_handler)
         optdict = new_options_dict()
         index = 0
         while index < argv.length
           #; [!5s5b6] treats '-' as an argument, not an option.
           if argv[index] =~ /\A-/ && argv[index] != "-"
             optstr = argv.delete_at(index)
-          #; [!q8356] parses options even after arguments when `parse_all=true`.
-          elsif parse_all
+          #; [!q8356] parses options even after arguments when `parse_all: true` specified in constructor.
+          elsif @parse_all
             index += 1
             next
-          #; [!ryra3] doesn't parse options after arguments when `parse_all=false`.
+          #; [!ryra3] doesn't parse options after arguments when `parse_all: false` specified in constructor.
           else
             break
           end
