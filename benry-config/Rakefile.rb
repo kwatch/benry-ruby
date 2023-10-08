@@ -17,3 +17,19 @@ def run_test(ruby=nil, &b)
     ruby "test/config_test.rb", &b
   end
 end
+
+
+desc "retrieve example code from README"
+task :examples do
+  dir = "examples"
+  rm_rf dir
+  mkdir dir
+  mkdir "#{dir}/config"
+  #
+  text = File.read("README.md", encoding: 'utf-8')
+  rexp = /^File: `(.*?)`.*\n\n```.*\n((?:.|\n)*?)```/
+  text.scan(rexp) do |filename, content|
+    File.write("#{dir}/#{filename}", content, encoding: 'utf-8')
+    puts "[create] #{dir}/#{filename}"
+  end
+end
