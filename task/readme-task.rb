@@ -17,8 +17,13 @@ end
 
 namespace :readme do
 
+
   desc "retrieve scripts from #{README_FILE}"
   task :retrieve do
+    do_readme_retrieve()
+  end
+
+  def do_readme_retrieve()
     dir = "tmp/readme"
     rm_rf dir if File.exist?(dir)
     mkdir_p dir
@@ -56,16 +61,26 @@ namespace :readme do
     end
   end
 
+
   desc "execute code in readme file"
   task :execute => :retrieve do
+    do_readme_execute()
+  end
+
+  def do_readme_execute()
     Dir.glob(README_DESTDIR+'/**/*.rb').sort.each do |fpath|
       puts "========================================"
       sh "ruby -I lib #{fpath}" do end
     end
   end
 
+
   desc "builds table of contents"
   task :toc do
+    do_readme_toc()
+  end
+
+  def do_readme_toc()
     url = ENV['README_URL']  or abort "$README_URL required."
     htmlfile = "README.html"
     sh "curl -s -o #{htmlfile} #{url}"
@@ -102,5 +117,6 @@ namespace :readme do
     puts "[changed] README.md"          if changed
     puts "[not changed] README.md"  unless changed
   end
+
 
 end
