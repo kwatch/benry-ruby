@@ -84,6 +84,14 @@ def run_test(ruby=nil, &b)
   run_oktest(ruby, &b)
 end
 
+def run_test_all()
+  ENV['VS_HOME']  or
+    abort "[ERROR] rake test:all: '$VS_HOME' environment var required."
+  vs_home = ENV['VS_HOME'].split(/[:;]/).first
+  ruby_versions = RUBY_VERSIONS
+  test_all(vs_home, ruby_versions)
+end
+
 
 unless Rake::Task.task_defined?(:test)
   desc "do test"
@@ -96,11 +104,7 @@ end
 unless Rake::Task.task_defined?(:'test:all')
   desc "do test for different ruby versions"
   task :'test:all' do
-    ENV['VS_HOME']  or
-      abort "[ERROR] rake test:all: '$VS_HOME' environment var required."
-    ruby_versions = RUBY_VERSIONS
-    vs_home = ENV['VS_HOME'].split(/[:;]/).first
-    test_all(vs_home, ruby_versions)
+    run_test_all()
   end
 end
 
