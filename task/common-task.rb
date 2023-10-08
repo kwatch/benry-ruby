@@ -32,6 +32,10 @@ end unless Rake::Task.task_defined?(:default)
 
 desc "show release guide"
 task :guide do
+  do_guide()
+end
+
+def do_guide()
   RELEASE != '0.0.0'  or abort "rake guide: 'RELEASE=X.X.X' required."
   puts guide_message(PROJECT, RELEASE)
 end
@@ -63,6 +67,19 @@ END
 end
 
 
+desc "run test"
+task :test do
+  do_test()
+end
+
+def do_test()
+  run_test()
+end
+
+def run_test(ruby=nil, &b)
+  run_oktest(ruby, &b)
+end
+
 def run_minitest(ruby=nil, &b)
   files = File.exist?("test/run_all.rb") \
           ? ["test/run_all.rb"] \
@@ -83,32 +100,18 @@ def run_oktest(ruby=nil, &b)
   end
 end
 
-def run_test(ruby=nil, &b)
-  run_oktest(ruby, &b)
+
+desc "run test in different ruby versions"
+task :'test:all' do
+  do_test_all()
 end
 
-def run_test_all()
+def do_test_all()
   ENV['VS_HOME']  or
     abort "[ERROR] rake test:all: '$VS_HOME' environment var required."
   vs_home = ENV['VS_HOME'].split(/[:;]/).first
   ruby_versions = RUBY_VERSIONS
   test_all(vs_home, ruby_versions)
-end
-
-
-unless Rake::Task.task_defined?(:test)
-  desc "do test"
-  task :test do
-    run_test()
-  end
-end
-
-
-unless Rake::Task.task_defined?(:'test:all')
-  desc "do test for different ruby versions"
-  task :'test:all' do
-    run_test_all()
-  end
 end
 
 def test_all(vs_home, ruby_versions)
@@ -129,6 +132,25 @@ def test_all(vs_home, ruby_versions)
       $stderr.puts error.("ruby #{ver} not found")
       sleep 1.0
     end
+  end
+end
+
+
+desc "edit metadata in files"
+task :edit do
+  do_edit()
+end
+
+def do_edit()
+  target_files().each do |fname|
+    changed = edit_file(fname) do |s|
+      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELEASE != '0.0.0'
+      s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
+      s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
+      s
+    end
+    puts "[C] #{fname}"     if changed
+    puts "[U] #{fname}" unless changed
   end
 end
 
@@ -159,23 +181,12 @@ def edit_file(filename)
 end
 
 
-desc "edit metadata in files"
-task :edit do
-  target_files().each do |fname|
-    changed = edit_file(fname) do |s|
-      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELEASE != '0.0.0'
-      s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
-      s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
-      s
-    end
-    puts "[C] #{fname}"     if changed
-    puts "[U] #{fname}" unless changed
-  end
-end unless Rake::Task.task_defined?(:edit)
-
-
 desc "create package (*.gem)"
 task :package do
+  do_package()
+end
+
+def do_package()
   RELEASE != '0.0.0'  or abort "rake package: 'RELEASE=X.X.X' required."
   ## copy
   dir = "build"
@@ -202,11 +213,15 @@ task :package do
   end
   mv "#{dir}/#{PROJECT}-#{RELEASE}.gem", "."
   rm_rf dir
-end unless Rake::Task.task_defined?(:package)
+end
 
 
 desc "extract latest gem file"
 task :'package:extract' do
+  do_package_extract()
+end
+
+def do_package_extract()
   gemfile = Dir.glob("#{PROJECT}-*.gem").sort_by {|x| File.mtime(x) }.last
   dir = gemfile.sub(/\.gem$/, '')
   rm_rf dir if File.exist?(dir)
@@ -219,12 +234,17 @@ task :'package:extract' do
       sh "tar xvf ../data.tar"
     end
   end
-end unless Rake::Task.task_defined?(:'package:extract')
+end
 
 
 desc "upload gem file to rubygems.org"
 task :publish do
-  RELEASE != '0.0.0'  or abort "rake publish: 'RELEASE=X.X.X' required."
+  do_publish()
+end
+
+def do_publish()
+  RELEASE != '0.0.0'  or
+    abort "rake publish: 'RELEASE=X.X.X' required."
   gemfile = "#{PROJECT}-#{RELEASE}.gem"
   print "** Are you sure to publish #{gemfile}? [y/N]: "
   answer = $stdin.gets().strip()
@@ -235,7 +255,7 @@ task :publish do
     sh "#git push"
     sh "#git push --tags"
   end
-end unless Rake::Task.task_defined?(:publish)
+end
 
 
 desc nil
