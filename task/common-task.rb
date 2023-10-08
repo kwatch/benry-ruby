@@ -66,40 +66,48 @@ unless respond_to?(:run_test, true)
 end
 
 
-desc "do test"
-task :test do
-  run_test()
-end unless Rake::Task.task_defined?(:test)
+unless Rake::Task.task_defined?(:test)
+  desc "do test"
+  task :test do
+    run_test()
+  end
+end
 
 
 unless Rake::Task.task_defined?(:'test:all')
   desc "do test for different ruby versions"
   task :'test:all' do
     ENV['VS_HOME']  or
-      abort "[ERROR] rake test:all: $VS_HOME required."
-    defined?(RUBY_VERSIONS)  or
-      abort "[ERROR] rake test:all: RUBY_VERSIONS required."
+      abort "[ERROR] rake test:all: '$VS_HOME' environment var required."
+    ruby_versions = ENV['RUBY_VERSIONS']    ? ENV['RUBY_VERSIONS'].split() \
+                  : defined?(RUBY_VERSIONS) ? RUBY_VERSIONS : nil
+    ruby_versions  or
+      abort "[ERROR] rake test:all: '$RUBY_VERSIONS' environment var required."
     vs_home = ENV['VS_HOME'].split(/[:;]/).first
-    ENV['TC_QUIET'] = "Y" if File.exist?("test/tc.rb")
-    header = proc {|s| "\033[0;36m=============== #{s} ===============\033[0m" }
-    error  = proc {|s| "\033[0;31m** #{s}\033[0m" }
-    comp = proc {|x, y| x.to_s.split('.').map(&:to_i) <=> y.to_s.split('.').map(&:to_i) }
-    RUBY_VERSIONS.each do |ver|
-      dir = Dir.glob("#{vs_home}/ruby/#{ver}.*/").sort_by(&comp).last
-      puts ""
-      unless dir
-        puts header.(ver)
-        $stderr.puts error.("ruby #{ver} not found")
-        next
-      end
+    test_all(vs_home, ruby_versions)
+  end
+end
+
+def test_all(vs_home, ruby_versions)
+  header = proc {|s| "\033[0;36m=============== #{s} ===============\033[0m" }
+  error  = proc {|s| "\033[0;31m** #{s}\033[0m" }
+  comp   = proc {|x, y| x.to_s.split('.').map(&:to_i) <=> y.to_s.split('.').map(&:to_i) }
+  ruby_versions.each do |ver|
+    dir = Dir.glob("#{vs_home}/ruby/#{ver}.*/").sort_by(&comp).last
+    puts ""
+    if dir
       puts header.("#{ver} (#{dir})")
       run_test("#{dir}/bin/ruby") do |ok, res|
         $stderr.puts error.("test failed") unless ok
       end
+      sleep 0.2
+    else
+      puts header.(ver)
+      $stderr.puts error.("ruby #{ver} not found")
+      sleep 1.0
     end
   end
 end
-
 
 def target_files()
   $_target_files ||= begin
@@ -132,7 +140,7 @@ desc "edit metadata in files"
 task :edit do
   target_files().each do |fname|
     changed = edit_file(fname) do |s|
-      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELE ASE != '0.0.0'
+      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELEASE != '0.0.0'
       s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
       s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
       s
