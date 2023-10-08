@@ -6,12 +6,14 @@ Gem::Specification.new do |spec|
   spec.author          = 'kwatch'
   spec.email           = 'kwatch@gmail.com'
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = 'https://github.com/kwatch/benry/tree/ruby/benry-cmdapp'
+  spec.homepage        = 'https://github.com/kwatch/benry-ruby/tree/main/benry-cmdapp'
   spec.summary         = "Command-line application framework`"
   spec.description     = <<-'END'
-Benry::CmdApp is a framework to create command-line application.
-If you want create command-line application which takes sub-commands
-like `git`, `docker`, or `npm`, Benry::CmdApp is the solution.
+Benry::CmdApp is a framework to create command-line application
+like `git`, `docker`, or `npm` commands.
+
+If you want create command-line application which takes sub-commands,
+Benry::CmdApp is the solution.
 END
   spec.license         = 'MIT'
   spec.files           = Dir[
@@ -27,5 +29,7 @@ END
   spec.test_files      = Dir['test/**/*_test.rb']
   #spec.extra_rdoc_files = ['README.md', 'CHANGES.md']
 
-  spec.add_development_dependency 'oktest'    , '~> 1.2'
+  spec.required_ruby_version = '>= 2.3'
+  spec.add_runtime_dependency     'benry-cmdopt'    , '~> 2'
+  spec.add_development_dependency 'oktest'          , '~> 1.2'
 end
