@@ -20,14 +20,14 @@ END
                            "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
                            #"bin/*", "doc/**/*", "examples/**/*",
                          ]
-  #spec.executables     = ["benry-hello"]
+  #spec.executables     = []
   spec.bindir          = "bin"
   spec.require_path    = "lib"
-  spec.test_files      = Dir["test/**/*_test.rb"]
+  spec.test_files      = Dir["test/**/*_test.rb"]   # or: ["test/run_all.rb"]
   #spec.extra_rdoc_files = ["README.md", "CHANGES.md"]
 
   spec.required_ruby_version = ">= 2.3"
-  #spec.add_development_dependency "minitest"     , "~> 5"
-  #spec.add_development_dependency "minitest-ok"  , "~> 0"
-  spec.add_development_dependency "oktest"       , "~> 1"
+  #spec.add_development_dependency "minitest"        , "~> 5"
+  #spec.add_development_dependency "minitest-ok"     , "~> 0"
+  spec.add_development_dependency "oktest"          , "~> 1"
 end
