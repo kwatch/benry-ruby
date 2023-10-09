@@ -1,7 +1,7 @@
 <!-- -*- coding: utf-8 -*- -->
-# Benry-recorder README
+# Benry-Recorder README
 
-Benry-recoder is a tiny utility that can:
+Benry-Recoder is a tiny utility that can:
 
 * Record method calls of target object.
 * Define fake methods on target object.
