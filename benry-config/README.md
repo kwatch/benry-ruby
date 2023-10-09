@@ -1,5 +1,5 @@
-benry-config
-============
+Benry-Config README
+===================
 
 ($Release: 0.0.0 $)
 
@@ -14,10 +14,22 @@ Utility class to support configuration.
 * Represents secret configurations which should be set by environment var or in private file.
 
 
+Table of Contents
+-----------------
+
+<!-- TOC -->
+
+  * <a href="#overview">Overview</a>
+  * <a href="#example">Example</a>
+  * <a href="#copyright-and-license">Copyright and License</a>
+
+<!-- /TOC -->
+
+
 Example
 -------
 
-File: `config/config.rb`
+File: config/config.rb
 
 ```ruby
 require 'benry/config'
@@ -35,7 +47,7 @@ class BaseConfig < Benry::BaseConfig
 end
 ```
 
-File: `config/config_dev.rb` (for development environment)
+File: config/config_dev.rb (for development environment)
 
 ```ruby
 ## for development environment
@@ -45,7 +57,7 @@ class AppConfig < BaseConfig
 end
 ```
 
-File: `config/config_prod.rb` (for production environment)
+File: config/config_prod.rb (for production environment)
 
 ```ruby
 ## for production environment
@@ -58,7 +70,7 @@ class AppConfig < BaseConfig
 end
 ```
 
-File: `config/config.private` (should be ignored by `.gitignore`)
+File: config/config.private (should be ignored by `.gitignore`)
 
 ```ruby
 ## this file should be ignored by '.gitignore', and
@@ -68,7 +80,7 @@ AppConfig.class_eval do
 end
 ```
 
-File: `main.rb`
+File: main.rb
 
 ```ruby
 ## load config files
