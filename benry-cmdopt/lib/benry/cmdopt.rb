@@ -26,7 +26,7 @@ module Benry::CmdOpt
   VERSION = '$Release: 0.0.0 $'.split()[1]
 
 
-  def self.new
+  def self.new()
     #; [!7kkqv] creates Facade object.
     return Facade.new
   end
@@ -34,7 +34,7 @@ module Benry::CmdOpt
 
   class Facade
 
-    def initialize
+    def initialize()
       @schema = SCHEMA_CLASS.new
     end
 
@@ -284,21 +284,21 @@ module Benry::CmdOpt
     def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       _init_validation(param, required, type, rexp, enum, range, value)
-      @key      = key       unless key.nil?
-      @optdef   = optdef    unless optdef.nil?
-      @desc     = desc      unless desc.nil?
-      @short    = short     unless short.nil?
-      @long     = long      unless long.nil?
-      @param    = param     unless param.nil?
-      @required = required  unless required.nil?
-      @type     = type      unless type.nil?
-      @rexp     = rexp      unless rexp.nil?
-      @enum     = enum      unless enum.nil?
-      @range    = range     unless range.nil?
-      @detail   = detail    unless detail.nil?
-      @value    = value     unless value.nil?
-      @tag      = tag       unless tag.nil?
-      @callback = callback  unless callback.nil?
+      @key      = key       unless nil == key
+      @optdef   = optdef    unless nil == optdef
+      @desc     = desc      unless nil == desc
+      @short    = short     unless nil == short
+      @long     = long      unless nil == long
+      @param    = param     unless nil == param
+      @required = required  unless nil == required
+      @type     = type      unless nil == type
+      @rexp     = rexp      unless nil == rexp
+      @enum     = enum      unless nil == enum
+      @range    = range     unless nil == range
+      @detail   = detail    unless nil == detail
+      @value    = value     unless nil == value
+      @tag      = tag       unless nil == tag
+      @callback = callback  unless nil == callback
       #; [!nn4cp] freezes enum object.
       @enum.freeze() if @enum
     end
@@ -307,7 +307,7 @@ module Benry::CmdOpt
     alias pattern rexp   # for backward compatibility
     alias help desc      # for backward compatibility
 
-    def required?
+    def required?()
       #; [!svxny] returns nil if option takes no arguments.
       #; [!uwbgc] returns false if argument is optional.
       #; [!togcx] returns true if argument is required.
@@ -635,8 +635,8 @@ module Benry::CmdOpt
 
 
   OPTIONS_CLASS = Hash
-  SCHEMA_CLASS = Schema
-  PARSER_CLASS = Parser
+  SCHEMA_CLASS  = Schema
+  PARSER_CLASS  = Parser
 
 
   class SchemaError < StandardError
@@ -650,4 +650,6 @@ module Benry::CmdOpt
 end
 
 
-Benry::Cmdopt = Benry::CmdOpt         # for backawrd compatibility
+module Benry
+  Cmdopt = CmdOpt         # for backawrd compatibility
+end
