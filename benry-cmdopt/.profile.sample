@@ -1,0 +1,3 @@
+. ../profile.sh
+export README_URL=https://gist.github.com/johnsmith/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+vs ruby 3.2
