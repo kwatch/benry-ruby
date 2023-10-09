@@ -1,14 +1,14 @@
-Benry::CmdOpt README
+Benry-CmdOpt README
 ====================
 
 ($Release: 0.0.0 $)
 
-Benry::CmdOpt is a command option parser library, like `optparse.rb`.
+Benry-CmdOpt is a command option parser library, like `optparse.rb`.
 
-Compared to `optparse.rb`, Benry::CmdOpt is easy to use, easy to extend,
+Compared to `optparse.rb`, Benry-CmdOpt is easy to use, easy to extend,
 and easy to understahnd.
 
-(Benry::CmdOpt requires Ruby >= 2.3)
+(Benry-CmdOpt requires Ruby >= 2.3)
 
 
 
@@ -387,7 +387,7 @@ cmdopt.add(:indent, '-i <N>', "indent", range: (0..))
 Boolean (on/off) Option
 -----------------------
 
-Benry::CmdOpt doens't support `--no-xxx` style option for usability reason.
+Benry-CmdOpt doens't support `--no-xxx` style option for usability reason.
 Use boolean option instead.
 
 ex3.rb:
@@ -417,7 +417,7 @@ $ ruby ex3.rb --foo=off       # disable
 Alternative Value
 -----------------
 
-Benry::CmdOpt supports alternative value.
+Benry-CmdOpt supports alternative value.
 
 ```ruby
 require 'benry/cmdopt'
@@ -468,7 +468,7 @@ p options   #=> {:lib=>["foo", "bar", "baz"]}
 Hidden Option
 -------------
 
-Benry::CmdOpt regards the following options as hidden.
+Benry-CmdOpt regards the following options as hidden.
 
 * Key name starts with `_` (for example `:_debug`).
 * Or description is nil.
