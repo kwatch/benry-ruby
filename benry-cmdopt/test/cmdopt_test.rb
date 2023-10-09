@@ -16,7 +16,7 @@ Oktest.scope do
     sc.add(:indent , "-i, --indent[=<WIDTH>]", "enable indent", type: Integer)
     sc.add(:mode   , "-m, --mode=<MODE>"     , "mode", enum: ['verbose', 'quiet'])
     sc.add(:libpath, "-I, --path=<PATH>"     , "library path (multiple ok)") do |optdef, key, val|
-      File.directory?(val)  or raise "directory not exist."
+      File.directory?(val)  or raise "Directory not exist."
       arr = optdef[key] || []
       arr << val
       arr
@@ -71,7 +71,7 @@ Oktest.scope do
           tuple = sc.__send__(:parse_optdef, "-i, --indent <WIDTH>")
         }
         ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       "-i, --indent <WIDTH>: invalid option definition (use '=--indent' instead of ' --indent').")
+                       "-i, --indent <WIDTH>: Invalid option definition (use '=--indent' instead of ' --indent').")
       end
 
     end
@@ -171,7 +171,7 @@ Oktest.scope do
       spec "[!jtp7z] raises SchemaError when key is nil and no long option." do
         sc = @schema
         pr = proc { sc.add(nil, "-i <N>", nil) }
-        msg = "add(nil, \"-i <N>\"): long option required when option key (1st arg) not specified."
+        msg = "add(nil, \"-i <N>\"): Long option required when option key (1st arg) not specified."
         ok {pr}.raise?(Benry::CmdOpt::SchemaError, msg)
       end
 
@@ -185,7 +185,7 @@ Oktest.scope do
       spec "[!97sn0] raises SchemaError when ',' is missing between short and long options." do
         sc = @schema
         pr = proc { sc.add(:exec, '-x --exec=ARG', "exec") }
-        msg = "add(:exec, \"-x --exec=ARG\"): missing ',' between short option and long options."
+        msg = "add(:exec, \"-x --exec=ARG\"): Missing ',' between short option and long options."
         ok {pr}.raise?(Benry::CmdOpt::SchemaError, msg)
       end
 
@@ -227,7 +227,7 @@ Oktest.scope do
         sc = @schema
         pr = proc { sc.add(:key, "--optdef=xx", "desc", "value") }
         ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       '"value": expected one of class, regexp, array or range, but got String.')
+                       '"value": Expected one of class, regexp, array or range, but got String.')
       end
 
       spec "[!rhhji] raises SchemaError when key is not a Symbol." do
@@ -236,7 +236,7 @@ Oktest.scope do
           sc.add("-i, --indent[=<WIDTH>]", "indent width", nil)
         }
         ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       'add("-i, --indent[=<WIDTH>]", "indent width"): the first arg should be a Symbol as an option key.')
+                       'add("-i, --indent[=<WIDTH>]", "indent width"): The first arg should be a Symbol as an option key.')
       end
 
       spec "[!vq6eq] raises SchemaError when help message is missing." do
@@ -249,7 +249,7 @@ Oktest.scope do
           end
         }
         ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                       'add(:indent, "-i, --indent[=<WIDTH>]"): help message required as 3rd argument.')
+                       'add(:indent, "-i, --indent[=<WIDTH>]"): Help message required as 3rd argument.')
       end
 
 
@@ -669,7 +669,7 @@ END
             sc.add(:indent, "-i, --indent[=<WIDTH>]", "indent width", type: Array)
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "Array: unregistered type.")
+                         "Array: Unregistered type.")
         end
 
         spec "[!s2aaj] raises SchemaError when option has no params but type specified." do
@@ -678,7 +678,7 @@ END
             sc.add(:indent, "-i, --indent", "indent width", type: Integer)
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "Integer: type specified in spite of option has no params.")
+                         "Integer: Type specified in spite of option has no params.")
         end
 
         spec "[!sz8x2] not raise error when no params but value specified." do
@@ -707,7 +707,7 @@ END
             sc.add(:indent, "-x, --indent[=<WIDTH>]", "indent width", rexp: '\A\d+\z')
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         '"\\\\A\\\\d+\\\\z": regexp pattern expected.')
+                         '"\\\\A\\\\d+\\\\z": Regexp pattern expected.')
         end
 
         spec "[!01fmt] raises SchmeaError when option has no params but pattern specified." do
@@ -716,7 +716,7 @@ END
             sc.add(:indent, "-i, --indent", "indent width", rexp: /\A\d+\z/)
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         '/\A\d+\z/: regexp pattern specified in spite of option has no params.')
+                         '/\A\d+\z/: Regexp pattern specified in spite of option has no params.')
         end
 
       end
@@ -731,7 +731,7 @@ END
             sc.add(:indent, "-i <N>", "indent width", enum: "2,4,8")
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         '"2,4,8": array or set expected.')
+                         '"2,4,8": Array or set expected.')
         end
 
         spec "[!xqed8] raises SchemaError when enum specified for no param option." do
@@ -740,7 +740,7 @@ END
             sc.add(:indent, "-i", "enable indent", enum: [2, 4, 8])
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "[2, 4, 8]: enum specified in spite of option has no params.")
+                         "[2, 4, 8]: Enum specified in spite of option has no params.")
         end
 
         spec "[!zuthh] raises SchemaError when enum element value is not instance of type class." do
@@ -749,7 +749,7 @@ END
             sc.add(:indent, "-i <N>", "enable indent", type: Integer, enum: ['2', '4', '8'])
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         '["2", "4", "8"]: enum element value should be instance of Integer, but "2" is not.')
+                         '["2", "4", "8"]: Enum element value should be instance of Integer, but "2" is not.')
         end
 
       end
@@ -761,7 +761,7 @@ END
             @schema.add(:indent, "-i <N>", "indent", type: Integer, range: [1,8])
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "[1, 8]: range object expected.")
+                         "[1, 8]: Range object expected.")
         end
 
         spec "[!gp025] raises SchemaError when range specified with `type: TrueClass`." do
@@ -769,7 +769,7 @@ END
             @schema.add(:indent, "-i <N>", "indent", type: TrueClass, range: 0..1)
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "0..1: range is not available with `type: TrueClass`.")
+                         "0..1: Range is not available with `type: TrueClass`.")
         end
 
         spec "[!7njd5] range beginning/end value should be expected type." do
@@ -777,12 +777,12 @@ END
             @schema.add(:indent, "-i <N>", "indent", range: (1..8))
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "1..8: range value should be String, but not.")
+                         "1..8: Range value should be String, but not.")
           pr = proc {
             @schema.add(:indent, "-i <N>", "indent", type: Date, range: (1..8))
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "1..8: range value should be Date, but not.")
+                         "1..8: Range value should be Date, but not.")
         end
 
         spec "[!uymig] range object can be endless." do
@@ -822,7 +822,7 @@ END
             sc.add(:flag, "--flag[=<on|off>]", "flag", type: TrueClass, value: 0)
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "0: value should be true or false when `type: TrueClass` specified.")
+                         "0: Value should be true or false when `type: TrueClass` specified.")
         end
 
         spec "[!c6i2o] raises SchemaError when value is not a kind of type." do
@@ -831,7 +831,7 @@ END
             sc.add(:flag, "--flag[=<on|off>]", "flag", type: Integer, value: false)
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "type mismatched between `type: Integer` and `value: false`.")
+                         "Type mismatched between `type: Integer` and `value: false`.")
         end
 
         spec "[!lnhp6] not raise error when type is not specified." do
@@ -848,7 +848,7 @@ END
             sc.add(:lang, "--lang[=<en|fr|it>]", "language", enum: ["en", "fr", "it"], value: "ja")
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
-                         "ja: value should be included in enum values, but not.")
+                         "ja: Value should be included in enum values, but not.")
         end
 
       end
@@ -931,14 +931,14 @@ END
         x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, rexp: /\A\d+\z/)
         optdict = {}
         pr = proc { x.validate_and_convert("abc", optdict) }
-        ok {pr}.raise?(RuntimeError, "pattern unmatched.")
+        ok {pr}.raise?(RuntimeError, "Pattern unmatched.")
       end
 
       spec "[!5jrdf] raises RuntimeError when value not in enum." do
         x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, enum: ['2', '4', '8'])
         optdict = {}
         pr = proc { x.validate_and_convert("10", optdict) }
-        ok {pr}.raise?(RuntimeError, "expected one of 2/4/8.")
+        ok {pr}.raise?(RuntimeError, "Expected one of 2/4/8.")
       end
 
       spec "[!5falp] raise RuntimeError when value not in range." do
@@ -946,21 +946,21 @@ END
                      type: Integer, range: 2..8)
         optdict = {}
         pr = proc { x.validate_and_convert("1", optdict) }
-        ok {pr}.raise?(RuntimeError, "too small (min: 2)")
+        ok {pr}.raise?(RuntimeError, "Too small (min: 2)")
         pr = proc { x.validate_and_convert("9", optdict) }
-        ok {pr}.raise?(RuntimeError, "too large (max: 8)")
+        ok {pr}.raise?(RuntimeError, "Too large (max: 8)")
         ## when min==0
         x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
                      type: Integer, range: 0..8)
         optdict = {}
         pr = proc { x.validate_and_convert("-1", optdict) }
-        ok {pr}.raise?(RuntimeError, "positive value (>= 0) expected.")
+        ok {pr}.raise?(RuntimeError, "Positive value (>= 0) expected.")
         ## when min==1
         x = new_item(:indent, "-i[=<N>]", "indent", "i", nil, "<N>", false,
                      type: Integer, range: 1..8)
         optdict = {}
         pr = proc { x.validate_and_convert("0", optdict) }
-        ok {pr}.raise?(RuntimeError, "positive value (>= 1) expected.")
+        ok {pr}.raise?(RuntimeError, "Positive value (>= 1) expected.")
       end
 
       spec "[!a0rej] supports endless range." do
@@ -976,7 +976,7 @@ END
                        type: Integer, range: range1)
           optdict = {}
           pr = proc { x.validate_and_convert("1", optdict) }
-          ok {pr}.raise?(RuntimeError, "too small (min: 2)")
+          ok {pr}.raise?(RuntimeError, "Too small (min: 2)")
           pr = proc { x.validate_and_convert("9", optdict) }
           ok {pr}.NOT.raise?(RuntimeError)
         end
@@ -987,7 +987,7 @@ END
           pr = proc { x.validate_and_convert("1", optdict) }
           ok {pr}.NOT.raise?(RuntimeError)
           pr = proc { x.validate_and_convert("9", optdict) }
-          ok {pr}.raise?(RuntimeError, "too large (max: 8)")
+          ok {pr}.raise?(RuntimeError, "Too large (max: 8)")
         end
       end
 
@@ -995,7 +995,7 @@ END
         x = new_item(:indent, "", "indent width", "i", "indent", "<WIDTH>", false, type: Integer)
         optdict = {}
         pr = proc { x.validate_and_convert("abc", optdict) }
-        ok {pr}.raise?(RuntimeError, "integer expected.")
+        ok {pr}.raise?(RuntimeError, "Integer expected.")
       end
 
       spec "[!jn9z3] calls callback when callback specified." do
@@ -1118,7 +1118,7 @@ END
           errmsg = err.message
           errcls = err.class
         }
-        ok {errmsg} == "-ix: integer expected."
+        ok {errmsg} == "-ix: Integer expected."
         ok {errcls} == Benry::CmdOpt::OptionError
         #
         sc = Benry::CmdOpt::Schema.new
@@ -1147,7 +1147,7 @@ END
       spec "[!3i994] raises OptionError when invalid long option format." do
         argv = ["--f/o/o"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--f/o/o: invalid long option.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--f/o/o: Invalid long option.")
       end
 
       spec "[!1ab42] invokes error handler method when unknown long option." do
@@ -1166,29 +1166,29 @@ END
       spec "[!er7h4] default behavior is to raise OptionError when unknown long option." do
         argv = ["--foo"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--foo: unknown long option.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--foo: Unknown long option.")
       end
 
       spec "[!2jd9w] raises OptionError when no arguments specified for arg required long option." do
         argv = ["--file"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--file: argument required.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--file: Argument required.")
       end
 
       spec "[!qyq8n] raises optionError when an argument specified for no arg long option." do
         argv = ["--version=1.0.0"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--version=1.0.0: unexpected argument.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--version=1.0.0: Unexpected argument.")
       end
 
       spec "[!o596x] validates argument value." do
         argv = ["--indent=abc"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--indent=abc: integer expected.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--indent=abc: Integer expected.")
         #
         argv = ["--path=/foo/bar"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--path=/foo/bar: directory not exist.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--path=/foo/bar: Directory not exist.")
 
       end
 
@@ -1204,13 +1204,13 @@ END
       spec "[!4eh49] raises OptionError when unknown short option specified." do
         argv = ["-hxf", "foo.png"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-x: unknown option.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-x: Unknown option.")
       end
 
       spec "[!utdbf] raises OptionError when argument required but not specified." do
         argv = ["-hf"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-f: argument required.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-f: Argument required.")
       end
 
       spec "[!f63hf] short option arg can be specified without space separator." do
@@ -1237,11 +1237,11 @@ END
       spec "[!yu0kc] validates short option argument." do
         argv = ["-iaaa"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-iaaa: integer expected.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-iaaa: Integer expected.")
         #
         argv = ["-I", "/foo/bar"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-I /foo/bar: directory not exist.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-I /foo/bar: Directory not exist.")
       end
 
     end
@@ -1266,7 +1266,7 @@ END
         pr = proc {
           parser.__send__(:handle_unknown_long_option, "--xx=XX", "xx", "XX")
         }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--xx=XX: unknown long option.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--xx=XX: Unknown long option.")
       end
 
     end
@@ -1297,10 +1297,10 @@ END
 
       spec "[!nzwc9] raises error when failed to convert value into integer." do
         pr = proc { @parser.parse(['-i2.1']) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-i2.1: integer expected.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-i2.1: Integer expected.")
         #
         pr = proc { @parser.parse(['--indent=2.2']) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--indent=2.2: integer expected.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--indent=2.2: Integer expected.")
       end
 
     end
@@ -1324,10 +1324,10 @@ END
 
       spec "[!t4elj] raises error when faield to convert value into float." do
         pr = proc { @parser.parse(['-r', 'abc']) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-r abc: float expected.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-r abc: Float expected.")
         #
         pr = proc { @parser.parse(['--ratio=abc']) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--ratio=abc: float expected.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "--ratio=abc: Float expected.")
       end
 
     end
@@ -1376,11 +1376,11 @@ END
       spec "[!h8ayh] raises error when failed to convert value into true nor false." do
         pr = proc { @parser.parse(["-bt"]) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError,
-                       "-bt: boolean expected.")
+                       "-bt: Boolean expected.")
         #
         pr = proc { @parser.parse(["--border=t"]) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError,
-                       "--border=t: boolean expected.")
+                       "--border=t: Boolean expected.")
       end
 
     end
@@ -1406,21 +1406,21 @@ END
       spec "[!h9q9y] raises error when failed to convert into date object." do
         pr = proc { @parser.parse(['-d', '2000/01/01']) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError,
-                       "-d 2000/01/01: invalid date format (ex: '2000-01-01')")
+                       "-d 2000/01/01: Invalid date format (ex: '2000-01-01')")
         #
         pr = proc { @parser.parse(['--date=01-01-2000']) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError,
-                       "--date=01-01-2000: invalid date format (ex: '2000-01-01')")
+                       "--date=01-01-2000: Invalid date format (ex: '2000-01-01')")
       end
 
       spec "[!i4ui8] raises error when specified date not exist." do
         pr = proc { @parser.parse(['-d', '2001-02-29']) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError,
-                       "-d 2001-02-29: date not exist.")
+                       "-d 2001-02-29: Date not exist.")
         #
         pr = proc { @parser.parse(['--date=2001-02-29']) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError,
-                       "--date=2001-02-29: date not exist.")
+                       "--date=2001-02-29: Date not exist.")
       end
 
     end
@@ -1576,7 +1576,7 @@ END
           errmsg = err.message
           errcls = err.class
         }
-        ok {errmsg} == "-dx: integer expected."
+        ok {errmsg} == "-dx: Integer expected."
         ok {errcls} == Benry::CmdOpt::OptionError
         #
         pr = proc do
