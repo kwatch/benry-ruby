@@ -1,7 +1,9 @@
-Benry::CLI README
-=================
+Benry-CLI README
+================
 
 ($Release: 0.0.0 $)
+
+(**OBSOLETE**. Use [Benry-CmdApp](https://github.com/kwatch/benry-ruby/tree/main/benry-cmdapp) instead.)
 
 Benry::CLI is a MVC-like framework for command-line application.
 It is suitable for command-line application such as `git`, `gem` or `rails`.
@@ -15,6 +17,24 @@ If you use Rake as command-line application framework instead of build tool,
 take account of Benry::CLI as an alternative of Rake.
 
 (Benry::CLI requires Ruby >= 2.0)
+
+
+Table of Contents
+-----------------
+
+<!-- TOC -->
+
+  * <a href="#basic-example">Basic Example</a>
+  * <a href="#command-line-options">Command-line Options</a>
+  * <a href="#validation-and-type-conversion">Validation and Type Conversion</a>
+  * <a href="#other-topics">Other Topics</a>
+    * <a href="#name-conversion-rule-in-help-message">Name Conversion Rule in Help Message</a>
+    * <a href="#prefix-of-action-name">Prefix of Action Name</a>
+      * <a href="#multiple-value-option">Multiple-Value Option</a>
+      * <a href="#parse-command-options-without-application">Parse Command Options without Application</a>
+  * <a href="#license-and-copyright">License and Copyright</a>
+
+<!-- /TOC -->
 
 
 Basic Example
