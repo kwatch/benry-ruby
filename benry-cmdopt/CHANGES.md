@@ -6,7 +6,7 @@ CHANGES
 Release 2.0.0 (????-??-??)
 --------------------------
 
-* [change] rename 'Benry::Cmdopt' to 'Benry::CmdOpt', and the old name is still available for backward compatibility.
+* [change] rename `Benry::Cmdopt` to `Benry::CmdOpt`, and the old name is still available for backward compatibility.
 * [change] `Parser#parse()` parses all options even after arguments.
 * [change] treat argument `-` as normal argument (in before release, `-` is ignored because treated as option).
 * [change] keyword parameter `pattern:` is renamed to `rexp:` (`pattern:` is also available for backward compatibilidy).
@@ -27,6 +27,7 @@ Release 2.0.0 (????-??-??)
 * [enhance] add `Schema#dup()` which duplicates each object.
 * [enhance] add `Schema#copy_from(other)` which copies option items from other schema.
 * [change] switch testing library from MiniTest to Oktest.
+* [change] capitalize the first letter of error messages.
 
 
 Release 1.1.0 (2021-01-18)
