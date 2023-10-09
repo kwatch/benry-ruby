@@ -17,7 +17,7 @@ module Benry
   ##
   ## Command option parser.
   ##
-  ## See: https://github.com/kwatch/benry-ruby/tree/ruby/benry-cmdopt
+  ## See: https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt
   ##
   module CmdOpt
 
