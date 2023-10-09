@@ -24,7 +24,7 @@ namespace :readme do
   end
 
   def do_readme_retrieve()
-    dir = "tmp/readme"
+    dir = README_DESTDIR
     rm_rf dir if File.exist?(dir)
     mkdir_p dir
     s = File.read(README_FILE, encoding: 'utf-8')
@@ -82,9 +82,11 @@ namespace :readme do
 
   def do_readme_toc()
     url = ENV['README_URL']  or abort "$README_URL required."
-    htmlfile = "README.html"
+    mkdir "tmp" unless Dir.exist?("tmp")
+    htmlfile = "tmp/README.html"
     sh "curl -s -o #{htmlfile} #{url}"
-    rexp = /<h(\d) dir="auto"><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
+    #rexp = /<h(\d) dir="auto"><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
+    rexp = /<h(\d) id="user-content-.*?" dir="auto"><a class="heading-link" href="#(.*?)">(.*)<svg/
     html_str = File.read(htmlfile, encoding: 'utf-8')
     buf = []
     html_str.scan(rexp) do
@@ -100,7 +102,8 @@ namespace :readme do
     buf.shift() if buf[0] && buf[0] =~ /^\* /
     toc_str = buf.join()
     #
-    changed = File.open("README.md", "r+", encoding: 'utf-8') do |f|
+    mdfile = README_FILE
+    changed = File.open(mdfile, "r+", encoding: 'utf-8') do |f|
       s1 = f.read()
       s2 = s1.sub(/(<!-- TOC -->\n).*(<!-- \/TOC -->\n)/m) {
         [$1, toc_str, $2].join("\n")
@@ -114,8 +117,8 @@ namespace :readme do
         false
       end
     end
-    puts "[changed] README.md"          if changed
-    puts "[not changed] README.md"  unless changed
+    puts "[changed] #{mdfile}"          if changed
+    puts "[not changed] #{mdfile}"  unless changed
   end
 
 
