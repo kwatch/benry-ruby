@@ -1,5 +1,5 @@
-benry-unixcmd Gem README
-========================
+Benry-UnixCmd README
+====================
 
 ($Release: 0.0.0 $)
 
@@ -30,32 +30,32 @@ Table of Contents
 
 * <a href="#install">Install</a>
 * <a href="#command-reference">Command Reference</a>
-  * <a href="#echo"><code>echo</code></a>
-  * <a href="#echoback"><code>echoback</code></a>
-  * <a href="#cp"><code>cp</code></a>
-  * <a href="#mv"><code>mv</code></a>
-  * <a href="#rm"><code>rm</code></a>
-  * <a href="#mkdir"><code>mkdir</code></a>
-  * <a href="#rmdir"><code>rmdir</code></a>
-  * <a href="#ln"><code>ln</code></a>
-  * <a href="#atomic_symlink"><code>atomic_symlink!</code></a>
-  * <a href="#touch"><code>touch</code></a>
-  * <a href="#chmod"><code>chmod</code></a>
-  * <a href="#chown"><code>chown</code></a>
-  * <a href="#pwd"><code>pwd</code></a>
-  * <a href="#cd"><code>cd</code></a>
-  * <a href="#pushd"><code>pushd</code></a>
-  * <a href="#store"><code>store</code></a>
-  * <a href="#sys"><code>sys</code></a>
-  * <a href="#ruby"><code>ruby</code></a>
-  * <a href="#capture2"><code>capture2</code></a>
-  * <a href="#capture2e"><code>capture2e</code></a>
-  * <a href="#capture3"><code>capture3</code></a>
-  * <a href="#zip"><code>zip</code></a>
-  * <a href="#unzip"><code>unzip</code></a>
-  * <a href="#time"><code>time</code></a>
+  * <a href="#echo">`echo`</a>
+  * <a href="#echoback">`echoback`</a>
+  * <a href="#cp">`cp`</a>
+  * <a href="#mv">`mv`</a>
+  * <a href="#rm">`rm`</a>
+  * <a href="#mkdir">`mkdir`</a>
+  * <a href="#rmdir">`rmdir`</a>
+  * <a href="#ln">`ln`</a>
+  * <a href="#atomic_symlink">`atomic_symlink!`</a>
+  * <a href="#touch">`touch`</a>
+  * <a href="#chmod">`chmod`</a>
+  * <a href="#chown">`chown`</a>
+  * <a href="#pwd">`pwd`</a>
+  * <a href="#cd">`cd`</a>
+  * <a href="#pushd">`pushd`</a>
+  * <a href="#store">`store`</a>
+  * <a href="#sys">`sys`</a>
+  * <a href="#ruby">`ruby`</a>
+  * <a href="#capture2">`capture2`</a>
+  * <a href="#capture2e">`capture2e`</a>
+  * <a href="#capture3">`capture3`</a>
+  * <a href="#zip">`zip`</a>
+  * <a href="#unzip">`unzip`</a>
+  * <a href="#time">`time`</a>
 * <a href="#faq">FAQ</a>
-  * <a href="#why-mv-or-cp-requires-to-option">Why <code>mv</code> or <code>cp</code> requires <code>to:</code> option?</a>
+  * <a href="#why-mv-or-cp-requires-to-option">Why `mv` or `cp` requires `to:` option?</a>
   * <a href="#how-to-use-in-rakefile">How to use in Rakefile?</a>
   * <a href="#how-to-change-prompt-string">How to change prompt string?</a>
   * <a href="#how-to-make-prompt-colored">How to make prompt colored?</a>
