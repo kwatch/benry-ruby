@@ -6,19 +6,20 @@ Gem::Specification.new do |spec|
   spec.author          = "kwatch"
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = "https://github.com/kwatch/benry-ruby/tree/main/benry-unixcmd"
+  spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-unixcmd.html"
   spec.summary         = "Unix commands implementation like 'fileutils.rb'"
   spec.description     = <<-"END"
 Unix commnads implementation. Similar to `fileutils.rb`, but better than it.
 
-See #{spec.homepage}#readme for details.
+See #{spec.homepage} for details.
 END
   spec.license         = "MIT"
   spec.files           = Dir[
                            "README.md", "MIT-LICENSE", "CHANGES.md",
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
-                           #"bin/*", "doc/**/*", "examples/**/*",
+                           #"bin/*", "examples/**/*",
+                           "doc/*.html", "doc/css/*",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
