@@ -1040,4 +1040,4 @@ License and Copyright
 
 $License: MIT License $
 
-$Copyright: copyright(c) 2021 kuwata-lab.com all rights reserved $
+$Copyright: copyright(c) 2021 kwatch@gmail.com $
