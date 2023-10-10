@@ -31,6 +31,7 @@ and easy to understahnd.</p>
 <ul>
 <li>Document: <a href="https://kwatch.github.io/benry-ruby/benry-cmdopt.html">https://kwatch.github.io/benry-ruby/benry-cmdopt.html</a></li>
 <li>GitHub: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt">https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt</a></li>
+<li>Changes: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt/CHANGES.md">https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt/CHANGES.md</a></li>
 </ul>
 <p>Benry-CmdOpt requires Ruby &gt;= 2.3.</p>
 </section>
@@ -251,8 +252,7 @@ opts = {}
 begin
   parser.parse!(ARGV, into: opts)
 <strong>rescue OptionParser::ParseError =&gt; err</strong>   # specify error class
-  $stderr.puts &quot;ERROR: #{err.message}&quot;
-  exit 1
+  abort &quot;ERROR: #{err.message}&quot;
 end
 
 ### benry/cmdopt.rb
@@ -260,8 +260,7 @@ require &#039;benry/cmdopt&#039;
 cmdopt = Benry::CmdOpt.new
 cmdopt.add(:file, &#039;-f, --file=&ltFILE&gt;&#039;, &quot;filename&quot;)
 opts = cmdopt.parse(ARGV) <strong>do |err|</strong>  # error handling wihtout error class name
-  $stderr.puts &quot;ERROR: #{err.message}&quot;
-  exit 1
+  abort &quot;ERROR: #{err.message}&quot;
 end
 </pre>
 <ul>
@@ -297,8 +296,7 @@ cmdopt.add(:version, &#039;    --version&#039;, &quot;print version&quot;)
 
 ## parse with error handling
 <strong>options = cmdopt.parse(ARGV)</strong> do |err|
-  $stderr.puts &quot;ERROR: #{err.message}&quot;
-  exit(1)
+  abort &quot;ERROR: #{err.message}&quot;
 end
 p options     # ex: {:help =&gt; true, :version =&gt; true}
 p ARGV        # options are removed from ARGV
@@ -621,8 +619,7 @@ schema.add(:indent, &#039;-i, --indent[=&ltWIDTH&gt;]&#039;, &quot;enable indent
 <strong>parser = Benry::CmdOpt::Parser.new(schema)</strong>
 argv = [&#039;-hi2&#039;, &#039;--file=blabla.txt&#039;, &#039;aaa&#039;, &#039;bbb&#039;]
 opts = parser.parse(argv) do |err|
-  $stderr.puts &quot;ERROR: #{err.message}&quot;
-  exit 1
+  abort &quot;ERROR: #{err.message}&quot;
 end
 p opts   #=&gt; {:help=&gt;true, :indent=&gt;2, :file=&gt;&quot;blabla.txt&quot;}
 p argv   #=&gt; [&quot;aaa&quot;, &quot;bbb&quot;]
@@ -641,7 +638,7 @@ Use <code>cmdopt.is_a?(Benry::CmdOpt::Facade)</code> instead if necessary.</p>
 <section class="section" id="license-and-copyright">
 <h2>License and Copyright</h2>
 <p>$License: MIT License $</p>
-<p>$Copyright: copyright(c) 2021-2023 kuwata-lab.com all rights reserved $</p>
+<p>$Copyright: copyright(c) 2021 kwatch@gmail.com $</p>
 </section>
 </section>
 </main>
