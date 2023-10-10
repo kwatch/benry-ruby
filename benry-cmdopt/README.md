@@ -4,7 +4,7 @@
 
 
 
-## Overview
+## What's This?
 
 Benry-CmdOpt is a command option parser library, like `optparse.rb`
 (Ruby standard library).
@@ -20,11 +20,11 @@ Benry-CmdOpt requires Ruby >= 2.3.
 
 
 
-## Table of Contents
+### Table of Contents
 
 <!-- TOC -->
 
-* [Overview](#overview)
+* [What's This?](#whats-this)
 * [Why not `optparse.rb`?](#why-not-optparserb)
 * [Install](#install)
 * [Usage](#usage)

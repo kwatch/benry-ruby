@@ -22,8 +22,8 @@
   </ul>
 </nav>
 <p>($Release: 0.0.0 $)</p>
-<section class="section" id="overview">
-<h2>Overview</h2>
+<section class="section" id="whats-this">
+<h2>What's This?</h2>
 <p>Benry-CmdOpt is a command option parser library, like <code>optparse.rb</code>
 (Ruby standard library).</p>
 <p>Compared to <code>optparse.rb</code>, Benry-CmdOpt is easy to use, easy to extend,
@@ -34,12 +34,11 @@ and easy to understahnd.</p>
 <li>Changes: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt/CHANGES.md">https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt/CHANGES.md</a></li>
 </ul>
 <p>Benry-CmdOpt requires Ruby &gt;= 2.3.</p>
-</section>
-<section class="section" id="table-of-contents">
-<h2>Table of Contents</h2>
+<section class="subsection" id="table-of-contents">
+<h3>Table of Contents</h3>
 <div class="toc">
 <ul>
-<li><a href="#overview">Overview</a></li>
+<li><a href="#whats-this">What's This?</a></li>
 <li><a href="#why-not-optparserb">Why not <code>optparse.rb</code>?</a></li>
 <li><a href="#install">Install</a></li>
 <li><a href="#usage">Usage</a>
@@ -61,6 +60,7 @@ and easy to understahnd.</p>
 </ul>
 </div>
 </section>
+</section>
 <section class="section" id="why-not-optparserb">
 <h2>Why not <code>optparse.rb</code>?</h2>
 <ul>
@@ -80,45 +80,45 @@ and easy to understahnd.</p>
   This feature is hard-coded in <code>OptionParser#parse_in_order()</code>
   and hard to be disabled.
 <p></p>
-  In contact, <code>benry/cmdopt.rb</code> doesn&#039;t behave this way.
+  In contact, <code>benry/cmdopt.rb</code> doesn't behave this way.
   <code>-x</code> option is available only when <code>-x</code> is defined.
   <code>benry/cmdopt.rb</code> does nothing superfluous.</li>
 <p></p>
 <li><code>optparse.rb</code> uses long option name as hash key automatically, but
-  it doesn&#039;t provide the way to specify hash key for short-only option.
+  it doesn't provide the way to specify hash key for short-only option.
 <p></p>
   <code>benry/cmdopt.rb</code> can specify hash key for short-only option.</li>
 </ul>
 <pre class="language-ruby">
 ### optparse.rb
-require &#039;optparse&#039;
+require 'optparse'
 parser = OptionParser.new
-parser.on(&#039;-v&#039;, &#039;--verbose&#039;, &quot;verbose mode&quot;) # short and long option
-parser.on(<strong>&#039;-q&#039;</strong>,              &quot;quiet mode&quot;)   # short-only option
+parser.on('-v', '--verbose', "verbose mode") # short and long option
+parser.on(<strong>'-q'</strong>,              "quiet mode")   # short-only option
 #
 opts = {}
-parser.parse!([&#039;-v&#039;], into: opts) # short option
+parser.parse!(['-v'], into: opts) # short option
 p opts  #=&gt; {:verbose=&gt;true}      # hash key is long option name
 #
 opts = {}
-parser.parse!([&#039;-q&#039;], into: opts) # short option
+parser.parse!(['-q'], into: opts) # short option
 p opts  #=&gt; <strong>{:q=&gt;true}</strong>            # hash key is short option name
 
 ### benry/cmdopt.rb
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:verbose, &#039;-v, --verbose&#039;, &quot;verbose mode&quot;) # short and long
-cmdopt.add(<strong>:quiet</strong>  , <strong>&#039;-q&#039;</strong>           , &quot;quiet mode&quot;)   # short-only
+cmdopt.add(:verbose, '-v, --verbose', "verbose mode") # short and long
+cmdopt.add(<strong>:quiet</strong>  , <strong>'-q'</strong>           , "quiet mode")   # short-only
 #
-opts = cmdopt.parse([&#039;-v&#039;])   # short option
+opts = cmdopt.parse(['-v'])   # short option
 p opts  #=&gt; {:verbose=&gt;true}  # independent hash key of option name
 #
-opts = cmdopt.parse([&#039;-q&#039;])   # short option
+opts = cmdopt.parse(['-q'])   # short option
 p opts  #=&gt; <strong>{:quiet=&gt;true}</strong>    # independent hash key of option name
 </pre>
 <ul>
 <li><code>optparse.rb</code> provides severay ways to validate option values, such as
-  type class, Regexp as pattern, or Array/Set as enum. But it doesn&#039;t
+  type class, Regexp as pattern, or Array/Set as enum. But it doesn't
   accept Range object. This means that, for examle, it is not simple to
   validate whether integer or float value is positive or not.
 <p></p>
@@ -128,12 +128,12 @@ p opts  #=&gt; <strong>{:quiet=&gt;true}</strong>    # independent hash key of o
 <pre class="language-ruby">
 ### optparse.rb
 parser = OptionParser.new
-parser.on(&#039;-n &ltN&gt;&#039;, &quot;number&quot;, Integer, <strong>(1..)</strong>)  #=&gt; NoMethodError
+parser.on('-n &ltN&gt;', "number", Integer, <strong>(1..)</strong>)  #=&gt; NoMethodError
 
 ### benry/cmdopt.rb
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:number, &quot;-n &ltN&gt;&quot;, &quot;number&quot;, type: Integer, <strong>range: (1..)</strong>) #=&gt; ok
+cmdopt.add(:number, "-n &ltN&gt;", "number", type: Integer, <strong>range: (1..)</strong>) #=&gt; ok
 </pre>
 <ul>
 <li><code>optparse.rb</code> accepts Array or Set object as enum values. But values
@@ -145,13 +145,13 @@ cmdopt.add(:number, &quot;-n &ltN&gt;&quot;, &quot;number&quot;, type: Integer, 
 <pre class="language-ruby">
 ### optparse.rb
 parser = OptionParser.new
-parser.on(&#039;-n &ltN&gt;&#039;, &quot;number&quot;, Integer, <strong>[1, 2, 3]</strong>)      # wrong
-parser.on(&#039;-n &ltN&gt;&#039;, &quot;number&quot;, Integer, <strong>[&#039;1&#039;,&#039;2&#039;,&#039;3&#039;]</strong>)  # ok (but not intuitive)
+parser.on('-n &ltN&gt;', "number", Integer, <strong>[1, 2, 3]</strong>)      # wrong
+parser.on('-n &ltN&gt;', "number", Integer, <strong>['1','2','3']</strong>)  # ok (but not intuitive)
 
 ### benry/cmdopt.rb
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:number, &quot;-n &ltN&gt;&quot;, &quot;number&quot;, type: Integer, <strong>enum: [1, 2, 3]</strong>) # very intuitive
+cmdopt.add(:number, "-n &ltN&gt;", "number", type: Integer, <strong>enum: [1, 2, 3]</strong>) # very intuitive
 </pre>
 <ul>
 <li><code>optparse.rb</code> adds <code>-h</code> and <code>--help</code> options automatically, and
@@ -162,14 +162,14 @@ cmdopt.add(:number, &quot;-n &ltN&gt;&quot;, &quot;number&quot;, type: Integer, 
   <code>benry/cmdopt.rb</code> does nothing superfluous.</li>
 </ul>
 <pre class="language-ruby">
-require &#039;optparse&#039;
+require 'optparse'
 parser = OptionParser.new
-## it is able to overwrite &#039;-h&#039; and/or &#039;--help&#039;,
+## it is able to overwrite '-h' and/or '--help',
 ## but how to remove or disable these options?
 opts = {}
-parser.on(<strong>&#039;-h &lthost&gt;&#039;</strong>, &quot;hostname&quot;) {|v| opts[:host] = v }
-parser.parse([<strong>&#039;--help&#039;</strong>])  # &lt== terminates current process!!
-puts &#039;xxx&#039;   #&lt== not printed because current process alreay terminated
+parser.on(<strong>'-h &lthost&gt;'</strong>, "hostname") {|v| opts[:host] = v }
+parser.parse([<strong>'--help'</strong>])  # &lt== terminates current process!!
+puts 'xxx'   #&lt== not printed because current process alreay terminated
 </pre>
 <ul>
 <li><code>optparse.rb</code> adds <code>-v</code> and <code>--version</code> options automatically, and
@@ -182,42 +182,42 @@ puts &#039;xxx&#039;   #&lt== not printed because current process alreay termina
   <code>benry/cmdopt.rb</code> does nothing superfluous.</li>
 </ul>
 <pre class="language-ruby">
-require &#039;optparse&#039;
+require 'optparse'
 parser = OptionParser.new
-## it is able to overwrite &#039;-v&#039; and/or &#039;--version&#039;,
+## it is able to overwrite '-v' and/or '--version',
 ## but how to remove or disable these options?
 opts = {}
-parser.on(<strong>&#039;-v&#039;</strong>, &quot;verbose mode&quot;) { opts[:verbose] = true }
-parser.parse([<strong>&#039;--version&#039;</strong>])  # &lt== terminates current process!!
-puts &#039;xxx&#039;   #&lt== not printed because current process alreay terminated
+parser.on(<strong>'-v'</strong>, "verbose mode") { opts[:verbose] = true }
+parser.parse([<strong>'--version'</strong>])  # &lt== terminates current process!!
+puts 'xxx'   #&lt== not printed because current process alreay terminated
 </pre>
 <ul>
-<li><code>optparse.rb</code> generates help message automatically, but it doesn&#039;t
+<li><code>optparse.rb</code> generates help message automatically, but it doesn't
   contain <code>-h</code>, <code>--help</code>, <code>-v</code>, nor <code>--version</code>.
   These options are available but not shown in help message. Strange.</li>
 <p></p>
 <li><code>optparse.rb</code> generate help message which contains command usage string
   such as <code>Usage: &ltcommand&gt; [options]</code>. <code>optparse.rb</code> should NOT include
   it in help message because it is just a library, not framework.
-  If you want to change &#039;[options]&#039; to &#039;[&ltoptions&gt;]&#039;, you must manipulate
+  If you want to change '[options]' to '[&ltoptions&gt;]', you must manipulate
   help message string by yourself.
 <p></p>
-  <code>benry/cmdopt.rb</code> doesn&#039;t include extra text (such as usage text) into
+  <code>benry/cmdopt.rb</code> doesn't include extra text (such as usage text) into
   help message. <code>benry/cmdopt.rb</code> does nothing superfluous.</li>
 <p></p>
 <li><code>optparse.rb</code> generates help message with too wide option name
   by default. You must specify proper width.
 <p></p>
   <code>benry/cmdopt.rb</code> calculates proper width automatically.
-  You don&#039;t need to specify proper width in many case.</li>
+  You don't need to specify proper width in many case.</li>
 </ul>
 <pre class="language-ruby">
 ### optparse.rb
-require &#039;optparse&#039;
-banner = &quot;Usage: blabla &ltoptions&gt;&quot;
+require 'optparse'
+banner = "Usage: blabla &ltoptions&gt;"
 parser = OptionParser.new(banner)  # or: OptionParser.new(banner, 25)
-parser.on(&#039;-f&#039;, &#039;--file=&ltFILE&gt;&#039;, &quot;filename&quot;)
-parser.on(&#039;-m &ltMODE&gt;&#039;          , &quot;verbose/quiet&quot;)
+parser.on('-f', '--file=&ltFILE&gt;', "filename")
+parser.on('-m &ltMODE&gt;'          , "verbose/quiet")
 puts parser.help
 ### output
 # Usage: blabla &ltoptions&gt;
@@ -225,11 +225,11 @@ puts parser.help
 #     <strong>-m &ltMODE&gt;                        verbose/quiet</strong>
 
 ### benry/cmdopt.rb
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:file, &#039;-f, --file=&ltFILE&gt;&#039;, &quot;filename&quot;)
-cmdopt.add(:mode, &#039;-m &ltMODE&gt;&#039;        , &quot;verbose/quiet&quot;)
-puts &quot;Usage: blabla [&ltoptions&gt;]&quot;
+cmdopt.add(:file, '-f, --file=&ltFILE&gt;', "filename")
+cmdopt.add(:mode, '-m &ltMODE&gt;'        , "verbose/quiet")
+puts "Usage: blabla [&ltoptions&gt;]"
 puts cmdopt.to_s()
 ### output (calculated proper width)
 # Usage: blabla [&ltoptions&gt;]
@@ -241,26 +241,26 @@ puts cmdopt.to_s()
   That is, you must know the error class name.
 <p></p>
   <code>benry/cmdopt.rb</code> provides error handler without exception class name.
-  You don&#039;t need to know the error class name on error handling.</li>
+  You don't need to know the error class name on error handling.</li>
 </ul>
 <pre class="language-ruby">
 ### optparse.rb
-require &#039;optparse&#039;
+require 'optparse'
 parser = OptionParser.new
-parser.on(&#039;-f&#039;, &#039;--file=&ltFILE&gt;&#039;, &quot;filename&quot;)
+parser.on('-f', '--file=&ltFILE&gt;', "filename")
 opts = {}
 begin
   parser.parse!(ARGV, into: opts)
 <strong>rescue OptionParser::ParseError =&gt; err</strong>   # specify error class
-  abort &quot;ERROR: #{err.message}&quot;
+  abort "ERROR: #{err.message}"
 end
 
 ### benry/cmdopt.rb
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:file, &#039;-f, --file=&ltFILE&gt;&#039;, &quot;filename&quot;)
+cmdopt.add(:file, '-f, --file=&ltFILE&gt;', "filename")
 opts = cmdopt.parse(ARGV) <strong>do |err|</strong>  # error handling wihtout error class name
-  abort &quot;ERROR: #{err.message}&quot;
+  abort "ERROR: #{err.message}"
 end
 </pre>
 <ul>
@@ -287,74 +287,74 @@ $ gem install benry-cmdopt
 <section class="subsection" id="define-parse-and-print-help">
 <h3>Define, Parse, and Print Help</h3>
 <pre class="language-ruby">
-<strong>require &#039;benry/cmdopt&#039;</strong>
+<strong>require 'benry/cmdopt'</strong>
 
 ## define
 <strong>cmdopt = Benry::CmdOpt.new</strong>
-cmdopt.add(:help   , &#039;-h, --help&#039;   , &quot;print help message&quot;)
-cmdopt.add(:version, &#039;    --version&#039;, &quot;print version&quot;)
+cmdopt.add(:help   , '-h, --help'   , "print help message")
+cmdopt.add(:version, '    --version', "print version")
 
 ## parse with error handling
 <strong>options = cmdopt.parse(ARGV)</strong> do |err|
-  abort &quot;ERROR: #{err.message}&quot;
+  abort "ERROR: #{err.message}"
 end
 p options     # ex: {:help =&gt; true, :version =&gt; true}
 p ARGV        # options are removed from ARGV
 
 ## help
 if options[:help]
-  puts &quot;Usage: foobar [&ltoptions&gt;] [&ltargs&gt;...]&quot;
-  puts &quot;&quot;
-  puts &quot;Options:&quot;
+  puts "Usage: foobar [&ltoptions&gt;] [&ltargs&gt;...]"
+  puts ""
+  puts "Options:"
   <strong>puts cmdopt.to_s()</strong>
   ## or: puts cmdopt.to_s(20)              # width
-  ## or: puts cmdopt.to_s(&quot;  %-20s : %s&quot;)  # format
+  ## or: puts cmdopt.to_s("  %-20s : %s")  # format
   ## or:
-  #format = &quot;  %-20s : %s&quot;
+  #format = "  %-20s : %s"
   #cmdopt.each_option_and_desc {|opt, help| puts format % [opt, help] }
 end
 </pre>
 <p>You can set <code>nil</code> to option name only if long option specified.</p>
 <pre class="language-ruby">
 ## both are same
-cmdopt.add(:help, &quot;-h, --help&quot;, &quot;print help message&quot;)
-cmdopt.add(<strong>nil</strong>  , &quot;-h, --help&quot;, &quot;print help message&quot;)
+cmdopt.add(:help, "-h, --help", "print help message")
+cmdopt.add(<strong>nil</strong>  , "-h, --help", "print help message")
 </pre>
 </section>
 <section class="subsection" id="command-option-parameter">
 <h3>Command Option Parameter</h3>
 <pre class="language-ruby">
 ## required parameter
-cmdopt.add(:file, &#039;-f, --file<strong>=&ltFILE&gt;</strong>&#039;, &quot;filename&quot;)   # short &amp; long
-cmdopt.add(:file, &#039;    --file<strong>=&ltFILE&gt;</strong>&#039;, &quot;filename&quot;)   # long only
-cmdopt.add(:file, &#039;-f <strong>&ltFILE&gt;</strong>&#039;        , &quot;filename&quot;)   # short only
+cmdopt.add(:file, '-f, --file<strong>=&ltFILE&gt;</strong>', "filename")   # short &amp; long
+cmdopt.add(:file, '    --file<strong>=&ltFILE&gt;</strong>', "filename")   # long only
+cmdopt.add(:file, '-f <strong>&ltFILE&gt;</strong>'        , "filename")   # short only
 
 ## optional parameter
-cmdopt.add(:indent, &#039;-i, --indent<strong>[=&ltN&gt;]</strong>&#039;, &quot;indent width&quot;)  # short &amp; long
-cmdopt.add(:indent, &#039;    --indent<strong>[=&ltN&gt;]</strong>&#039;, &quot;indent width&quot;)  # long only
-cmdopt.add(:indent, &#039;-i<strong>[&ltN&gt;]</strong>&#039;           , &quot;indent width&quot;)  # short only
+cmdopt.add(:indent, '-i, --indent<strong>[=&ltN&gt;]</strong>', "indent width")  # short &amp; long
+cmdopt.add(:indent, '    --indent<strong>[=&ltN&gt;]</strong>', "indent width")  # long only
+cmdopt.add(:indent, '-i<strong>[&ltN&gt;]</strong>'           , "indent width")  # short only
 </pre>
-<p>Notice that <code>&quot;--file &ltFILE&gt;&quot;</code> style is <strong>not supported for usability reason</strong>.
-Use <code>&quot;--file=&ltFILE&gt;&quot;</code> style instead.</p>
+<p>Notice that <code>"--file &ltFILE&gt;"</code> style is <strong>not supported for usability reason</strong>.
+Use <code>"--file=&ltFILE&gt;"</code> style instead.</p>
 <p>(From a usability perspective, the former style should not be supported.
  <code>optparse.rb</code> is wrong because it supports both styles
- and doesn&#039;t provide the way to disable the former style.)</p>
+ and doesn't provide the way to disable the former style.)</p>
 </section>
 <section class="subsection" id="argument-validation">
 <h3>Argument Validation</h3>
 <pre class="language-ruby">
 ## type (class)
-cmdopt.add(:indent , &#039;-i &ltN&gt;&#039;, &quot;indent width&quot;, <strong>type: Integer</strong>)
+cmdopt.add(:indent , '-i &ltN&gt;', "indent width", <strong>type: Integer</strong>)
 ## pattern (regular expression)
-cmdopt.add(:indent , &#039;-i &ltN&gt;&#039;, &quot;indent width&quot;, <strong>rexp: /\A\d+\z/</strong>)
+cmdopt.add(:indent , '-i &ltN&gt;', "indent width", <strong>rexp: /\A\d+\z/</strong>)
 ## enum (Array or Set)
-cmdopt.add(:indent , &#039;-i &ltN&gt;&#039;, &quot;indent width&quot;, <strong>enum: [&quot;2&quot;, &quot;4&quot;, &quot;8&quot;]</strong>)
+cmdopt.add(:indent , '-i &ltN&gt;', "indent width", <strong>enum: ["2", "4", "8"]</strong>)
 ## range (endless range such as ``1..`` available)
-cmdopt.add(:indent , &#039;-i &ltN&gt;&#039;, &quot;indent width&quot;, <strong>range: (0..8)</strong>)
+cmdopt.add(:indent , '-i &ltN&gt;', "indent width", <strong>range: (0..8)</strong>)
 ## callback
-cmdopt.add(:indent , &#039;-i &ltN&gt;&#039;, &quot;indent width&quot;) <strong>{|val|</strong>
+cmdopt.add(:indent , '-i &ltN&gt;', "indent width") <strong>{|val|</strong>
   val =~ /\A\d+\z/  or
-    <strong>raise &quot;Integer expected.&quot;</strong>  # raise without exception class.
+    <strong>raise "Integer expected."</strong>  # raise without exception class.
   <strong>val.to_i</strong>                     # convert argument value.
 }
 </pre>
@@ -367,7 +367,7 @@ cmdopt.add(:indent , &#039;-i &ltN&gt;&#039;, &quot;indent width&quot;) <strong>
 <li>TrueClass (<code>/\A(true|on|yes|false|off|no)\z/</code>)</li>
 <li>Date      (<code>/\A\d\d\d\d-\d\d?-\d\d?\z/</code>)</li>
 </ul>
-<p>Notice that Ruby doesn&#039;t have Boolean class.
+<p>Notice that Ruby doesn't have Boolean class.
 Benry-CmdOpt uses TrueClass instead.</p>
 <p>In addition:</p>
 <ul>
@@ -376,29 +376,29 @@ Benry-CmdOpt uses TrueClass instead.</p>
 </ul>
 <pre class="language-ruby">
 ## ok
-cmdopt.add(:lang, &#039;-l &ltlang&gt;&#039;, &quot;language&quot;, <strong>enum: [&quot;en&quot;, &quot;fr&quot;, &quot;it&quot;]</strong>)
+cmdopt.add(:lang, '-l &ltlang&gt;', "language", <strong>enum: ["en", "fr", "it"]</strong>)
 
 ## error: enum values are not Integer
-cmdopt.add(:lang, &#039;-l &ltlang&gt;&#039;, &quot;language&quot;, <strong>enum: [&quot;en&quot;, &quot;fr&quot;, &quot;it&quot;], type: Integer</strong>)
+cmdopt.add(:lang, '-l &ltlang&gt;', "language", <strong>enum: ["en", "fr", "it"], type: Integer</strong>)
 
 ## ok
-cmdopt.add(:indent, &#039;-i &ltN&gt;&#039;, &quot;indent&quot;, <strong>range: (0..), type: Integer</strong>)
+cmdopt.add(:indent, '-i &ltN&gt;', "indent", <strong>range: (0..), type: Integer</strong>)
 
 ## error: beginning value of range is not a String
-cmdopt.add(:indent, &#039;-i &ltN&gt;&#039;, &quot;indent&quot;, <strong>range: (0..)</strong>)
+cmdopt.add(:indent, '-i &ltN&gt;', "indent", <strong>range: (0..)</strong>)
 </pre>
 </section>
 <section class="subsection" id="boolean-onoff-option">
 <h3>Boolean (on/off) Option</h3>
-<p>Benry-CmdOpt doens&#039;t support <code>--no-xxx</code> style option for usability reason.
+<p>Benry-CmdOpt doens't support <code>--no-xxx</code> style option for usability reason.
 Use boolean option instead.</p>
 <p>ex3.rb:</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:foo, <strong>&quot;--foo[=on|off]&quot;</strong>, &quot;foo feature&quot;, <strong>type: TrueClass</strong>)  # !!!!
+cmdopt.add(:foo, <strong>"--foo[=on|off]"</strong>, "foo feature", <strong>type: TrueClass</strong>)  # !!!!
 ## or:
-#cmdopt.add(:foo, <strong>&quot;--foo=&lton|off&gt;&quot;</strong>, &quot;foo feature&quot;, <strong>type: TrueClass</strong>)
+#cmdopt.add(:foo, <strong>"--foo=&lton|off&gt;"</strong>, "foo feature", <strong>type: TrueClass</strong>)
 options = cmdopt.parse(ARGV)
 p options
 </pre>
@@ -416,24 +416,24 @@ $ ruby ex3.rb <strong>--foo=off</strong>       # disable
 <h3>Alternative Value</h3>
 <p>Benry-CmdOpt supports alternative value.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:help1, &quot;-h&quot;, &quot;help&quot;)
-cmdopt.add(:help2, &quot;-H&quot;, &quot;help&quot;, <strong>value: &quot;HELP&quot;</strong>)   # !!!!!
+cmdopt.add(:help1, "-h", "help")
+cmdopt.add(:help2, "-H", "help", <strong>value: "HELP"</strong>)   # !!!!!
 
-options = cmdopt.parse([&quot;-h&quot;, &quot;-H&quot;])
+options = cmdopt.parse(["-h", "-H"])
 p options[:help1]   #=&gt; true          # normal
-p options[:help2]   #=&gt; <strong>&quot;HELP&quot;</strong>        # alternative value
+p options[:help2]   #=&gt; <strong>"HELP"</strong>        # alternative value
 </pre>
 <p>This is useful for boolean option.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:flag1, &quot;--flag1[=&lton|off&gt;]&quot;, &quot;f1&quot;, type: TrueClass)
-cmdopt.add(:flag2, &quot;--flag2[=&lton|off&gt;]&quot;, &quot;f2&quot;, type: TrueClass, <strong>value: false</strong>)  # !!!!
+cmdopt.add(:flag1, "--flag1[=&lton|off&gt;]", "f1", type: TrueClass)
+cmdopt.add(:flag2, "--flag2[=&lton|off&gt;]", "f2", type: TrueClass, <strong>value: false</strong>)  # !!!!
 
 ## when `--flag2` specified, got `false` value.
-options = cmdopt.parse([&quot;--flag1&quot;, &quot;--flag2&quot;])
+options = cmdopt.parse(["--flag1", "--flag2"])
 p options[:flag1]   #=&gt; true
 p options[:flag2]   #=&gt; <strong>false</strong> (!!!!!)
 </pre>
@@ -441,10 +441,10 @@ p options[:flag2]   #=&gt; <strong>false</strong> (!!!!!)
 <section class="subsection" id="multiple-value-option">
 <h3>Multiple Value Option</h3>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
 
-cmdopt.add(:lib , &#039;-I &ltNAME&gt;&#039;, &quot;library name&quot;) <strong>{|options, key, val|</strong>
+cmdopt.add(:lib , '-I &ltNAME&gt;', "library name") <strong>{|options, key, val|</strong>
   <strong>arr = options[key] || []</strong>
   <strong>arr &lt&lt val</strong>
   <strong>arr</strong>
@@ -452,8 +452,8 @@ cmdopt.add(:lib , &#039;-I &ltNAME&gt;&#039;, &quot;library name&quot;) <strong>
   #(options[key] || []) &lt&lt val
 <strong>}</strong>
 
-options = cmdopt.parse([&quot;-I&quot;, &quot;foo&quot;, &quot;-I&quot;, &quot;bar&quot;, &quot;-Ibaz&quot;])
-p options   #=&gt; <strong>{:lib=&gt;[&quot;foo&quot;, &quot;bar&quot;, &quot;baz&quot;]}</strong>
+options = cmdopt.parse(["-I", "foo", "-I", "bar", "-Ibaz"])
+p options   #=&gt; <strong>{:lib=&gt;["foo", "bar", "baz"]}</strong>
 </pre>
 </section>
 <section class="subsection" id="hidden-option">
@@ -466,14 +466,14 @@ p options   #=&gt; <strong>{:lib=&gt;[&quot;foo&quot;, &quot;bar&quot;, &quot;ba
 <p>The former is better than the latter, because even hidden option should have its own description.</p>
 <p>These hidden options are not included in help message.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:help , &#039;-h&#039;, &quot;help message&quot;)
-cmdopt.add(:debug, &#039;-D&#039;, <strong>nil</strong>)       # hidden (because description is nil)
-cmdopt.add(<strong>:_log</strong> , &#039;-L&#039;, &quot;logging&quot;) # hidden (because key starts with &#039;_&#039;)
+cmdopt.add(:help , '-h', "help message")
+cmdopt.add(:debug, '-D', <strong>nil</strong>)       # hidden (because description is nil)
+cmdopt.add(<strong>:_log</strong> , '-L', "logging") # hidden (because key starts with '_')
 puts cmdopt.to_s()
 
-### output (neither &#039;-D&#039; nor &#039;-L&#039; is shown because hidden options)
+### output (neither '-D' nor '-L' is shown because hidden options)
 #  -h             : help message
 </pre>
 <p>To show all options including hidden ones, add <code>all: true</code> to <code>cmdopt.to_s()</code>.</p>
@@ -495,62 +495,62 @@ puts cmdopt.to_s(<strong>all: true</strong>)   # or: cmdopt.to_s(nil, all: true)
 <li><code>parse(argv, all: false)</code> only parses options placed before arguments.</li>
 </ul>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:help   , &#039;--help&#039;   , &quot;print help message&quot;)
-cmdopt.add(:version, &#039;--version&#039;, &quot;print version&quot;)
+cmdopt.add(:help   , '--help'   , "print help message")
+cmdopt.add(:version, '--version', "print version")
 
 ## `parse(argv, all: true)` (default)
-argv = [&quot;--help&quot;, &quot;arg1&quot;, &quot;--version&quot;, &quot;arg2&quot;]
+argv = ["--help", "arg1", "--version", "arg2"]
 options = cmdopt.parse(argv, <strong>all: true</strong>)          # !!!
 p options       #=&gt; {:help=&gt;true, <strong>:version=&gt;true</strong>}
-p argv          #=&gt; [&quot;arg1&quot;, &quot;arg2&quot;]
+p argv          #=&gt; ["arg1", "arg2"]
 
 ## `parse(argv, all: false)`
-argv = [&quot;--help&quot;, &quot;arg1&quot;, &quot;--version&quot;, &quot;arg2&quot;]
+argv = ["--help", "arg1", "--version", "arg2"]
 options = cmdopt.parse(argv, <strong>all: false</strong>)         # !!!
 p options       #=&gt; {:help=&gt;true}
-p argv          #=&gt; [&quot;arg1&quot;, <strong>&quot;--version&quot;</strong>, &quot;arg2&quot;]
+p argv          #=&gt; ["arg1", <strong>"--version"</strong>, "arg2"]
 </pre>
 <p>This is useful when parsing global options of sub-commands, like Git command.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 
-argv = [&quot;-h&quot;, &quot;commit&quot;, &quot;xxx&quot;, &quot;-m&quot;, &quot;yyy&quot;]
+argv = ["-h", "commit", "xxx", "-m", "yyy"]
 
 ## parse global options
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:help, &#039;-h&#039;, &quot;print help message&quot;)
+cmdopt.add(:help, '-h', "print help message")
 global_opts = cmdopt.parse(argv, <strong>all: false</strong>)   # !!!false!!!
 p global_opts       #=&gt; {:help=&gt;true}
-p argv              #=&gt; [&quot;commit&quot;, &quot;xxx&quot;, &quot;-m&quot;, &quot;yyy&quot;]
+p argv              #=&gt; ["commit", "xxx", "-m", "yyy"]
 
 ## get sub-command
 sub_command = argv.shift()
-p sub_command       #=&gt; &quot;commit&quot;
-p argv              #=&gt; [&quot;xxx&quot;, <strong>&quot;-m&quot;</strong>, &quot;yyy&quot;]
+p sub_command       #=&gt; "commit"
+p argv              #=&gt; ["xxx", <strong>"-m"</strong>, "yyy"]
 
 ## parse sub-command options
 cmdopt = Benry::CmdOpt.new()
 case sub_command
-when &quot;commit&quot;
-  cmdopt.add(:message, &#039;-m &ltmessage&gt;&#039;, &quot;commit message&quot;)
+when "commit"
+  cmdopt.add(:message, '-m &ltmessage&gt;', "commit message")
 else
   # ...
 end
 sub_opts = cmdopt.parse(argv, <strong>all: true</strong>)       # !!!true!!!
-p sub_opts          #=&gt; {:message =&gt; &quot;yyy&quot;}
-p argv              #=&gt; [&quot;xxx&quot;]
+p sub_opts          #=&gt; {:message =&gt; "yyy"}
+p argv              #=&gt; ["xxx"]
 </pre>
 </section>
 <section class="subsection" id="detailed-description-of-option">
 <h3>Detailed Description of Option</h3>
 <p><code>#add()</code> method in <code>Benry::CmdOpt</code> or <code>Benry::CmdOpt::Schema</code> supports <code>detail:</code> keyword argument which takes detailed description of option.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:mode, &quot;-m, --mode=&ltMODE&gt;&quot;, &quot;output mode&quot;, <strong>detail: &lt&lt&quot;END&quot;</strong>)
+cmdopt.add(:mode, "-m, --mode=&ltMODE&gt;", "output mode", <strong>detail: &lt&lt"END"</strong>)
   v, verbose: print many output
   q, quiet:   print litte output
   c, compact: print summary output
@@ -558,8 +558,8 @@ cmdopt.add(:mode, &quot;-m, --mode=&ltMODE&gt;&quot;, &quot;output mode&quot;, <
 puts cmdopt.to_s()
 ## or:
 #cmdopt.each_option_and_desc do |optstr, desc, detail|
-#  puts &quot;  %-20s : %s\n&quot; % [optstr, desc]
-#  puts detail.gsub(/^/, &#039; &#039; * 25) if detail
+#  puts "  %-20s : %s\n" % [optstr, desc]
+#  puts detail.gsub(/^/, ' ' * 25) if detail
 #end
 </pre>
 <p>Output:</p>
@@ -575,17 +575,17 @@ puts cmdopt.to_s()
 <p><code>#add()</code> method in <code>Benry::CmdOpt</code> or <code>Benry::CmdOpt::Schema</code> supports <code>tag:</code> keyword argument.
 You can use it for any purpose.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 
 cmdopt = Benry::CmdOpt.new()
-cmdopt.add(:help, &quot;-h, --help&quot;, &quot;help message&quot;, <strong>tag: &quot;important&quot;</strong>)  # !!!
-cmdopt.add(:version, &quot;--version&quot;, &quot;print version&quot;, <strong>tag: nil</strong>)
+cmdopt.add(:help, "-h, --help", "help message", <strong>tag: "important"</strong>)  # !!!
+cmdopt.add(:version, "--version", "print version", <strong>tag: nil</strong>)
 cmdopt.schema.each do |item|
-  puts &quot;#{item.key}: tag=#{item.tag.inspect}&quot;
+  puts "#{item.key}: tag=#{item.tag.inspect}"
 end
 
 ## output:
-#help: <strong>tag=&quot;important&quot;</strong>
+#help: <strong>tag="important"</strong>
 #version: <strong>tag=nil</strong>
 </pre>
 </section>
@@ -607,29 +607,29 @@ end
 <li><code>Benry::CmdOpt::Facade</code> ... facade object including schema and parser.</li>
 </ul>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 
 ## define schema
 <strong>schema = Benry::CmdOpt::Schema.new</strong>
-schema.add(:help  , &#039;-h, --help&#039;            , &quot;show help message&quot;)
-schema.add(:file  , &#039;-f, --file=&ltFILE&gt;&#039;     , &quot;filename&quot;)
-schema.add(:indent, &#039;-i, --indent[=&ltWIDTH&gt;]&#039;, &quot;enable indent&quot;, type: Integer)
+schema.add(:help  , '-h, --help'            , "show help message")
+schema.add(:file  , '-f, --file=&ltFILE&gt;'     , "filename")
+schema.add(:indent, '-i, --indent[=&ltWIDTH&gt;]', "enable indent", type: Integer)
 
 ## parse options
 <strong>parser = Benry::CmdOpt::Parser.new(schema)</strong>
-argv = [&#039;-hi2&#039;, &#039;--file=blabla.txt&#039;, &#039;aaa&#039;, &#039;bbb&#039;]
+argv = ['-hi2', '--file=blabla.txt', 'aaa', 'bbb']
 opts = parser.parse(argv) do |err|
-  abort &quot;ERROR: #{err.message}&quot;
+  abort "ERROR: #{err.message}"
 end
-p opts   #=&gt; {:help=&gt;true, :indent=&gt;2, :file=&gt;&quot;blabla.txt&quot;}
-p argv   #=&gt; [&quot;aaa&quot;, &quot;bbb&quot;]
+p opts   #=&gt; {:help=&gt;true, :indent=&gt;2, :file=&gt;"blabla.txt"}
+p argv   #=&gt; ["aaa", "bbb"]
 </pre>
 <p>Notice that <code>Benry::CmdOpt.new()</code> returns a facade object.</p>
 <pre class="language-ruby">
-require &#039;benry/cmdopt&#039;
+require 'benry/cmdopt'
 
 <strong>cmdopt = Benry::CmdOpt.new()             # new facade object</strong>
-<strong>cmdopt.add</strong>(:help, &#039;-h&#039;, &quot;help message&quot;)  # same as <strong>schema.add</strong>(...)
+<strong>cmdopt.add</strong>(:help, '-h', "help message")  # same as <strong>schema.add</strong>(...)
 opts = <strong>cmdopt.parse</strong>(ARGV)                # same as <strong>parser.parse</strong>(...)
 </pre>
 <p>Notice that <code>cmdopt.is_a?(Benry::CmdOpt)</code> results in false.
