@@ -14,6 +14,7 @@ and easy to understahnd.
 
 * Document: <https://kwatch.github.io/benry-ruby/benry-cmdopt.html>
 * GitHub: <https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt>
+* Changes: <https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt/CHANGES.md>
 
 Benry-CmdOpt requires Ruby >= 2.3.
 
