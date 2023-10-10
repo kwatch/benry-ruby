@@ -1,9 +1,16 @@
-Benry-UnixCmd README
-====================
+# Benry-UnixCmd
 
 ($Release: 0.0.0 $)
 
-benry-unixcmd gem implements popular UNIX commands, like FileUtils.
+
+## What's this?
+
+Benry-UnixCmd implements popular UNIX commands, like FileUtils,
+but much better than it.
+
+* Document: <https://kwatch.github.io/benry-ruby/benry-unixcmd.html>
+* GitHub: <https://github.com/kwatch/benry-ruby/tree/main/benry-unixcmd>
+* Changes: <https://github.com/kwatch/benry-ruby/blob/main/benry-unixcmd/CHANGES.md>
 
 Features compared to FileUtils:
 
@@ -19,55 +26,54 @@ Features compared to FileUtils:
 * provides `store` command which copies files recursively into target directory, keeping file path.
 * provides `atomic_symlink!` command which switches symlink atomically.
 
-(benry-unixcmd gem requires Ruby >= 2.3)
+(Benry-UnixCmd requires Ruby >= 2.3)
 
 
 
-Table of Contents
-=================
+### Table of Contents
 
 <!-- TOC -->
 
-* <a href="#install">Install</a>
-* <a href="#command-reference">Command Reference</a>
-  * <a href="#echo">`echo`</a>
-  * <a href="#echoback">`echoback`</a>
-  * <a href="#cp">`cp`</a>
-  * <a href="#mv">`mv`</a>
-  * <a href="#rm">`rm`</a>
-  * <a href="#mkdir">`mkdir`</a>
-  * <a href="#rmdir">`rmdir`</a>
-  * <a href="#ln">`ln`</a>
-  * <a href="#atomic_symlink">`atomic_symlink!`</a>
-  * <a href="#touch">`touch`</a>
-  * <a href="#chmod">`chmod`</a>
-  * <a href="#chown">`chown`</a>
-  * <a href="#pwd">`pwd`</a>
-  * <a href="#cd">`cd`</a>
-  * <a href="#pushd">`pushd`</a>
-  * <a href="#store">`store`</a>
-  * <a href="#sys">`sys`</a>
-  * <a href="#ruby">`ruby`</a>
-  * <a href="#capture2">`capture2`</a>
-  * <a href="#capture2e">`capture2e`</a>
-  * <a href="#capture3">`capture3`</a>
-  * <a href="#zip">`zip`</a>
-  * <a href="#unzip">`unzip`</a>
-  * <a href="#time">`time`</a>
-* <a href="#faq">FAQ</a>
-  * <a href="#why-mv-or-cp-requires-to-option">Why `mv` or `cp` requires `to:` option?</a>
-  * <a href="#how-to-use-in-rakefile">How to use in Rakefile?</a>
-  * <a href="#how-to-change-prompt-string">How to change prompt string?</a>
-  * <a href="#how-to-make-prompt-colored">How to make prompt colored?</a>
-  * <a href="#how-to-disable-command-echoback">How to disable command echoback?</a>
-* <a href="#license-and-copyright">License and Copyright</a>
+* [What's this?](#whats-this)
+* [Install](#install)
+* [Command Reference](#command-reference)
+  * [`echo`](#echo)
+  * [`echoback`](#echoback)
+  * [`cp`](#cp)
+  * [`mv`](#mv)
+  * [`rm`](#rm)
+  * [`mkdir`](#mkdir)
+  * [`rmdir`](#rmdir)
+  * [`ln`](#ln)
+  * [`atomic_symlink!`](#atomic_symlink)
+  * [`touch`](#touch)
+  * [`chmod`](#chmod)
+  * [`chown`](#chown)
+  * [`pwd`](#pwd)
+  * [`cd`](#cd)
+  * [`pushd`](#pushd)
+  * [`store`](#store)
+  * [`sys`](#sys)
+  * [`ruby`](#ruby)
+  * [`capture2`](#capture2)
+  * [`capture2e`](#capture2e)
+  * [`capture3`](#capture3)
+  * [`zip`](#zip)
+  * [`unzip`](#unzip)
+  * [`time`](#time)
+* [FAQ](#faq)
+  * [Why `mv` or `cp` requires `to:` option?](#why-mv-or-cp-requires-to-option)
+  * [How to use in Rakefile?](#how-to-use-in-rakefile)
+  * [How to change prompt string?](#how-to-change-prompt-string)
+  * [How to make prompt colored?](#how-to-make-prompt-colored)
+  * [How to disable command echoback?](#how-to-disable-command-echoback)
+* [License and Copyright](#license-and-copyright)
 
 <!-- /TOC -->
 
 
 
-Install
-=======
+## Install
 
 ```
 $ gem install benry-unixcmd
@@ -79,26 +85,25 @@ File: ex1.rb
 require 'benry/unixcmd'      # !!!!!
 include Benry::UnixCommand   # !!!!!
 
-output = capture2 "ls -al"   # run command and return output
-#print output
+output = capture2 "uname -srmp"   # run command and return output
+p output
 ```
 
 Result:
 
 ```terminal
 [localhost]$ ruby ex1.rb
-$ ls -al
+$ uname -srmp
+"Darwin 22.5.0 arm64 arm\n"
 ```
 
 
 
-Command Reference
-=================
+## Command Reference
 
 
 
-`echo`
-------
+### `echo`
 
 File: ex-echo1.rb
 
@@ -129,8 +134,7 @@ Options:
 
 
 
-`echoback`
-----------
+### `echoback`
 
 * `echoback "command"` prints `$ command` string into stdout.
 * `echoback "command"` indents command if in block of `cd` or `pushd`.
@@ -165,8 +169,7 @@ $ cd -
 
 
 
-`cp`
-----
+### `cp`
 
 * `cp "x", "y"` copies `x` to new file `y'. Fails when `y` already exists.
 * `cp! "x", "y"` is similar to above, but overwrites `y` even if it exists.
@@ -205,8 +208,7 @@ Options:
 
 
 
-`mv`
-----
+### `mv`
 
 * `mv "x", "y"` renames `x` to `y`. Fails when `y` already exists.
 * `mv! "x", "y"` is similar to above, but overwrites `y` even if it exists.
@@ -244,8 +246,7 @@ Options:
 
 
 
-`rm`
-----
+### `rm`
 
 * `rm "x", "y"` removes file `x` and `y`.
 * `rm :r, "dir1"` removes directory recursively.
@@ -278,8 +279,7 @@ Options:
 
 
 
-`mkdir`
--------
+### `mkdir`
 
 * `mkdir "x", "y"` creates `x` and `y` directories.
 * `mkdir :p, "x/y/z"` creates `x/y/z` directory.
@@ -312,8 +312,7 @@ Options:
 
 
 
-`rmdir`
--------
+### `rmdir`
 
 * `rmdir "x", "y"` removed empty directores.
 * Raises error when directory not empty.
@@ -336,8 +335,7 @@ Options:
 
 
 
-`ln`
-----
+### `ln`
 
 * `ln "x", "y"` creates hard link.
 * `ln :s, "x", "y"` creates symbolic link. Error if `y` already exists.
@@ -364,14 +362,13 @@ ln! :s, "foo1.txt", "dir/foo1.txt"    # overwrites dir/foo1.txt if exists.
 ## create symbolic link into directory.
 ln :s, "foo1.txt", to: "dir"
 
-## error! use `to: "dir"` instead.
+## error! use ``to: "dir"`` instead.
 ln :s, "foo1.txt", "dir"
 ```
 
 
 
-`atomic_symlink!`
------------------
+### `atomic_symlink!`
 
 * `atomic_symlink! "x", "y"` creates symbolic link atomically.
 
@@ -398,8 +395,7 @@ Options:
 
 
 
-`touch`
--------
+### `touch`
 
 * `touch "x"` updates timestamp of file.
 * `touch :r, "reffile", "x"` uses timestamp of `reffile` instead current timestamp.
@@ -427,8 +423,7 @@ Options:
 
 
 
-`chmod`
--------
+### `chmod`
 
 * `chmod 0644, "x"` changes file permission.
 * `chmod :R, "a+r", "dir"` changes permissions recursively.
@@ -457,8 +452,7 @@ Options:
 
 
 
-`chown`
--------
+### `chown`
 
 * `chown "user:group", "x", "y"` changes owner and group of files.
 * `chown "user", "x", "y"` changes owner of files.
@@ -485,8 +479,7 @@ Options:
 
 
 
-`pwd`
------
+### `pwd`
 
 * `pwd()` prints current working directory path.
 
@@ -508,8 +501,7 @@ Options:
 
 
 
-`cd`
-----
+### `cd`
 
 * `cd` changes current working directory.
 * If block given, `cd` invokes block just after changing current directory,
@@ -558,8 +550,7 @@ Options:
 
 
 
-`pushd`
--------
+### `pushd`
 
 * `pushd` changes current directory, invokes block, and back to previous directory.
 * `pushd` requires block argument. `cd` also takes block argument but it is an optional.
@@ -609,8 +600,7 @@ Options:
 
 
 
-`store`
--------
+### `store`
 
 * `store "x", "y", to: "dir", ` copies files under `x` and `y` to `dir` keeping file path.
   For example, `x/foo/bar.rb` will be copied as `dir/x/foo/bar.rb`.
@@ -639,8 +629,7 @@ Options:
 
 
 
-`sys`
------
+### `sys`
 
 * `sys "ls -al"` runs `ls -al` command.
 * `sys` raises error when command failed.
@@ -657,7 +646,7 @@ File: ex-sys1.rb
 require 'benry/unixcmd'
 include Benry::UnixCommand
 
-## run `ls` command
+## run ``ls`` command
 sys "ls foo.txt"     # may raise error when command failed
 sys! "ls foo.txt"    # ignore error even when command filed
 
@@ -675,8 +664,7 @@ Options:
 
 
 
-`ruby`
-------
+### `ruby`
 
 * `ruby "...."` is almost same as `sys "ruby ...."`.
 * `RbConfig.ruby` is used as ruby command path.
@@ -702,13 +690,12 @@ Options:
 
 
 
-`capture2`
-----------
+### `capture2`
 
 * `capture2 "ls -al"` runs `ls -al` and returns output of the command.
 * `capture2 "cat -n", stdin_data: "A\nB\n"` run `cat -n` command and uses `"A\nB\n"` as stdin data.
-* `caputre "ls foo"` will raise error when command failed.
-* `caputre! "ls foo"` ignores error even when command failed, and returns command output and process status object.
+* `caputre2 "ls foo"` will raise error when command failed.
+* `caputre2! "ls foo"` ignores error even when command failed, and returns command output and process status object.
 * `capture2()` invokes `Popen3.capture2()` internally. All keyword arguments are available.
 
 <!--
@@ -720,9 +707,9 @@ require 'benry/unixcmd'
 include Benry::UnixCommand
 
 ## run command and get output of the command.
-output = capture2 "ls -l foo.txt"                  # error if command failed
-output, process_status = capture2 "ls -l foot.xt"  # ignore error even command failed
-puts process_status.exitstatus
+output = capture2 "ls -l foo.txt"                   # error if command failed
+output, process_status = capture2! "ls -l foot.xt"  # ignore error even command failed
+puts process_status.exitstatus      #=> 1
 
 ## run command with stdin data.
 input = "AA\nBB\nCC\n"
@@ -735,8 +722,7 @@ Options:
 
 
 
-`capture2e`
------------
+### `capture2e`
 
 * almost same as `capture2`, but output contains both stdout and stderr.
 
@@ -760,10 +746,9 @@ Options:
 
 
 
-`capture3`
-----------
+### `capture3`
 
-* almost same as `capture3`, but returns both stdout output and stderr output.
+* almost same as `capture2`, but returns both stdout output and stderr output.
 
 <!--
 File: ex-capture3.rb
@@ -789,8 +774,7 @@ Options:
 
 
 
-`zip`
------
+### `zip`
 
 * `zip "foo.zip", "file1", "file2"` creates new zip file `foo.zip`.
 * `zip :r, "foo.zip", "dir1"` adds files under `dir1` into zip file recursively.
@@ -799,7 +783,8 @@ Options:
 * `zip :'0'` doesn't compress files.
 * `zip :'1'` compress files in best speed.
 * `zip :'9'` compress files in best compression level.
-* `zip` and `zip!` requires `rubyzip` gem. You must install it by yourself.
+* `zip` and `zip!` loads `rubyzip` gem automatically. You must install it by yourself.
+* (`rubyzip` gem is necessary ONLY when `zip` or `zip!` command is invoked.)
 * `zip` and `zip!` doesn't support absolute path.
 
 <!--
@@ -829,8 +814,7 @@ Options:
 
 
 
-`unzip`
--------
+### `unzip`
 
 * `unzip "foo.zip"` extracts files in zip file into current directory.
 * `unzip :d, "dir1", "foo.zip"` extracts files under `dir1`.
@@ -838,7 +822,8 @@ Options:
 * `unzip "foo.zip"` will be error if extracting file already exists.
 * `unzip! "foo.zip"` will overwrite existing files.
 * `unzip "foo.txt", "file1", "file2"` extracts only `file1` and `file2`.
-* `zunip` and `unzip!` requires `rubyzip` gem. You must install it by yourself.
+* `zunip` and `unzip!` loads `rubyzip` gem automatically. You must install it by yourself.
+* (`rubyzip` gem is necessary ONLY when `unzip` or `unzip!` command is invoked.)
 * `unzip` and `unzip!` doesn't support absolute path.
 
 <!--
@@ -865,8 +850,7 @@ Options:
 
 
 
-`time`
-------
+### `time`
 
 * `time do ... end` invokes block and prints elapsed time into stderr.
 
@@ -892,13 +876,11 @@ $ zip -qr9 dir1.zip dir1
 
 
 
-FAQ
-====
+## FAQ
 
 
 
-Why `mv` or `cp` requires `to:` option?
----------------------------------------
+### Why `mv` or `cp` requires `to:` option?
 
 Because UNIX command has bad interface which causes unexpected result.
 
@@ -926,8 +908,7 @@ In the same reason, `cp()` and `ln()` of Benry::UnixCommand also requires `to:` 
 
 
 
-How to use in Rakefile?
------------------------
+### How to use in Rakefile?
 
 File: Rakefile
 
@@ -937,6 +918,7 @@ include Benry::UnixCommand   # !!!!!
 Rake::DSL.prepend Benry::UnixCommand  # !!!!!
 
 task :example do
+  ## invoke commands defined in Benry::UnixCommand, not in Rake nor fileutils.rb
   mkdir :p, "foo/bar/baz"
   here = Dir.pwd()
   pushd "foo/bar/baz" do
@@ -959,8 +941,7 @@ $ popd    # back to /home/yourname
 
 
 
-How to change prompt string?
-----------------------------
+### How to change prompt string?
 
 File: ex-prompt1.rb
 
@@ -985,8 +966,7 @@ Wed Jan 15 20:23:07 UTC 2021
 
 
 
-How to make prompt colored?
----------------------------
+### How to make prompt colored?
 
 <!--
 File: ex-prompt2.rb
@@ -1012,8 +992,7 @@ sys "date"
 
 
 
-How to disable command echoback?
---------------------------------
+### How to disable command echoback?
 
 File: ex-quiet1.rb
 
@@ -1035,8 +1014,7 @@ Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
 
 
 
-License and Copyright
-=====================
+## License and Copyright
 
 $License: MIT License $
 
