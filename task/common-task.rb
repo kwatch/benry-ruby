@@ -26,7 +26,7 @@ task :guide do
 end
 
 def do_guide()
-  RELEASE != '0.0.0'  or abort "rake guide: 'RELEASE=X.X.X' required."
+  RELEASE != '0.0.0'  or abort "** ERROR: 'RELEASE=X.X.X' required."
   puts guide_message(PROJECT, RELEASE)
 end
 
@@ -68,6 +68,7 @@ end
 
 desc "copy 'doc/*.html' to '../docs/'"
 task 'doc:export' do
+  RELEASE != '0.0.0'  or abort "** ERROR: 'RELEASE=X.X.X' required."
   x = PROJECT
   cp "doc/#{x}.html", "../docs/"
 end
@@ -96,7 +97,7 @@ def target_files()
     spec_src = File.read("#{PROJECT}.gemspec", encoding: 'utf-8')
     spec = eval spec_src
     spec.name == PROJECT  or
-      abort "'#{PROJECT}' != '#{spec.name}' (project name in gemspec file)"
+      abort "** ERROR: '#{PROJECT}' != '#{spec.name}' (project name in gemspec file)"
     spec.files
   end
   return $_target_files
@@ -124,7 +125,7 @@ task :package do
 end
 
 def do_package()
-  RELEASE != '0.0.0'  or abort "rake package: 'RELEASE=X.X.X' required."
+  RELEASE != '0.0.0'  or abort "** ERROR: 'RELEASE=X.X.X' required."
   ## copy
   dir = "build"
   rm_rf dir if File.exist?(dir)
@@ -180,8 +181,7 @@ task :publish do
 end
 
 def do_publish()
-  RELEASE != '0.0.0'  or
-    abort "rake publish: 'RELEASE=X.X.X' required."
+  RELEASE != '0.0.0'  or abort "** ERROR: 'RELEASE=X.X.X' required."
   gemfile = "#{PROJECT}-#{RELEASE}.gem"
   print "** Are you sure to publish #{gemfile}? [y/N]: "
   answer = $stdin.gets().strip()
