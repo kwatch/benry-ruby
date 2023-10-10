@@ -92,7 +92,7 @@ def target_files()
     spec = eval spec_src
     spec.name == PROJECT  or
       abort "** ERROR: '#{PROJECT}' != '#{spec.name}' (project name in gemspec file)"
-    spec.files
+    spec.files + Dir.glob("doc/*.mdx")
   end
   return $_target_files
 end
@@ -105,8 +105,8 @@ def edit_file!(filename, verbose: true)
     s
   end
   if verbose
-    puts "[C] #{fname}"     if changed
-    puts "[U] #{fname}" unless changed
+    puts "[C] #{filename}"     if changed
+    puts "[U] #{filename}" unless changed
   end
   return changed
 end
