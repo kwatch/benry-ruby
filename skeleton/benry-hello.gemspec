@@ -18,7 +18,7 @@ END
                            "README.md", "MIT-LICENSE", "CHANGES.md",
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
-                           #"bin/*", "doc/**/*", "examples/**/*",
+                           #"bin/*", "examples/**/*",
                            "doc/*.html", "doc/css/*",
                          ]
   #spec.executables     = []
