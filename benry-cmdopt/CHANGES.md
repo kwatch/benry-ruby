@@ -1,9 +1,8 @@
-=======
 CHANGES
 =======
 
 
-Release 2.0.0 (????-??-??)
+Release 2.0.0 (2023-10-10)
 --------------------------
 
 * [change] rename `Benry::Cmdopt` to `Benry::CmdOpt`, and the old name is still available for backward compatibility.
