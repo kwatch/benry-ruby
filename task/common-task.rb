@@ -16,7 +16,7 @@ CLOBBER.concat Dir.glob("#{PROJECT}-*.gem")
 
 
 task :default do
-  sh "rake -T"
+  sh "rake -T", verbose: false
 end unless Rake::Task.task_defined?(:default)
 
 
