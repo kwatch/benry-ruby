@@ -281,12 +281,18 @@ class MarkdownParser
         curr = mark
       elsif mark == curr
         tagname = mark == '**' ? :strong : mark == '~~' ? :del : :code
+        (str = prevstr + str; prevstr = nil) if prevstr
         nodelist << [tagname, {}, [str]]
         curr = nil
-      else
-        mark.nil?  or
-          _err "#{curr}: not closed, but found '#{mark}'."
+      elsif mark.nil?
+        (str = prevstr + str; prevstr = nil) if prevstr
         nodelist << (curr+str)
+        curr = nil
+      elsif curr == '``'
+        str += mark
+        prevstr = prevstr ? prevstr+str : str
+      else
+        _err "#{curr}: not closed, but found '#{mark}'."
       end
     end
     return nodelist
