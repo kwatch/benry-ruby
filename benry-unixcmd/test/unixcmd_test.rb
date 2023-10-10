@@ -708,14 +708,14 @@ Oktest.scope do
             File.utime(atime2, mtime2, "d1/bar.txt")
             cp :p, "d1/bar.txt", "blabla.txt"
             ok {File.atime("blabla.txt")} != atime1
-            ok {File.atime("blabla.txt")} != atime2
+            ok {File.atime("blabla.txt")} == atime2   # !!!
             ok {File.mtime("blabla.txt")} != mtime1
             ok {File.mtime("blabla.txt")} == mtime2   # !!!
             ok {File.ctime("blabla.txt")} != ctime1
             #
             cp :pr, "d1", "d9"
             ok {File.atime("d9/bar.txt")} != atime1
-            ok {File.atime("d9/bar.txt")} != atime2
+            ok {File.atime("d9/bar.txt")} == atime2   # !!!
             ok {File.mtime("d9/bar.txt")} != mtime1
             ok {File.mtime("d9/bar.txt")} == mtime2   # !!!
             ok {File.ctime("d9/bar.txt")} != ctime1
@@ -842,14 +842,14 @@ Oktest.scope do
             ok {File.mtime("d9/bar.txt")} != mtime1
             ok {File.mtime("d9/bar.txt")} == mtime2   # !!!
             ok {File.atime("d9/bar.txt")} != atime1
-            ok {File.atime("d9/bar.txt")} != atime2
+            ok {File.atime("d9/bar.txt")} == atime2   # !!!
             #
             cp :pr, "d1", to: "d9"
             ok {File.ctime("d9/d1/bar.txt")} != ctime1
             ok {File.mtime("d9/d1/bar.txt")} != mtime1
             ok {File.mtime("d9/d1/bar.txt")} == mtime2   # !!!
             ok {File.atime("d9/d1/bar.txt")} != atime1
-            ok {File.atime("d9/d1/bar.txt")} != atime2
+            ok {File.atime("d9/d1/bar.txt")} == atime2   # !!!
           end
         end
         spec "[!zoun9] not keep file timestamp (mtime) if '-p' option not specified." do
@@ -1963,8 +1963,8 @@ Oktest.scope do
           store :p, "d1/**/*.txt", to: "d9"
           ok {File.atime("d1/d2/baz.txt")} != atime1
           ok {File.mtime("d1/d2/baz.txt")} != mtime1
-          ok {File.atime("d1/d2/baz.txt")} != atime2
-          ok {File.mtime("d1/d2/baz.txt")} == mtime2
+          ok {File.atime("d1/d2/baz.txt")} == atime2   # !!!
+          ok {File.mtime("d1/d2/baz.txt")} == mtime2   # !!!
         end
       end
       spec "[!w8oq6] creates hard links if '-l' option specified." do
