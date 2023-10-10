@@ -71,6 +71,7 @@ task 'doc:export' do
   RELEASE != '0.0.0'  or abort "** ERROR: 'RELEASE=X.X.X' required."
   x = PROJECT
   cp "doc/#{x}.html", "../docs/"
+  edit_file!("../docs/#{x}.html")
 end
 
 
@@ -81,14 +82,7 @@ end
 
 def do_edit()
   target_files().each do |fname|
-    changed = edit_file(fname) do |s|
-      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $") if RELEASE != '0.0.0'
-      s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
-      s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
-      s
-    end
-    puts "[C] #{fname}"     if changed
-    puts "[U] #{fname}" unless changed
+    edit_file!(fname)
   end
 end
 
@@ -101,6 +95,20 @@ def target_files()
     spec.files
   end
   return $_target_files
+end
+
+def edit_file!(filename, verbose: true)
+  changed = edit_file(filename) do |s|
+    s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $")
+    s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
+    s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
+    s
+  end
+  if verbose
+    puts "[C] #{fname}"     if changed
+    puts "[U] #{fname}" unless changed
+  end
+  return changed
 end
 
 def edit_file(filename)
@@ -138,12 +146,7 @@ def do_package()
   ## edit
   Dir.glob("#{dir}/**/*").each do |file|
     next unless File.file?(file)
-    edit_file(file) do |s|
-      s = s.gsub(/\$Release[:].*?\$/,   "$"+"Release: #{RELEASE} $")
-      s = s.gsub(/\$Copyright[:].*?\$/, "$"+"Copyright: #{COPYRIGHT} $")
-      s = s.gsub(/\$License[:].*?\$/,   "$"+"License: #{LICENSE} $")
-      s
-    end
+    edit_file!(file, verbose: false)
   end
   ## build
   chdir dir do
