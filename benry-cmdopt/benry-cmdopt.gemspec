@@ -6,19 +6,20 @@ Gem::Specification.new do |spec|
   spec.author          = "kwatch"
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = "https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt"
+  spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-cmdopt.html"
   spec.summary         = "Command option parser, much better than `optparse.rb`"
   spec.description     = <<-"END"
 Command option parser, much simpler and better than `optparse.rb`.
 
-Why not `optparse.rb`? See #{spec.homepage}#readme for details.
+Why not `optparse.rb`? See #{spec.homepage}#why-not-optparserb for details.
 END
   spec.license         = "MIT"
   spec.files           = Dir[
                            "README.md", "MIT-LICENSE", "CHANGES.md",
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
-                           #"bin/*", "doc/**/*", "examples/**/*",
+                           #"bin/*", "examples/**/*",
+                           "doc/*.html", "doc/css/*",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
