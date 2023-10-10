@@ -1,45 +1,51 @@
-Benry-CmdOpt README
-====================
+# Benry-CmdOpt
 
 ($Release: 0.0.0 $)
 
-Benry-CmdOpt is a command option parser library, like `optparse.rb`.
+
+
+## Overview
+
+Benry-CmdOpt is a command option parser library, like `optparse.rb`
+(Ruby standard library).
 
 Compared to `optparse.rb`, Benry-CmdOpt is easy to use, easy to extend,
 and easy to understahnd.
 
-(Benry-CmdOpt requires Ruby >= 2.3)
+* Document: <https://kwatch.github.io/benry-ruby/benry-cmdopt.html>
+* GitHub: <https://github.com/kwatch/benry-ruby/tree/main/benry-cmdopt>
+
+Benry-CmdOpt requires Ruby >= 2.3.
 
 
 
-Table of Contents
-=================
+## Table of Contents
 
 <!-- TOC -->
 
-* <a href="#why-not-optparserb">Why not `optparse.rb`?</a>
-* <a href="#install">Install</a>
-* <a href="#usage">Usage</a>
-  * <a href="#define-parse-and-print-help">Define, Parse, and Print Help</a>
-  * <a href="#command-option-parameter">Command Option Parameter</a>
-  * <a href="#argument-validation">Argument Validation</a>
-  * <a href="#boolean-onoff-option">Boolean (on/off) Option</a>
-  * <a href="#alternative-value">Alternative Value</a>
-  * <a href="#multiple-option">Multiple Option</a>
-  * <a href="#hidden-option">Hidden Option</a>
-  * <a href="#global-options-with-sub-commands">Global Options with Sub-Commands</a>
-  * <a href="#detailed-description-of-option">Detailed Description of Option</a>
-  * <a href="#option-tag">Option Tag</a>
-  * <a href="#not-supported">Not Supported</a>
-* <a href="#internal-classes">Internal Classes</a>
-* <a href="#license-and-copyright">License and Copyright</a>
+* [Overview](#overview)
+* [Why not `optparse.rb`?](#why-not-optparserb)
+* [Install](#install)
+* [Usage](#usage)
+  * [Define, Parse, and Print Help](#define-parse-and-print-help)
+  * [Command Option Parameter](#command-option-parameter)
+  * [Argument Validation](#argument-validation)
+  * [Boolean (on/off) Option](#boolean-onoff-option)
+  * [Alternative Value](#alternative-value)
+  * [Multiple Value Option](#multiple-value-option)
+  * [Hidden Option](#hidden-option)
+  * [Global Options with Sub-Commands](#global-options-with-sub-commands)
+  * [Detailed Description of Option](#detailed-description-of-option)
+  * [Option Tag](#option-tag)
+  * [Not Supported](#not-supported)
+* [Internal Classes](#internal-classes)
+* [License and Copyright](#license-and-copyright)
 
 <!-- /TOC -->
 
 
 
-Why not `optparse.rb`?
-======================
+## Why not `optparse.rb`?
 
 * `optparse.rb` can handle both `--name=val` and `--name val` styles.
   The later style is ambiguous; you may wonder whether `--name` takes
@@ -215,10 +221,10 @@ puts cmdopt.to_s()
 ```
 
 * `optparse.rb` enforces you to catch `OptionParser::ParseError` exception.
-  That is, you must know error class name.
+  That is, you must know the error class name.
 
   `benry/cmdopt.rb` provides error handler without exception class name.
-  You don't need to know error class name on error handling.
+  You don't need to know the error class name on error handling.
 
 ```ruby
 ### optparse.rb
@@ -228,8 +234,8 @@ parser.on('-f', '--file=<FILE>', "filename")
 opts = {}
 begin
   parser.parse!(ARGV, into: opts)
-rescue OptionParser::ParseError => ex   # specify error class
-  $stderr.puts "ERROR: #{ex.message}"
+rescue OptionParser::ParseError => err   # specify error class
+  $stderr.puts "ERROR: #{err.message}"
   exit 1
 end
 
@@ -256,8 +262,7 @@ end
 
 
 
-Install
-=======
+## Install
 
 ```
 $ gem install benry-cmdopt
@@ -265,12 +270,10 @@ $ gem install benry-cmdopt
 
 
 
-Usage
-=====
+## Usage
 
 
-Define, Parse, and Print Help
------------------------------
+### Define, Parse, and Print Help
 
 ```ruby
 require 'benry/cmdopt'
@@ -302,7 +305,7 @@ if options[:help]
 end
 ```
 
-You can set nil to option name only if long option specified.
+You can set `nil` to option name only if long option specified.
 
 ```ruby
 ## both are same
@@ -311,8 +314,7 @@ cmdopt.add(nil  , "-h, --help", "print help message")
 ```
 
 
-Command Option Parameter
-------------------------
+### Command Option Parameter
 
 ```ruby
 ## required parameter
@@ -326,7 +328,7 @@ cmdopt.add(:indent, '    --indent[=<N>]', "indent width")  # long only
 cmdopt.add(:indent, '-i[<N>]'           , "indent width")  # short only
 ```
 
-Notice that `"--file <FILE>"` style is not supported for usability reason.
+Notice that `"--file <FILE>"` style is **not supported for usability reason**.
 Use `"--file=<FILE>"` style instead.
 
 (From a usability perspective, the former style should not be supported.
@@ -334,8 +336,7 @@ Use `"--file=<FILE>"` style instead.
  and doesn't provide the way to disable the former style.)
 
 
-Argument Validation
--------------------
+### Argument Validation
 
 ```ruby
 ## type (class)
@@ -344,12 +345,12 @@ cmdopt.add(:indent , '-i <N>', "indent width", type: Integer)
 cmdopt.add(:indent , '-i <N>', "indent width", rexp: /\A\d+\z/)
 ## enum (Array or Set)
 cmdopt.add(:indent , '-i <N>', "indent width", enum: ["2", "4", "8"])
-## range (endless range such as `1..` available)
+## range (endless range such as ``1..`` available)
 cmdopt.add(:indent , '-i <N>', "indent width", range: (0..8))
 ## callback
 cmdopt.add(:indent , '-i <N>', "indent width") {|val|
   val =~ /\A\d+\z/  or
-    raise "integer expected."  # raise without exception class.
+    raise "Integer expected."  # raise without exception class.
   val.to_i                     # convert argument value.
 }
 ```
@@ -363,6 +364,9 @@ cmdopt.add(:indent , '-i <N>', "indent width") {|val|
 * Float     (`/\A[-+]?(\d+\.\d*\|\.\d+)z/`)
 * TrueClass (`/\A(true|on|yes|false|off|no)\z/`)
 * Date      (`/\A\d\d\d\d-\d\d?-\d\d?\z/`)
+
+Notice that Ruby doesn't have Boolean class.
+Benry-CmdOpt uses TrueClass instead.
 
 In addition:
 
@@ -384,8 +388,7 @@ cmdopt.add(:indent, '-i <N>', "indent", range: (0..))
 ```
 
 
-Boolean (on/off) Option
------------------------
+### Boolean (on/off) Option
 
 Benry-CmdOpt doens't support `--no-xxx` style option for usability reason.
 Use boolean option instead.
@@ -414,8 +417,7 @@ $ ruby ex3.rb --foo=off       # disable
 ```
 
 
-Alternative Value
------------------
+### Alternative Value
 
 Benry-CmdOpt supports alternative value.
 
@@ -445,8 +447,7 @@ p options[:flag2]   #=> false (!!!!!)
 ```
 
 
-Multiple Option
----------------
+### Multiple Value Option
 
 ```ruby
 require 'benry/cmdopt'
@@ -465,8 +466,7 @@ p options   #=> {:lib=>["foo", "bar", "baz"]}
 ```
 
 
-Hidden Option
--------------
+### Hidden Option
 
 Benry-CmdOpt regards the following options as hidden.
 
@@ -502,8 +502,7 @@ puts cmdopt.to_s(all: true)   # or: cmdopt.to_s(nil, all: true)
 ```
 
 
-Global Options with Sub-Commands
---------------------------------
+### Global Options with Sub-Commands
 
 `parse()` accepts boolean keyword argument `all`.
 
@@ -562,8 +561,7 @@ p argv              #=> ["xxx"]
 ```
 
 
-Detailed Description of Option
-------------------------------
+### Detailed Description of Option
 
 `#add()` method in `Benry::CmdOpt` or `Benry::CmdOpt::Schema` supports `detail:` keyword argument which takes detailed description of option.
 
@@ -594,8 +592,7 @@ Output:
 ```
 
 
-Option Tag
-----------
+### Option Tag
 
 `#add()` method in `Benry::CmdOpt` or `Benry::CmdOpt::Schema` supports `tag:` keyword argument.
 You can use it for any purpose.
@@ -616,8 +613,7 @@ end
 ```
 
 
-Not Supported
--------------
+### Not Supported
 
 * default value
 * `--no-xxx` style option
@@ -626,12 +622,11 @@ Not Supported
 
 
 
-Internal Classes
-================
+## Internal Classes
 
-* `Benry::CmdOpt::Schema` -- command option schema.
-* `Benry::CmdOpt::Parser` -- command option parser.
-* `Benry::CmdOpt::Facade` -- facade object including schema and parser.
+* `Benry::CmdOpt::Schema` ... command option schema.
+* `Benry::CmdOpt::Parser` ... command option parser.
+* `Benry::CmdOpt::Facade` ... facade object including schema and parser.
 
 ```ruby
 require 'benry/cmdopt'
@@ -653,7 +648,7 @@ p opts   #=> {:help=>true, :indent=>2, :file=>"blabla.txt"}
 p argv   #=> ["aaa", "bbb"]
 ```
 
-Notice that `Benry::CmdOpt.new()` returns facade object.
+Notice that `Benry::CmdOpt.new()` returns a facade object.
 
 ```ruby
 require 'benry/cmdopt'
@@ -664,12 +659,11 @@ opts = cmdopt.parse(ARGV)                # same as parser.parse(...)
 ```
 
 Notice that `cmdopt.is_a?(Benry::CmdOpt)` results in false.
-Use `cmdopt.is_a?(Benry::Facade)` instead if necessary.
+Use `cmdopt.is_a?(Benry::CmdOpt::Facade)` instead if necessary.
 
 
 
-License and Copyright
-=====================
+## License and Copyright
 
 $License: MIT License $
 
