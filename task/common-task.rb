@@ -53,6 +53,7 @@ How to release:
   $ git push
   $ git push --tags
   $ rake clean
+  $ mv #{target}.gem archive/
 END
 end
 
