@@ -1,0 +1,846 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+require 'set'
+
+$conf = {}
+
+
+class ParseError < StandardError
+end
+
+
+class MarkdownParser
+
+  def parse(md_text, filename=nil)
+    md_text ||= filename.nil? ? $stdin.read() : File.read(md_text)
+    @lines    = md_text.gsub(/\r\n/, "\n").each_line
+    @filename = filename || "-"
+    @lineno   = 0
+    #
+    firstline = getline()
+    nodelist, lastline = parse_block(firstline, 0)
+    lastline.nil?  or fail "** internal error: lastline=#{lastline.inspect}"
+    #
+    @lines    = nil
+    @filename = nil
+    @lineno   = nil
+    #
+    return [:document, {}, nodelist]
+  end
+
+  protected
+
+  def getline()
+    line = @lines.next()
+  rescue StopIteration
+    return nil
+  else
+    @lineno += 1
+    return line
+  end
+
+  def _err(errmsg, lineno=nil)
+    lineno ||= @lineno
+    raise ParseError, "line #{lineno}: #{errmsg}"
+  end
+  private :_err
+
+  def parse_block(line, seclevel, indent_width=0, firstline=nil)
+    nodelist = []
+    lines = []
+    lines << firstline if firstline
+    while line
+      case line
+      when /^\s*<!--/
+        start_lineno = @lineno
+        while line && line !~ /-->$/
+          line = getline()
+        end
+        line  or _err "<!--: not closed by '-->'.", start_lineno
+        if line =~ /^\s*<!-- TOC\/? -->$/
+          add_lines_as_text(lines, nodelist)
+          nodelist << [:toc, {}, []]
+        end
+        line = getline()
+      when /^(\#+|=+)\*?(?: +(.*))?$/
+        break if seclevel.nil?
+        break if $1.length < seclevel
+        node, line = parse_section(line)
+        add_lines_as_text(lines, nodelist)
+        nodelist << node
+      when /^\s*$/
+        add_lines_as_text(lines, nodelist)
+        nodelist << :para unless nodelist.empty? || nodelist[-1] == :para
+        line = getline()
+      when /^( *)(?:(\*)|(\d+\.)|(::?)) /
+        add_lines_as_text(lines, nodelist)
+        break if $1.length < indent_width
+        node, line = ($2 ? parse_ul(line) : $3 ? parse_ol(line) : parse_dl(line))
+        para = node[2].last == :para ? node[2].pop() : nil
+        nodelist << node
+        nodelist << para if para
+      when /^( *)```/
+        add_lines_as_text(lines, nodelist)
+        break if $1.length < indent_width
+        node, line = parse_pre(line)
+        nodelist << node
+      when /^( *)\|/
+        add_lines_as_text(lines, nodelist)
+        break if $1.length < indent_width
+        node, line = parse_table(line)
+        nodelist << node
+      else
+        line =~ /^( *)/
+        break if $1.length < indent_width
+        lines << line
+        line = getline()
+      end
+    end
+    add_lines_as_text(lines, nodelist)
+    return nodelist, line
+  end
+
+  def add_lines_as_text(lines, nodelist)
+    if ! lines.empty?
+      text = lines.join()
+      nodes = parse_inline(text)
+      nodelist.concat(nodes)
+      lines.clear()
+    end
+  end
+
+  def parse_section(line)
+    line =~ /^((?:#+|=+))(\*)?(?: +(.*))?$/  or fail "** internal error: line=#{line.inspect}"
+    seclevel = $1.length
+    skip_toc = !! $2
+    sectitle = $3 ? $3.strip() : nil
+    lineno   = @lineno
+    nodelist, line = parse_block(getline(), seclevel + 1)
+    tagname  = SECTION_LEVELS[seclevel]  or _err "section level too deep."
+    attrs    = {seclevel: seclevel, title_str: sectitle, title: parse_inline(sectitle), lineno: lineno}
+    attrs[:toc] = false if skip_toc
+    node     = [tagname, attrs, nodelist]
+    return node, line
+  end
+
+  SECTION_LEVELS = {
+    1 => :chapter,
+    2 => :section,
+    3 => :subsection,
+    4 => :subsubsection,
+    5 => :paragraph,
+    6 => :subparagra,
+  }
+
+  def parse_ul(line)
+    _parse_list(line, /\A( *)\* +/, :ul)
+  end
+
+  def parse_ol(line)
+    _parse_list(line, /\A( *)\d+\. +/, :ol)
+  end
+
+  def _parse_list(line, rexp, tagname)
+    nodelist = []
+    indent = nil
+    while line && line =~ rexp
+      indent ||= $1
+      break if $1.length < indent.length
+      text = $'
+      start_lineno = @lineno
+      nodelist_, line = parse_block(getline(), nil, indent.length + 1, text)
+      para = nodelist_.last == :para ? nodelist_.pop() : nil
+      nodelist << [:li, {}, nodelist_]
+      nodelist << para if para
+    end
+    return [tagname, {}, nodelist], line
+  end
+  private :_parse_list
+
+  def parse_dl(line)
+    nodelist = []
+    indent = nil
+    while line && line =~ /\A( *)(::?) (.*)$/
+      indent ||= $1
+      break if $1.length < indent.length
+      title = $3
+      attrs = {title_text: title, title_node: parse_inline(title), mark: $2}
+      line = getline()
+      break if line.nil?
+      nodelist_, line = parse_block(line, nil, indent.length + 1)
+      para = nodelist_.last == :para ? nodelist_.pop() : nil
+      nodelist << [:li, attrs, nodelist_]
+      nodelist << para if para
+    end
+    return [:dl, {}, nodelist], line
+  end
+
+  def parse_pre(line)
+    line =~ /\A( *)```(.*)$/  or fail "** internal error: line=#{line.inspect}"
+    indent = $1
+    argstr = $2
+    argstr =~ /\A(\w+)?$/  or _err "```#{argstr}: invalid lang name."
+    lang = $1
+    start_lineno = @lineno
+    lines = []
+    while (line = getline()) && line !~ /\A#{indent}```$/
+      if indent.empty?
+        lines << line
+      elsif line =~ /\A\s*$/
+        lines << line
+      else
+        line.start_with?(indent)  or
+          _err "expected indent `#{indent}` at beginning of line."
+        lines << line.sub(indent, '')
+      end
+    end
+    line  or _err "#{indent}```#{lang}: not closed.", start_lineno
+    attrs = {lang: lang, lineno: start_lineno}
+    node = [:pre, attrs, [lines.join()]]
+    line = getline()
+    return node, line
+  end
+
+  def parse_table(line)
+    line =~ /\A( *)\|/  or fail "** internal error: line=#{line.inspect}"
+    indent = $1
+    aligns = nil
+    rows   = []
+    header = nil
+    while line =~ /\A( *)\|/
+      cols = line.strip().split('|').collect {|col| col.strip }
+      cols.shift() if cols[0].empty?
+      cols.pop()   if line =~ /\|$/ && cols[-1].empty?
+      if line =~ /\A( *)\|:?---/
+        aligns == nil  or
+          raise _err("table separator duplicated")
+        aligns = cols.collect {|col|
+          col = col.strip
+          case col
+          when /\A:-+\z/; 'left'
+          when /\A-+:\z/; 'right'
+          when /\A-+\z/ ; 'center'
+          when /\A\z/   ; nil
+          else
+            raise _err("invalid table separator (#{col.inspect})")
+          end
+        }.compact()
+        header = rows
+        rows = []
+      else
+        rows << cols
+      end
+      line = getline()
+    end
+    node = [:table, {}, aligns, header, rows]
+    return node, line
+  end
+
+  def parse_inline(text)
+    nodelist = []
+    curr = nil
+    prevstr = nil
+    _scan_inline(text) do |str, mark, args|
+      if mark == :anchor
+        text, href = args
+        if curr == nil
+          (str = prevstr + str; prevstr = nil) if prevstr
+          nodelist << str unless str.empty?
+          text = href if text.nil? || text.empty?
+          nodelist << [:a, {href: href}, [text]]
+        elsif curr == '``'
+          str += "[#{text}](#{href})"
+          prevstr = prevstr ? str : prevstr+str
+        else
+          _err "[#{text}](#{href}): nested in '#{curr}'."
+        end
+      elsif mark == :link
+        href, = args
+        if curr == nil
+          (str = prevstr + str; prevstr = nil) if prevstr
+          nodelist << str unless str.empty?
+          nodelist << [:a, {href: href}, [href]]
+        elsif curr == '``'
+          str += "<#{href}>"
+          prevstr = prevstr ? str : prevstr+str
+        else
+          _err "<#{href}>: nested in '#{curr}'."
+        end
+      elsif mark == :br
+        if curr == nil
+          (str = prevstr + str; prevstr = nil) if prevstr
+          nodelist << str unless str.empty?
+          nodelist << [:br, {}, []]
+        else
+          _err "<br>: not available in '#{curr}'."
+        end
+      elsif curr == nil
+        (str = prevstr + str; prevstr = nil) if prevstr
+        nodelist << str unless str.empty?
+        curr = mark
+      elsif mark == curr
+        tagname = mark == '**' ? :strong : mark == '~~' ? :del : :code
+        nodelist << [tagname, {}, [str]]
+        curr = nil
+      else
+        mark.nil?  or
+          _err "#{curr}: not closed, but found '#{mark}'."
+        nodelist << (curr+str)
+      end
+    end
+    return nodelist
+  end
+
+  def _scan_inline(text)
+    rexp = /(\*\*|``|~~|\[(.*?)\]\((.*?)\)|<(\w+:\S*?)>|(<br\/?>)(?:\n|$))/
+    pos = 0
+    text.scan(rexp) do
+      m = Regexp.last_match()
+      beg = m.begin(0)
+      str = text[pos...beg]
+      pos = m.end(0)
+      if $2
+        href = $3
+        ! href.empty?  or _err "[#{$2}](): url required."
+        yield str, :anchor, [$2, $3]
+      elsif $4
+        href = $4
+        yield str, :link, [href]
+      elsif $5
+        yield str, :br, nil
+      else
+        yield str, $1, nil
+      end
+    end
+    str = text[pos..-1]
+    yield str, nil
+  end
+  private :_scan_inline
+
+end
+
+
+module HtmlHelper
+
+  def escape(x)
+    return x.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
+  end
+  alias h escape
+
+  ESCAPE_TABLE = {'&'=>'&amp;', '<'=>'&lt', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;'}
+
+  def _title2anchor(title_str)
+    return title_str.gsub(/[^-\w ]+/, '').gsub(' ', '-').downcase()
+  end
+
+end
+
+
+class HtmlTransformer
+  include HtmlHelper
+
+  def transform(node)
+    @root_node = node
+    transform_node(node, [])
+    @root_node = nil
+    return node
+  end
+
+  def transform_node(node, path)
+    tagname, attrs, children = node
+    case tagname
+    when :document, :chapter, :section, :subsection, :subsubsection, :paragraph, :subparagraph
+      children[0..-1] = _nodelist_with_p(children)
+      path << tagname
+      children.each do |child|
+        transform_node(child, path)
+      end
+    when :toc
+      li_node = toc_traverse(@root_node)
+      ul_node = li_node[2][0]
+      children[0..-1] = [ul_node]
+    end
+  end
+
+  private
+
+  def _each_with_p(nodelist)
+    arr = []
+    nodelist.each do |x|
+      if x.is_a?(String) || x.is_a?(Array) && inline_node?(x)
+        arr << x
+      else
+        if ! arr.empty?
+          yield [:p, {}, arr]
+          arr = []
+        end
+        yield x unless x == :para
+      end
+    end
+    yield [:p, {}, arr] if ! arr.empty?
+  end
+
+  def _nodelist_with_p(nodelist)
+    nodelist2 = []
+    _each_with_p(nodelist) {|x| nodelist2 << x }
+    return nodelist2
+  end
+
+  BLOCKS = Set.new([
+    :chapter, :section, :subsection, :subsubsection, :paragraph, :subparagraph,
+    :ol, :ul, :dl, :li,
+    :p, :pre,
+  ])
+
+  INLINES = Set.new([
+    :strong, :code, :del, :a, :br,
+  ])
+
+  def block_node?(node)
+    tagname = node[0]
+    return BLOCKS.include?(tagname)
+  end
+
+  def inline_node?(node)
+    tagname = node[0]
+    return INLINES.include?(tagname)
+  end
+
+  def toc_traverse(node)    # TODO: rewrite
+    return nil unless node.is_a?(Array)
+    tagname, attrs, children = node
+    if (tagname == :section || tagname == :subsection) && attrs[:toc] != false
+      title  = attrs[:title_str]
+      return nil if title == "Table of Contents"
+      anchor = _title2anchor(title)
+      a_node = [:a, {href: "##{anchor}"}, attrs[:title]]
+      childs = children.collect {|x| toc_traverse(x) }.compact()
+      nodes  = childs.empty? ? [a_node] \
+                             : [a_node, "\n", [:ul, {}, childs]]
+      return [:li, {}, nodes]
+    elsif tagname == :subsubsection
+      return nil   # not traverse children
+    else
+      li_nodes = children.collect {|x| toc_traverse(x) }.compact()
+      return nil if li_nodes.empty?
+      return li_nodes[0] if li_nodes.length == 1
+      ul_node = [:ul, {}, li_nodes]
+      return [:li, {}, [ul_node]]
+    end
+  end
+
+end
+
+
+class TocTraverser
+  include HtmlHelper
+
+  def traverse(node, level=1, &block)    # TODO: rewrite
+    return nil unless node.is_a?(Array)
+    tag, attrs, children = node
+    heading_p = tag == :chapter || tag == :section || tag == :subsection || tag == :subsubsection
+    if heading_p && attrs[:toc] != false
+      title  = attrs[:title_str]
+      return nil if title == "Table of Contents"
+      anchor = _title2anchor(title)
+      yield tag, level, title, anchor
+      children.each do |child|
+        traverse(child, level+1, &block)
+      end
+    else
+      children.each do |child|
+        traverse(child, level, &block)
+      end
+    end
+  end
+
+  def build_toc(node)
+    sb = []
+    traverse(node) do |tag, level, title, anchor|
+      case tag
+      when :chapter       ; indent = nil
+      when :section       ; indent = ""
+      when :subsection    ; indent = "  "
+      when :subsubsection ; indent = nil
+      else
+        raise "** internal error: tag=#{tag.inspect}"
+      end
+      if indent
+        sb << "#{indent}* [#{title}](##{anchor})\n"
+      end
+    end
+    return sb.join()
+  end
+
+end
+
+
+class HtmlRenderer
+  include HtmlHelper
+
+  def render(node)
+    @buf = []
+    render_node(node)
+    output = @buf.join()
+    @buf.clear()
+    @buf = nil
+    return output
+  end
+
+  protected
+
+  def render_node(node)
+    self.__send__("render_#{node[0]}", node)
+  end
+
+  def render_nodelist(nodelist)
+    b = @buf
+    nodelist.each do |x|
+      case x
+      when String  ; b << h(x)
+      when Array   ; render_node(x)
+      when :para   ; b << "<p></p>\n"
+      else
+        fail "** internal error: x=#{x.inspect}"
+      end
+    end
+  end
+
+  def render_document(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << <<"END"
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#fafafa">
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <title></title>
+  <link rel="stylesheet" href="lib/sanitize.css/2.0.0/sanitize.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+END
+    render_nodelist(children)
+    b << <<"END"
+</main>
+</body>
+</html>
+END
+  end
+
+  def render_chapter(node)
+    _render_sectioning(node, "h1")
+  end
+
+  def render_section(node)
+    _render_sectioning(node, "h2")
+  end
+
+  def render_subsection(node)
+    _render_sectioning(node, "h3")
+  end
+
+  def render_subsubsection(node)
+    _render_sectioning(node, "h4")
+  end
+
+  def render_paragraph(node)
+    _render_sectioning(node, "h5")
+  end
+
+  def render_subparagraph(node)
+    _render_sectioning(node, "h6")
+  end
+
+  def _render_sectioning(node, titletag)
+    tagname, attrs, children = node
+    b = @buf
+    anchor = _title2anchor(attrs[:title_str])
+    b << "<section class=\"#{tagname}\" id=\"#{anchor}\">\n"
+    b << "<#{titletag}>"
+    render_nodelist(attrs[:title])
+    b << "</#{titletag}>\n"
+    if tagname == :chapter
+      b << <<"END"
+<nav class="nav">
+  <ul class="nav">
+END
+      $conf['tabs']&.each do |d|
+        cls = "nav"
+        cls += " curr" if d['label'].downcase == ENV['TAB'].to_s.downcase
+        b << <<"END"
+    <li class="#{cls}"><a href="#{d['href']}">#{h(d['label'])}</a></li>
+END
+      end
+      b << <<"END"
+  </ul>
+</nav>
+END
+    end
+    render_nodelist(children)
+    b << "</section>\n"
+  end
+
+  def _title2anchor(title_str)
+    return title_str.gsub(/[^-\w ]+/, '').gsub(' ', '-').downcase()
+  end
+
+  def render_p(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<p>"
+    render_nodelist(children)
+    b[-1] = b[-1].chomp()
+    b << "</p>\n"
+  end
+
+  def render_pre(node)
+    tagname, attrs, children = node
+    b = @buf
+    if attrs[:lang]
+      b << "<pre class=\"language-#{attrs[:lang]}\">\n"
+    else
+      b << "<pre>\n"
+    end
+    #render_nodelist(children)
+    s = h(children[0])
+    s = s.gsub(/\{\{\*/, '<strong>').gsub(/\*\}\}/, '</strong>')
+    s = s.gsub(/\{\{\=/, '<del>').gsub(/\=\}\}/, '</del>')
+    b << s
+    b << "</pre>\n"
+  end
+
+  def render_ul(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<ul>\n"
+    render_nodelist(children)
+    b << "</ul>\n"
+  end
+
+  def render_ol(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<ol>\n"
+    render_nodelist(children)
+    b << "</ol>\n"
+  end
+
+  def render_dl(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<dl>\n"
+    render_nodelist(children)
+    b << "</dl>\n"
+  end
+
+  def render_li(node)
+    tagname, attrs, children = node
+    b = @buf
+    title_node = attrs[:title_node] || attrs[:title]
+    if title_node
+      if attrs[:mark] == '::'
+        b << "<dt class=\"bold\">"
+      else
+        b << "<dt>"
+      end
+      render_nodelist(title_node)
+      b << "</dt>\n"
+      b << "<dd>"
+      render_nodelist(children)
+      b[-1] = b[-1].chomp()
+      b << "</dd>\n"
+    else
+      b << "<li>"
+      render_nodelist(children)
+      b[-1] = b[-1].chomp()
+      b << "</li>\n"
+    end
+  end
+
+  def render_table(node)
+    tagname, attrs, aligns, headers, rows = node
+    b = @buf
+    b << "<table>\n"
+    if headers
+      b << "<thead>\n"
+      b << "<tr>\n"
+      headers.each do |row|
+        row.zip(aligns).each do |col, align|
+          b << "<th align=\"#{align}\">#{h(col)}</th>\n"
+        end
+      end
+      b << "</tr>\n"
+      b << "</thead>\n"
+    end
+    if rows && ! rows.empty?
+      b << "<tbody>\n"
+      rows.each do |row|
+        b << "<tr>\n"
+        row.zip(aligns).each do |col, align|
+          b << "<td align=\"#{align}\">#{h(col)}</td>"
+        end
+        b << "\n"
+        b << "</tr>\n"
+      end
+      b << "</tbody>\n"
+    end
+    b << "</table>\n"
+  end
+
+  def render_toc(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<div class=\"toc\">\n"
+    render_nodelist(children)
+    b << "</div>\n"
+  end
+
+  def render_strong(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<strong>"
+    render_nodelist(children)
+    b << "</strong>"
+  end
+
+  def render_code(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<code>"
+    render_nodelist(children)
+    b << "</code>"
+  end
+
+  def render_a(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<a href=\"#{h(attrs[:href])}\">"
+    render_nodelist(children)
+    b << "</a>"
+  end
+
+  def render_br(node)
+    tagname, attrs, children = node
+    b = @buf
+    b << "<br />\n"
+  end
+
+end
+
+
+class Main
+
+  def run(*args)
+    if args.empty?
+      print usage()
+      return 0
+    end
+    #
+    opts = {}
+    while ! args.empty? && args[0].start_with?('-')
+      opt = args.shift()
+      if opt == '--'
+        break
+      elsif opt.start_with?('--')
+        opt =~ /\A--(\w+(?:-\w+)*)(?:=(.*))?\z/  or
+          raise "#{opt}: invalid option."
+        name = $1; val = $2 || true
+        opts[name] = val
+      else
+        raise "#{opt}: unknown option."
+      end
+    end
+    #
+    args.length == 1  or
+      raise "too much argument."
+    filename = args[0]
+    #
+    if File.exist?("md2-conf.yaml")
+      require 'yaml'
+      conf = YAML.safe_load_file("md2-conf.yaml")
+      $conf = conf if conf
+    end
+    #
+    parser = MarkdownParser.new()
+    content = File.read(filename)
+    node = parser.parse(content, filename)
+    if opts["toc"]
+      do_toc_action(node)
+    elsif opts["md"]
+      do_md_action(node, content)
+    else
+      do_html_action(node)
+    end
+    #
+    return 0
+  end
+
+  private
+
+  def do_toc_action(node)
+    print TocTraverser.new.build_toc(node)
+  end
+
+  def do_md_action(node, content)
+    str = content
+    toc = TocTraverser.new.build_toc(node)
+    toc = "<!-- TOC -->\n\n#{toc}\n<!-- /TOC -->\n"
+    str = str.gsub(/^ *<!-- TOC\/? -->\n/, toc)
+    str = str.gsub(/^(##*)\* /, '\\1 ')
+    edit = proc {|s| s.gsub(/``/, '`') }
+    sb = []
+    pos = 0
+    str.scan(/^```.*?^```\n/m) do
+      m = Regexp.last_match
+      text = str[pos...m.begin(0)]
+      pos = m.end(0)
+      sb << edit.(text)
+      s = m[0]
+      s = s.gsub(/\{\{\*|\*\}\}/, '')
+      s = s.gsub(/^ *\{\{\=.*=\}\} *\n/, '')
+      sb << s
+    end
+    text = pos == 0 ? str : str[pos..-1]
+    sb << edit.(text)
+    print sb.join()
+  end
+
+  def do_html_action(node)
+    node = HtmlTransformer.new.transform(node)
+    html = HtmlRenderer.new.render(node)
+    print html
+  end
+
+  def usage(command_name="md2")
+    return <<END
+Usage: #{command_name} [<options>] <file.md> > <file.html>
+  --toc          : print table of contents in Markdown format
+END
+  end
+
+  def self.main(argv=nil, command_name="md2")
+    argv ||= ARGV
+    status = self.new.run(*argv)
+    return status || 0
+  #rescue RuntimeError => exc
+  #  $stderr.puts "ERROR (#{command_name}): #{exc.message}"
+  #  return 1
+  end
+
+end
+
+
+if __FILE__ == $0
+  status = Main.main()
+  exit(status)
+end
