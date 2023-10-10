@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-PROJECT   = "benry-unixmd"
+PROJECT   = "benry-unixcmd"
 RELEASE   = ENV['RELEASE'] || "0.0.0"
 COPYRIGHT = "copyright(c) 2021 kwatch@gmail.com"
 LICENSE   = "MIT License"
