@@ -236,8 +236,7 @@ opts = {}
 begin
   parser.parse!(ARGV, into: opts)
 rescue OptionParser::ParseError => err   # specify error class
-  $stderr.puts "ERROR: #{err.message}"
-  exit 1
+  abort "ERROR: #{err.message}"
 end
 
 ### benry/cmdopt.rb
@@ -245,8 +244,7 @@ require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
 cmdopt.add(:file, '-f, --file=<FILE>', "filename")
 opts = cmdopt.parse(ARGV) do |err|  # error handling wihtout error class name
-  $stderr.puts "ERROR: #{err.message}"
-  exit 1
+  abort "ERROR: #{err.message}"
 end
 ```
 
@@ -286,8 +284,7 @@ cmdopt.add(:version, '    --version', "print version")
 
 ## parse with error handling
 options = cmdopt.parse(ARGV) do |err|
-  $stderr.puts "ERROR: #{err.message}"
-  exit(1)
+  abort "ERROR: #{err.message}"
 end
 p options     # ex: {:help => true, :version => true}
 p ARGV        # options are removed from ARGV
@@ -642,8 +639,7 @@ schema.add(:indent, '-i, --indent[=<WIDTH>]', "enable indent", type: Integer)
 parser = Benry::CmdOpt::Parser.new(schema)
 argv = ['-hi2', '--file=blabla.txt', 'aaa', 'bbb']
 opts = parser.parse(argv) do |err|
-  $stderr.puts "ERROR: #{err.message}"
-  exit 1
+  abort "ERROR: #{err.message}"
 end
 p opts   #=> {:help=>true, :indent=>2, :file=>"blabla.txt"}
 p argv   #=> ["aaa", "bbb"]
