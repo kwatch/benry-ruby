@@ -6,12 +6,12 @@ Gem::Specification.new do |spec|
   spec.author          = "kwatch"
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = "https://github.com/kwatch/benry-ruby/tree/main/benry-hello"
+  spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-hello.html"
   spec.summary         = "Hello world"
   spec.description     = <<-"END"
 Hello world.
 
-See #{spec.homepage}#readme for details.
+See #{spec.homepage} for details.
 END
   spec.license         = "MIT"
   spec.files           = Dir[
@@ -19,6 +19,7 @@ END
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
                            #"bin/*", "doc/**/*", "examples/**/*",
+                           "doc/*.html", "doc/css/*",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
