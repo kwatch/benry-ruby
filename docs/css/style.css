@@ -40,6 +40,10 @@ h3 {
 	font-size: 180%;
 	font-weight: normal;
 }
+h2 > code, h3 > code {
+	color: #39c;
+	font-weight: bold;
+}
 
 
 section.section {
@@ -84,6 +88,10 @@ code {
 	background: #f6f6f6;
 	padding: 1px 3px;
 	color: #444;
+}
+h2 > code, h3 > code {
+	border: none;
+	background-color: transparent;
 }
 
 
