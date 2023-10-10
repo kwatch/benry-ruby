@@ -324,11 +324,15 @@ end
 module HtmlHelper
 
   def escape(x)
-    return x.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
+    #return x.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
+    #return x.to_s.gsub(/[&<>"]/, ESCAPE_TABLE)
+    return x.to_s.gsub(/[&<>]/, ESCAPE_TABLE)
   end
   alias h escape
 
-  ESCAPE_TABLE = {'&'=>'&amp;', '<'=>'&lt', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;'}
+  #ESCAPE_TABLE = {'&'=>'&amp;', '<'=>'&lt', '>'=>'&gt;', '"'=>'&quot;', "'"=>'&#039;'}
+  #ESCAPE_TABLE = {'&'=>'&amp;', '<'=>'&lt', '>'=>'&gt;', '"'=>'&quot;'}
+  ESCAPE_TABLE = {'&'=>'&amp;', '<'=>'&lt', '>'=>'&gt;'}
 
   def _title2anchor(title_str)
     return title_str.gsub(/[^-\w ]+/, '').gsub(' ', '-').downcase()
