@@ -7,7 +7,7 @@ require 'benry/config'
 
 
 
-class TestCommonConfig < Benry::BaseConfig
+class TestCommonConfig < Benry::Config
   add :db_name            , "db1"
   add :db_user            , "user1"
   add :db_pass            , ABSTRACT
@@ -39,13 +39,13 @@ end
 Oktest.scope do
 
 
-  topic Benry::BaseConfig::AbstractValue do
+  topic Benry::Config::AbstractValue do
 
 
     topic '#initialize()' do
 
       spec "[!6hcf9] accepts environment variable name." do
-        v = Benry::BaseConfig::AbstractValue.new(:FOO)
+        v = Benry::Config::AbstractValue.new(:FOO)
         ok {v.envvar} == :FOO
       end
 
@@ -55,12 +55,12 @@ Oktest.scope do
     topic '#[]' do
 
       spec "[!p0acp] returns new object with environment variable name." do
-        foo = Benry::BaseConfig::ABSTRACT[:FOO]
-        ok {foo.class} == Benry::BaseConfig::AbstractValue
+        foo = Benry::Config::ABSTRACT[:FOO]
+        ok {foo.class} == Benry::Config::AbstractValue
         ok {foo.envvar} == :FOO
         #
-        bar = Benry::BaseConfig::SECRET[:BAR]
-        ok {bar.class} == Benry::BaseConfig::SecretValue
+        bar = Benry::Config::SECRET[:BAR]
+        ok {bar.class} == Benry::Config::SecretValue
         ok {bar.envvar} == :BAR
       end
     end
@@ -70,7 +70,7 @@ Oktest.scope do
 
 
 
-  topic Benry::BaseConfig do
+  topic Benry::Config do
 
 
     topic '#initialize()' do
@@ -141,13 +141,13 @@ Oktest.scope do
         ok {TestCommonConfig.instance_variable_get('@__dict')} == {
           :db_name        => "db1",
           :db_user        => "user1",
-          :db_pass        => Benry::BaseConfig::ABSTRACT,
-          :session_secret => Benry::BaseConfig::SECRET,
+          :db_pass        => Benry::Config::ABSTRACT,
+          :session_secret => Benry::Config::SECRET,
         }
       end
 
       spec "[!o0ts4] defines getter method." do
-        cls = Class.new(Benry::BaseConfig) do
+        cls = Class.new(Benry::Config) do
           add :foo  , "FOO"
         end
         obj = cls.new
