@@ -1,40 +1,46 @@
-Benry-Config README
-===================
+# Benry-Config
 
 ($Release: 0.0.0 $)
 
 
-Overview
---------
+## What's this?
 
 Utility class to support configuration.
+
+Features:
 
 * Easy to define configuration for environments (production, development, ...).
 * Raises error when configuration name is wrong (typo).
 * Represents secret configurations which should be set by environment var or in private file.
 
+Links:
 
-Table of Contents
------------------
+* Document: <https://kwatch.github.io/benry-ruby/benry-config.html>
+* GitHub: <https://github.com/kwatch/benry-ruby/tree/main/benry-config>
+* Changes: <https://github.com/kwatch/benry-ruby/tree/main/benry-config/CHANGES.md>
+
+
+
+### Table of Contents
 
 <!-- TOC -->
 
-  * <a href="#overview">Overview</a>
-  * <a href="#example">Example</a>
-  * <a href="#copyright-and-license">Copyright and License</a>
+* [What's this?](#whats-this)
+* [Example](#example)
+* [Copyright and License](#copyright-and-license)
 
 <!-- /TOC -->
 
 
-Example
--------
 
-File: config/config.rb
+## Example
+
+File: config/app.rb
 
 ```ruby
 require 'benry/config'
 
-class BaseConfig < Benry::BaseConfig
+class AppConfigBase < Benry::BaseConfig
   ## add names and values
   add :db_host          , "localhost"
   add :db_user          , "user1"
@@ -47,30 +53,34 @@ class BaseConfig < Benry::BaseConfig
 end
 ```
 
-File: config/config_dev.rb (for development environment)
+File: config/app_dev.rb (for development environment)
 
 ```ruby
+require_relative './app'
+
 ## for development environment
-class AppConfig < BaseConfig
+class AppConfig < AppConfigBase
   ## set (= override) existing values
   set :db_pass          , "pass1"        # set ABSTRACT value
 end
 ```
 
-File: config/config_prod.rb (for production environment)
+File: config/app_prod.rb (for production environment)
 
 ```ruby
+require_relative './app'
+
 ## for production environment
-class AppConfig < BaseConfig
+class AppConfig < AppConfigBase
   ## set (= override) existing values
   set :db_host          , "db-master"    # override existing value
   set :db_pass          , "passXXX"      # set ABSTRACT value
   ## error because `:db_name` is not defined in paremnt class.
-  set :db_name          , "prod1"        # error! (not defined)
+  set :db_name          , "prod1"        #=> Benry::ConfigError (not defined)
 end
 ```
 
-File: config/config.private (should be ignored by `.gitignore`)
+File: config/app.private (should be ignored by `.gitignore`)
 
 ```ruby
 ## this file should be ignored by '.gitignore', and
@@ -85,11 +95,11 @@ File: main.rb
 ```ruby
 ## load config files
 app_env = ENV['APP_ENV']  or raise "$APP_ENV required."
-require "./config/config.rb"                # defines BaseConfig class
-require "./config/config_#{app_env}.rb"     # defines Config class
-load    "./config/config.private"
+require "./config/app.rb"                # defines BaseConfig class
+require "./config/app_#{app_env}.rb"     # defines Config class
+load    "./config/app.private"
 ## or:
-#load   "./config/config.#{app_env}.private"
+#load   "./config/app.#{app_env}.private"
 
 ## create a config object
 $config = AppConfig.new.freeze
@@ -99,6 +109,10 @@ p $config.db_pass             #=> "pass1"
 p $config.session_cookie      #=> "sess"
 p $config.session_secret      #=> "YRjCIAiPlCBvwLUq5mnZ"
 #
+p $config.defined?(:db_user)  #=> true
+p $config.defined?(:db_pass)  #=> true
+p $config.defined?(:db_name)  #=> false
+#
 p $config.get_all(:db_)       #=> {:host=>"localhost", :user=>"user1", :pass=>"pass1"}
 p $config.get_all(:session_)  #=> {:cookie=>"sess", :secret=>"YRjCIAiPlCBvwLUq5mnZ"}
 #
@@ -107,9 +121,8 @@ $config.each! {|k, v| puts "#{k}=#{v.inspect}" }   # not hide secret values
 ```
 
 
-Copyright and License
----------------------
 
-$Copyright: copyright(c) 2016 kwatch@gmail.com $
+## Copyright and License
 
-$License: MIT License $
+* $Copyright: copyright(c) 2016 kwatch@gmail.com $
+* $License: MIT License $
