@@ -1,6 +1,6 @@
 require 'benry/config'
 
-class BaseConfig < Benry::BaseConfig
+class AppConfigBase < Benry::BaseConfig
   ## add names and values
   add :db_host          , "localhost"
   add :db_user          , "user1"
