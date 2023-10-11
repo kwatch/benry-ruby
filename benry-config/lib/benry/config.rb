@@ -14,12 +14,7 @@ module Benry
   end
 
 
-  ##
-  ## Configuration class.
-  ##
-  ## https://github.com/kwatch/benry-ruby/tree/main/benry-config#readme
-  ##
-  class BaseConfig
+  class Config
 
     class AbstractValue
 
@@ -179,6 +174,9 @@ module Benry
     end
 
   end
+
+
+  BaseConfig = Config   # for backward compatibility
 
 
 end
