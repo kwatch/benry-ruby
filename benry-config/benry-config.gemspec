@@ -6,16 +6,16 @@ Gem::Specification.new do |spec|
   spec.author          = "kwatch"
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = "https://github.com/kwatch/benry-ruby/tree/main/benry-config"
-  spec.summary         = "Useful configuration library"
+  spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-config.html"
+  spec.summary         = "Application configuration library"
   spec.description     = <<"END"
 Small library for configuration of application.
 
-See #{spec.homepage}#readme for details.
+See #{spec.homepage} for details.
 END
   spec.license         = "MIT"
   spec.files           = Dir[
-                           "README.md", "MIT-LICENSE.txt", #"CHANGES.md",
+                           "README.md", "MIT-LICENSE", #"CHANGES.md",
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*_test.rb", "task/**/*.rb",
                            #"bin/*", "doc/**/*", "examples/**/*",
