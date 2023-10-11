@@ -264,16 +264,18 @@ opts = cmdopt.parse(ARGV) <strong>do |err|</strong>  # error handling wihtout er
 end
 </pre>
 <ul>
-<li>Source code of <code>optparse.rb</code> is very large and complicated, because
-  <code>OptParse</code> class does everything about command option parsing.
-  It is hard to customize or extend <code>OptionParser</code> class.
+<li>The source code of "optparse.rb" is quite large and complex for a command
+  option parser library. The reason is that one large <code>OptParse</code> class
+  does everything related to parsing command options. Bad class design.
+  Therefore it is hard to customize or extend <code>OptionParser</code> class.
 <p></p>
   In contract, <code>benry/cmdopt.rb</code> consists of several classes
   (schema class, parser class, and facade class).
   Therefore it is easy to understand and extend these classes.
 <p></p>
-  File <code>optparse.rb</code> (in Ruby 3.2) contains 1143 lines (except comments and blanks),
-  while <code>benry/cmdopt.rb</code> (v2.0.0) contains 429 lines (except both, too).</li>
+  In fact, file <code>optparse.rb</code> and <code>optparse/*.rb</code> (in Ruby 3.2)
+  contains total 1298 lines (except comments and blanks), while
+  <code>benry/cmdopt.rb</code> (v2.0.0) contains only 429 lines (except both, too).</li>
 </ul>
 </section>
 <section class="section" id="install">
