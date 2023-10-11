@@ -122,4 +122,4 @@ p obj.bar(3, 4, 'a'=>5)    # accepts any arguments
 ## License and Copyright
 
 * $License: MIT License $
-* $Copyright: copyright(c) 2011-2021 kuwata-lab.com all rights reserved $
+* $Copyright: copyright(c) 2011 kwatch@gmail.com $

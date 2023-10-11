@@ -3,7 +3,7 @@
 
 PROJECT   = "benry-recorder"
 RELEASE   = ENV['RELEASE'] || "0.0.0"
-COPYRIGHT = "copyright(c) 2011-2021 kuwata-lab.com all rights reserved"
+COPYRIGHT = "copyright(c) 2011 kwatch@gmail.com"
 LICENSE   = "MIT License"
 
 README_EXTRACT  = /^file: (.*\.rb)/
