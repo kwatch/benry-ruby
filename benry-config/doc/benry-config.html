@@ -54,7 +54,7 @@
 <pre class="language-ruby">
 <strong>require 'benry/config'</strong>
 
-<strong>class AppConfigBase &lt Benry::BaseConfig</strong>
+<strong>class AppConfigBase &lt Benry::Config</strong>
   ## add names and values
   <strong>add</strong> :db_host          , "localhost"
   <strong>add</strong> :db_user          , "user1"
@@ -101,9 +101,9 @@ end
 <pre class="language-ruby">
 ## load config files
 app_env = ENV['APP_ENV']  or raise "$APP_ENV required."
-<strong>require "./config/app.rb"</strong>                # defines BaseConfig class
-<strong>require "./config/app_#{app_env}.rb"</strong>     # defines Config class
-<strong>load    "./config/app.private"</strong>
+<strong>require "./config/app.rb"</strong>                # define AppConfigBase class
+<strong>require "./config/app_#{app_env}.rb"</strong>     # define AppConfig class
+<strong>load    "./config/app.private"</strong>           # modify AppConfig class
 ## or:
 #load   "./config/app.#{app_env}.private"
 
