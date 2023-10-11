@@ -3,9 +3,9 @@
 ###
 ### File commands like FileUtils module
 ###
-### $Release$
-### $Copyright$
-### $License$
+### $Release: 0.0.0 $
+### $Copyright: copyright(c) 2021 kwatch@gmail.com $
+### $License: MIT License $
 ###
 
 
