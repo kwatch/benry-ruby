@@ -8,7 +8,7 @@ LICENSE   = "MIT License"
 
 README_EXTRACT  = /^file: (.*\.rb)/
 
-Dir.glob("./task/*.rb").each {|x| require_relative x }
+Dir.glob("./task/*.rb").sort.each {|x| require_relative x }
 
 def readme_extract_callback(filename, str)
   if filename == 'example1.rb'
