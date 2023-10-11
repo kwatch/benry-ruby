@@ -1,6 +1,11 @@
 <!-- -*- coding: utf-8 -*- -->
 # Benry-Recorder README
 
+($Release: 0.0.0 $)
+
+
+## What's this?
+
 Benry-Recoder is a tiny utility that can:
 
 * Record method calls of target object.
@@ -8,14 +13,15 @@ Benry-Recoder is a tiny utility that can:
 * Create fake object which has fake methods.
 
 
-## Table of Contents
+### Table of Contents
 
 <!-- TOC -->
 
-  * <a href="#how-to-record-method-calls">How to record method calls</a>
-  * <a href="#how-to-define-fake-methods">How to define fake methods</a>
-  * <a href="#how-to-create-fake-object">How to create fake object</a>
-  * <a href="#license-and-copyright">License and Copyright</a>
+* [What's this?](#whats-this)
+* [How to record method calls](#how-to-record-method-calls)
+* [How to define fake methods](#how-to-define-fake-methods)
+* [How to create fake object](#how-to-create-fake-object)
+* [License and Copyright](#license-and-copyright)
 
 <!-- /TOC -->
 
