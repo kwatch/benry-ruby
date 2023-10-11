@@ -11,7 +11,7 @@ Features:
 
 * Easy to define configuration for environments (production, development, ...).
 * Raises error when configuration name is wrong (typo).
-* Represents secret configurations which should be set by environment var or in private file.
+* Represents secret configurations which should be set by environment var or in secret file.
 
 Links:
 
@@ -80,7 +80,7 @@ class AppConfig < AppConfigBase
 end
 ```
 
-File: config/app.private (should be ignored by `.gitignore`)
+File: config/app.secret (should be ignored by `.gitignore`)
 
 ```ruby
 ## this file should be ignored by '.gitignore', and
@@ -97,9 +97,9 @@ File: main.rb
 app_env = ENV['APP_ENV']  or raise "$APP_ENV required."
 require "./config/app.rb"                # define AppConfigBase class
 require "./config/app_#{app_env}.rb"     # define AppConfig class
-load    "./config/app.private"           # modify AppConfig class
+load    "./config/app.secret"            # modify AppConfig class
 ## or:
-#load   "./config/app.#{app_env}.private"
+#load   "./config/app.#{app_env}.secret"
 
 ## create a config object
 $config = AppConfig.new.freeze

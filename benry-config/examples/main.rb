@@ -1,10 +1,10 @@
 ## load config files
 app_env = ENV['APP_ENV']  or raise "$APP_ENV required."
-require "./config/app.rb"                # defines AppConfigBase class
-require "./config/app_#{app_env}.rb"     # defines AppConfig class
-load    "./config/app.private"
+require "./config/app.rb"                # define AppConfigBase class
+require "./config/app_#{app_env}.rb"     # define AppConfig class
+load    "./config/app.secret"            # modify AppConfig class
 ## or:
-#load   "./config/app.#{app_env}.private"
+#load   "./config/app.#{app_env}.secret"
 
 ## create a config object
 $config = AppConfig.new.freeze
