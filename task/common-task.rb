@@ -41,6 +41,8 @@ How to release:
   $ which ruby
   $ rake test
   $ rake test:all
+  $ rake doc
+  $ rake doc:export RELEASE=#{release}
   $ rake readme:execute			# optional
   $ rake readme:toc			# optional
   $ rake package RELEASE=#{release}
@@ -50,10 +52,13 @@ How to release:
   $ gem uninstall #{project}
   $ gem push #{target}.gem	# publish gem to rubygems.org
   $ git tag #{tag}		# or: git tag ruby-#{tag}
-  $ git push
   $ git push --tags
   $ rake clean
   $ mv #{target}.gem archive/
+  $ cd ../docs/
+  $ git add #{target}.html
+  $ git commit -m "[main] docs: update '#{target}.html'"
+  $ git push
 END
 end
 
