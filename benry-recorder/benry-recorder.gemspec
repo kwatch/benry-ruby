@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.author          = "kwatch"
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = "https://github.com/kwatch/benry-ruby/tree/main/benry-recorder"
+  spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-recorder.html"
   spec.summary         = "Record method calls, or define fake methods."
   spec.description     = <<-"END"
 Benry-Recorder is a small tool that can:
@@ -24,7 +24,8 @@ END
                            "README.md", "MIT-LICENSE", "CHANGES.md",
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
-                           #"bin/*", "doc/**/*", "examples/**/*",
+                           #"bin/*", "examples/**/*",
+                           "doc/*.html", "doc/css/*",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
