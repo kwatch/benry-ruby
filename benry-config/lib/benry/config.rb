@@ -14,11 +14,6 @@ module Benry
   end
 
 
-  ##
-  ## Configuration class.
-  ##
-  ## https://github.com/kwatch/benry-ruby/tree/main/benry-config#readme
-  ##
   class Config
 
     class AbstractValue
