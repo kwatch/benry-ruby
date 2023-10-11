@@ -15,7 +15,7 @@ See #{spec.homepage} for details.
 END
   spec.license         = "MIT"
   spec.files           = Dir[
-                           "README.md", "MIT-LICENSE", #"CHANGES.md",
+                           "README.md", "MIT-LICENSE", "CHANGES.md",
                            "Rakefile.rb", "#{spec.name}.gemspec",
                            "lib/**/*.rb", "test/**/*_test.rb", "task/**/*.rb",
                            "examples/**/*", #"bin/*",
