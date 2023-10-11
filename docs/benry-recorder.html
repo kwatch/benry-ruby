@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#fafafa">
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <title></title>
+  <link rel="stylesheet" href="lib/sanitize.css/2.0.0/sanitize.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+<section class="chapter" id="benry-recorder-readme">
+<h1>Benry-Recorder README</h1>
+<nav class="nav">
+  <ul class="nav">
+  </ul>
+</nav>
+<p>($Release: 1.0.0 $)</p>
+<section class="section" id="whats-this">
+<h2>What's this?</h2>
+<p>Benry-Recoder is a tiny utility that can:</p>
+<ul>
+<li>Record method calls of target object.</li>
+<li>Define fake methods on target object.</li>
+<li>Create fake object which has fake methods.</li>
+</ul>
+<section class="subsection" id="table-of-contents">
+<h3>Table of Contents</h3>
+<div class="toc">
+<ul>
+<li><a href="#whats-this">What's this?</a></li>
+<li><a href="#how-to-record-method-calls">How to record method calls</a></li>
+<li><a href="#how-to-define-fake-methods">How to define fake methods</a></li>
+<li><a href="#how-to-create-fake-object">How to create fake object</a></li>
+<li><a href="#license-and-copyright">License and Copyright</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section class="section" id="how-to-record-method-calls">
+<h2>How to record method calls</h2>
+<pre class="language-ruby">
+<strong>require 'benry/recorder'</strong>
+
+class Calc
+  def average(*nums)   # average() calls total()
+    return total(*nums) / nums.length
+  end
+  def total(*nums)
+    t = 0; nums.each {|n| t += n }
+    return t   # or: return nums.sum
+  end
+end
+
+## target object
+calc = Calc.new
+
+## record method calls
+<strong>rec = Benry::Recorder.new</strong>
+<strong>rec.record(calc, :total, :average)</strong>
+
+## call methods
+calc.average(10, 20, 30, 40)    # calls calc.total() internally
+
+## details of method calls
+p <strong>rec.length</strong>               #=&gt; 2
+puts rec.inspect
+      #=&gt; 0: #&ltCalc:0x001234abcd&gt;.average(10, 20, 30, 40) #=&gt; 25
+      #   1: #&ltCalc:0x001234abcd&gt;.total(10, 20, 30, 40) #=&gt; 100
+#
+p <strong>rec[0].obj</strong>               #=&gt; #&ltCalc:0x001234abcd&gt;
+p <strong>rec[0].obj</strong>.equal?(calc)  #=&gt; true
+p <strong>rec[0].name</strong>              #=&gt; :average
+p <strong>rec[0].args</strong>              #=&gt; [10, 20, 30, 40]
+p <strong>rec[0].ret</strong>               #=&gt; 25
+#
+p <strong>rec[1].obj</strong>               #=&gt; #&ltCalc:0x001234abcd&gt;
+p <strong>rec[1].obj</strong>.equal?(calc)  #=&gt; true
+p <strong>rec[1].name</strong>              #=&gt; :total
+p <strong>rec[1].args</strong>              #=&gt; [10, 20, 30, 40]
+p <strong>rec[1].ret</strong>               #=&gt; 100
+#
+p <strong>rec[0].to_a</strong>              #=&gt; [obj, :average, [10, 20, 30, 40], 25]
+p <strong>rec[1].to_a</strong>              #=&gt; [obj, :total, [10, 20, 30, 40], 100]
+</pre>
+</section>
+<section class="section" id="how-to-define-fake-methods">
+<h2>How to define fake methods</h2>
+<pre class="language-ruby">
+require 'benry/recorder'
+
+class Calc
+  ....(snip)....
+end
+
+## target object
+calc = Calc.new
+
+## before
+p calc.total(10, 20, 30, 40)     #=&gt; 100
+p calc.average(10, 20, 30, 40)   #=&gt;  25
+
+## define fake methods
+<strong>rec = Benry::Recorder.new</strong>
+<strong>rec.fake_method(calc, :total=&gt;123, :average=&gt;34)</strong>
+
+## after
+p calc.total(10, 20, 30, 40)     <strong>#=&gt; 123</strong>
+p calc.average(10, 20, 30, 40)   <strong>#=&gt;  34</strong>
+</pre>
+</section>
+<section class="section" id="how-to-create-fake-object">
+<h2>How to create fake object</h2>
+<pre class="language-ruby">
+require 'benry/recorder'
+
+<strong>rec = Benry::Recorder.new</strong>
+<strong>obj = rec.fake_object(:foo=&gt;10, :bar=&gt;20)</strong>
+p <strong>obj.foo()</strong>                #=&gt; 10
+p <strong>obj.bar()</strong>                #=&gt; 20
+p <strong>obj.bar(3, 4, 'a'=&gt;5)</strong>    # accepts any arguments
+</pre>
+</section>
+<section class="section" id="license-and-copyright">
+<h2>License and Copyright</h2>
+<ul>
+<li>$License: MIT License $</li>
+<li>$Copyright: copyright(c) 2011 kwatch@gmail.com $</li>
+</ul>
+</section>
+</section>
+</main>
+</body>
+</html>
