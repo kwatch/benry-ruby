@@ -56,8 +56,8 @@ How to release:
   $ rake clean
   $ mv #{target}.gem archive/
   $ cd ../docs/
-  $ git add #{target}.html
-  $ git commit -m "[main] docs: update '#{target}.html'"
+  $ git add #{project}.html
+  $ git commit -m "[main] docs: update '#{project}.html'"
   $ git push
 END
 end
