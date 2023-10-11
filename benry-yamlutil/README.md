@@ -168,6 +168,6 @@ In order to work well with YAML tags, please +1 to this pull request:
 Copyright and License
 ---------------------
 
-$Copyright: copyright(c) 2016 kuwata-lab.com all rights reserved $
+$Copyright: copyright(c) 2016 kwatch@gmail.com $
 
 $License: MIT License $
