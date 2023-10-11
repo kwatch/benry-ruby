@@ -8,7 +8,7 @@ LICENSE   = "MIT License"
 
 README_DESTDIR   = "examples"
 
-Dir.glob('./task/*-task.rb').each {|x| require x }
+Dir.glob('./task/*-task.rb').sort.each {|x| require x }
 
 desc "retrieve example code from README"
 task :examples => "readme:retrieve"
