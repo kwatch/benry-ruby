@@ -29,7 +29,7 @@
 <ul>
 <li>Easy to define configuration for environments (production, development, ...).</li>
 <li>Raises error when configuration name is wrong (typo).</li>
-<li>Represents secret configurations which should be set by environment var or in private file.</li>
+<li>Represents secret configurations which should be set by environment var or in secret file.</li>
 </ul>
 <p>Links:</p>
 <ul>
@@ -62,8 +62,8 @@
   <strong>add</strong> :session_cookie   , "sess"
   <strong>add</strong> :session_secret   , <strong>SECRET</strong>
   ## or:
-  #<strong>add</strong> :db_pass         , <strong>ABSTRACT['DB_PASS']</strong>    # get value from ENV
-  #<strong>add</strong> :session_secret  , <strong>SECRET['SESS_SECRET']</strong>  # get secret value from ENV
+  #add :db_pass         , <strong>ABSTRACT['DB_PASS']</strong>    # get value from ENV
+  #add :session_secret  , <strong>SECRET['SESS_SECRET']</strong>  # get secret value from ENV
 end
 </pre>
 <p>File: config/app_dev.rb (for development environment)</p>
@@ -89,7 +89,7 @@ require_relative './app'
   <strong>set</strong> :db_name          , "prod1"        #=&gt; <strong>Benry::ConfigError (not defined)</strong>
 end
 </pre>
-<p>File: config/app.private (should be ignored by `.gitignore`)</p>
+<p>File: config/app.secret (should be ignored by `.gitignore`)</p>
 <pre class="language-ruby">
 ## this file should be ignored by '.gitignore', and
 ## file permission should be `600`.
@@ -103,9 +103,9 @@ end
 app_env = ENV['APP_ENV']  or raise "$APP_ENV required."
 <strong>require "./config/app.rb"</strong>                # define AppConfigBase class
 <strong>require "./config/app_#{app_env}.rb"</strong>     # define AppConfig class
-<strong>load    "./config/app.private"</strong>           # modify AppConfig class
+<strong>load    "./config/app.secret"</strong>            # modify AppConfig class
 ## or:
-#load   "./config/app.#{app_env}.private"
+#load   "./config/app.#{app_env}.secret"
 
 ## create a config object
 <strong>$config = AppConfig.new.freeze</strong>
