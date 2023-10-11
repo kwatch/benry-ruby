@@ -2,7 +2,7 @@
 
 ###
 ### $Release: 0.0.0 $
-### $Copyright: copyright(c) 2016 kuwata-lab.com all rights reserved $
+### $Copyright: copyright(c) 2016 kwatch@gmail.com $
 ### $License: MIT License $
 ###
 
