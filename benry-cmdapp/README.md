@@ -2498,4 +2498,4 @@ License and Copyright
 
 $License: MIT License $
 
-$Copyright: copyright(c) 2023 kuwata-lab.com all rights reserved $
+$Copyright: copyright(c) 2023 kwatch@gmail.com $
