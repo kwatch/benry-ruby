@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#fafafa">
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <title></title>
+  <link rel="stylesheet" href="lib/sanitize.css/2.0.0/sanitize.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+<section class="chapter" id="benry-config">
+<h1>Benry-Config</h1>
+<nav class="nav">
+  <ul class="nav">
+  </ul>
+</nav>
+<p>($Release: 0.0.0 $)</p>
+<section class="section" id="whats-this">
+<h2>What's this?</h2>
+<p>Utility class to support configuration.</p>
+<p>Features:</p>
+<ul>
+<li>Easy to define configuration for environments (production, development, ...).</li>
+<li>Raises error when configuration name is wrong (typo).</li>
+<li>Represents secret configurations which should be set by environment var or in private file.</li>
+</ul>
+<p>Links:</p>
+<ul>
+<li>Document: <a href="https://kwatch.github.io/benry-ruby/benry-config.html">https://kwatch.github.io/benry-ruby/benry-config.html</a></li>
+<li>GitHub: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-config">https://github.com/kwatch/benry-ruby/tree/main/benry-config</a></li>
+<li>Changes: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-config/CHANGES.md">https://github.com/kwatch/benry-ruby/tree/main/benry-config/CHANGES.md</a></li>
+</ul>
+<section class="subsection" id="table-of-contents">
+<h3>Table of Contents</h3>
+<div class="toc">
+<ul>
+<li><a href="#whats-this">What's this?</a></li>
+<li><a href="#example">Example</a></li>
+<li><a href="#copyright-and-license">Copyright and License</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section class="section" id="example">
+<h2>Example</h2>
+<p>File: config/app.rb</p>
+<pre class="language-ruby">
+<strong>require 'benry/config'</strong>
+
+<strong>class AppConfigBase &lt Benry::BaseConfig</strong>
+  ## add names and values
+  <strong>add</strong> :db_host          , "localhost"
+  <strong>add</strong> :db_user          , "user1"
+  <strong>add</strong> :db_pass          , <strong>ABSTRACT</strong>       # should be set value in subclass
+  <strong>add</strong> :session_cookie   , "sess"
+  <strong>add</strong> :session_secret   , <strong>SECRET</strong>
+  ## or:
+  #<strong>add</strong> :db_pass         , <strong>ABSTRACT['DB_PASS']</strong>    # get value from ENV
+  #<strong>add</strong> :session_secret  , <strong>SECRET['SESS_SECRET']</strong>  # get secret value from ENV
+end
+</pre>
+<p>File: config/app_dev.rb (for development environment)</p>
+<pre class="language-ruby">
+require_relative './app'
+
+## for development environment
+<strong>class AppConfig &lt AppConfigBase</strong>
+  ## set (= override) existing values
+  <strong>set</strong> :db_pass          , "pass1"        # set ABSTRACT value
+end
+</pre>
+<p>File: config/app_prod.rb (for production environment)</p>
+<pre class="language-ruby">
+require_relative './app'
+
+## for production environment
+<strong>class AppConfig &lt AppConfigBase</strong>
+  ## set (= override) existing values
+  <strong>set</strong> :db_host          , "db-master"    # override existing value
+  <strong>set</strong> :db_pass          , "passXXX"      # set ABSTRACT value
+  ## error because `:db_name` is not defined in paremnt class.
+  <strong>set</strong> :db_name          , "prod1"        #=&gt; <strong>Benry::ConfigError (not defined)</strong>
+end
+</pre>
+<p>File: config/app.private (should be ignored by `.gitignore`)</p>
+<pre class="language-ruby">
+## this file should be ignored by '.gitignore', and
+## file permission should be `600`.
+<strong>AppConfig.class_eval do</strong>
+  <strong>set</strong> :session_secret   , "YRjCIAiPlCBvwLUq5mnZ"  # set SECRET value
+end
+</pre>
+<p>File: main.rb</p>
+<pre class="language-ruby">
+## load config files
+app_env = ENV['APP_ENV']  or raise "$APP_ENV required."
+<strong>require "./config/app.rb"</strong>                # defines BaseConfig class
+<strong>require "./config/app_#{app_env}.rb"</strong>     # defines Config class
+<strong>load    "./config/app.private"</strong>
+## or:
+#load   "./config/app.#{app_env}.private"
+
+## create a config object
+<strong>$config = AppConfig.new.freeze</strong>
+#
+p $config.db_user             #=&gt; "user1"
+p $config.db_pass             #=&gt; "pass1"
+p $config.session_cookie      #=&gt; "sess"
+p $config.session_secret      #=&gt; "YRjCIAiPlCBvwLUq5mnZ"
+#
+p <strong>$config.defined?</strong>(:db_user)  #=&gt; true
+p <strong>$config.defined?</strong>(:db_pass)  #=&gt; true
+p <strong>$config.defined?</strong>(:db_name)  #=&gt; false
+#
+p <strong>$config.get_all(:db_)</strong>       #=&gt; {:host=&gt;"localhost", :user=&gt;"user1", :pass=&gt;"pass1"}
+p <strong>$config.get_all(:session_)</strong>  #=&gt; {:cookie=&gt;"sess", :secret=&gt;"YRjCIAiPlCBvwLUq5mnZ"}
+#
+<strong>$config.each</strong>  {|k, v| puts "#{k}=#{v.inspect}" }   # hide secret values as "(secret)"
+<strong>$config.each!</strong> {|k, v| puts "#{k}=#{v.inspect}" }   # not hide secret values
+</pre>
+</section>
+<section class="section" id="copyright-and-license">
+<h2>Copyright and License</h2>
+<ul>
+<li>$Copyright: copyright(c) 2016 kwatch@gmail.com $</li>
+<li>$License: MIT License $</li>
+</ul>
+</section>
+</section>
+</main>
+</body>
+</html>
