@@ -926,19 +926,19 @@ END
         ok {sout} == "Ciao, Alice!\n"
       end
 
-      spec "[!6mlol] reports error if action requries argument but nothing specified." do
+      spec "[!6mlol] error if action requries argument but nothing specified." do
         pr = proc { @app.run("test-arity1") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
                        "test-arity1: Argument required.")
       end
 
-      spec "[!72jla] reports error if action requires N args but specified less than N args." do
+      spec "[!72jla] error if action requires N args but specified less than N args." do
         pr = proc { @app.run("test-arity1", "foo") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
                        "test-arity1: Too less arguments (at least 2).")
       end
 
-      spec "[!zawxe] reports error if action requires N args but specified over than N args." do
+      spec "[!zawxe] error if action requires N args but specified over than N args." do
         pr = proc { @app.run("test-arity1", "foo", "bar", "baz", "boo") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
                        "test-arity1: Too much arguments (at most 3).")
@@ -1009,7 +1009,7 @@ Actions:
 END
       end
 
-      spec "[!4qs7y] shows private (hidden) actions if '--all' option specified." do
+      spec "[!4qs7y] shows private (hidden) actions/options if '--all' option specified." do
         class HiddenTest < Benry::CmdApp::ActionScope
           private
           @action.("hidden test")

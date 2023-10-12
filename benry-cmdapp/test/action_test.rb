@@ -492,7 +492,7 @@ END
 
     topic '.inherited()' do
 
-      spec "[!f826w] registers all subclasses into 'Action::SUBCLASSES'." do
+      spec "[!f826w] registers all subclasses into 'ActionScope::SUBCLASSES'." do
         class InheritedTest0a < Benry::CmdApp::ActionScope
         end
         class InheritedTest0b < Benry::CmdApp::ActionScope
@@ -689,7 +689,7 @@ END
                        "def hello5(): Action 'added5:hello5' already exist.")
       end
 
-      topic '[!5e5o0] when method name is same as default action name...' do
+      case_when '[!5e5o0] when method name is same as default action name...' do
 
         spec "[!myj3p] uses prefix name (expect last char ':') as action name." do
           new_names, x = defined_actions() do
@@ -724,7 +724,7 @@ END
 
       end
 
-      topic '[!agpwh] else...' do
+      case_else '[!agpwh] else...' do
 
         spec "[!3icc4] uses method name as action name." do
           new_names, x = defined_actions() do
