@@ -1,8 +1,8 @@
-Benry::CmdApp CHANGES
-=====================
+CHANGES
+=======
 
 
-Release 1.0.0 (????-??-??)
+Release 0.1.0 (2023-10-12)
 --------------------------
 
 * The first public release.
