@@ -9,7 +9,7 @@ require_relative './shared'
 Oktest.scope do
 
 
-  topic Benry::CmdApp::Index do
+  topic Benry::CmdApp::ActionIndex do
     include CommonTestingHelper
 
     class IndexTestAction < Benry::CmdApp::ActionScope

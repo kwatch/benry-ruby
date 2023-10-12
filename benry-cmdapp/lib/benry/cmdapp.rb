@@ -140,7 +140,7 @@ module Benry::CmdApp
   end
 
 
-  class Index
+  class ActionIndex
 
     def initialize()
       @actions   = {}   # {action_name => ActionMetadata}
@@ -259,7 +259,7 @@ module Benry::CmdApp
   end
 
 
-  INDEX = Index.new
+  INDEX = ActionIndex.new
 
 
   def self.delete_action(action_name)
