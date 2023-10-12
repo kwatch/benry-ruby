@@ -94,8 +94,8 @@ module Benry
 
       def inspect()
         #; [!g2iwe] represents internal data.
-        s = args.collect {|arg| arg.inspect }.join(", ")
-        return "#{obj.inspect}.#{name}(#{s}) #=> #{ret.inspect}"
+        s = @args.collect {|arg| arg.inspect }.join(", ")
+        return "#{@obj.inspect}.#{@name}(#{s}) #=> #{@ret.inspect}"
       end
 
     end
