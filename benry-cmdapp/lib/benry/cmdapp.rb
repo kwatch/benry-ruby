@@ -576,7 +576,7 @@ module Benry::CmdApp
 
   class ActionScope
 
-    def run_once(action_name, *args, **kwargs)
+    def run_action_once(action_name, *args, **kwargs)
       #; [!oh8dc] don't invoke action if already invoked.
       return __run_action(action_name, true, args, kwargs)
     end
