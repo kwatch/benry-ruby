@@ -6,23 +6,25 @@ Gem::Specification.new do |spec|
   spec.author          = "kwatch"
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
-  spec.homepage        = "https://github.com/kwatch/benry-ruby/tree/main/benry-cmdapp"
+  spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-cmdapp.html"
   spec.summary         = "Command-line application framework`"
   spec.description     = <<-"END"
-Benry::CmdApp is a framework to create command-line application
+Benry-CmdApp is a framework to create command-line application
 like `git`, `docker`, or `npm` commands.
 
-If you want create command-line application which takes sub-commands,
-Benry::CmdApp is the solution.
+If you want create a command-line application which takes sub-commands,
+Benry-CmdApp is the solution.
 
-See #{spec.homepage}#readme for details.
+See #{spec.homepage} for details.
 END
   spec.license         = "MIT"
   spec.files           = Dir[
                            "README.md", "MIT-LICENSE", "CHANGES.md",
-                           "Rakefile.rb", "#{spec.name}.gemspec",
-                           "lib/**/*.rb", "test/**/*.rb", "task/**/*.rb",
-                           #"bin/*", "doc/**/*", "examples/**/*",
+                           "#{spec.name}.gemspec",
+                           #"Rakefile.rb", "task/**/*.rb",,
+                           "lib/**/*.rb", "test/**/*.rb",
+                           #"bin/*", "examples/**/*",
+                           "doc/*.html", "doc/css/*.css",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
