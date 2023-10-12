@@ -89,7 +89,8 @@ task :edit do
 end
 
 def do_edit()
-  target_files().each do |fname|
+  filenames = target_files() + Dir.glob("doc/*.mdx")
+  filenames.each do |fname|
     edit_file!(fname)
   end
 end
@@ -100,7 +101,7 @@ def target_files()
     spec = eval spec_src
     spec.name == PROJECT  or
       abort "** ERROR: '#{PROJECT}' != '#{spec.name}' (project name in gemspec file)"
-    spec.files + Dir.glob("doc/*.mdx")
+    spec.files
   end
   return $_target_files
 end
