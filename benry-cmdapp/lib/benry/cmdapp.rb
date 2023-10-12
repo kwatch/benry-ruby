@@ -574,7 +574,7 @@ module Benry::CmdApp
   ACTION_HELP_BUILDER_CLASS = ActionHelpBuilder
 
 
-  class Action
+  class ActionScope
 
     def run_action_once(action_name, *args, **kwargs)
       #; [!oh8dc] don't invoke action if already invoked.
@@ -626,7 +626,7 @@ module Benry::CmdApp
     SUBCLASSES = []
 
     def self.inherited(subclass)
-      #; [!f826w] registers all subclasses into 'Action::SUBCLASSES'.
+      #; [!f826w] registers all subclasses into 'ActionScope::SUBCLASSES'.
       SUBCLASSES << subclass
       #; [!2imrb] sets class instance variables in subclass.
       subclass.instance_eval do
@@ -730,7 +730,10 @@ module Benry::CmdApp
   end
 
 
-  class BuiltInAction < Action
+  Action = ActionScope
+
+
+  class BuiltInAction < ActionScope
 
     @action.("print help message (of action)")
     @option.(:all, "-a, --all", "show private (hidden) options, too")
@@ -1142,7 +1145,7 @@ module Benry::CmdApp
     def do_validate_actions(_args, _global_opts)
       #; [!6xhvt] reports warning at end of help message.
       nl = "\n"
-      Action::SUBCLASSES.each do |klass|
+      ActionScope::SUBCLASSES.each do |klass|
         #; [!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist.
         alias_of = klass.instance_variable_get(:@__aliasof__)
         if alias_of

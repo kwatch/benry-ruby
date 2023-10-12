@@ -235,7 +235,7 @@ END
 
     topic '#build_help_message()' do
 
-      class HelpMessageTest < Benry::CmdApp::Action
+      class HelpMessageTest < Benry::CmdApp::ActionScope
         @action.("greeting #1")
         def yo_yo()
         end
@@ -656,7 +656,7 @@ END
 
     topic '#build_aliases()' do
 
-      class BuildAliasTest < Benry::CmdApp::Action
+      class BuildAliasTest < Benry::CmdApp::ActionScope
         prefix "help25"
         @action.("test #1")
         def test1; end

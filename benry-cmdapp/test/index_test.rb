@@ -12,7 +12,7 @@ Oktest.scope do
   topic Benry::CmdApp::Index do
     include CommonTestingHelper
 
-    class IndexTestAction < Benry::CmdApp::Action
+    class IndexTestAction < Benry::CmdApp::ActionScope
       @action.("lookup test #1")
       @option.(:repeat, "-r <N>", "repeat", type: Integer)
       def lookup1(user="world", repeat: nil); end
@@ -133,7 +133,7 @@ Oktest.scope do
     topic '#delete_action()' do
 
       spec "[!08e1s] unregisters action." do
-        class DeleteActionTest < Benry::CmdApp::Action
+        class DeleteActionTest < Benry::CmdApp::ActionScope
           @action.("test")
           def delaction1(); end
         end
@@ -157,7 +157,7 @@ Oktest.scope do
     topic '#delete_alias()' do
 
       spec "[!8ls45] unregisters alias." do
-        class DeleteAliasTest < Benry::CmdApp::Action
+        class DeleteAliasTest < Benry::CmdApp::ActionScope
           @action.("test")
           def delalias1(); end
         end

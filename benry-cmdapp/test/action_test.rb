@@ -14,7 +14,7 @@ Oktest.scope do
     #include CommonTestingHelper         # not work. why?
     include ActionMetadataTestingHelper
 
-    class MetadataTestAction < Benry::CmdApp::Action
+    class MetadataTestAction < Benry::CmdApp::ActionScope
 
       @action.("print greeting message")
       @option.(:lang, "-l, --lang=<en|fr|it>", "language")
@@ -57,7 +57,7 @@ Oktest.scope do
 
     topic '#hidden?()' do
 
-      class HiddenTestAction < Benry::CmdApp::Action
+      class HiddenTestAction < Benry::CmdApp::ActionScope
         @action.("public")
         def pphidden1(); puts __method__(); end
         #
@@ -292,7 +292,7 @@ END
 
     topic '#run_action()' do
 
-      class ActionWithArgsTest < Benry::CmdApp::Action
+      class ActionWithArgsTest < Benry::CmdApp::ActionScope
         @action.("hello")
         @option.(:lang, "-l <lang>", "language")
         @option.(:repeat, "-r <N>", "repeat <N> times")
@@ -326,10 +326,10 @@ END
   end
 
 
-  topic Benry::CmdApp::Action do
+  topic Benry::CmdApp::ActionScope do
 
 
-    class InvokeTestAction < Benry::CmdApp::Action
+    class InvokeTestAction < Benry::CmdApp::ActionScope
       prefix "test3:foo"
       #
       @action.("invoke once")
@@ -351,7 +351,7 @@ END
       end
     end
 
-    class LoopedActionTest < Benry::CmdApp::Action
+    class LoopedActionTest < Benry::CmdApp::ActionScope
       @action.("test")
       def loop1()
         run_action_once("loop2")
@@ -462,7 +462,7 @@ END
     topic '.prefix()' do
 
       spec "[!1gwyv] converts symbol into string." do
-        class PrefixTest1 < Benry::CmdApp::Action
+        class PrefixTest1 < Benry::CmdApp::ActionScope
           prefix :foo
         end
         prefix = PrefixTest1.instance_variable_get('@__prefix__')
@@ -471,7 +471,7 @@ END
 
       spec "[!pz46w] error if prefix contains extra '_'." do
         pr = proc do
-          class PrefixTest2 < Benry::CmdApp::Action
+          class PrefixTest2 < Benry::CmdApp::ActionScope
             prefix "foo_bar"
           end
         end
@@ -480,7 +480,7 @@ END
       end
 
       spec "[!9pu01] adds ':' at end of prefix name if prefix not end with ':'." do
-        class PrefixTest3 < Benry::CmdApp::Action
+        class PrefixTest3 < Benry::CmdApp::ActionScope
           prefix "foo:bar"
         end
         prefix = PrefixTest3.instance_variable_get('@__prefix__')
@@ -493,23 +493,23 @@ END
     topic '.inherited()' do
 
       spec "[!f826w] registers all subclasses into 'Action::SUBCLASSES'." do
-        class InheritedTest0a < Benry::CmdApp::Action
+        class InheritedTest0a < Benry::CmdApp::ActionScope
         end
-        class InheritedTest0b < Benry::CmdApp::Action
+        class InheritedTest0b < Benry::CmdApp::ActionScope
         end
-        ok {Benry::CmdApp::Action::SUBCLASSES}.include?(InheritedTest0a)
-        ok {Benry::CmdApp::Action::SUBCLASSES}.include?(InheritedTest0b)
+        ok {Benry::CmdApp::ActionScope::SUBCLASSES}.include?(InheritedTest0a)
+        ok {Benry::CmdApp::ActionScope::SUBCLASSES}.include?(InheritedTest0b)
       end
 
       spec "[!2imrb] sets class instance variables in subclass." do
-        class InheritedTest1 < Benry::CmdApp::Action
+        class InheritedTest1 < Benry::CmdApp::ActionScope
         end
         ivars = InheritedTest1.instance_variables().sort()
         ok {ivars} == [:@__action__, :@__aliasof__, :@__default__, :@__option__, :@__prefix__, :@action, :@copy_options, :@option]
       end
 
       spec "[!1qv12] @action is a Proc object and saves args." do
-        class InheritedTest2 < Benry::CmdApp::Action
+        class InheritedTest2 < Benry::CmdApp::ActionScope
           @action.("description", detail: "xxx", postamble: "yyy", important: true, tag: "zzz")
         end
         x = InheritedTest2.instance_variable_get('@__action__')
@@ -517,7 +517,7 @@ END
       end
 
       spec "[!33ma7] @option is a Proc object and saves args." do
-        class InheritedTest3 < Benry::CmdApp::Action
+        class InheritedTest3 < Benry::CmdApp::ActionScope
           @action.("description", detail: "xxx", postamble: "yyy")
           @option.(:xx, "-x, --xxx=<N>", "desc 1", type: Integer, rexp: /\A\d+\z/, enum: [2,4,8], range: (2..8))
           @option.(:yy, "-y, --yyy[=<on|off>]", "desc 2", type: TrueClass, value: false)
@@ -546,7 +546,7 @@ END
 
       spec "[!gxybo] '@option.()' raises error when '@action.()' not called." do
         pr = proc do
-          class InheritedTest4 < Benry::CmdApp::Action
+          class InheritedTest4 < Benry::CmdApp::ActionScope
             @option.(:xx, "-x, --xxx=<N>", "desc 1")
           end
         end
@@ -556,7 +556,7 @@ END
 
       spec "[!ga6zh] '@option.()' raises error when invalid option info specified." do
         pr = proc do
-          class InheritedTest20 < Benry::CmdApp::Action
+          class InheritedTest20 < Benry::CmdApp::ActionScope
             @action.("test")
             @option.(:xx, "-x, --xxx=<N>", "desc 1", range: (2..8))
             def hello(xx: nil)
@@ -568,7 +568,7 @@ END
       end
 
       spec "[!yrkxn] @copy_options is a Proc object and copies options from other action." do
-        class InheritedTest5 < Benry::CmdApp::Action
+        class InheritedTest5 < Benry::CmdApp::ActionScope
           @action.("copy src")
           @option.(:xxx, "-x, --xxx=<arg>", "xxx #1")
           def optcopy1(xxx: nil)
@@ -592,7 +592,7 @@ END
 
       spec "[!mhhn2] '@copy_options.()' raises error when action not found." do
         pr = proc do
-          class InheritedTest6 < Benry::CmdApp::Action
+          class InheritedTest6 < Benry::CmdApp::ActionScope
             @action.("copy")
             @copy_options.("optcopy99")
             def copytest2(yyy: nil)
@@ -619,7 +619,7 @@ END
 
       spec "[!idh1j] do nothing if '@__action__' is nil." do
         new_names, x = defined_actions() do
-          class Added1Test < Benry::CmdApp::Action
+          class Added1Test < Benry::CmdApp::ActionScope
             prefix "added1"
             def hello1(); end
           end
@@ -630,7 +630,7 @@ END
 
       spec "[!ernnb] clears both '@__action__' and '@__option__'." do
         new_names, x = defined_actions() do
-          class Added2Test < Benry::CmdApp::Action
+          class Added2Test < Benry::CmdApp::ActionScope
             @action.("test", detail: "XXX", postamble: "YYY")
             @option.(:foo, "--foo", "foo")
           end
@@ -646,7 +646,7 @@ END
 
       spec "[!n8tem] creates ActionMetadata object if '@__action__' is not nil." do
         new_names, x = defined_actions() do
-          class Added3Test < Benry::CmdApp::Action
+          class Added3Test < Benry::CmdApp::ActionScope
             prefix "added3"
             @action.("test", detail: "XXX", postamble: "YYY")
             def hello3(); end
@@ -664,7 +664,7 @@ END
 
       spec "[!4pbsc] raises error if keyword param for option not exist in method." do
         pr = proc do
-          class Added4Test < Benry::CmdApp::Action
+          class Added4Test < Benry::CmdApp::ActionScope
             prefix "added4"
             @action.("test")
             @option.(:flag, "--flag=<on|off>", nil, type: TrueClass)
@@ -677,7 +677,7 @@ END
 
       spec "[!t8vbf] raises error if action name duplicated." do
         pr = proc do
-          class Added5Test < Benry::CmdApp::Action
+          class Added5Test < Benry::CmdApp::ActionScope
             prefix "added5"
             @action.("test")
             def hello5(xx: nil); end
@@ -693,7 +693,7 @@ END
 
         spec "[!myj3p] uses prefix name (expect last char ':') as action name." do
           new_names, x = defined_actions() do
-            class Added6Test < Benry::CmdApp::Action
+            class Added6Test < Benry::CmdApp::ActionScope
               prefix "added6", action: :hello6
               @action.("test")
               def hello6(); end
@@ -705,7 +705,7 @@ END
         end
 
         spec "[!j5oto] clears '@__default__'." do
-          class ClearDefaultTest1 < Benry::CmdApp::Action
+          class ClearDefaultTest1 < Benry::CmdApp::ActionScope
             prefix "cleardefault1", action: :test2_   # symbol
             @__default__ != nil  or
               raise MiniTest::Assertion, "@__default__ should NOT be nil"
@@ -728,7 +728,7 @@ END
 
         spec "[!3icc4] uses method name as action name." do
           new_names, x = defined_actions() do
-            class Added7Test < Benry::CmdApp::Action
+            class Added7Test < Benry::CmdApp::ActionScope
               @action.("test")
               def hello7xx(); end
             end
@@ -740,7 +740,7 @@ END
 
         spec "[!c643b] converts action name 'aa_bb_cc_' into 'aa_bb_cc'." do
           new_names, x = defined_actions() do
-            class Added8Test < Benry::CmdApp::Action
+            class Added8Test < Benry::CmdApp::ActionScope
               @action.("test")
               def hello8xx_(); end
             end
@@ -752,7 +752,7 @@ END
 
         spec "[!3fkb3] converts action name 'aa__bb__cc' into 'aa:bb:cc'." do
           new_names, x = defined_actions() do
-            class Added9Test < Benry::CmdApp::Action
+            class Added9Test < Benry::CmdApp::ActionScope
               @action.("test")
               def hello9xx__yy__zz(); end
             end
@@ -764,7 +764,7 @@ END
 
         spec "[!o9s9h] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'." do
           new_names, x = defined_actions() do
-            class Added10Test < Benry::CmdApp::Action
+            class Added10Test < Benry::CmdApp::ActionScope
               @action.("test")
               def _hello10xx_yy_zz(); end
             end
@@ -776,7 +776,7 @@ END
 
         spec "[!8hlni] when action name is same as default name, uses prefix as action name." do
           new_names, x = defined_actions() do
-            class Added11Test < Benry::CmdApp::Action
+            class Added11Test < Benry::CmdApp::ActionScope
               prefix "added11", action: "hello11"
               @action.("test")
               def hello11(); end
@@ -788,7 +788,7 @@ END
         end
 
         spec "[!q8oxi] clears '@__default__' when default name matched to action name." do
-          class ClearDefaultTest2 < Benry::CmdApp::Action
+          class ClearDefaultTest2 < Benry::CmdApp::ActionScope
             prefix "cleardefault2", action: "test2"   # string
             @__default__ != nil  or
               raise MiniTest::Assertion, "@__default__ should NOT be nil"
@@ -807,7 +807,7 @@ END
 
         spec "[!xfent] when prefix is provided, adds it to action name." do
           new_names, x = defined_actions() do
-            class Added12Test < Benry::CmdApp::Action
+            class Added12Test < Benry::CmdApp::ActionScope
               prefix "added12"
               @action.("test")
               def hello12(); end
@@ -822,7 +822,7 @@ END
 
       spec "[!jpzbi] defines same name alias of action as prefix." do
         ## when symbol
-        class AliasOfTest1 < Benry::CmdApp::Action
+        class AliasOfTest1 < Benry::CmdApp::ActionScope
           prefix "blabla1", alias_of: :bla1    # symbol
           @action.("test")
           def bla1(); end
@@ -830,7 +830,7 @@ END
         ok {Benry::CmdApp::INDEX.get_alias("blabla1")} != nil
         ok {Benry::CmdApp::INDEX.get_alias("blabla1").action_name} == "blabla1:bla1"
         ## when string
-        class AliasOfTest2 < Benry::CmdApp::Action
+        class AliasOfTest2 < Benry::CmdApp::ActionScope
           prefix "bla:bla2", alias_of: "blala"    # string
           @action.("test")
           def blala(); end
@@ -840,7 +840,7 @@ END
       end
 
       spec "[!tvjb0] clears '@__aliasof__' only when alias created." do
-        class AliasOfTest3 < Benry::CmdApp::Action
+        class AliasOfTest3 < Benry::CmdApp::ActionScope
           prefix "bla:bla3", alias_of: "bla3b"    # string
           @__aliasof__ != nil  or
             raise MiniTest::Assertion, "@__aliasof__ should NOT be nil"
@@ -866,7 +866,7 @@ END
 
       spec "[!997gs] not raise error when action not found." do
         pr = proc do
-          class AliasOfTest4 < Benry::CmdApp::Action
+          class AliasOfTest4 < Benry::CmdApp::ActionScope
             prefix "blabla4", alias_of: :bla99     # action not exist
             @action.("test")
             def bla3(); end
@@ -881,11 +881,11 @@ END
 
       spec "[!349nr] raises error when same name action or alias with prefix already exists." do
         pr = proc do
-          class AliasOfTest5a < Benry::CmdApp::Action
+          class AliasOfTest5a < Benry::CmdApp::ActionScope
             @action.("test")
             def bla5(); end                    # define 'bla5' action
           end
-          class AliasOfTest5b < Benry::CmdApp::Action
+          class AliasOfTest5b < Benry::CmdApp::ActionScope
             prefix "bla5", alias_of: :blala    # define 'bla5' action, too
             @action.("test")
             def blala(); end
@@ -992,7 +992,7 @@ END
 
   topic Benry::CmdApp::Alias do
 
-    class Alias2Test < Benry::CmdApp::Action
+    class Alias2Test < Benry::CmdApp::ActionScope
       prefix "alias2"
       #
       @action.("alias test")
