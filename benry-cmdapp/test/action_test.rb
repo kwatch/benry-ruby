@@ -389,19 +389,19 @@ END
     end
 
 
-    topic '#run_action!()' do
+    topic '#run_action_anyway()' do
 
       spec "[!2yrc2] invokes action even if already invoked." do
         sout, serr = capture_sio() do
-          @action.run_action!("test3:foo:invoke3", "Alice", lang: "fr")
+          @action.run_action_anyway("test3:foo:invoke3", "Alice", lang: "fr")
         end
         ok {sout} == "Bonjour, Alice!\n"
         sout, serr = capture_sio() do
-          @action.run_action!("test3:foo:invoke3", "Alice", lang: "fr")
+          @action.run_action_anyway("test3:foo:invoke3", "Alice", lang: "fr")
         end
         ok {sout} == "Bonjour, Alice!\n"
         sout, serr = capture_sio() do
-          @action.run_action!("test3:foo:invoke3", "Alice", lang: "en")
+          @action.run_action_anyway("test3:foo:invoke3", "Alice", lang: "en")
         end
         ok {sout} == "Hello, Alice!\n"
       end

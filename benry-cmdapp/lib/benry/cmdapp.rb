@@ -581,7 +581,7 @@ module Benry::CmdApp
       return __run_action(action_name, true, args, kwargs)
     end
 
-    def run_action!(action_name, *args, **kwargs)
+    def run_action_anyway(action_name, *args, **kwargs)
       #; [!2yrc2] invokes action even if already invoked.
       return __run_action(action_name, false, args, kwargs)
     end
