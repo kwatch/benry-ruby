@@ -1471,6 +1471,12 @@ END
         ok {item.value} == 4
       end
 
+      spec "[!tu4k3] returns self." do
+        cmdopt = Benry::CmdOpt.new()
+        x = cmdopt.add(:version, "-v, --version", "version")
+        ok {x}.same?(cmdopt)
+      end
+
     end
 
 
@@ -1567,6 +1573,17 @@ END
           File.open(val) {|f| f.read }
         end
         @cmdopt.add(:debug, "-d, --debug[=<LEVEL>]", "debug", type: Integer)
+      end
+
+      spec "[!7gc2m] parses command options." do
+        args = ["-d", "x", "y"]
+        @cmdopt.parse(args)
+        ok {args} == ["x", "y"]
+      end
+
+      spec "[!no4xu] returns option values as dict." do
+        args = ["-d", "x"]
+        ok {@cmdopt.parse(args)} == {:debug=>true}
       end
 
       spec "[!areof] handles only OptionError when block given." do
