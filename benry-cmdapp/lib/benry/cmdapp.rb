@@ -730,6 +730,9 @@ module Benry::CmdApp
   end
 
 
+  Action = ActionScope
+
+
   class BuiltInAction < ActionScope
 
     @action.("print help message (of action)")
