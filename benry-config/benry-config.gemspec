@@ -16,10 +16,9 @@ END
   spec.license         = "MIT"
   spec.files           = Dir[
                            "README.md", "MIT-LICENSE", "CHANGES.md",
-                           "Rakefile.rb", "#{spec.name}.gemspec",
-                           "lib/**/*.rb", "test/**/*_test.rb", "task/**/*.rb",
-                           "examples/**/*.*", #"bin/*",
-                           "doc/*.html", "doc/css/*",
+                           "#{spec.name}.gemspec",
+                           "lib/**/*.rb", "test/**/*.rb", "examples/**/*", #"bin/*",
+                           "doc/*.html", "doc/css/*.css",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
