@@ -198,7 +198,7 @@ module Benry::CmdApp
       #; [!08e1s] unregisters action.
       #; [!zjpq0] raises error if action not registered.
       @actions.delete(action_name.to_s)  or
-        raise ActionNotFoundError.new("delete_action(#{action_name.inspect}): action not found.")
+        raise ActionNotFoundError.new("delete_action(#{action_name.inspect}): Action not found.")
     end
 
     def action_exist?(action_name)
@@ -241,7 +241,7 @@ module Benry::CmdApp
       #; [!8ls45] unregisters alias.
       #; [!fdfyq] raises error if alias not registered.
       @aliases.delete(alias_name.to_s)  or
-        raise ActionNotFoundError.new("delete_alias(#{alias_name.inspect}): alias not found.")
+        raise ActionNotFoundError.new("delete_alias(#{alias_name.inspect}): Alias not found.")
     end
 
     def get_alias(alias_name)
@@ -376,7 +376,7 @@ module Benry::CmdApp
       opt_keys = @schema.each.collect {|item| item.key }
       key = (opt_keys - kw_params).first
       return nil if key == nil
-      return "should have keyword parameter '#{key}' for '@option.(#{key.inspect})', but not."
+      return "Should have keyword parameter '#{key}' for '@option.(#{key.inspect})', but not."
     end
 
     def help_message(command, all=false)
@@ -594,11 +594,11 @@ module Benry::CmdApp
       prefix = self.class.instance_variable_get('@__prefix__')
       metadata = INDEX.lookup_action("#{prefix}#{action_name}") || \
                  INDEX.lookup_action(action_name)  or
-        raise ActionNotFoundError.new("#{action_name}: action not found.")
+        raise ActionNotFoundError.new("#{action_name}: Action not found.")
       name = metadata.name
       #; [!u8mit] raises error if action flow is looped.
       ! INDEX.action_doing?(name)  or
-          raise LoopedActionError.new("#{name}: looped action detected.")
+          raise LoopedActionError.new("#{name}: Action loop detected.")
       #; [!vhdo9] don't invoke action twice if 'once' arg is true.
       if INDEX.action_done?(name)
         return INDEX.action_result(name) if once
@@ -615,7 +615,7 @@ module Benry::CmdApp
       str = str.to_s
       #; [!pz46w] error if prefix contains extra '_'.
       str =~ /\A\w[-a-zA-Z0-9]*(:\w[-a-zA-Z0-9]*)*\z/  or
-        raise ActionDefError.new("#{str}: invalid prefix name (please use ':' or '-' instead of '_' as word separator).")
+        raise ActionDefError.new("#{str}: Invalid prefix name (please use ':' or '-' instead of '_' as word separator).")
       #; [!9pu01] adds ':' at end of prefix name if prefix not end with ':'.
       str += ':' unless str.end_with?(':')
       @__prefix__  = str
@@ -643,7 +643,7 @@ module Benry::CmdApp
         @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &block|
           #; [!gxybo] '@option.()' raises error when '@action.()' not called.
           @__action__ != nil  or
-            raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` required but not called.")
+            raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` Required but not called.")
           schema = (@__option__ ||= SCHEMA_CLASS.new)
           #; [!ga6zh] '@option.()' raises error when invalid option info specified.
           begin
@@ -656,7 +656,7 @@ module Benry::CmdApp
         @copy_options = proc do |action_name, except: nil|
           #; [!mhhn2] '@copy_options.()' raises error when action not found.
           metadata = INDEX.get_action(action_name)  or
-            raise OptionDefError.new("@copy_options.(#{action_name.inspect}): action not found.")
+            raise OptionDefError.new("@copy_options.(#{action_name.inspect}): Action not found.")
           @__option__ ||= SCHEMA_CLASS.new
           @__option__.copy_from(metadata.schema, except: except)
         end
@@ -679,7 +679,7 @@ module Benry::CmdApp
         raise ActionDefError.new("def #{method}(): #{errmsg}")
       #; [!t8vbf] raises error if action name duplicated.
       ! INDEX.action_exist?(name)  or
-        raise ActionDefError.new("def #{method}(): action '#{name}' already exist.")
+        raise ActionDefError.new("def #{method}(): Action '#{name}' already exist.")
       INDEX.register_action(name, metadata)
       #; [!jpzbi] defines same name alias of action as prefix.
       #; [!997gs] not raise error when action not found.
@@ -739,7 +739,7 @@ module Benry::CmdApp
       #; [!jfgsy] prints help message of action if action name specified.
       if action_name
         action_metadata = INDEX.get_action(action_name)  or
-          raise ActionNotFoundError.new("#{action}: action not found.")
+          raise ActionNotFoundError.new("#{action}: Action not found.")
         help_builder = ACTION_HELP_BUILDER_CLASS.new(action_metadata)
         config = $cmdapp_config
         msg = help_builder.build_help_message(config.app_command, all)
@@ -764,13 +764,13 @@ module Benry::CmdApp
     action_ = action_name.to_s
     #; [!nrz3d] error if action not found.
     INDEX.action_exist?(action_)  or
-      raise AliasDefError.new("#{invocation}: action not found.")
+      raise AliasDefError.new("#{invocation}: Action not found.")
     #; [!vvmwd] error when action with same name as alias exists.
     ! INDEX.action_exist?(alias_)  or
-      raise AliasDefError.new("#{invocation}: not allowed to define same name alias as existing action.")
+      raise AliasDefError.new("#{invocation}: Not allowed to define same name alias as existing action.")
     #; [!i9726] error if alias already defined.
     ! INDEX.alias_exist?(alias_)  or
-      raise AliasDefError.new("#{invocation}: alias name duplicated.")
+      raise AliasDefError.new("#{invocation}: Alias name duplicated.")
     #; [!vzlrb] registers alias name with action name.
     #; [!0cq6o] supports args.
     #; [!4wtxj] supports 'tag:' keyword arg.
@@ -1074,20 +1074,20 @@ module Benry::CmdApp
         action_name = args.shift()
         #; [!vl0zr] error when action not found.
         metadata = INDEX.lookup_action(action_name)  or
-          raise CommandError.new("#{action_name}: unknown action.")
+          raise CommandError.new("#{action_name}: Unknown action.")
       #; [!gucj7] if no action specified, finds default action instead.
       elsif c.default_action
         action_name = c.default_action
         #; [!388rs] error when default action not found.
         metadata = INDEX.lookup_action(action_name)  or
-          raise CommandError.new("#{action_name}: unknown default action.")
+          raise CommandError.new("#{action_name}: Unknown default action.")
       #; [!drmls] returns nil if no action specified but 'config.default_help' is set.
       elsif c.default_help
         #do_print_help_message([])
         return nil
       #; [!hs589] error when action nor default action not specified.
       else
-        raise CommandError.new("#{c.app_command}: action name required (run `#{c.app_command} -h` for details).")
+        raise CommandError.new("#{c.app_command}: Action name required (run `#{c.app_command} -h` for details).")
       end
       return metadata
     end
@@ -1103,10 +1103,10 @@ module Benry::CmdApp
       min, max = metadata.method_arity()
       n = args.length
       if n < min
-        raise CommandError.new("#{action_name}: argument required.") if n == 0
-        raise CommandError.new("#{action_name}: too less arguments (at least #{min}).")
+        raise CommandError.new("#{action_name}: Argument required.") if n == 0
+        raise CommandError.new("#{action_name}: Too less arguments (at least #{min}).")
       elsif max && max < n
-        raise CommandError.new("#{action_name}: too much arguments (at most #{max}).")
+        raise CommandError.new("#{action_name}: Too much arguments (at most #{max}).")
       end
       #; [!cf45e] runs action with arguments and options.
       #; [!tsal4] detects looped action.
@@ -1125,7 +1125,7 @@ module Benry::CmdApp
       if action_name
         #; [!cgxkb] error if action for help option not found.
         metadata = INDEX.lookup_action(action_name)  or
-          raise CommandError.new("#{action_name}: action not found.")
+          raise CommandError.new("#{action_name}: Action not found.")
         msg = metadata.help_message(@config.app_command, all)
       #; [!nv0x3] prints help message of command if action name not provided.
       else
