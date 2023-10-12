@@ -807,6 +807,7 @@ class Main
     toc = "<!-- TOC -->\n\n#{toc}\n<!-- /TOC -->\n"
     str = str.gsub(/^ *<!-- TOC\/? -->\n/, toc)
     str = str.gsub(/^(##*)\* /, '\\1 ')
+    str = str.gsub(/^(==*)\*? /) { '#' * $1.length + " " }
     edit = proc {|s| s.gsub(/``/, '`') }
     sb = []
     pos = 0
