@@ -148,7 +148,7 @@ Oktest.scope do
         ok {Benry::CmdApp::INDEX.action_exist?(name)} == false
         pr = proc { Benry::CmdApp::INDEX.delete_action(name) }
         ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError,
-                       "delete_action(\"delaction99\"): action not found.")
+                       "delete_action(\"delaction99\"): Action not found.")
       end
 
     end
@@ -173,7 +173,7 @@ Oktest.scope do
         ok {Benry::CmdApp::INDEX.alias_exist?(name)} == false
         pr = proc { Benry::CmdApp::INDEX.delete_alias(name) }
         ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError,
-                       "delete_alias(\"delalias99\"): alias not found.")
+                       "delete_alias(\"delalias99\"): Alias not found.")
       end
 
     end

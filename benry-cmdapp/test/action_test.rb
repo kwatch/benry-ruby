@@ -130,7 +130,7 @@ Oktest.scope do
       spec "[!56da8] raises InvalidOptionError if option value is invalid." do
         args = ["-x", "fr", "Alice"]
         pr = proc { @metadata.parse_options(args) }
-        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-x: unknown option.")
+        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-x: Unknown option.")
       end
 
     end
@@ -223,7 +223,7 @@ END
         schema.add(:foo, "--foo", "foo")
         metadata = Benry::CmdApp::ActionMetadata.new("halo1", MetadataTestAction, :halo1, "greeting", schema)
         msg = metadata.validate_method_params()
-        ok {msg} == "should have keyword parameter 'foo' for '@option.(:foo)', but not."
+        ok {msg} == "Should have keyword parameter 'foo' for '@option.(:foo)', but not."
       end
 
       spec "[!1koi8] returns nil if all keyword parameters for option exist." do
@@ -429,12 +429,12 @@ END
 
       spec "[!7vszf] raises error if action specified not found." do
         pr = proc { __run_action("loop9", nil, ["Alice"], {}) }
-        ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError, "loop9: action not found.")
+        ok {pr}.raise?(Benry::CmdApp::ActionNotFoundError, "loop9: Action not found.")
       end
 
       spec "[!u8mit] raises error if action flow is looped." do
         pr = proc { __run_loop("loop1", nil, [], {}) }
-        ok {pr}.raise?(Benry::CmdApp::LoopedActionError, "loop1: looped action detected.")
+        ok {pr}.raise?(Benry::CmdApp::LoopedActionError, "loop1: Action loop detected.")
       end
 
       spec "[!vhdo9] don't invoke action twice if 'once' arg is true." do
@@ -476,7 +476,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::ActionDefError,
-                       "foo_bar: invalid prefix name (please use ':' or '-' instead of '_' as word separator).")
+                       "foo_bar: Invalid prefix name (please use ':' or '-' instead of '_' as word separator).")
       end
 
       spec "[!9pu01] adds ':' at end of prefix name if prefix not end with ':'." do
@@ -551,7 +551,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::OptionDefError,
-                       "@option.(:xx): `@action.()` required but not called.")
+                       "@option.(:xx): `@action.()` Required but not called.")
       end
 
       spec "[!ga6zh] '@option.()' raises error when invalid option info specified." do
@@ -564,7 +564,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::OptionDefError,
-                       "2..8: range value should be String, but not.")
+                       "2..8: Range value should be String, but not.")
       end
 
       spec "[!yrkxn] @copy_options is a Proc object and copies options from other action." do
@@ -600,7 +600,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::OptionDefError,
-                       "@copy_options.(\"optcopy99\"): action not found.")
+                       "@copy_options.(\"optcopy99\"): Action not found.")
       end
 
     end
@@ -672,7 +672,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::ActionDefError,
-                       "def hello4(): should have keyword parameter 'flag' for '@option.(:flag)', but not.")
+                       "def hello4(): Should have keyword parameter 'flag' for '@option.(:flag)', but not.")
       end
 
       spec "[!t8vbf] raises error if action name duplicated." do
@@ -686,7 +686,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::ActionDefError,
-                       "def hello5(): action 'added5:hello5' already exist.")
+                       "def hello5(): Action 'added5:hello5' already exist.")
       end
 
       topic '[!5e5o0] when method name is same as default action name...' do
@@ -893,7 +893,7 @@ END
         end
         begin
           ok {pr}.raise?(Benry::CmdApp::AliasDefError,
-                         'action_alias("bla5", "bla5:blala"): not allowed to define same name alias as existing action.')
+                         'action_alias("bla5", "bla5:blala"): Not allowed to define same name alias as existing action.')
         ensure
           AliasOfTest5b.class_eval { @__aliasof__ = nil }
         end

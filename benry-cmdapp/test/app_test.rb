@@ -233,7 +233,7 @@ END
 
       spec "[!a7d4w] prints error message with '[ERROR]' prompt." do
         sout, serr = capture_sio { @app.main(["sayhello", "Alice", "Bob"]) }
-        ok {serr} == "\e[0;31m[ERROR]\e[0m sayhello: too much arguments (at most 1).\n"
+        ok {serr} == "\e[0;31m[ERROR]\e[0m sayhello: Too much arguments (at most 1).\n"
         ok {sout} == ""
       end
 
@@ -255,7 +255,7 @@ END
         ok {sout} == ""
         serr = serr.sub(/file: \/.*?test\//, 'file: test/')
         ok {serr} == <<"END"
-\e[0;31m[ERROR]\e[0m def err2(): should have keyword parameter 'foo' for '@option.(:foo)', but not.
+\e[0;31m[ERROR]\e[0m def err2(): Should have keyword parameter 'foo' for '@option.(:foo)', but not.
 \t\(file: test\/app_test\.rb, line: #{lineno})
 END
       end
@@ -295,7 +295,7 @@ END
         begin
           pr = proc { @app.main(["-D", "sayhello", "Alice", "Bob"]) }
           ok {pr}.raise?(Benry::CmdApp::CommandError,
-                         "sayhello: too much arguments (at most 1).")
+                         "sayhello: Too much arguments (at most 1).")
         ensure
           $DEBUG_MODE = bkup
         end
@@ -317,7 +317,7 @@ END
           ret = @app.main(["sayhello", "Alice", "Bob"])
         end
         ok {ret} == 1
-        ok {serr} == "\e[0;31m[ERROR]\e[0m sayhello: too much arguments (at most 1).\n"
+        ok {serr} == "\e[0;31m[ERROR]\e[0m sayhello: Too much arguments (at most 1).\n"
         ok {sout} == ""
       end
 
@@ -496,7 +496,7 @@ END
         @app.config.feat_candidate = false
         pr = proc { @app.run("candi:date5:") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "candi:date5:: unknown action.")
+                       "candi:date5:: Unknown action.")
         ## flag is off
         @app.config.feat_candidate = true
         sout, serr = capture_sio(tty: false) { @app.run("candi:date5:") }
@@ -536,7 +536,7 @@ END
       spec "[!agfdi] reports error when action not found." do
         pr = proc { @app.run("xxx-yyy") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "xxx-yyy: unknown action.")
+                       "xxx-yyy: Unknown action.")
       end
 
       spec "[!v5k56] runs default action if action not specified." do
@@ -550,7 +550,7 @@ END
         @config.default_action = "xxx-zzz"
         pr = proc { @app.run() }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "xxx-zzz: unknown default action.")
+                       "xxx-zzz: Unknown default action.")
       end
 
       spec "[!7h0ku] prints help if no action but 'config.default_help' is true." do
@@ -568,7 +568,7 @@ END
         @config.default_action = nil
         pr = proc { @app.run() }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "testapp: action name required (run `testapp -h` for details).")
+                       "testapp: Action name required (run `testapp -h` for details).")
       end
 
       spec "[!hk6iu] unsets $cmdapp_config at end." do
@@ -670,7 +670,7 @@ END
 
       spec "[!kklah] raises InvalidOptionError if global option value is invalid." do
         pr = proc { @app.run("-hoge", "test-globalopt") }
-        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-o: unknown option.")
+        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-o: Unknown option.")
       end
 
     end
@@ -883,7 +883,7 @@ END
       spec "[!vl0zr] error when action not found." do
         pr = proc { @app.__send__(:do_find_action, ["hiyo"], {}) }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "hiyo: unknown action.")
+                       "hiyo: Unknown action.")
       end
 
       spec "[!gucj7] if no action specified, finds default action instead." do
@@ -897,7 +897,7 @@ END
         @app.config.default_action = "hiyo"
         pr = proc { @app.__send__(:do_find_action, [], {}) }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "hiyo: unknown default action.")
+                       "hiyo: Unknown default action.")
       end
 
       spec "[!drmls] returns nil if no action specified but 'config.default_help' is set." do
@@ -912,7 +912,7 @@ END
         @app.config.default_help = false
         pr = proc { @app.__send__(:do_find_action, [], {}) }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "testapp: action name required (run `testapp -h` for details).")
+                       "testapp: Action name required (run `testapp -h` for details).")
       end
 
     end
@@ -929,19 +929,19 @@ END
       spec "[!6mlol] reports error if action requries argument but nothing specified." do
         pr = proc { @app.run("test-arity1") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "test-arity1: argument required.")
+                       "test-arity1: Argument required.")
       end
 
       spec "[!72jla] reports error if action requires N args but specified less than N args." do
         pr = proc { @app.run("test-arity1", "foo") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "test-arity1: too less arguments (at least 2).")
+                       "test-arity1: Too less arguments (at least 2).")
       end
 
       spec "[!zawxe] reports error if action requires N args but specified over than N args." do
         pr = proc { @app.run("test-arity1", "foo", "bar", "baz", "boo") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "test-arity1: too much arguments (at most 3).")
+                       "test-arity1: Too much arguments (at most 3).")
       end
 
       spec "[!y97o3] action can take any much args if action has variable arg." do
@@ -960,7 +960,7 @@ END
       spec "[!tsal4] detects looped action." do
         pr = proc { @app.run("test-loop1") }
         ok {pr}.raise?(Benry::CmdApp::LoopedActionError,
-                       "test-loop1: looped action detected.")
+                       "test-loop1: Action loop detected.")
       end
 
     end
@@ -986,7 +986,7 @@ END
         ["-h", "--help"].each do |opt|
           pr = proc { @app.run(opt, "xhello") }
           ok {pr}.raise?(Benry::CmdApp::CommandError,
-                         "xhello: action not found.")
+                         "xhello: Action not found.")
         end
       end
 
