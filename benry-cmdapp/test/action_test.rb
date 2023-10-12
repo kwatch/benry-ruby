@@ -130,7 +130,7 @@ Oktest.scope do
       spec "[!56da8] raises InvalidOptionError if option value is invalid." do
         args = ["-x", "fr", "Alice"]
         pr = proc { @metadata.parse_options(args) }
-        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-x: unknown option.")
+        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-x: Unknown option.")
       end
 
     end
@@ -564,7 +564,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::OptionDefError,
-                       "2..8: range value should be String, but not.")
+                       "2..8: Range value should be String, but not.")
       end
 
       spec "[!yrkxn] @copy_options is a Proc object and copies options from other action." do

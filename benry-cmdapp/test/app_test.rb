@@ -670,7 +670,7 @@ END
 
       spec "[!kklah] raises InvalidOptionError if global option value is invalid." do
         pr = proc { @app.run("-hoge", "test-globalopt") }
-        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-o: unknown option.")
+        ok {pr}.raise?(Benry::CmdApp::InvalidOptionError, "-o: Unknown option.")
       end
 
     end
