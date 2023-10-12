@@ -359,11 +359,11 @@ END
         #
         @action.("loop test")
         def test_loop1()
-          run_action_once("test-loop2")
+          run_once("test-loop2")
         end
         @action.("loop test")
         def test_loop2()
-          run_action_once("test-loop1")
+          run_once("test-loop1")
         end
       end
 

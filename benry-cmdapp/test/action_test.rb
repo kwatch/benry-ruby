@@ -354,15 +354,15 @@ END
     class LoopedActionTest < Benry::CmdApp::ActionScope
       @action.("test")
       def loop1()
-        run_action_once("loop2")
+        run_once("loop2")
       end
       @action.("test")
       def loop2()
-        run_action_once("loop3")
+        run_once("loop3")
       end
       @action.("test")
       def loop3()
-        run_action_once("loop1")
+        run_once("loop1")
       end
     end
 
@@ -372,15 +372,15 @@ END
     end
 
 
-    topic '#run_action_once()' do
+    topic '#run_once()' do
 
       spec "[!oh8dc] don't invoke action if already invoked." do
         sout, serr = capture_sio() do
-          @action.run_action_once("test3:foo:invoke2", "Alice", lang: "fr")
+          @action.run_once("test3:foo:invoke2", "Alice", lang: "fr")
         end
         ok {sout} == "Bonjour, Alice!\n"
         sout, serr = capture_sio() do
-          @action.run_action_once("test3:foo:invoke2", "Alice", lang: "fr")
+          @action.run_once("test3:foo:invoke2", "Alice", lang: "fr")
         end
         ok {sout} == ""
         ok {serr} == ""
@@ -422,7 +422,7 @@ END
 
       spec "[!lbp9r] invokes action name with prefix if prefix defined." do
         sout, serr = capture_sio() do
-          @action.run_action_once("invoke2", "Alice", lang: "fr")
+          @action.run_once("invoke2", "Alice", lang: "fr")
         end
         ok {sout} == "Bonjour, Alice!\n"
       end
