@@ -2,6 +2,13 @@ CHANGES
 =======
 
 
+Release 2.0.2 (2023-10-12)
+--------------------------
+
+* [change] remove unnecessary files from gem.
+* [bugfix] fix to add missing test cases.
+
+
 Release 2.0.1 (2023-10-11)
 --------------------------
 
