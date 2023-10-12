@@ -41,6 +41,8 @@ How to release:
   $ which ruby
   $ rake test
   $ rake test:all
+  $ specid diff lib test
+  $ chkruby lib/**/*.rb test/**/*.rb
   $ rake doc
   $ rake doc:export RELEASE=#{release}
   $ rake readme:execute			# optional
