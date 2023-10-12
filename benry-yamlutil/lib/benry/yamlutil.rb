@@ -145,8 +145,8 @@ module Benry
 
       def replace_self(root, value)
         d = root
-        key_path[0..-2].each {|k| d = d[k] }
-        d[key_path[-1]] = value
+        @key_path[0..-2].each {|k| d = d[k] }
+        d[@key_path[-1]] = value
       end
 
       def each   # called from Visitor#merge_mapping()
