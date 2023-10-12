@@ -15,7 +15,7 @@ Oktest.scope do
     topic '.delete_action()' do
 
       spec "[!era7d] deletes action." do
-        class DeleteAction2Test < Benry::CmdApp::Action
+        class DeleteAction2Test < Benry::CmdApp::ActionScope
           @action.("test")
           def delaction2(); end
         end
@@ -45,7 +45,7 @@ Oktest.scope do
     topic '.delete_alias()' do
 
       spec "[!9g0x9] deletes alias." do
-        class DeleteAlias2Test < Benry::CmdApp::Action
+        class DeleteAlias2Test < Benry::CmdApp::ActionScope
           @action.("test")
           def delalias2(); end
         end
@@ -72,7 +72,7 @@ Oktest.scope do
 
     topic '.action_alias()' do
 
-      class Alias1Test < Benry::CmdApp::Action
+      class Alias1Test < Benry::CmdApp::ActionScope
         prefix "alias1"
         @action.("alias test")
         def a1(); end

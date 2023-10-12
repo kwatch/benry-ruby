@@ -156,7 +156,7 @@ Oktest.scope do
   topic Benry::CmdApp::Application do
     include CommonTestingHelper
 
-    class AppTest < Benry::CmdApp::Action
+    class AppTest < Benry::CmdApp::ActionScope
       @action.("print greeting message")
       @option.(:lang, "-l, --lang=<en|fr|it>", "language")
       def sayhello(user="world", lang: "en")
@@ -238,7 +238,7 @@ END
       end
 
       spec "[!r7opi] prints filename and line number on where error raised if DefinitionError." do
-        class MainTest1 < Benry::CmdApp::Action
+        class MainTest1 < Benry::CmdApp::ActionScope
           prefix "main1"
           @action.("test")
           def err1
@@ -261,7 +261,7 @@ END
       end
 
       spec "[!v0zrf] error location can be filtered by block." do
-        class MainTest2 < Benry::CmdApp::Action
+        class MainTest2 < Benry::CmdApp::ActionScope
           prefix "main2"
           @action.("test")
           def err2
@@ -326,7 +326,7 @@ END
 
     topic '#run()' do
 
-      class AppRunTest < Benry::CmdApp::Action
+      class AppRunTest < Benry::CmdApp::ActionScope
         #
         @action.("test config")
         def check_config()
@@ -459,7 +459,7 @@ END
       end
 
       spec "[!avxos] prints candidate actions if action name ends with ':'." do
-        class CandidateTest1 < Benry::CmdApp::Action
+        class CandidateTest1 < Benry::CmdApp::ActionScope
           prefix "candi:date1"
           @action.("test")
           def bbb(); end
@@ -485,7 +485,7 @@ END
       end
 
       spec "[!eeh0y] candidates are not printed if 'config.feat_candidate' is false." do
-        class CandidateTest5 < Benry::CmdApp::Action
+        class CandidateTest5 < Benry::CmdApp::ActionScope
           prefix "candi:date5"
           @action.("test b")
           def bbb(); end
@@ -1010,7 +1010,7 @@ END
       end
 
       spec "[!4qs7y] shows private (hidden) actions if '--all' option specified." do
-        class HiddenTest < Benry::CmdApp::Action
+        class HiddenTest < Benry::CmdApp::ActionScope
           private
           @action.("hidden test")
           @option.(:_trace, "-T", "enable tracing")
@@ -1131,7 +1131,7 @@ END
     topic '#do_validate_actions()' do
 
       spec "[!6xhvt] reports warning at end of help message." do
-        class ValidateActionTest1 < Benry::CmdApp::Action
+        class ValidateActionTest1 < Benry::CmdApp::ActionScope
           prefix "validate1", alias_of: :test
           @action.("test")
           def test1(); end
@@ -1151,7 +1151,7 @@ END
       end
 
       spec "[!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist." do
-        class ValidateActionTest2 < Benry::CmdApp::Action
+        class ValidateActionTest2 < Benry::CmdApp::ActionScope
           prefix "validate2", alias_of: :test2
           @action.("test")
           def test(); end
@@ -1168,7 +1168,7 @@ END
       end
 
       spec "[!h7lon] reports warning if `action:` specified in action class but corresponding action not exist." do
-        class ValidateActionTest3 < Benry::CmdApp::Action
+        class ValidateActionTest3 < Benry::CmdApp::ActionScope
           prefix "validate3", action: :test3
           @action.("test")
           def test(); end
@@ -1190,7 +1190,7 @@ END
     topic '#do_print_candidates()' do
 
       spec "[!0e8vt] prints candidate action names including prefix name without tailing ':'." do
-        class CandidateTest2 < Benry::CmdApp::Action
+        class CandidateTest2 < Benry::CmdApp::ActionScope
           prefix "candi:date2", action: :eee
           @action.("test1")
           def ddd(); end
@@ -1212,7 +1212,7 @@ END
       end
 
       spec "[!85i5m] candidate actions should include alias names." do
-        class CandidateTest3 < Benry::CmdApp::Action
+        class CandidateTest3 < Benry::CmdApp::ActionScope
           prefix "candi:date3", action: :ggg
           @action.("test1")
           def hhh(); end
@@ -1248,7 +1248,7 @@ END
       end
 
       spec "[!k3lw0] private (hidden) action should not be printed as candidates." do
-        class CandidateTest4 < Benry::CmdApp::Action
+        class CandidateTest4 < Benry::CmdApp::ActionScope
           prefix "candi:date4"
           @action.("test1")
           def kkk(); end
@@ -1271,7 +1271,7 @@ END
       end
 
       spec "[!j4b54] shows candidates in strong format if important." do
-        class CandidateTest6 < Benry::CmdApp::Action
+        class CandidateTest6 < Benry::CmdApp::ActionScope
           prefix "candi:date6"
           @action.("test1")
           def t1(); end
@@ -1293,7 +1293,7 @@ END
       end
 
       spec "[!q3819] shows candidates in weak format if not important." do
-        class CandidateTest7 < Benry::CmdApp::Action
+        class CandidateTest7 < Benry::CmdApp::ActionScope
           prefix "candi:date7"
           @action.("test1")
           def t1(); end
