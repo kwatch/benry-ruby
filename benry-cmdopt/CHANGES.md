@@ -2,6 +2,13 @@ CHANGES
 =======
 
 
+Release 2.1.0 (????-??-??)
+--------------------------
+
+* [enhance] Add `hidden: true` keyword argument to `Benry::Schema#add()` and `Benry::Facade#add()`. This keyword argument makes the option as hidden option.
+* [change] Option which name stars with '_' is now not regarded as hidden option. Use `hidden: true` instead.
+
+
 Release 2.0.2 (2023-10-12)
 --------------------------
 
