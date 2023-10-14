@@ -334,6 +334,12 @@ module Benry::CmdOpt
       return @desc == nil
     end
 
+    def important?()
+      #; [!ua8kt] returns true/false if `important:` kwarg passed to constructor.
+      #; [!hz9sx] returns nil if `important:` kwarg not passed to constructor.
+      return @important
+    end
+
     def validate_and_convert(val, optdict)
       #; [!h0s0o] raises RuntimeError when value not matched to pattern.
       if @rexp && val != true

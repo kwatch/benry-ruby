@@ -923,6 +923,23 @@ END
     end
 
 
+    topic '#important?()' do
+
+      spec "[!ua8kt] returns true/false if `important:` kwarg passed to constructor." do
+        item1 = Benry::CmdOpt::SchemaItem.new(:debug, "-D", "debug mode", "D", nil, nil, nil, important: true)
+        ok {item1.important?} == true
+        item2 = Benry::CmdOpt::SchemaItem.new(:debug, "-D", "debug mode", "D", nil, nil, nil, important: false)
+        ok {item2.important?} == false
+      end
+
+      spec "[!hz9sx] returns nil if `important:` kwarg not passed to constructor." do
+        item3 = Benry::CmdOpt::SchemaItem.new(:debug, "-D", "debug mode", "D", nil, nil, nil)
+        ok {item3.important?} == nil
+      end
+
+    end
+
+
     topic '#validate_and_convert()' do
 
       def new_item(key, optstr, desc, short, long, param, required,
