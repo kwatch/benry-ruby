@@ -898,6 +898,16 @@ END
 
     topic '#hidden?()' do
 
+      spec "[!no6ov] returns true if @hidden is true." do
+        item = Benry::CmdOpt::SchemaItem.new(:debug, "-D", "debug mode", "D", nil, nil, nil, hidden: true)
+        ok {item.hidden?} == true
+      end
+
+      spec "[!ej8ot] returns false if @hidden is false." do
+        item = Benry::CmdOpt::SchemaItem.new(:debug, "-D", "debug mode", "D", nil, nil, nil, hidden: false)
+        ok {item.hidden?} == false
+      end
+
       spec "[!h0uxs] returns true if desc is nil." do
         desc = nil
         item = Benry::CmdOpt::SchemaItem.new(:debug, "-D", desc, "D", nil, nil, nil)
