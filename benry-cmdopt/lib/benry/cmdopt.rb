@@ -157,10 +157,16 @@ module Benry::CmdOpt
       #; [!to1th] includes all option help when `all` is true.
       #; [!a4qe4] option should not be hidden if description is empty string.
       sb = []
-      width = nil; indent = nil
-      each_option_and_desc(all: all) do |opt, desc, detail|
-        sb << format % [opt, desc || ""] << "\n"
+      width = nil; indent = nil; color_p = $stdout.tty?
+      @items.each do |item|
+        next if ! all && item.hidden?
+        #; [!jrwb6] decorates help message according to `important:` value of option.
+        #; [!9nlfb] not decorate help message when stdout is not a tty.
+        s = format % [item.optdef, item.desc || ""]
+        s = _decorate_str(s, item.important?) if color_p
+        sb << s << "\n"
         #; [!848rm] supports multi-lines help message.
+        detail = item.detail
         if detail
           width  ||= (format % ['', '']).length
           indent ||= ' ' * width
@@ -274,6 +280,14 @@ module Benry::CmdOpt
       long_p  = @items.any? {|x| x.desc &&  x.long &&  x.param }
       short_p = @items.all? {|x| x.desc && !x.long && !x.param }
       return short_p ? 8 : long_p ? 20 : 14
+    end
+
+    def _decorate_str(str, important)
+      case important
+      when true  ; return "\e[1m#{str}\e[0m"  # bold
+      when false ; return "\e[2m#{str}\e[0m"  # gray
+      else       ; return str
+      end
     end
 
   end

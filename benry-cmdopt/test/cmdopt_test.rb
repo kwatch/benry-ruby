@@ -349,6 +349,42 @@ END
 END
       end
 
+      fixture :schema_with_importance do
+        sc = Benry::CmdOpt::Schema.new
+        sc.add(:help  , "-h, --help" , "help message")
+        sc.add(:trace , "-T, --trace", "trace"      , important: true)
+        sc.add(:debug , "-D, --debug", "debug mode" , important: false)
+        sc.add(:quiet , "-q, --quiet", "quiet mode")
+        sc
+      end
+
+      spec "[!jrwb6] decorates help message according to `important:` value of option." do
+        |schema_with_importance|
+        sc = schema_with_importance
+        ok {sc.option_help()} == <<END
+  -h, --help     : help message
+\e[1m  -T, --trace    : trace\e[0m
+\e[2m  -D, --debug    : debug mode\e[0m
+  -q, --quiet    : quiet mode
+END
+      end
+
+      spec "[!9nlfb] not decorate help message when stdout is not a tty." do
+        |schema_with_importance|
+        sc = schema_with_importance
+        output = nil
+        capture_sio() {
+          ok {$stdout}.NOT.tty?
+          output = sc.option_help()
+        }
+        ok {output} == <<END
+  -h, --help     : help message
+  -T, --trace    : trace
+  -D, --debug    : debug mode
+  -q, --quiet    : quiet mode
+END
+      end
+
     end
 
 
