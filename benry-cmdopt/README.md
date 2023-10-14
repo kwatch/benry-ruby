@@ -470,22 +470,20 @@ p options   #=> {:lib=>["foo", "bar", "baz"]}
 
 Benry-CmdOpt regards the following options as hidden.
 
-* Key name starts with `_` (for example `:_debug`).
+* Keyword argument `hidden: true` is passed to `.add()` method.
 * Or description is nil.
 
-The former is better than the latter, because even hidden option should have its own description.
-
-These hidden options are not included in help message.
+Hidden options are not included in help message.
 
 ```ruby
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:help , '-h', "help message")
-cmdopt.add(:debug, '-D', nil)       # hidden (because description is nil)
-cmdopt.add(:_log , '-L', "logging") # hidden (because key starts with '_')
+cmdopt.add(:help   , '-h', "help message")
+cmdopt.add(:logging, '-L', "logging", hidden: true)  # hidden
+cmdopt.add(:debug  , '-D', nil)                      # hidden (desc is nil)
 puts cmdopt.to_s()
 
-### output (neither '-D' nor '-L' is shown because hidden options)
+### output (neither '-L' nor '-D' is shown because hidden options)
 #  -h             : help message
 ```
 
@@ -497,8 +495,8 @@ puts cmdopt.to_s(all: true)   # or: cmdopt.to_s(nil, all: true)
 
 ### output
 #  -h             : help message
-#  -D             :
 #  -L             : logging
+#  -D             : 
 ```
 
 

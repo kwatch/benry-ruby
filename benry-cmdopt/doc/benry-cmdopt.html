@@ -462,20 +462,19 @@ p options   #=&gt; <strong>{:lib=&gt;["foo", "bar", "baz"]}</strong>
 <h3>Hidden Option</h3>
 <p>Benry-CmdOpt regards the following options as hidden.</p>
 <ul>
-<li>Key name starts with <code>_</code> (for example <code>:_debug</code>).</li>
+<li>Keyword argument <code>hidden: true</code> is passed to <code>.add()</code> method.</li>
 <li>Or description is nil.</li>
 </ul>
-<p>The former is better than the latter, because even hidden option should have its own description.</p>
-<p>These hidden options are not included in help message.</p>
+<p>Hidden options are not included in help message.</p>
 <pre class="language-ruby">
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:help , '-h', "help message")
-cmdopt.add(:debug, '-D', <strong>nil</strong>)       # hidden (because description is nil)
-cmdopt.add(<strong>:_log</strong> , '-L', "logging") # hidden (because key starts with '_')
+cmdopt.add(:help   , '-h', "help message")
+cmdopt.add(:logging, '-L', "logging", <strong>hidden: true</strong>)  # hidden
+cmdopt.add(:debug  , '-D', <strong>nil</strong>)                      # hidden (desc is nil)
 puts cmdopt.to_s()
 
-### output (neither '-D' nor '-L' is shown because hidden options)
+### output (neither '-L' nor '-D' is shown because hidden options)
 #  -h             : help message
 </pre>
 <p>To show all options including hidden ones, add <code>all: true</code> to <code>cmdopt.to_s()</code>.</p>
@@ -485,8 +484,8 @@ puts cmdopt.to_s(<strong>all: true</strong>)   # or: cmdopt.to_s(nil, all: true)
 
 ### output
 #  -h             : help message
-#  <strong>-D             :</strong>
 #  <strong>-L             : logging</strong>
+#  <strong>-D             : </strong>
 </pre>
 </section>
 <section class="subsection" id="global-options-with-sub-commands">
