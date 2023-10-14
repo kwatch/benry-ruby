@@ -40,11 +40,11 @@ module Benry::CmdOpt
 
     attr_reader :schema
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!vmb3r] defines command option.
       #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
-      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: tag, &callback)
+      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, tag: tag, &callback)
       #; [!tu4k3] returns self.
       self
     end
@@ -103,7 +103,7 @@ module Benry::CmdOpt
       self
     end
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
       rest.each do |x|
@@ -137,7 +137,7 @@ module Benry::CmdOpt
       end
       #; [!yht0v] keeps command option definitions.
       item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                 type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: tag, &callback)
+                 type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, tag: tag, &callback)
       @items << item
       item
     end
@@ -281,7 +281,7 @@ module Benry::CmdOpt
 
   class SchemaItem    # avoid Struct
 
-    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, tag: nil, &callback)
+    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, hidden: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       _init_validation(param, required, type, rexp, enum, range, value)
       @key      = key       unless nil == key
@@ -297,6 +297,7 @@ module Benry::CmdOpt
       @range    = range     unless nil == range
       @detail   = detail    unless nil == detail
       @value    = value     unless nil == value
+      @hidden   = hidden    unless nil == hidden
       @tag      = tag       unless nil == tag
       @callback = callback  unless nil == callback
       #; [!nn4cp] freezes enum object.
@@ -324,10 +325,12 @@ module Benry::CmdOpt
     end
 
     def hidden?()
+      #; [!no6ov] returns true if @hidden is true.
+      #; [!ej8ot] returns false if @hidden is false.
+      return @hidden if @hidden != nil
       #; [!h0uxs] returns true if desc is nil.
-      #; [!su00g] returns true if key starts with '_'.
       #; [!28vzx] returns false if else.
-      return @desc == nil || @key.to_s.start_with?('_')
+      return @desc == nil
     end
 
     def validate_and_convert(val, optdict)
