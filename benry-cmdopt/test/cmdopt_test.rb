@@ -342,7 +342,7 @@ END
       spec "[!a4qe4] option should not be hidden if description is empty string." do
         sc = Benry::CmdOpt::Schema.new
         sc.add(:debug , "-D", nil)       # hidden
-        sc.add(:_trace, "-T", "trace")   # hidden
+        sc.add(:trace, "-T", "trace", hidden: true)   # hidden
         sc.add(:what  , "-W", "")        # NOT hidden!
         ok {sc.option_help()} == <<END
   -W             : 
@@ -445,7 +445,7 @@ END
         sc.add(:help, "-h, --help", "show help message")
         sc.add(:version, "    --version", "print version")
         sc.add(:debug  , "-d, --debug"  , nil)            # hidden
-        sc.add(:_DEBUG , "-D, --DEBUG"  , "debug mode")   # hidden
+        sc.add(:DEBUG  , "-D, --DEBUG"  , "debug mode", hidden: true)   # hidden
         @schema = sc
       end
 
@@ -532,7 +532,7 @@ END
       spec "[!icvm1] ignores hidden items if 'all: false' kwarg specified." do
         schema = Benry::CmdOpt::Schema.new
         schema.add(:debug , "-D", nil)
-        schema.add(:_trace, "-T", "trace")
+        schema.add(:trace, "-T", "trace", hidden: true)
         ok {schema.empty?()} == false
         ok {schema.empty?(all: true)} == false
         ok {schema.empty?(all: false)} == true
@@ -911,12 +911,6 @@ END
       spec "[!h0uxs] returns true if desc is nil." do
         desc = nil
         item = Benry::CmdOpt::SchemaItem.new(:debug, "-D", desc, "D", nil, nil, nil)
-        ok {item.hidden?} == true
-      end
-
-      spec "[!su00g] returns true if key starts with '_'." do
-        desc = "debug mode"
-        item = Benry::CmdOpt::SchemaItem.new(:_debug, "-D", desc, "D", nil, nil, nil)
         ok {item.hidden?} == true
       end
 
@@ -1530,7 +1524,7 @@ END
         @cmdopt.add(:help   , "-h, --help"        , "show help message")
         @cmdopt.add(:version, "    --version"     , "print version")
         @cmdopt.add(:debug  , "-D"                , nil)       # hidden option
-        @cmdopt.add(:_trace , "-T"                , "trace")   # hidden option
+        @cmdopt.add(:trace  , "-T"                , "trace", hidden: true)  # hidden option
       end
 
       spec "[!bw9qx] yields each option definition string and help message." do

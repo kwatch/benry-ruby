@@ -329,9 +329,8 @@ module Benry::CmdOpt
       #; [!ej8ot] returns false if @hidden is false.
       return @hidden if @hidden != nil
       #; [!h0uxs] returns true if desc is nil.
-      #; [!su00g] returns true if key starts with '_'.
       #; [!28vzx] returns false if else.
-      return @desc == nil || @key.to_s.start_with?('_')
+      return @desc == nil
     end
 
     def validate_and_convert(val, optdict)
