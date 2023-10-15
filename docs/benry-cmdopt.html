@@ -21,7 +21,7 @@
   <ul class="nav">
   </ul>
 </nav>
-<p>($Release: 2.0.2 $)</p>
+<p>($Release: 2.1.0 $)</p>
 <section class="section" id="whats-this">
 <h2>What's This?</h2>
 <p>Benry-CmdOpt is a command option parser library, like <code>optparse.rb</code>
@@ -53,6 +53,7 @@ and easy to understahnd.</p>
 <li><a href="#global-options-with-sub-commands">Global Options with Sub-Commands</a></li>
 <li><a href="#detailed-description-of-option">Detailed Description of Option</a></li>
 <li><a href="#option-tag">Option Tag</a></li>
+<li><a href="#important-options">Important Options</a></li>
 <li><a href="#not-supported">Not Supported</a></li>
 </ul></li>
 <li><a href="#internal-classes">Internal Classes</a></li>
@@ -462,20 +463,19 @@ p options   #=&gt; <strong>{:lib=&gt;["foo", "bar", "baz"]}</strong>
 <h3>Hidden Option</h3>
 <p>Benry-CmdOpt regards the following options as hidden.</p>
 <ul>
-<li>Key name starts with <code>_</code> (for example <code>:_debug</code>).</li>
+<li>Keyword argument <code>hidden: true</code> is passed to <code>.add()</code> method.</li>
 <li>Or description is nil.</li>
 </ul>
-<p>The former is better than the latter, because even hidden option should have its own description.</p>
-<p>These hidden options are not included in help message.</p>
+<p>Hidden options are not included in help message.</p>
 <pre class="language-ruby">
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
-cmdopt.add(:help , '-h', "help message")
-cmdopt.add(:debug, '-D', <strong>nil</strong>)       # hidden (because description is nil)
-cmdopt.add(<strong>:_log</strong> , '-L', "logging") # hidden (because key starts with '_')
+cmdopt.add(:help   , '-h', "help message")
+cmdopt.add(:logging, '-L', "logging", <strong>hidden: true</strong>)  # hidden
+cmdopt.add(:debug  , '-D', <strong>nil</strong>)                      # hidden (desc is nil)
 puts cmdopt.to_s()
 
-### output (neither '-D' nor '-L' is shown because hidden options)
+### output (neither '-L' nor '-D' is shown because hidden options)
 #  -h             : help message
 </pre>
 <p>To show all options including hidden ones, add <code>all: true</code> to <code>cmdopt.to_s()</code>.</p>
@@ -485,8 +485,8 @@ puts cmdopt.to_s(<strong>all: true</strong>)   # or: cmdopt.to_s(nil, all: true)
 
 ### output
 #  -h             : help message
-#  <strong>-D             :</strong>
 #  <strong>-L             : logging</strong>
+#  <strong>-D             : </strong>
 </pre>
 </section>
 <section class="subsection" id="global-options-with-sub-commands">
@@ -591,12 +591,36 @@ end
 #version: <strong>tag=nil</strong>
 </pre>
 </section>
+<section class="subsection" id="important-options">
+<h3>Important Options</h3>
+<p>You can specify that the option is important or not.
+Pass <code>important: true</code> or <code>important: false</code> keyword argument to <code>#add()</code> method of <code>Benry::CmdOpt</code> or <code>Benry::CmdOpt::Schema</code> object.</p>
+<p>The help message of options is decorated according to value of <code>important:</code> keyword argument.</p>
+<ul>
+<li>Printed in bold font when <code>important: true</code> specified to the option.</li>
+<li>Printed in gray color when <code>important: false</code> specified to the option.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/cmdopt'
+
+cmdopt = Benry::CmdOpt.new()
+cmdopt.add(:help   , "-h", "help message")
+cmdopt.add(:verbose, "-v", "verbose mode", <strong>important: true</strong>)   # !!!
+cmdopt.add(:debug  , "-D", "debug mode"  , <strong>important: false</strong>)  # !!!
+puts cmdopt.option_help()
+
+## output:
+#  -h       : help message
+#  -v       : verbose mode      # bold font
+#  -D       : debug mode        # gray color
+</pre>
+</section>
 <section class="subsection" id="not-supported">
 <h3>Not Supported</h3>
 <ul>
-<li>default value</li>
+<li>default value when the option not specified in command-line</li>
 <li><code>--no-xxx</code> style option</li>
-<li>bash/zsh completion</li>
+<li>bash/zsh completion (may be supported in the future)</li>
 <li>I18N of error message (may be supported in the future)</li>
 </ul>
 </section>
