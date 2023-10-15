@@ -40,11 +40,11 @@ module Benry::CmdOpt
 
     attr_reader :schema
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!vmb3r] defines command option.
       #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
-      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, tag: tag, &callback)
+      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       #; [!tu4k3] returns self.
       self
     end
@@ -103,7 +103,7 @@ module Benry::CmdOpt
       self
     end
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
       rest.each do |x|
@@ -137,7 +137,7 @@ module Benry::CmdOpt
       end
       #; [!yht0v] keeps command option definitions.
       item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                 type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, tag: tag, &callback)
+                 type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       @items << item
       item
     end
@@ -157,10 +157,16 @@ module Benry::CmdOpt
       #; [!to1th] includes all option help when `all` is true.
       #; [!a4qe4] option should not be hidden if description is empty string.
       sb = []
-      width = nil; indent = nil
-      each_option_and_desc(all: all) do |opt, desc, detail|
-        sb << format % [opt, desc || ""] << "\n"
+      width = nil; indent = nil; color_p = $stdout.tty?
+      @items.each do |item|
+        next if ! all && item.hidden?
+        #; [!jrwb6] decorates help message according to `important:` value of option.
+        #; [!9nlfb] not decorate help message when stdout is not a tty.
+        s = format % [item.optdef, item.desc || ""]
+        s = _decorate_str(s, item.important?) if color_p
+        sb << s << "\n"
         #; [!848rm] supports multi-lines help message.
+        detail = item.detail
         if detail
           width  ||= (format % ['', '']).length
           indent ||= ' ' * width
@@ -276,12 +282,20 @@ module Benry::CmdOpt
       return short_p ? 8 : long_p ? 20 : 14
     end
 
+    def _decorate_str(str, important)
+      case important
+      when true  ; return "\e[1m#{str}\e[0m"  # bold
+      when false ; return "\e[2m#{str}\e[0m"  # gray
+      else       ; return str
+      end
+    end
+
   end
 
 
   class SchemaItem    # avoid Struct
 
-    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, hidden: nil, tag: nil, &callback)
+    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       _init_validation(param, required, type, rexp, enum, range, value)
       @key      = key       unless nil == key
@@ -298,6 +312,7 @@ module Benry::CmdOpt
       @detail   = detail    unless nil == detail
       @value    = value     unless nil == value
       @hidden   = hidden    unless nil == hidden
+      @important = important unless nil == important
       @tag      = tag       unless nil == tag
       @callback = callback  unless nil == callback
       #; [!nn4cp] freezes enum object.
@@ -331,6 +346,12 @@ module Benry::CmdOpt
       #; [!h0uxs] returns true if desc is nil.
       #; [!28vzx] returns false if else.
       return @desc == nil
+    end
+
+    def important?()
+      #; [!ua8kt] returns true/false if `important:` kwarg passed to constructor.
+      #; [!hz9sx] returns nil if `important:` kwarg not passed to constructor.
+      return @important
     end
 
     def validate_and_convert(val, optdict)

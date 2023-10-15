@@ -38,6 +38,7 @@ Benry-CmdOpt requires Ruby >= 2.3.
   * [Global Options with Sub-Commands](#global-options-with-sub-commands)
   * [Detailed Description of Option](#detailed-description-of-option)
   * [Option Tag](#option-tag)
+  * [Important Options](#important-options)
   * [Not Supported](#not-supported)
 * [Internal Classes](#internal-classes)
 * [License and Copyright](#license-and-copyright)
@@ -608,6 +609,32 @@ end
 ## output:
 #help: tag="important"
 #version: tag=nil
+```
+
+
+### Important Options
+
+You can specify that the option is important or not.
+Pass `important: true` or `important: false` keyword argument to `#add()` method of `Benry::CmdOpt` or `Benry::CmdOpt::Schema` object.
+
+The help message of options is decorated according to value of `important:` keyword argument.
+
+* Printed in bold font when `important: true` specified to the option.
+* Printed in gray color when `important: false` specified to the option.
+
+```ruby
+require 'benry/cmdopt'
+
+cmdopt = Benry::CmdOpt.new()
+cmdopt.add(:help   , "-h", "help message")
+cmdopt.add(:verbose, "-v", "verbose mode", important: true)   # !!!
+cmdopt.add(:debug  , "-D", "debug mode"  , important: false)  # !!!
+puts cmdopt.option_help()
+
+## output:
+#  -h       : help message
+#  -v       : verbose mode      # bold font
+#  -D       : debug mode        # gray color
 ```
 
 
