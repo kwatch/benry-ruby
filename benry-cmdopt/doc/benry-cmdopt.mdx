@@ -1,10 +1,10 @@
-# Benry-CmdOpt
+= Benry-CmdOpt
 
 ($Release: 0.0.0 $)
 
 
 
-## What's This?
+== What's This?
 
 Benry-CmdOpt is a command option parser library, like ``optparse.rb``
 (Ruby standard library).
@@ -20,13 +20,13 @@ Benry-CmdOpt requires Ruby >= 2.3.
 
 
 
-### Table of Contents
+=== Table of Contents
 
 <!-- TOC/ -->
 
 
 
-## Why not ``optparse.rb``?
+== Why not ``optparse.rb``?
 
 * ``optparse.rb`` can handle both ``--name=val`` and ``--name val`` styles.
   The later style is ambiguous; you may wonder whether ``--name`` takes
@@ -243,7 +243,7 @@ end
 
 
 
-## Install
+== Install
 
 ```
 $ gem install benry-cmdopt
@@ -251,10 +251,10 @@ $ gem install benry-cmdopt
 
 
 
-## Usage
+== Usage
 
 
-### Define, Parse, and Print Help
+=== Define, Parse, and Print Help
 
 ```ruby
 {{*require 'benry/cmdopt'*}}
@@ -294,7 +294,7 @@ cmdopt.add({{*nil*}}  , "-h, --help", "print help message")
 ```
 
 
-### Command Option Parameter
+=== Command Option Parameter
 
 ```ruby
 ## required parameter
@@ -316,7 +316,7 @@ Use ``"--file=<FILE>"`` style instead.
  and doesn't provide the way to disable the former style.)
 
 
-### Argument Validation
+=== Argument Validation
 
 ```ruby
 ## type (class)
@@ -368,7 +368,7 @@ cmdopt.add(:indent, '-i <N>', "indent", {{*range: (0..)*}})
 ```
 
 
-### Boolean (on/off) Option
+=== Boolean (on/off) Option
 
 Benry-CmdOpt doens't support ``--no-xxx`` style option for usability reason.
 Use boolean option instead.
@@ -397,7 +397,7 @@ $ ruby ex3.rb {{*--foo=off*}}       # disable
 ```
 
 
-### Alternative Value
+=== Alternative Value
 
 Benry-CmdOpt supports alternative value.
 
@@ -427,7 +427,7 @@ p options[:flag2]   #=> {{*false*}} (!!!!!)
 ```
 
 
-### Multiple Value Option
+=== Multiple Value Option
 
 ```ruby
 require 'benry/cmdopt'
@@ -446,7 +446,7 @@ p options   #=> {{*{:lib=>["foo", "bar", "baz"]}*}}
 ```
 
 
-### Hidden Option
+=== Hidden Option
 
 Benry-CmdOpt regards the following options as hidden.
 
@@ -480,7 +480,7 @@ puts cmdopt.to_s({{*all: true*}})   # or: cmdopt.to_s(nil, all: true)
 ```
 
 
-### Global Options with Sub-Commands
+=== Global Options with Sub-Commands
 
 ``parse()`` accepts boolean keyword argument ``all``.
 
@@ -539,7 +539,7 @@ p argv              #=> ["xxx"]
 ```
 
 
-### Detailed Description of Option
+=== Detailed Description of Option
 
 ``#add()`` method in ``Benry::CmdOpt`` or ``Benry::CmdOpt::Schema`` supports ``detail:`` keyword argument which takes detailed description of option.
 
@@ -570,7 +570,7 @@ Output:
 ```
 
 
-### Option Tag
+=== Option Tag
 
 ``#add()`` method in ``Benry::CmdOpt`` or ``Benry::CmdOpt::Schema`` supports ``tag:`` keyword argument.
 You can use it for any purpose.
@@ -591,7 +591,7 @@ end
 ```
 
 
-### Important Options
+=== Important Options
 
 You can specify that the option is important or not.
 Pass ``important: true`` or ``important: false`` keyword argument to ``#add()`` method of ``Benry::CmdOpt`` or ``Benry::CmdOpt::Schema`` object.
@@ -617,16 +617,16 @@ puts cmdopt.option_help()
 ```
 
 
-### Not Supported
+=== Not Supported
 
-* default value
+* default value when the option not specified in command-line
 * ``--no-xxx`` style option
-* bash/zsh completion
+* bash/zsh completion (may be supported in the future)
 * I18N of error message (may be supported in the future)
 
 
 
-## Internal Classes
+== Internal Classes
 
 * ``Benry::CmdOpt::Schema`` ... command option schema.
 * ``Benry::CmdOpt::Parser`` ... command option parser.
@@ -666,7 +666,7 @@ Use ``cmdopt.is_a?(Benry::CmdOpt::Facade)`` instead if necessary.
 
 
 
-## License and Copyright
+== License and Copyright
 
 $License: MIT License $
 

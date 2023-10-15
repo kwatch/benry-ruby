@@ -640,9 +640,9 @@ puts cmdopt.option_help()
 
 ### Not Supported
 
-* default value
+* default value when the option not specified in command-line
 * `--no-xxx` style option
-* bash/zsh completion
+* bash/zsh completion (may be supported in the future)
 * I18N of error message (may be supported in the future)
 
 
