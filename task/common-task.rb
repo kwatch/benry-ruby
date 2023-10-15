@@ -20,12 +20,12 @@ task :default do
 end unless Rake::Task.task_defined?(:default)
 
 
-desc "show release guide"
-task :guide do
-  do_guide()
+desc "show release operations"
+task :'release:guide' do
+  do_release_guide()
 end
 
-def do_guide()
+def do_release_guide()
   RELEASE != '0.0.0'  or abort "** ERROR: 'RELEASE=X.X.X' required."
   puts guide_message(PROJECT, RELEASE)
 end
