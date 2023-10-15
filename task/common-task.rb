@@ -33,7 +33,7 @@ end
 def guide_message(project, release)
   target = "#{project}-#{release}"
   tag    = "#{project}-#{release}"
-  puts <<END
+  return <<END
 How to release:
 
   $ git diff .
@@ -42,7 +42,7 @@ How to release:
   $ rake test
   $ rake test:all
   $ specid diff lib test
-  $ chkruby lib/**/*.rb test/**/*.rb
+  $ chkruby lib test
   $ rake doc
   $ rake doc:export RELEASE=#{release}
   $ rake readme:execute			# optional
@@ -50,6 +50,7 @@ How to release:
   $ rake package RELEASE=#{release}
   $ rake package:extract		# confirm files in gem file
   $ (cd #{target}/data; find . -type f)
+  $ (cd #{target}/data; ag '(Release|Copyright|License):')
   $ gem install #{target}.gem	# confirm gem package
   $ gem uninstall #{project}
   $ gem push #{target}.gem	# publish gem to rubygems.org
