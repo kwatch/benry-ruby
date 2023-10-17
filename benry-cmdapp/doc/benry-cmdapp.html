@@ -1116,7 +1116,8 @@ Actions:
 <section class="subsection" id="private-hidden-action">
 <h3>Private (Hidden) Action</h3>
 <ul>
-<li>If action method is private, Benry::CmdApp regards that action as private.</li>
+<li>If <code>hidden: true</code> keyword argument passed to <code>@action.()</code>,
+  or action method is private, then Benry::CmdApp regards that action as private.</li>
 <li>Private actions are hidden in help message.</li>
 <li>Private actions are shown when <code>-a</code> or <code>--all</code> option enabled and specified.</li>
 </ul>
@@ -1132,13 +1133,12 @@ class SampleAction &lt Benry::CmdApp::Action
     puts __method__
   end
 
-  @action.("test action #2")
+  @action.("test action #2", <strong>hidden: true</strong>)  # !!!!
   def test2()
     puts __method__
   end
-  <strong>private :test2</strong>               # !!!! private method !!!!
 
-  <strong>private</strong>                      # !!!! private method !!!!
+  <strong>private</strong>                      # !!!!
 
   @action.("test action #3")
   def test3()
@@ -1188,7 +1188,7 @@ Actions:
 <section class="subsection" id="private-hidden-option">
 <h3>Private (Hidden) Option</h3>
 <ul>
-<li>Options which name stars with <code>_</code> are treated as private option.</li>
+<li>Options defined with <code>hidden: true</code> keyword argument are treated as private option.</li>
 <li>Private options are hidden in help message of action.</li>
 <li>Private options are shown when <code>-a</code> or <code>--all</code> option enabled and specified.</li>
 </ul>
@@ -1201,9 +1201,9 @@ class SampleAction &lt Benry::CmdApp::Action
 
   @action.("test action")
   @option.(:verbose, "-v", "verbose mode")
-  @option.(<strong>:_debug</strong> , "-D", "debug mode")      # !!!!
-  def test1(verbose: false, _debug: false)
-    puts "verbose=#{verbose}, _debug=#{_debug}"
+  @option.(:debug , "-D", "debug mode", <strong>hidden: true</strong>)      # !!!!
+  def test1(verbose: false, debug: false)
+    puts "verbose=#{verbose}, debug=#{_debug}"
   end
 
 end

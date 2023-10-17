@@ -47,7 +47,7 @@ Oktest.scope do
 
       spec "[!c4ljy] returns true if schema contains only private (hidden) options." do
         sc = Benry::CmdOpt::Schema.new
-        sc.add(:_help, "-h", "help")
+        sc.add(:help, "-h", "help", hidden: true)
         ok {Benry::CmdApp::Util.schema_empty?(sc)} == true
         sc.add(:version, "-V", "version")
         ok {Benry::CmdApp::Util.schema_empty?(sc)} == false

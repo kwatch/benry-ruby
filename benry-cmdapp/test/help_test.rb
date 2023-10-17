@@ -84,7 +84,7 @@ END
 
       spec "[!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified." do
         schema = new_schema(lang: false)
-        schema.add(:_lang, "-l, --lang=<en|fr|it>", "language")
+        schema.add(:lang, "-l, --lang=<en|fr|it>", "language", hidden: true)
         msg = new_metadata(schema).help_message("testapp")
         msg = uncolorize(msg)
         ok {msg} =~ /^  \$ testapp halo1 \[<user>\]\n/
@@ -116,7 +116,7 @@ END
 
       spec "[!hghuj] ignores 'Options:' section when only hidden options speicified." do
         schema = new_schema(lang: false)
-        schema.add(:_lang, "-l, --lang=<en|fr|it>", "language")  # hidden option
+        schema.add(:lang, "-l, --lang=<en|fr|it>", "language", hidden: true)  # hidden option
         msg = new_metadata(schema).help_message("testapp")
         msg = uncolorize(msg)
         ok {msg}.NOT.include?("Options:\n")
@@ -125,7 +125,7 @@ END
       spec "[!vqqq1] hidden option should be shown in weak format." do
         schema = new_schema(lang: false)
         schema.add(:file , "-f, --file=<file>", "filename")
-        schema.add(:_lang, "-l, --lang=<lang>", "language")  # hidden option
+        schema.add(:lang, "-l, --lang=<lang>", "language", hidden: true)  # hidden option
         msg = new_metadata(schema).help_message("testapp", true)
         ok {msg}.end_with?(<<"END")
 \e[34mOptions:\e[0m
@@ -436,7 +436,7 @@ END
         @config.option_debug = false
         app = Benry::CmdApp::Application.new(@config)
         schema = app.instance_variable_get('@schema')
-        schema.add(:_log, "-L", "private option")
+        schema.add(:log, "-L", "private option", hidden: true)
         msg = app.help_message()
         msg = uncolorize(msg)
         ok {msg} !~ /^  -L /
@@ -454,7 +454,7 @@ END
         @config.option_debug = false
         app = Benry::CmdApp::Application.new(@config)
         schema = app.instance_variable_get('@schema')
-        schema.add(:_log, "-L", "private option")
+        schema.add(:log, "-L", "private option", hidden: true)
         msg = app.help_message(true)
         msg = uncolorize(msg)
         ok {msg} =~ /^  -L /
@@ -477,7 +477,7 @@ END
 
       spec "[!p1tu9] prints option in weak format if option is hidden." do
         |app3|
-        app3.schema.add(:_log, "-L", "private option")   # !!!
+        app3.schema.add(:log, "-L", "private option", hidden: true)   # !!!
         msg = app3.help_message(true)
         ok {msg}.include?(<<END)
 \e[34mOptions:\e[0m
@@ -494,7 +494,7 @@ END
         @config.option_debug = false
         app = Benry::CmdApp::Application.new(@config)
         schema = app.instance_variable_get('@schema')
-        schema.add(:_log, "-L", "private option")
+        schema.add(:log, "-L", "private option", hidden: true)
         msg = app.help_message()
         msg = uncolorize(msg)
         ok {msg} !~ /^Options:$/
