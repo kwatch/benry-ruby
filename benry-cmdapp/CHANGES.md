@@ -2,7 +2,7 @@ CHANGES
 =======
 
 
-Release 0.2.0 (????-??-??)
+Release 0.2.0 (2023-10-18)
 --------------------------
 
 * [change] Requires Benry-CmdOpt 2.1.0 or higher.
