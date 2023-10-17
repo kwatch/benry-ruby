@@ -5,6 +5,8 @@ CHANGES
 Release 0.2.0 (????-??-??)
 --------------------------
 
+* [change] Requires Benry-CmdOpt 2.1.0 or higher.
+* [enhance] `@action.()` and `@option.()` supports `hidden: true` keyword argument.
 * [change] Rename `#run_action!()` in Action class to `#run_action_anyway()`.
 
 
