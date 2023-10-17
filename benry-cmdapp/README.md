@@ -1181,7 +1181,8 @@ Actions:
 
 ### Private (Hidden) Action
 
-* If action method is private, Benry::CmdApp regards that action as private.
+* If `hidden: true` keyword argument passed to `@action.()`,
+  or action method is private, then Benry::CmdApp regards that action as private.
 * Private actions are hidden in help message.
 * Private actions are shown when `-a` or `--all` option enabled and specified.
 
@@ -1198,13 +1199,12 @@ class SampleAction < Benry::CmdApp::Action
     puts __method__
   end
 
-  @action.("test action #2")
+  @action.("test action #2", hidden: true)  # !!!!
   def test2()
     puts __method__
   end
-  private :test2               # !!!! private method !!!!
 
-  private                      # !!!! private method !!!!
+  private                      # !!!!
 
   @action.("test action #3")
   def test3()
@@ -1258,7 +1258,7 @@ Actions:
 
 ### Private (Hidden) Option
 
-* Options which name stars with `_` are treated as private option.
+* Options defined with `hidden: true` keyword argument are treated as private option.
 * Private options are hidden in help message of action.
 * Private options are shown when `-a` or `--all` option enabled and specified.
 
@@ -1272,9 +1272,9 @@ class SampleAction < Benry::CmdApp::Action
 
   @action.("test action")
   @option.(:verbose, "-v", "verbose mode")
-  @option.(:_debug , "-D", "debug mode")      # !!!!
-  def test1(verbose: false, _debug: false)
-    puts "verbose=#{verbose}, _debug=#{_debug}"
+  @option.(:debug , "-D", "debug mode", hidden: true)      # !!!!
+  def test1(verbose: false, debug: false)
+    puts "verbose=#{verbose}, debug=#{_debug}"
   end
 
 end
