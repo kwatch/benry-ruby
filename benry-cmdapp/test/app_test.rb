@@ -1013,8 +1013,8 @@ END
         class HiddenTest < Benry::CmdApp::ActionScope
           private
           @action.("hidden test")
-          @option.(:_trace, "-T", "enable tracing")
-          def hidden1(_trace: false)
+          @option.(:trace, "-T", "enable tracing", hidden: true)
+          def hidden1(trace: false)
           end
         end
         #
