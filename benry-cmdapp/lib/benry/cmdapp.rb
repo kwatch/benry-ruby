@@ -277,7 +277,7 @@ module Benry::CmdApp
 
   class ActionMetadata
 
-    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, important: nil, tag: nil)
+    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, important: nil, tag: nil, hidden: nil)
       @name   = name
       @klass  = klass
       @method = method
@@ -287,14 +287,15 @@ module Benry::CmdApp
       @postamble = postamble if postamble != nil
       @important = important if important != nil
       @tag    = tag          if tag != nil
+      @hidden = hidden       if hidden != nil
     end
 
-    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble, :important, :tag
+    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble, :important, :tag, :hidden
 
     def hidden?()
       #; [!kp10p] returns true when action method is private.
       #; [!nw322] returns false when action method is not private.
-      return ! @klass.method_defined?(@method)
+      return @hidden != nil ? @hidden : ! @klass.method_defined?(@method)
     end
 
     def important?()
@@ -636,18 +637,18 @@ module Benry::CmdApp
         @__aliasof__  = nil    # ex: :method_name or "action-name"
         @__default__  = nil    # ex: :method_name or "action-name"
         #; [!1qv12] @action is a Proc object and saves args.
-        @action = proc do |desc, detail: nil, postamble: nil, important: nil, tag: nil|
-          @__action__ = [desc, {detail: detail, postamble: postamble, important: important, tag: tag}]
+        @action = proc do |desc, detail: nil, postamble: nil, important: nil, tag: nil, hidden: nil|
+          @__action__ = [desc, {detail: detail, postamble: postamble, important: important, tag: tag, hidden: hidden}]
         end
         #; [!33ma7] @option is a Proc object and saves args.
-        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, detail: nil, tag: nil, &block|
+        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, detail: nil, important: nil, tag: nil, hidden: nil, &block|
           #; [!gxybo] '@option.()' raises error when '@action.()' not called.
           @__action__ != nil  or
             raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` Required but not called.")
           schema = (@__option__ ||= SCHEMA_CLASS.new)
           #; [!ga6zh] '@option.()' raises error when invalid option info specified.
           begin
-            schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, tag: nil, &block)
+            schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, important: important, tag: tag, hidden: hidden, &block)
           rescue Benry::CmdOpt::SchemaError => exc
             raise OptionDefError.new(exc.message)
           end
