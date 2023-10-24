@@ -127,6 +127,29 @@ Oktest.scope do
         ok {Benry::CmdApp::INDEX.metadata_get("dummy2049")} == nil
       end
 
+      spec "[!01sx1] deletes existing action." do
+        MyAction.class_eval do
+          @action.("dummy")
+          def dummy4290()
+          end
+        end
+        ok {MyAction.method_defined?(:dummy4290)} == true
+        Benry::CmdApp.undef_action("dummy4290")
+        ok {MyAction.method_defined?(:dummy4290)} == false
+        #
+        MyAction.class_eval do
+          private
+          prefix "p8902:" do
+            @action.("dummy")
+            def dummy9024()
+            end
+          end
+        end
+        ok {MyAction.private_method_defined?(:p8902__dummy9024)} == true
+        Benry::CmdApp.undef_action("p8902:dummy9024")
+        ok {MyAction.private_method_defined?(:p8902__dummy9024)} == false
+      end
+
     end
 
 

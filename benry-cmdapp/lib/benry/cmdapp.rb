@@ -325,6 +325,8 @@ module Benry::CmdApp
       raise DefinitionError.new("undef_action(#{action_name.inspect}): #{errmsg}")
     #; [!01sx1] deletes existing action.
     INDEX.metadata_del(action_name)
+    #; [!op8z5] deletes action method from action class.
+    md.klass.class_eval { remove_method(md.meth) }
     nil
   end
 
