@@ -307,6 +307,30 @@ Oktest.scope do
 
       end
 
+      spec "[!dad1q] raises DefinitionError if action with same name already defined." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            @action.("duplicate")
+            def hello()
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "def hello(): Action 'hello' already defined (to redefine it, delete it beforehand by `undef_action()`).")
+        #
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "git:" do
+              @action.("duplicate")
+              def stage()
+              end
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "def stage(): Action 'git:stage' already defined (to redefine it, delete it beforehand by `undef_action()`).")
+      end
+
       spec "[!ur8lp] raises DefinitionError if method already defined in parent or ancestor class." do
         pr = proc do
           ScopeTestAction.class_eval do

@@ -417,10 +417,15 @@ module Benry::CmdApp
         #; [!0ki5g] not add prefix to action name.
         prefix = alias_target = nil
       end
+      #
+      #; [!dad1q] raises DefinitionError if action with same name already defined.
+      ! INDEX.metadata_exist?(action)  or
+        raise DefinitionError.new("def #{method_symbol}(): Action '#{action}' already defined (to redefine it, delete it beforehand by `undef_action()`).")
       #; [!ur8lp] raises DefinitionError if method already defined in parent or ancestor class.
       #; [!dj0ql] method override check is done with new method name (= prefixed name).
       ! Util.method_override?(self, meth)  or
         raise DefinitionError.new("def #{method_symbol}(): Please rename it to `#{method_symbol}_()` because same method defined in parent or ancestor class.")
+      #
       #; [!7fnh4] registers action metadata.
       schema ||= OPTION_EMPTY_SCHEMA
       action_metadata = ActionMetadata.new(action, desc, schema, self, meth, **kws)
