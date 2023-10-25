@@ -698,8 +698,8 @@ module Benry::CmdApp
     FORMAT_OPTION         = "  %-18s : %s"
     FORMAT_ACTION         = "  %-18s : %s"
     FORMAT_USAGE          = "  $ %s"
-    HELP_COMMAND_DECO     = "\e[1m%s\e[0m"      # bold
-    HELP_HEADER_DECO      = "\e[1;34m%s\e[0m"   # bold, blue
+    DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
+    DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
     DECORATION_WEAK       = "\e[2m%s\e[0m"      # gray color
     DECORATION_HIDDEN     = "\e[2m%s\e[0m"      # gray color
@@ -709,9 +709,9 @@ module Benry::CmdApp
     def initialize(app_desc, app_version=nil,
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
-                   format_option: nil, format_action: nil, format_usage: nil,
-                   help_command_deco: nil, help_header_deco: nil,
                    help_postamble: nil,
+                   format_option: nil, format_action: nil, format_usage: nil,
+                   deco_command: nil, deco_header: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
                    option_verbose: nil, option_quiet: nil, option_color: nil,
                    option_debug: nil, option_trace: nil)
@@ -722,12 +722,12 @@ module Benry::CmdApp
       @app_usage          = app_usage
       @app_detail         = app_detail
       @default_action     = default_action
+      @help_postamble     = help_postamble
       @format_option      = format_option || FORMAT_OPTION
       @format_action      = format_action || FORMAT_ACTION
       @format_usage       = format_usage  || FORMAT_USAGE
-      @help_command_deco  = help_command_deco  || HELP_COMMAND_DECO
-      @help_header_deco   = help_header_deco   || HELP_HEADER_DECO
-      @help_postamble     = help_postamble
+      @deco_command       = deco_command || DECORATION_COMMAND
+      @deco_header        = deco_header  || DECORATION_HEADER
       @deco_strong        = deco_strong  || DECORATION_STRONG
       @deco_weak          = deco_weak    || DECORATION_WEAK
       @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
@@ -748,7 +748,7 @@ module Benry::CmdApp
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
     attr_accessor :format_option, :format_action, :format_usage
-    attr_accessor :help_command_deco, :help_header_deco
+    attr_accessor :deco_command, :deco_header
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
     attr_accessor :option_verbose, :option_quiet, :option_color
@@ -849,12 +849,12 @@ module Benry::CmdApp
 
     def decorate_command(s)
       #; [!zffx5] decorates command string.
-      return @config.help_command_deco % s
+      return @config.deco_command % s
     end
 
     def decorate_header(s)
       #; [!zffx5] decorates header string.
-      return @config.help_header_deco % s
+      return @config.deco_header % s
     end
 
     def decorate_str(s, hidden, important)
@@ -894,7 +894,7 @@ module Benry::CmdApp
       #; [!bmh17] includes `config.app_name` or `config.app_command` into preamble.
       #; [!3h380] includes `config.app_detail` into preamble if it is set.
       c = @config
-      cmd = c.help_command_deco % (c.app_name || c.app_command)
+      cmd = c.deco_command % (c.app_name || c.app_command)
       s = "#{cmd} --- #{c.app_desc}\n"
       if c.app_detail
         s += "\n"
@@ -907,7 +907,7 @@ module Benry::CmdApp
     def help_message__usage()
       #; [!h98me] returns 'Usage:' section of application help message.
       c = @config
-      s = c.help_command_deco % c.app_command
+      s = c.deco_command % c.app_command
       s = c.format_usage % s + " [<options>] "
       #; [!i9d4r] includes `config.app_usage` into help message if it is set.
       usage = s + (c.app_usage || @config.class.const_get(:APP_USAGE))
@@ -983,14 +983,14 @@ module Benry::CmdApp
       #; [!imxdq] includes `config.app_command`, not `config.app_name`, into preamble.
       md = metadata
       c = @config
-      s = c.help_command_deco % "#{c.app_command} #{md.name}"
+      s = c.deco_command % "#{c.app_command} #{md.name}"
       return "#{s} --- #{md.desc}\n"
     end
 
     def help_message__usage(metadata, all: false)
       md = metadata
       c = @config
-      s = c.help_command_deco % "#{c.app_command} #{md.name}"
+      s = c.deco_command % "#{c.app_command} #{md.name}"
       s = c.format_usage % s
       #; [!jca5d] not add '[<options>]' if action has no options.
       s += " [<options>]" unless md.option_empty?(all: all)
