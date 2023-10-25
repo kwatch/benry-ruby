@@ -326,37 +326,37 @@ END
     end
 
 
-    topic '#help_message__preamble()' do
+    topic '#build_preamble_part()' do
 
       spec "[!51v42] returns preamble part of application help message." do
-        x = @builder.__send__(:help_message__preamble)
+        x = @builder.__send__(:build_preamble_part)
         ok {x} == "\e[1mTestApp\e[0m (1.2.3) --- test app\n"
       end
 
       spec "[!bmh17] includes `config.app_name` or `config.app_command` into preamble." do
         @config.app_name = "TestApp"
         @config.app_command = "testapp"
-        x = @builder.__send__(:help_message__preamble)
+        x = @builder.__send__(:build_preamble_part)
         ok {x} == "\e[1mTestApp\e[0m (1.2.3) --- test app\n"
         #
         @config.app_name = nil
-        x = @builder.__send__(:help_message__preamble)
+        x = @builder.__send__(:build_preamble_part)
         ok {x} == "\e[1mtestapp\e[0m (1.2.3) --- test app\n"
       end
 
       spec "[!opii8] includes `config.app_versoin` into preamble if it is set." do
         @config.app_version = "3.4.5"
-        x = @builder.__send__(:help_message__preamble)
+        x = @builder.__send__(:build_preamble_part)
         ok {x} == "\e[1mTestApp\e[0m (3.4.5) --- test app\n"
         #
         @config.app_version = nil
-        x = @builder.__send__(:help_message__preamble)
+        x = @builder.__send__(:build_preamble_part)
         ok {x} == "\e[1mTestApp\e[0m --- test app\n"
       end
 
       spec "[!3h380] includes `config.app_detail` into preamble if it is set." do
         @config.app_detail = "https://www.example.com/"
-        x = @builder.__send__(:help_message__preamble)
+        x = @builder.__send__(:build_preamble_part)
         ok {x} == <<"END"
 \e[1mTestApp\e[0m (1.2.3) --- test app
 
@@ -367,10 +367,10 @@ END
     end
 
 
-    topic '#help_message__usage()' do
+    topic '#build_usage_part()' do
 
       spec "[!h98me] returns 'Usage:' section of application help message." do
-        x = @builder.__send__(:help_message__usage)
+        x = @builder.__send__(:build_usage_part)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
@@ -379,7 +379,7 @@ END
 
       spec "[!i9d4r] includes `config.app_usage` into help message if it is set." do
         @config.app_usage = "<command> [<args>...]"
-        x = @builder.__send__(:help_message__usage)
+        x = @builder.__send__(:build_usage_part)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <command> [<args>...]
@@ -389,11 +389,11 @@ END
     end
 
 
-    topic '#help_message__options()' do
+    topic '#build_options_part()' do
 
       spec "[!f2n70] returns 'Options:' section of application help message." do
         gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
-        x = @builder.__send__(:help_message__options, gschema)
+        x = @builder.__send__(:build_options_part, gschema)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -410,7 +410,7 @@ END
 
       spec "[!0bboq] includes hidden options into help message if `all: true` passed." do
         gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
-        x = @builder.__send__(:help_message__options, gschema, all: true)
+        x = @builder.__send__(:build_options_part, gschema, all: true)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -428,26 +428,26 @@ END
 
       spec "[!fjhow] returns nil if no options." do
         gschema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
-        x = @builder.__send__(:help_message__options, gschema)
+        x = @builder.__send__(:build_options_part, gschema)
         ok {x} == nil
       end
 
     end
 
 
-    topic '#help_message__actions()' do
+    topic '#build_actions_part()' do
 
       spec "[!typ67] returns 'Actions:' section of help message." do
-        x = @builder.__send__(:help_message__actions)
+        x = @builder.__send__(:build_actions_part)
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
       end
 
       spec "[!yn8ea] includes hidden actions into help message if `all: true` passed." do
-        x = @builder.__send__(:help_message__actions, all: true)
+        x = @builder.__send__(:build_actions_part, all: true)
         ok {x} =~ /debuginfo/
         ok {x} =~ /^\e\[2m  debuginfo          : hidden action\e\[0m$/
         #
-        x = @builder.__send__(:help_message__actions)
+        x = @builder.__send__(:build_actions_part)
         ok {x} !~ /debuginfo/
       end
 
@@ -457,25 +457,25 @@ END
         index = Benry::CmdApp::MetadataIndex.new()
         with_dummy_index(index) do
           #
-          x = @builder.__send__(:help_message__actions)
+          x = @builder.__send__(:build_actions_part)
           ok {x} == nil
           #
           index.metadata_add(debuginfo_md)
-          x = @builder.__send__(:help_message__actions)
+          x = @builder.__send__(:build_actions_part)
           ok {x} == nil
-          x = @builder.__send__(:help_message__actions, all: true)
+          x = @builder.__send__(:build_actions_part, all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
 END
           #
           index.metadata_add(hello_md)
-          x = @builder.__send__(:help_message__actions)
+          x = @builder.__send__(:build_actions_part)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   hello              : greeting message
 END
-          x = @builder.__send__(:help_message__actions, all: true)
+          x = @builder.__send__(:build_actions_part, all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
@@ -486,25 +486,25 @@ END
 
       spec "[!8qz6a] adds default action name after header if it is set." do
         @config.default_action = "help"
-        x = @builder.__send__(:help_message__actions)
+        x = @builder.__send__(:build_actions_part)
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m \(default: help\)$/
         #
         @config.default_action = "hello"
-        x = @builder.__send__(:help_message__actions)
+        x = @builder.__send__(:build_actions_part)
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m \(default: hello\)$/
       end
 
     end
 
 
-    topic '#help_message__postamble()' do
+    topic '#build_postamble_part()' do
 
       spec "[!64hj1] returns postamble of application help message." do
         @config.help_postamble = [
           {"Examples:" => "  $ echo yes\n  yes\n"},
           "(Tips: blablabla)",
         ]
-        x = @builder.__send__(:help_message__postamble)
+        x = @builder.__send__(:build_postamble_part)
         ok {x} == <<"END"
 \e[1;34mExamples:\e[0m
   $ echo yes
@@ -515,7 +515,7 @@ END
       end
 
       spec "[!z5k2w] returns nil if postamble not set." do
-        x = @builder.__send__(:help_message__postamble)
+        x = @builder.__send__(:build_postamble_part)
         ok {x} == nil
       end
 
@@ -592,11 +592,11 @@ END
     end
 
 
-    topic '#help_message__preamble()' do
+    topic '#build_preamble_part()' do
 
       spec "[!a6nk4] returns preamble of action help message." do
         metadata = @index.metadata_get("hello")
-        x = @builder.__send__(:help_message__preamble, metadata)
+        x = @builder.__send__(:build_preamble_part, metadata)
         ok {x} == <<"END"
 \e[1mtestapp hello\e[0m --- greeting message
 END
@@ -606,7 +606,7 @@ END
         @config.app_name    = "TestApp1"
         @config.app_command = "testapp1"
         metadata = @index.metadata_get("hello")
-        x = @builder.__send__(:help_message__preamble, metadata)
+        x = @builder.__send__(:build_preamble_part, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 hello\e[0m --- greeting message
 END
@@ -615,7 +615,7 @@ END
       spec "[!7uy4f] includes `detail:` kwarg value of `@action.()` if specified." do
         @config.app_command = "testapp1"
         metadata = @index.metadata_get("prepostamble")
-        x = @builder.__send__(:help_message__preamble, metadata)
+        x = @builder.__send__(:build_preamble_part, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 prepostamble\e[0m --- preamble and postamble
 
@@ -626,11 +626,11 @@ END
     end
 
 
-    topic '#help_message__usage()' do
+    topic '#build_usage_part()' do
 
       spec "[!jca5d] not add '[<options>]' if action has no options." do
         metadata = @index.metadata_get("noopt")
-        x = @builder.__send__(:help_message__usage, metadata)
+        x = @builder.__send__(:build_usage_part, metadata)
         ok {x}.NOT.include?("[<options>]")
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -638,7 +638,7 @@ END
 END
         #
         metadata = @index.metadata_get("debuginfo")   # has a hidden option
-        x = @builder.__send__(:help_message__usage, metadata)
+        x = @builder.__send__(:build_usage_part, metadata)
         ok {x}.NOT.include?("[<options>]")
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -648,7 +648,7 @@ END
 
       spec "[!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string." do
         metadata = @index.metadata_get("usagesample1")
-        x = @builder.__send__(:help_message__usage, metadata)
+        x = @builder.__send__(:build_usage_part, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp usagesample1\e[0m input.txt > output.txt
@@ -657,7 +657,7 @@ END
 
       spec "[!nfuxz] `usage:` kwarg can be a string or an array of string." do
         metadata = @index.metadata_get("usagesample2")
-        x = @builder.__send__(:help_message__usage, metadata)
+        x = @builder.__send__(:build_usage_part, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp usagesample2\e[0m [<options>] input.txt | less
@@ -667,13 +667,13 @@ END
 
       spec "[!z3lh9] if `usage:` kwarg not specified in `@action.()`, generates usage string from method parameters." do
         metadata = @index.metadata_get("argsample")
-        x = @builder.__send__(:help_message__usage, metadata)
+        x = @builder.__send__(:build_usage_part, metadata)
         ok {x}.include?("[<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]")
       end
 
       spec "[!iuctx] returns 'Usage:' section of action help message." do
         metadata = @index.metadata_get("argsample")
-        x = @builder.__send__(:help_message__usage, metadata)
+        x = @builder.__send__(:build_usage_part, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp argsample\e[0m [<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]
@@ -683,11 +683,11 @@ END
     end
 
 
-    topic '#help_message__options()' do
+    topic '#build_options_part()' do
 
       spec "[!pafgs] returns 'Options:' section of help message." do
         metadata = @index.metadata_get("hello")
-        x = @builder.__send__(:help_message__options, metadata)
+        x = @builder.__send__(:build_options_part, metadata)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
   -l, --lang=<lang>  : language name (en/fr/it)
@@ -696,18 +696,18 @@ END
 
       spec "[!85wus] returns nil if action has no options." do
         metadata = @index.metadata_get("noopt")
-        x = @builder.__send__(:help_message__options, metadata)
+        x = @builder.__send__(:build_options_part, metadata)
         ok {x} == nil
       end
 
     end
 
 
-    topic '#help_message__postamble()' do
+    topic '#build_postamble_part()' do
 
       spec "[!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`." do
         metadata = @index.metadata_get("prepostamble")
-        x = @builder.__send__(:help_message__postamble, metadata)
+        x = @builder.__send__(:build_postamble_part, metadata)
         ok {x} == <<"END"
 \e[1;34mExamples:\e[0m
   $ echo
@@ -718,7 +718,7 @@ END
 
       spec "[!jajse] returns nil if postamble is not set." do
         metadata = @index.metadata_get("hello")
-        x = @builder.__send__(:help_message__postamble, metadata)
+        x = @builder.__send__(:build_postamble_part, metadata)
         ok {x} == nil
       end
 

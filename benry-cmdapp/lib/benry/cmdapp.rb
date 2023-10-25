@@ -891,17 +891,17 @@ module Benry::CmdApp
       #; [!ezcs4] returns help message string of application.
       #; [!ntj2y] includes hidden actions and options if `all: true` passed.
       sb = []
-      sb << help_message__preamble()
-      sb << help_message__usage()
-      sb << help_message__options(gschema, all: all)
-      sb << help_message__actions(all: all)
-      sb << help_message__postamble()
+      sb << build_preamble_part()
+      sb << build_usage_part()
+      sb << build_options_part(gschema, all: all)
+      sb << build_actions_part(all: all)
+      sb << build_postamble_part()
       return sb.compact().join("\n")
     end
 
     protected
 
-    def help_message__preamble()
+    def build_preamble_part()
       #; [!51v42] returns preamble part of application help message.
       #; [!bmh17] includes `config.app_name` or `config.app_command` into preamble.
       #; [!opii8] includes `config.app_versoin` into preamble if it is set.
@@ -921,7 +921,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def help_message__usage()
+    def build_usage_part()
       #; [!h98me] returns 'Usage:' section of application help message.
       c = @config
       s = c.deco_command % c.app_command
@@ -932,7 +932,7 @@ module Benry::CmdApp
       return build_section(header, usage + "\n")
     end
 
-    def help_message__options(gschema, all: false)
+    def build_options_part(gschema, all: false)
       #; [!f2n70] returns 'Options:' section of application help message.
       #; [!0bboq] includes hidden options into help message if `all: true` passed.
       #; [!fjhow] returns nil if no options.
@@ -943,7 +943,7 @@ module Benry::CmdApp
       return build_section(header, s)
     end
 
-    def help_message__actions(all: false, &filter)
+    def build_actions_part(all: false, &filter)
       index = INDEX
       #; [!typ67] returns 'Actions:' section of help message.
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
@@ -969,7 +969,7 @@ module Benry::CmdApp
       return build_section(header, sb.join(), extra)
     end
 
-    def help_message__postamble()
+    def build_postamble_part()
       #; [!64hj1] returns postamble of application help message.
       #; [!z5k2w] returns nil if postamble not set.
       return build_sections(@config.help_postamble, 'config.help_postamble')
@@ -986,16 +986,16 @@ module Benry::CmdApp
       #; [!vcg9w] not include 'Options:' section if action has no options.
       #; [!1auu5] not include '[<options>]' in 'Usage:'section if action has no options.
       sb = []
-      sb << help_message__preamble(metadata)
-      sb << help_message__usage(metadata, all: all)
-      sb << help_message__options(metadata, all: all)
-      sb << help_message__postamble(metadata)
+      sb << build_preamble_part(metadata)
+      sb << build_usage_part(metadata, all: all)
+      sb << build_options_part(metadata, all: all)
+      sb << build_postamble_part(metadata)
       return sb.compact().join("\n")
     end
 
     protected
 
-    def help_message__preamble(metadata)
+    def build_preamble_part(metadata)
       #; [!a6nk4] returns preamble of action help message.
       #; [!imxdq] includes `config.app_command`, not `config.app_name`, into preamble.
       #; [!7uy4f] includes `detail:` kwarg value of `@action.()` if specified.
@@ -1011,7 +1011,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def help_message__usage(metadata, all: false)
+    def build_usage_part(metadata, all: false)
       md = metadata
       c = @config
       s = c.deco_command % "#{c.app_command} #{md.name}"
@@ -1032,7 +1032,7 @@ module Benry::CmdApp
       return build_section(header, sb.join())
     end
 
-    def help_message__options(metadata, all: false)
+    def build_options_part(metadata, all: false)
       #; [!pafgs] returns 'Options:' section of help message.
       #; [!85wus] returns nil if action has no options.
       format = @config.format_option
@@ -1042,7 +1042,7 @@ module Benry::CmdApp
       return build_section(header, s)
     end
 
-    def help_message__postamble(metadata)
+    def build_postamble_part(metadata)
       #; [!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`.
       #; [!jajse] returns nil if postamble is not set.
       return build_sections(metadata.postamble, '@action.(postamble: "...")')
@@ -1066,7 +1066,7 @@ module Benry::CmdApp
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
       #; [!k2tts] returns nil if no actions found.
       b = new_app_help_builder()
-      return b.__send__(:help_message__actions, all: all)
+      return b.__send__(:build_actions_part, all: all)
     end
 
     def build_action_list_filtered_by(prefix, all: false)
@@ -1075,7 +1075,7 @@ module Benry::CmdApp
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       found = false
-      s1 = b.__send__(:help_message__actions, all: all) {|metadata|
+      s1 = b.__send__(:build_actions_part, all: all) {|metadata|
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         md = metadata
         if md.name.start_with?(prefix)
