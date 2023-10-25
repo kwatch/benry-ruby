@@ -779,6 +779,45 @@ END
     end
 
 
+    topic '#change_order!(*keys)' do
+
+      spec "[!2cp9s] sorts options in order of keys specified." do
+        config = Benry::CmdApp::Config.new("sample app", "1.2.3", option_debug: true)
+        schema = new_schema(config)
+        ok {schema.to_s} == <<'END'
+  -h, --help     : print help message (of action if specified)
+  -V, --version  : print version
+  -l, --list     : list actions
+  -a, --all      : list all actions/options including hidden ones
+      --debug    : debug mode
+END
+        #
+        schema.change_order!(:list, :help, :all, :debug, :version)
+        ok {schema.to_s} == <<'END'
+  -l, --list     : list actions
+  -h, --help     : print help message (of action if specified)
+  -a, --all      : list all actions/options including hidden ones
+      --debug    : debug mode
+  -V, --version  : print version
+END
+      end
+
+      spec "[!xe7e1] moves options which are not included in specified keys to end of option list." do
+        config = Benry::CmdApp::Config.new("sample app", "1.2.3", option_debug: true)
+        schema = new_schema(config)
+        schema.change_order!(:list, :help)
+        ok {schema.to_s} == <<'END'
+  -l, --list     : list actions
+  -h, --help     : print help message (of action if specified)
+  -V, --version  : print version
+  -a, --all      : list all actions/options including hidden ones
+      --debug    : debug mode
+END
+      end
+
+    end
+
+
   end
 
 

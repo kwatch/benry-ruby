@@ -1138,6 +1138,14 @@ module Benry::CmdApp
       add(:trace   , "-T, --trace"   , "trace mode")      if c.option_trace
     end
 
+    def change_order!(*keys)
+      #; [!2cp9s] sorts options in order of keys specified.
+      #; [!xe7e1] moves options which are not included in specified keys to end of option list.
+      n = @items.length
+      @items.sort_by! {|item| keys.index(item.key) || @items.index(item) + n }
+      nil
+    end
+
   end
 
   GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
