@@ -452,31 +452,36 @@ END
       end
 
       spec "[!24by5] returns nil if no actions defined." do
+        debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
+        hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
         index = Benry::CmdApp::MetadataIndex.new()
-        x = @builder.__send__(:help_message__actions, _index: index)
-        ok {x} == nil
-        #
-        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("debuginfo"))
-        x = @builder.__send__(:help_message__actions, _index: index)
-        ok {x} == nil
-        x = @builder.__send__(:help_message__actions, _index: index, all: true)
-        ok {x} == <<"END"
+        with_dummy_index(index) do
+          #
+          x = @builder.__send__(:help_message__actions)
+          ok {x} == nil
+          #
+          index.metadata_add(debuginfo_md)
+          x = @builder.__send__(:help_message__actions)
+          ok {x} == nil
+          x = @builder.__send__(:help_message__actions, all: true)
+          ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
 END
-        #
-        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
-        x = @builder.__send__(:help_message__actions, _index: index)
-        ok {x} == <<"END"
+          #
+          index.metadata_add(hello_md)
+          x = @builder.__send__(:help_message__actions)
+          ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   hello              : greeting message
 END
-        x = @builder.__send__(:help_message__actions, _index: index, all: true)
-        ok {x} == <<"END"
+          x = @builder.__send__(:help_message__actions, all: true)
+          ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
   hello              : greeting message
 END
+        end
       end
 
       spec "[!8qz6a] adds default action name after header if it is set." do

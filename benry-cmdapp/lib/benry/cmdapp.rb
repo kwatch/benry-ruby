@@ -939,8 +939,8 @@ module Benry::CmdApp
       return build_section(header, s)
     end
 
-    def help_message__actions(all: false, _index: nil, &filter)
-      index = _index || INDEX
+    def help_message__actions(all: false, &filter)
+      index = INDEX
       #; [!typ67] returns 'Actions:' section of help message.
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
       c = @config
