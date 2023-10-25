@@ -789,7 +789,7 @@ END
     end
 
 
-    topic '#change_order!(*keys)' do
+    topic '#reorder_options!(*keys)' do
 
       spec "[!2cp9s] sorts options in order of keys specified." do
         config = Benry::CmdApp::Config.new("sample app", "1.2.3", option_debug: true)
@@ -802,7 +802,7 @@ END
       --debug    : debug mode
 END
         #
-        schema.change_order!(:list, :help, :all, :debug, :version)
+        schema.reorder_options!(:list, :help, :all, :debug, :version)
         ok {schema.to_s} == <<'END'
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
@@ -815,7 +815,7 @@ END
       spec "[!xe7e1] moves options which are not included in specified keys to end of option list." do
         config = Benry::CmdApp::Config.new("sample app", "1.2.3", option_debug: true)
         schema = new_schema(config)
-        schema.change_order!(:list, :help)
+        schema.reorder_options!(:list, :help)
         ok {schema.to_s} == <<'END'
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
