@@ -147,6 +147,13 @@ Oktest.scope do
                        "foo:xxx: Action not found.")
       end
 
+      spec "[!de6a9] raises ActionError if alias name specified." do
+        Benry::CmdApp.define_alias("a0469", "hello")
+        pr = proc { @context.run_action("a0469", [], {}) }
+        ok {pr}.raise?(Benry::CmdApp::ActionError,
+                       "a0469: Action expected, but it is an alias.")
+      end
+
       spec "[!6hoir] don't run action and returns false if `once: true` specified and the action already done." do
         ret1 = ret2 = ret3 = nil
         sout, serr = capture_sio do

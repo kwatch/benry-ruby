@@ -649,19 +649,29 @@ module Benry::CmdApp
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
         prefix = $1
-        metadata = @index.action_lookup(prefix + action)
+        metadata = @index.metadata_get(prefix + action)
         action = prefix + action if metadata
       end
       #; [!ygpsw] raises ActionError if action not found.
-      metadata ||= @index.action_lookup(action)  or
+      metadata ||= @index.metadata_get(action)
+      metadata != nil  or
         raise ActionError.new("#{action}: Action not found.")
+      #; [!de6a9] raises ActionError if alias name specified.
+      ! metadata.alias?  or
+        raise ActionError.new("#{action}: Action expected, but it is an alias.")
+      return _run_action(metadata, args, kwargs, once: once)
+    end
+
+    def _run_action(action_metadata, args, kwargs, once: false)
+      ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
       #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
+      action = action_metadata.name
       return false if once && @status_dict[action] == :done
       #; [!xwlou] raises ActionError if looped aciton detected.
       @status_dict[action] != :doing  or
         raise ActionError.new("#{action}: Looped action detected.")
       #; [!peqk8] raises ActionError if args and opts not matched to action method.
-      md = metadata
+      md = action_metadata
       scope_obj = md.klass.new(@config, self)
       #scope_obj = (@scope_objects[md.klass.name] ||= md.klass.new(@config, self))
       errmsg = Util.validate_args_and_kwargs(scope_obj, md.meth, args, kwargs)
