@@ -219,7 +219,7 @@ END
     topic '#build_help_message()' do
 
       spec "[!ezcs4] returns help message string of application." do
-        gschema = Benry::CmdApp::Application.new_global_option_schema(@config)
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
         actual = @builder.build_help_message(gschema)
         expected = <<"END"
 \e[1mTestApp\e[0m (1.2.3) --- test app
@@ -245,7 +245,7 @@ END
 
       spec "[!ntj2y] includes hidden actions and options if `all: true` passed." do
         @config.option_debug = true
-        gschema = Benry::CmdApp::Application.new_global_option_schema(@config)
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
         actual = @builder.build_help_message(gschema)
         expected = <<"END"
 \e[1mTestApp\e[0m (1.2.3) --- test app
@@ -339,7 +339,7 @@ END
     topic '#help_message__options()' do
 
       spec "[!f2n70] returns 'Options:' section of application help message." do
-        gschema = Benry::CmdApp::Application.new_global_option_schema(@config)
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
         x = @builder.__send__(:help_message__options, gschema)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
@@ -356,7 +356,7 @@ END
       end
 
       spec "[!0bboq] includes hidden options into help message if `all: true` passed." do
-        gschema = Benry::CmdApp::Application.new_global_option_schema(@config)
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
         x = @builder.__send__(:help_message__options, gschema, all: true)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m

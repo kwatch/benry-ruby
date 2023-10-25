@@ -713,8 +713,8 @@ module Benry::CmdApp
                    format_option: nil, format_action: nil, format_usage: nil,
                    deco_command: nil, deco_header: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
-                   option_verbose: nil, option_quiet: nil, option_color: nil,
-                   option_debug: nil, option_trace: nil)
+                   option_verbose: false, option_quiet: false, option_color: false,
+                   option_debug: nil, option_trace: false)
       @app_desc           = app_desc
       @app_version        = app_version
       @app_name           = app_name
@@ -1121,6 +1121,28 @@ module Benry::CmdApp
   ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
 
 
+  class GlobalOptionSchema < OptionSchema
+
+    def initialize(config)
+      super()
+      #; [!ppcvp] adds options according to config object.
+      c = config
+      add(:help    , "-h, --help"    , "print help message (of action if specified)")
+      add(:version , "-V, --version" , "print version")   if c.app_version
+      add(:list    , "-l, --list"    , "list actions")
+      add(:all     , "-a, --all"     , "list all actions/options including hidden ones")
+      add(:verbose , "-v, --verbose" , "verbose mode")    if c.option_verbose
+      add(:quiet   , "-q, --quiet"   , "quiet mode")      if c.option_quiet
+      add(:color   , "-C, --color[=on|off]", "color mode", type: TrueClass) if c.option_color
+      add(:debug   , "    --debug"   , "debug mode", hidden: ! c.option_debug)
+      add(:trace   , "-T, --trace"   , "trace mode")      if c.option_trace
+    end
+
+  end
+
+  GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
+
+
   def self.current_app()   # :nodoc:
     #; [!xdjce] returns current application.
     return @current_app
@@ -1137,7 +1159,7 @@ module Benry::CmdApp
 
     def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _index: INDEX)
       @config        = config
-      @option_schema = global_option_schema || self.class.new_global_option_schema(config)
+      @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
       @index         = _index
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
@@ -1147,22 +1169,6 @@ module Benry::CmdApp
 
     def inspect()
       return super.split().first() + ">"
-    end
-
-    def self.new_global_option_schema(config)
-      #; [!b8gj4] creates global option schema.
-      c = config
-      schema = OPTION_SCHEMA_CLASS.new
-      schema.add(:help     , "-h, --help"     , "print help message (of action if specified)")
-      schema.add(:version  , "-V, --version"  , "print version") if c.app_version
-      schema.add(:list     , "-l, --list"     , "list actions")
-      schema.add(:all      , "-a, --all"      , "list all actions/options including hidden ones")
-      schema.add(:verbose  , "-v, --verbose"  , "verbose mode")   if c.option_verbose
-      schema.add(:quiet    , "-q, --quiet"    , "quiet mode")     if c.option_quiet
-      schema.add(:color    , "-C, --color[=on|off]", "color mode", type: TrueClass) if c.option_color
-      schema.add(:debug    , "    --debug"    , "debug mode", hidden: ! c.option_debug)
-      schema.add(:trace    , "-T, --trace"    , "trace mode")     if c.option_trace
-      return schema
     end
 
     def main(argv=ARGV)

@@ -16,16 +16,6 @@ Oktest.scope do
     end
 
 
-    topic '.new_global_option_schema()' do
-
-      spec "[!b8gj4] creates global option schema." do
-        x = Benry::CmdApp::Application.new_global_option_schema(@config)
-        ok {x}.is_a?(Benry::CmdApp::OPTION_SCHEMA_CLASS)
-      end
-
-    end
-
-
     topic '#main()' do
 
       spec "[!65e9n] returns `0` as status code." do
@@ -733,6 +723,57 @@ END
         lines = @app.instance_eval { read_file_as_lines(__FILE__) }
         ok {lines}.is_a?(Array)
         ok {lines[__LINE__ - 2]} == "        ok {lines}.is_a?(Array)\n"
+      end
+
+    end
+
+
+  end
+
+
+  topic Benry::CmdApp::GlobalOptionSchema do
+
+    def new_schema(config)
+      return Benry::CmdApp::GlobalOptionSchema.new(config)
+    end
+
+
+    topic '#initialize()' do
+
+      spec "[!ppcvp] adds options according to config object." do
+        config = Benry::CmdApp::Config.new("sample app")
+        schema = new_schema(config)
+        ok {schema.get(:help)}    != nil
+        ok {schema.get(:list)}    != nil
+        ok {schema.get(:all)}     != nil
+        ok {schema.get(:debug)}   != nil
+        ok {schema.get(:debug)}.hidden?
+        ok {schema.to_s} == <<"END"
+  -h, --help     : print help message (of action if specified)
+  -l, --list     : list actions
+  -a, --all      : list all actions/options including hidden ones
+END
+        #
+        ok {schema.get(:version)} == nil
+        ok {schema.get(:verbose)} == nil
+        ok {schema.get(:quiet)}   == nil
+        ok {schema.get(:color)}   == nil
+        ok {schema.get(:trace)}   == nil
+        #
+        config.app_version = "1.2.3"
+        config.option_verbose = true
+        config.option_quiet  = true
+        config.option_color  = true
+        config.option_debug  = true
+        config.option_trace  = true
+        #
+        schema = new_schema(config)
+        ok {schema.get(:version)} != nil
+        ok {schema.get(:verbose)} != nil
+        ok {schema.get(:quiet)}   != nil
+        ok {schema.get(:color)}   != nil
+        ok {schema.get(:trace)}   != nil
+        ok {schema.get(:debug)}.NOT.hidden?
       end
 
     end
