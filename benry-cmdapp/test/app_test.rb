@@ -408,8 +408,8 @@ END
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
 
 \e[1;34mOptions:\e[0m
-  -h, --help         : show help message
-  -V, --version      : output version
+  -h, --help         : print help message (of action if specified)
+  -V, --version      : print version
   -l, --list         : list actions
   -a, --all          : list all actions/options including hidden ones
 

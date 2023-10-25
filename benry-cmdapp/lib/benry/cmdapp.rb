@@ -1148,8 +1148,8 @@ module Benry::CmdApp
       #; [!b8gj4] creates global option schema.
       c = config
       schema = OPTION_SCHEMA_CLASS.new
-      schema.add(:help     , "-h, --help"     , "show help message")
-      schema.add(:version  , "-V, --version"  , "output version") if c.app_version
+      schema.add(:help     , "-h, --help"     , "print help message (of action if specified)")
+      schema.add(:version  , "-V, --version"  , "print version") if c.app_version
       schema.add(:list     , "-l, --list"     , "list actions")
       schema.add(:all      , "-a, --all"      , "list all actions/options including hidden ones")
       schema.add(:verbose  , "-v, --verbose"  , "verbose mode")   if c.option_verbose
