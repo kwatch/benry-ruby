@@ -897,18 +897,18 @@ module Benry::CmdApp
       #; [!opii8] includes `config.app_versoin` into preamble if it is set.
       #; [!3h380] includes `config.app_detail` into preamble if it is set.
       c = @config
-      cmd = c.deco_command % (c.app_name || c.app_command)
+      s = c.deco_command % (c.app_name || c.app_command)
+      sb = []
       if c.app_version
-        s = "#{cmd} (#{c.app_version}) --- #{c.app_desc}\n"
+        sb << "#{s} (#{c.app_version}) --- #{c.app_desc}\n"
       else
-        s = "#{cmd} --- #{c.app_desc}\n"
+        sb << "#{s} --- #{c.app_desc}\n"
       end
       if c.app_detail
-        s += "\n"
-        s += c.app_detail
-        s += "\n" unless s.end_with?("\n")
+        sb << "\n"
+        sb << build_sections(c.app_detail, 'config.app_detail')
       end
-      return s
+      return sb.join()
     end
 
     def help_message__usage()
