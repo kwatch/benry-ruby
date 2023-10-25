@@ -776,6 +776,11 @@ END
         ok {schema.get(:debug)}.NOT.hidden?
       end
 
+      spec "[!umjw5] add nothing if config is nil." do
+        schema = new_schema(nil)
+        ok {schema}.empty?
+      end
+
     end
 
 

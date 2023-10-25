@@ -1125,6 +1125,8 @@ module Benry::CmdApp
 
     def initialize(config)
       super()
+      #; [!umjw5] add nothing if config is nil.
+      return if ! config
       #; [!ppcvp] adds options according to config object.
       c = config
       add(:help    , "-h, --help"    , "print help message (of action if specified)")
