@@ -74,6 +74,13 @@ Oktest.scope do
                    "http://example.com/doc/\n")
       end
 
+      spec "[!0o8w4] appends '\n' to content if it doesn't end with '\n'." do
+        s = @builder.__send__(:build_section, "Document:", "http://...")
+        ok {s} == ("\e[1;34mDocument:\e[0m\n" \
+                   "http://...\n")
+        ok {s}.end_with?("\n")
+      end
+
     end
 
 

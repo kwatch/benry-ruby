@@ -801,7 +801,9 @@ module Benry::CmdApp
 
     def build_section(header, content, extra=nil)
       #; [!61psk] returns section string with decorating header.
-      return "#{decorate_header(header)}#{extra}\n#{content}"
+      #; [!0o8w4] appends '\n' to content if it doesn't end with '\n'.
+      nl = content.end_with?("\n") ? nil : "\n"
+      return "#{decorate_header(header)}#{extra}\n#{content}#{nl}"
     end
 
     def build_sections(value, item, &b)
