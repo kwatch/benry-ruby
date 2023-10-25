@@ -1057,16 +1057,16 @@ module Benry::CmdApp
     end
     private :new_app_help_builder
 
-    def build_action_list(all: false, _index: nil)
+    def build_action_list(all: false)
       #; [!q12ju] returns list of actions and aliases.
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
       #; [!k2tts] returns nil if no actions found.
       b = new_app_help_builder()
-      return b.__send__(:help_message__actions, all: all, _index: _index)
+      return b.__send__(:help_message__actions, all: all)
     end
 
-    def build_action_list_filtered_by(prefix, _index: nil, all: false)
-      index = _index || INDEX
+    def build_action_list_filtered_by(prefix, all: false)
+      index = INDEX
       b = new_app_help_builder()
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
@@ -1107,8 +1107,8 @@ module Benry::CmdApp
       return [s1, s2].compact().join("\n")
     end
 
-    def build_top_prefix_list(all: false, _index: nil)
-      index = _index || INDEX
+    def build_top_prefix_list(all: false)
+      index = INDEX
       #; [!crbav] returns top prefix list.
       dict = {}
       index.metadata_each do |metadata|

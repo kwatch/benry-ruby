@@ -46,6 +46,22 @@ end
 Oktest.scope do
 
 
+  def with_dummy_index(index, &b)
+    bkup = nil
+    Benry::CmdApp.module_eval {
+      bkup = const_get :INDEX
+      remove_const :INDEX
+      const_set :INDEX, index
+    }
+    yield
+  ensure
+    Benry::CmdApp.module_eval {
+      remove_const :INDEX
+      const_set :INDEX, bkup
+    }
+  end
+
+
   topic Benry::CmdApp::BaseHelpBuilder do
 
 
@@ -740,31 +756,36 @@ END
       end
 
       spec "[!k2tts] returns nil if no actions found." do
+        debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
+        hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
         index = Benry::CmdApp::MetadataIndex.new()
-        x = @builder.build_action_list(_index: index)
-        ok {x} == nil
-        #
-        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("debuginfo"))
-        x = @builder.build_action_list(_index: index)
-        ok {x} == nil
-        x = @builder.build_action_list(_index: index, all: true)
-        ok {x} == <<"END"
+        with_dummy_index(index) do
+          #
+          x = @builder.build_action_list()
+          ok {x} == nil
+          #
+          index.metadata_add(debuginfo_md)
+          x = @builder.build_action_list()
+          ok {x} == nil
+          x = @builder.build_action_list(all: true)
+          ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
 END
-        #
-        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
-        x = @builder.build_action_list(_index: index)
-        ok {x} == <<"END"
+          #
+          index.metadata_add(hello_md)
+          x = @builder.build_action_list()
+          ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   hello              : greeting message
 END
-        x = @builder.build_action_list(_index: index, all: true)
-        ok {x} == <<"END"
+          x = @builder.build_action_list(all: true)
+          ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
   hello              : greeting message
 END
+        end
       end
 
     end
@@ -883,10 +904,12 @@ END
           index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
         end
         #
-        x = @builder.build_top_prefix_list(_index: index)
-        ok {x} == nil
-        x = @builder.build_top_prefix_list(all: true, _index: index)
-        ok {x} != nil
+        with_dummy_index(index) do
+          x = @builder.build_top_prefix_list()
+          ok {x} == nil
+          x = @builder.build_top_prefix_list(all: true)
+          ok {x} != nil
+        end
       end
 
       spec "[!30l2j] includes number of actions per prefix." do
