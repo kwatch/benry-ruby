@@ -266,10 +266,7 @@ module Benry::CmdApp
   end
 
 
-  def self.define_alias(alias_name, action_name, args=nil, tag: nil, important: nil, hidden: nil)
-    #; [!yrf2g] raises ArgumentError if 3rd arg is not nil nor an array of string.
-    args == nil || args.is_a?(Array)  or
-      raise ArgumentError.new("define_alias(#{alias_name.inspect}, #{action_name.inspect}, #{args.inspect}): 3rd argument should be an array of string, but got #{args.class.name}.")
+  def self.define_alias(alias_name, action_name, *args, tag: nil, important: nil, hidden: nil)
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
     errmsg = self.__validate_alias_and_action(alias_name, action_name)
     errmsg == nil  or
