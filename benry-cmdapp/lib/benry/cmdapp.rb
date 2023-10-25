@@ -630,13 +630,23 @@ module Benry::CmdApp
     private :__clear
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
+      #; [!2mnh7] looks up action metadata with action or alias name.
+      alias_args = []
+      metadata = @index.metadata_get(action_name)
+      while metadata != nil && metadata.alias?
+        alias_args = metadata.args + alias_args if metadata.args
+        metadata = @index.metadata_get(metadata.action)
+      end
       #; [!0ukvb] raises CommandError if action nor alias not found.
-      metadata = @index.action_lookup(action_name)  or
+      metadata != nil  or
         raise CommandError.new("#{action_name}: Action nor alias not found.")
+      #; [!9n46s] if alias has its own args, combines them with command-line args.
+      args = alias_args + cmdline_args
+      #; [!5ru31] options in alias args are also parsed as well as command-line options.
       #; [!r3gfv] raises OptionError if invalid action options specified.
-      options = metadata.parse_options(cmdline_args)
+      options = metadata.parse_options(args)
       #; [!lg6br] runs action with command-line arguments.
-      run_action(action_name, cmdline_args, options, once: false)
+      _run_action(metadata, args, options, once: false)
       return nil
     ensure
       #; [!jcguj] clears instance variables.
