@@ -498,6 +498,35 @@ END
     end
 
 
+    topic '.__validate_action_method()' do
+
+      spec "[!5a4d3] returns error message if action with same name already defined." do
+        x = nil
+        ScopeTestAction.class_eval do
+          x = __validate_action_method("hello", :tmp__helo, :hello)
+        end
+        ok {x} == "Action 'hello' already defined (to redefine it, delete it beforehand by `undef_action()`)."
+      end
+
+      spec "[!uxsx3] returns error message if method already defined in parent or ancestor cl" do
+        x = nil
+        ScopeTestAction.class_eval do
+          x = __validate_action_method("print", :print, :print)
+        end
+        ok {x} == "Please rename it to `print_()` because same method defined in parent or ancestor class."
+      end
+
+      spec "[!3fmpo] method override check is done with new method name (= prefixed name)." do
+        x = nil
+        ScopeTestAction.class_eval do
+          x = __validate_action_method("p3159:print", :print, :xprint)
+        end
+        ok {x} == "Please rename it to `xprint_()` because same method defined in parent or ancestor class."
+      end
+
+    end
+
+
     topic '.current_prefix()' do
 
       spec "[!2zt0f] returns current prefix name such as 'foo:bar:'." do
