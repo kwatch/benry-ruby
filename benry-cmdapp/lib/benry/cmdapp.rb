@@ -986,10 +986,17 @@ module Benry::CmdApp
     def help_message__preamble(metadata)
       #; [!a6nk4] returns preamble of action help message.
       #; [!imxdq] includes `config.app_command`, not `config.app_name`, into preamble.
+      #; [!7uy4f] includes `detail:` kwarg value of `@action.()` if specified.
       md = metadata
+      sb = []
       c = @config
       s = c.deco_command % "#{c.app_command} #{md.name}"
-      return "#{s} --- #{md.desc}\n"
+      sb << "#{s} --- #{md.desc}\n"
+      if md.detail
+        sb << "\n"
+        sb << build_sections(md.detail, '@action.(detail: ...)')
+      end
+      return sb.join()
     end
 
     def help_message__usage(metadata, all: false)

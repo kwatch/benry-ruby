@@ -8,6 +8,7 @@ require_relative 'shared'
 class HelpTestAction < Benry::CmdApp::Action
 
   @action.("preamble and postamble",
+           detail: "See https://....",
            postamble: [{"Examples:"=>"  $ echo\n"}, "(Tips: blabla)"])
   def prepostamble()
   end
@@ -552,6 +553,17 @@ END
         x = @builder.__send__(:help_message__preamble, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 hello\e[0m --- greeting message
+END
+      end
+
+      spec "[!7uy4f] includes `detail:` kwarg value of `@action.()` if specified." do
+        @config.app_command = "testapp1"
+        metadata = @index.metadata_get("prepostamble")
+        x = @builder.__send__(:help_message__preamble, metadata)
+        ok {x} == <<"END"
+\e[1mtestapp1 prepostamble\e[0m --- preamble and postamble
+
+See https://....
 END
       end
 
