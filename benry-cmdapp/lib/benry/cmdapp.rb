@@ -1150,8 +1150,8 @@ module Benry::CmdApp
       c = config
       add(:help    , "-h, --help"    , "print help message (of action if specified)")
       add(:version , "-V, --version" , "print version")   if c.app_version
-      add(:list    , "-l, --list"    , "list actions")
-      add(:all     , "-a, --all"     , "list all actions/options including hidden ones")
+      add(:list    , "-l, --list"    , "list actions")    if c.option_list
+      add(:all     , "-a, --all"     , "list all actions/options including hidden ones") if c.option_all
       add(:verbose , "-v, --verbose" , "verbose mode")    if c.option_verbose
       add(:quiet   , "-q, --quiet"   , "quiet mode")      if c.option_quiet
       add(:color   , "--color[=<on|off>]", "color mode", type: TrueClass) if c.option_color

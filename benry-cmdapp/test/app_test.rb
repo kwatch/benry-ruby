@@ -741,26 +741,28 @@ END
     topic '#initialize()' do
 
       spec "[!ppcvp] adds options according to config object." do
-        config = Benry::CmdApp::Config.new("sample app")
+        config = Benry::CmdApp::Config.new("sample app", "1.2.3")
         schema = new_schema(config)
         ok {schema.get(:help)}    != nil
+        ok {schema.get(:version)} != nil
         ok {schema.get(:list)}    != nil
         ok {schema.get(:all)}     != nil
+        ok {schema.get(:verbose)} == nil
+        ok {schema.get(:quiet)}   == nil
+        ok {schema.get(:color)}   == nil
         ok {schema.get(:debug)}   != nil
         ok {schema.get(:debug)}.hidden?
         ok {schema.to_s} == <<"END"
   -h, --help     : print help message (of action if specified)
+  -V, --version  : print version
   -l, --list     : list actions
   -a, --all      : list all actions/options including hidden ones
 END
-        #
-        ok {schema.get(:version)} == nil
-        ok {schema.get(:verbose)} == nil
-        ok {schema.get(:quiet)}   == nil
-        ok {schema.get(:color)}   == nil
         ok {schema.get(:trace)}   == nil
         #
-        config.app_version = "1.2.3"
+        config.app_version   = nil
+        config.option_list   = false
+        config.option_all    = false
         config.option_verbose = true
         config.option_quiet  = true
         config.option_color  = true
@@ -768,7 +770,10 @@ END
         config.option_trace  = true
         #
         schema = new_schema(config)
-        ok {schema.get(:version)} != nil
+        ok {schema.get(:help)}    != nil
+        ok {schema.get(:version)} == nil
+        ok {schema.get(:list)}    == nil
+        ok {schema.get(:all)}     == nil
         ok {schema.get(:verbose)} != nil
         ok {schema.get(:quiet)}   != nil
         ok {schema.get(:color)}   != nil
