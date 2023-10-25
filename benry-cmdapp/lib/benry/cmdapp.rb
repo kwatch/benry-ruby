@@ -828,12 +828,18 @@ module Benry::CmdApp
     def build_option_help(schema, format, all: false)
       #; [!muhem] returns option part of help message.
       #; [!4z70n] includes hidden options when `all: true` passed.
+      #; [!hxy1f] includes `detail:` kwarg value with indentation.
       #; [!jcqdf] returns nil if no options.
       c = @config
       sb = []
       schema.each do |x|
         next if x.hidden? && ! all
         s = format % [x.optdef, x.desc]
+        if x.detail
+          space = (format % ["", ""]).gsub(/\S/, " ")
+          s += "\n"
+          s += x.detail.chomp("\n").gsub(/^/, space)
+        end
         s = decorate_str(s, x.hidden?, x.important?)
         sb << s << "\n"
       end

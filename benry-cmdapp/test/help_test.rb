@@ -139,6 +139,34 @@ END
 END
       end
 
+      spec "[!hxy1f] includes `detail:` kwarg value with indentation." do
+        @schema.add(:mode, "-m <mode>", "output mode", detail: <<END)
+- v, verbose: print many output
+- q, quiet:   print litte output
+- c, compact: print summary output
+END
+        #
+        x = @builder.__send__(:build_option_help, @schema, @format)
+        ok {x} == <<"END"
+  -h, --help         : help message
+  -f <file>          : filename
+  -m <mode>          : output mode
+                       - v, verbose: print many output
+                       - q, quiet:   print litte output
+                       - c, compact: print summary output
+END
+        #
+        x = @builder.__send__(:build_option_help, @schema, "  %-15s # %s")
+        ok {x} == <<"END"
+  -h, --help      # help message
+  -f <file>       # filename
+  -m <mode>       # output mode
+                    - v, verbose: print many output
+                    - q, quiet:   print litte output
+                    - c, compact: print summary output
+END
+      end
+
       spec "[!jcqdf] returns nil if no options." do
         schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
         x = @builder.__send__(:build_option_help, schema, @format)
