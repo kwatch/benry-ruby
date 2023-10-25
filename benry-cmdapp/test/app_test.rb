@@ -402,7 +402,7 @@ END
       spec "[!iyxxb] returns application help message." do
         actual = @app.instance_eval { render_application_help() }
         expected = <<"END"
-\e[1mtestapp\e[0m --- test app
+\e[1mtestapp\e[0m (1.2.3) --- test app
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]

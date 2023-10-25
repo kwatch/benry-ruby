@@ -222,7 +222,7 @@ END
         gschema = Benry::CmdApp::Application.new_global_option_schema(@config)
         actual = @builder.build_help_message(gschema)
         expected = <<"END"
-\e[1mTestApp\e[0m --- test app
+\e[1mTestApp\e[0m (1.2.3) --- test app
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
@@ -248,7 +248,7 @@ END
         gschema = Benry::CmdApp::Application.new_global_option_schema(@config)
         actual = @builder.build_help_message(gschema)
         expected = <<"END"
-\e[1mTestApp\e[0m --- test app
+\e[1mTestApp\e[0m (1.2.3) --- test app
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
@@ -277,25 +277,35 @@ END
 
       spec "[!51v42] returns preamble part of application help message." do
         x = @builder.__send__(:help_message__preamble)
-        ok {x} == "\e[1mTestApp\e[0m --- test app\n"
+        ok {x} == "\e[1mTestApp\e[0m (1.2.3) --- test app\n"
       end
 
       spec "[!bmh17] includes `config.app_name` or `config.app_command` into preamble." do
         @config.app_name = "TestApp"
         @config.app_command = "testapp"
         x = @builder.__send__(:help_message__preamble)
-        ok {x} == "\e[1mTestApp\e[0m --- test app\n"
+        ok {x} == "\e[1mTestApp\e[0m (1.2.3) --- test app\n"
         #
         @config.app_name = nil
         x = @builder.__send__(:help_message__preamble)
-        ok {x} == "\e[1mtestapp\e[0m --- test app\n"
+        ok {x} == "\e[1mtestapp\e[0m (1.2.3) --- test app\n"
+      end
+
+      spec "[!opii8] includes `config.app_versoin` into preamble if it is set." do
+        @config.app_version = "3.4.5"
+        x = @builder.__send__(:help_message__preamble)
+        ok {x} == "\e[1mTestApp\e[0m (3.4.5) --- test app\n"
+        #
+        @config.app_version = nil
+        x = @builder.__send__(:help_message__preamble)
+        ok {x} == "\e[1mTestApp\e[0m --- test app\n"
       end
 
       spec "[!3h380] includes `config.app_detail` into preamble if it is set." do
         @config.app_detail = "https://www.example.com/"
         x = @builder.__send__(:help_message__preamble)
         ok {x} == <<"END"
-\e[1mTestApp\e[0m --- test app
+\e[1mTestApp\e[0m (1.2.3) --- test app
 
 https://www.example.com/
 END

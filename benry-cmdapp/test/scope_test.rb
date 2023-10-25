@@ -744,7 +744,7 @@ END
         at_end { Benry::CmdApp._set_current_app(nil) }
         scope = Benry::CmdApp::BuiltInAction.new(@config)
         sout, serr = capture_sio { scope.help() }
-        ok {sout} =~ /\A\e\[1mTestApp\e\[0m --- test app$/
+        ok {sout} =~ /\A\e\[1mTestApp\e\[0m \(1\.2\.3\) --- test app$/
         ok {sout} =~ /^\e\[1;34mUsage:\e\[0m$/
         ok {sout} =~ /^\e\[1;34mOptions:\e\[0m$/
         ok {sout} =~ /^\e\[1;34mActions:\e\[0m$/

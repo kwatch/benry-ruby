@@ -892,10 +892,15 @@ module Benry::CmdApp
     def help_message__preamble()
       #; [!51v42] returns preamble part of application help message.
       #; [!bmh17] includes `config.app_name` or `config.app_command` into preamble.
+      #; [!opii8] includes `config.app_versoin` into preamble if it is set.
       #; [!3h380] includes `config.app_detail` into preamble if it is set.
       c = @config
       cmd = c.deco_command % (c.app_name || c.app_command)
-      s = "#{cmd} --- #{c.app_desc}\n"
+      if c.app_version
+        s = "#{cmd} (#{c.app_version}) --- #{c.app_desc}\n"
+      else
+        s = "#{cmd} --- #{c.app_desc}\n"
+      end
       if c.app_detail
         s += "\n"
         s += c.app_detail
