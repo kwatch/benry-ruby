@@ -508,7 +508,7 @@ END
         ok {x} == "Action 'hello' already defined (to redefine it, delete it beforehand by `undef_action()`)."
       end
 
-      spec "[!uxsx3] returns error message if method already defined in parent or ancestor cl" do
+      spec "[!uxsx3] returns error message if method already defined in parent or ancestor class." do
         x = nil
         ScopeTestAction.class_eval do
           x = __validate_action_method("print", :print, :print)

@@ -127,7 +127,7 @@ Oktest.scope do
         ok {Benry::CmdApp::INDEX.metadata_get("dummy2049")} == nil
       end
 
-      spec "[!01sx1] deletes existing action." do
+      spec "[!op8z5] deletes action method from action class." do
         MyAction.class_eval do
           @action.("dummy")
           def dummy4290()

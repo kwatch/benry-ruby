@@ -138,14 +138,14 @@ module Benry::CmdApp
     end
 
     def self.method_override?(klass, meth)  # :nodoc:
-      #; [!ldd1x] returns error message if method defined in parent or ancestor classes.
+      #; [!ldd1x] returns true if method defined in parent or ancestor classes.
       klass.ancestors[1..-1].each do |cls|
         if cls.method_defined?(meth) || cls.private_method_defined?(meth)
           return true
         end
         break if cls.is_a?(Class)
       end
-      #; [!bc65v] returns nil if meethod not defined in parent nor ancestor classes.
+      #; [!bc65v] returns false if meethod not defined in parent nor ancestor classes.
       return false
     end
 
@@ -1018,7 +1018,7 @@ module Benry::CmdApp
       if md.usage != nil
         #; [!nfuxz] `usage:` kwarg can be a string or an array of string.
         sb = [md.usage].flatten.collect {|x| "#{s} #{x}\n" }
-      #; [!z3lh9] if `usage:` kwargs not specified in `@action.()`, generates usage string from method parameters.
+      #; [!z3lh9] if `usage:` kwarg not specified in `@action.()`, generates usage string from method parameters.
       else
         sb = [s]
         sb << Util.method2help(md.klass.new(c), md.meth) << "\n"

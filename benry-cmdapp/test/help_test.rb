@@ -625,7 +625,7 @@ END
 END
       end
 
-      spec "[!h5bp4] if `usage:` kwargs specified in `@action.()`, use it as usage string." do
+      spec "[!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string." do
         metadata = @index.metadata_get("usagesample1")
         x = @builder.__send__(:help_message__usage, metadata)
         ok {x} == <<"END"
