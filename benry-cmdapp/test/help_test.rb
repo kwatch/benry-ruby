@@ -7,7 +7,8 @@ require_relative 'shared'
 
 class HelpTestAction < Benry::CmdApp::Action
 
-  @action.("preamble and postamble", detail: [{"Examples:"=>"  $ echo\n"}, "(Tips: blabla)"])
+  @action.("preamble and postamble",
+           postamble: [{"Examples:"=>"  $ echo\n"}, "(Tips: blabla)"])
   def prepostamble()
   end
 

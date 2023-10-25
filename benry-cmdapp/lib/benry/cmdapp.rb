@@ -1026,7 +1026,7 @@ module Benry::CmdApp
     def help_message__postamble(metadata)
       #; [!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`.
       #; [!jajse] returns nil if postamble is not set.
-      return build_sections(metadata.detail, '@action.(postamble: "...")')
+      return build_sections(metadata.postamble, '@action.(postamble: "...")')
     end
 
   end
