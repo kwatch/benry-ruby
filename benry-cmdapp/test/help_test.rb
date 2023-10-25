@@ -110,7 +110,7 @@ END
         @schema.add(:file  , "-f <file>"   , "filename")
         @schema.add(:debug , "    --debug" , "debug mode", hidden: true)
         config = Benry::CmdApp::Config.new("test app", "1.2.3")
-        @format = config.help_option_format
+        @format = config.format_option
       end
 
       spec "[!muhem] returns option part of help message." do

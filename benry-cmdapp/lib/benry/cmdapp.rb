@@ -695,9 +695,9 @@ module Benry::CmdApp
 
   class Config
 
-    HELP_OPTION_FORMAT    = "  %-18s : %s"
-    HELP_ACTION_FORMAT    = "  %-18s : %s"
-    HELP_USAGE_FORMAT     = "  $ %s"
+    FORMAT_OPTION         = "  %-18s : %s"
+    FORMAT_ACTION         = "  %-18s : %s"
+    FORMAT_USAGE          = "  $ %s"
     HELP_COMMAND_DECO     = "\e[1m%s\e[0m"      # bold
     HELP_HEADER_DECO      = "\e[1;34m%s\e[0m"   # bold, blue
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
@@ -709,7 +709,7 @@ module Benry::CmdApp
     def initialize(app_desc, app_version=nil,
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
-                   help_option_format: nil, help_action_format: nil, help_usage_format: nil,
+                   format_option: nil, format_action: nil, format_usage: nil,
                    help_command_deco: nil, help_header_deco: nil,
                    help_postamble: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
@@ -722,9 +722,9 @@ module Benry::CmdApp
       @app_usage          = app_usage
       @app_detail         = app_detail
       @default_action     = default_action
-      @help_option_format = help_option_format || HELP_OPTION_FORMAT
-      @help_action_format = help_action_format || HELP_ACTION_FORMAT
-      @help_usage_format  = help_usage_format  || HELP_USAGE_FORMAT
+      @format_option      = format_option || FORMAT_OPTION
+      @format_action      = format_action || FORMAT_ACTION
+      @format_usage       = format_usage  || FORMAT_USAGE
       @help_command_deco  = help_command_deco  || HELP_COMMAND_DECO
       @help_header_deco   = help_header_deco   || HELP_HEADER_DECO
       @help_postamble     = help_postamble
@@ -747,7 +747,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
-    attr_accessor :help_option_format, :help_action_format, :help_usage_format
+    attr_accessor :format_option, :format_action, :format_usage
     attr_accessor :help_command_deco, :help_header_deco
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
@@ -841,7 +841,7 @@ module Benry::CmdApp
     def build_action_line(metadata)
       #; [!ferqn] returns '  <action> : <descriptn>' line.
       md = metadata
-      format = @config.help_action_format
+      format = @config.format_action
       s = format % [md.name, md.desc]
       s = decorate_str(s, md.hidden?, md.important?)
       return s + "\n"
@@ -908,7 +908,7 @@ module Benry::CmdApp
       #; [!h98me] returns 'Usage:' section of application help message.
       c = @config
       s = c.help_command_deco % c.app_command
-      s = c.help_usage_format % s + " [<options>] "
+      s = c.format_usage % s + " [<options>] "
       #; [!i9d4r] includes `config.app_usage` into help message if it is set.
       usage = s + (c.app_usage || @config.class.const_get(:APP_USAGE))
       header = self.class.const_get(:HEADER_USAGE)    # "Usage:"
@@ -919,7 +919,7 @@ module Benry::CmdApp
       #; [!f2n70] returns 'Options:' section of application help message.
       #; [!0bboq] includes hidden options into help message if `all: true` passed.
       #; [!fjhow] returns nil if no options.
-      format = @config.help_option_format
+      format = @config.format_option
       s = build_option_help(gschema, format, all: all)
       return nil if s == nil
       header = self.class.const_get(:HEADER_OPTIONS)    # "Options:"
@@ -991,7 +991,7 @@ module Benry::CmdApp
       md = metadata
       c = @config
       s = c.help_command_deco % "#{c.app_command} #{md.name}"
-      s = c.help_usage_format % s
+      s = c.format_usage % s
       #; [!jca5d] not add '[<options>]' if action has no options.
       s += " [<options>]" unless md.option_empty?(all: all)
       #; [!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string.
@@ -1011,7 +1011,7 @@ module Benry::CmdApp
     def help_message__options(metadata, all: false)
       #; [!pafgs] returns 'Options:' section of help message.
       #; [!85wus] returns nil if action has no options.
-      format = @config.help_option_format
+      format = @config.format_option
       s = build_option_help(metadata.schema, format, all: all)
       return nil if s == nil
       header = self.class.const_get(:HEADER_OPTIONS)  # "Options:"
