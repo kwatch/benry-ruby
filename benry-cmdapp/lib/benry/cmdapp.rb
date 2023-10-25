@@ -246,14 +246,17 @@ module Benry::CmdApp
 
   class AliasMetadata < BaseMetadata
 
-    def initialize(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+    def initialize(alias_name, action_name, args, tag: nil, important: nil, hidden: nil)
       #; [!qtb61] sets description string automatically.
-      desc = "alias of '#{action_name}'"
+      #; [!kgic6] includes args value into description if provided.
+      desc = args && ! args.empty? ? "alias of '#{action_name} #{args.join(' ')}'" \
+                                   : "alias of '#{action_name}'"
       super(alias_name, desc, tag: tag, important: important, hidden: hidden)
       @action = action_name
+      @args   = args
     end
 
-    attr_reader :action
+    attr_reader :action, :args
 
     def alias?()
       #; [!c798o] returns true which means that this is an alias metadata.
@@ -263,13 +266,16 @@ module Benry::CmdApp
   end
 
 
-  def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+  def self.define_alias(alias_name, action_name, args=nil, tag: nil, important: nil, hidden: nil)
+    #; [!yrf2g] raises ArgumentError if 3rd arg is not nil nor an array of string.
+    args == nil || args.is_a?(Array)  or
+      raise ArgumentError.new("define_alias(#{alias_name.inspect}, #{action_name.inspect}, #{args.inspect}): 3rd argument should be an array of string, but got #{args.class.name}.")
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
     errmsg = self.__validate_alias_and_action(alias_name, action_name)
     errmsg == nil  or
       raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_name.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
-    alias_metadata = AliasMetadata.new(alias_name, action_name, tag: tag, important: important, hidden: hidden)
+    alias_metadata = AliasMetadata.new(alias_name, action_name, args, tag: tag, important: important, hidden: hidden)
     INDEX.metadata_add(alias_metadata)
     #; [!wfbqu] returns alias metadata.
     return alias_metadata
@@ -443,7 +449,7 @@ module Benry::CmdApp
       #; [!lyn0z] registers alias metadata if necessary.
       if alias_p
         prefix != nil  or raise "** assertion failed: ailas_target=#{alias_target.inspect}"
-        alias_metadata = AliasMetadata.new(prefix.chomp(':'), action)
+        alias_metadata = AliasMetadata.new(prefix.chomp(':'), action, nil)
         INDEX.metadata_add(alias_metadata)
         #; [!4402s] clears `alias_of:` kwarg.
         @__prefixdef__[2] = nil

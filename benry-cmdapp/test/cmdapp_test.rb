@@ -13,6 +13,12 @@ Oktest.scope do
 
     topic '.define_alias()' do
 
+      spec "[!yrf2g] raises ArgumentError if 3rd arg is not nil nor an array of string." do
+        pr = proc { Benry::CmdApp.define_alias("hello2", "hello1", "abc") }
+        ok {pr}.raise?(ArgumentError,
+                       %q`define_alias("hello2", "hello1", "abc"): 3rd argument should be an array of string, but got String.`)
+      end
+
       spec "[!hqc27] raises DefinitionError if something error exists in alias or action." do
         pr = proc { Benry::CmdApp.define_alias("hello2", "hello1") }
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
