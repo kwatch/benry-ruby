@@ -695,8 +695,8 @@ module Benry::CmdApp
 
   class Config
 
-    HELP_OPTION_FORMAT    = "  %-17s : %s"
-    HELP_ACTION_FORMAT    = "  %-17s : %s"
+    HELP_OPTION_FORMAT    = "  %-18s : %s"
+    HELP_ACTION_FORMAT    = "  %-18s : %s"
     HELP_USAGE_FORMAT     = "  $ %s"
     HELP_COMMAND_DECO     = "\e[1m%s\e[0m"      # bold
     HELP_HEADER_DECO      = "\e[1;34m%s\e[0m"   # bold, blue

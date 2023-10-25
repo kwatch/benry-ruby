@@ -116,17 +116,17 @@ END
       spec "[!muhem] returns option part of help message." do
         x = @builder.__send__(:build_option_help, @schema, @format)
         ok {x} == <<"END"
-  -h, --help        : help message
-  -f <file>         : filename
+  -h, --help         : help message
+  -f <file>          : filename
 END
       end
 
       spec "[!4z70n] includes hidden options when `all: true` passed." do
         x = @builder.__send__(:build_option_help, @schema, @format, all: true)
         ok {x} == <<"END"
-  -h, --help        : help message
-  -f <file>         : filename
-\e[2m      --debug       : debug mode\e[0m
+  -h, --help         : help message
+  -f <file>          : filename
+\e[2m      --debug        : debug mode\e[0m
 END
       end
 
@@ -144,11 +144,11 @@ END
       spec "[!ferqn] returns '  <action> : <descriptn>' line." do
         metadata = Benry::CmdApp::INDEX.metadata_get("hello")
         x = @builder.__send__(:build_action_line, metadata)
-        ok {x} == "  hello             : greeting message\n"
+        ok {x} == "  hello              : greeting message\n"
         #
         metadata = Benry::CmdApp::INDEX.metadata_get("debuginfo")
         x = @builder.__send__(:build_action_line, metadata)
-        ok {x} == "\e[2m  debuginfo         : hidden action\e[0m\n"
+        ok {x} == "\e[2m  debuginfo          : hidden action\e[0m\n"
       end
 
     end
@@ -228,14 +228,14 @@ END
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
 
 \e[1;34mOptions:\e[0m
-  -h, --help        : show help message
-  -V, --version     : output version
-  -l, --list        : list actions
-  -a, --all         : list all actions/options including hidden ones
-  -v, --verbose     : verbose mode
-  -q, --quiet       : quiet mode
+  -h, --help         : show help message
+  -V, --version      : output version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
   -C, --color[=on|off] : color mode
-  -T, --trace       : trace mode
+  -T, --trace        : trace mode
 
 \e[1;34mActions:\e[0m
 END
@@ -254,15 +254,15 @@ END
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
 
 \e[1;34mOptions:\e[0m
-  -h, --help        : show help message
-  -V, --version     : output version
-  -l, --list        : list actions
-  -a, --all         : list all actions/options including hidden ones
-  -v, --verbose     : verbose mode
-  -q, --quiet       : quiet mode
+  -h, --help         : show help message
+  -V, --version      : output version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
   -C, --color[=on|off] : color mode
-      --debug       : debug mode
-  -T, --trace       : trace mode
+      --debug        : debug mode
+  -T, --trace        : trace mode
 
 \e[1;34mActions:\e[0m
 END
@@ -333,14 +333,14 @@ END
         x = @builder.__send__(:help_message__options, gschema)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
-  -h, --help        : show help message
-  -V, --version     : output version
-  -l, --list        : list actions
-  -a, --all         : list all actions/options including hidden ones
-  -v, --verbose     : verbose mode
-  -q, --quiet       : quiet mode
+  -h, --help         : show help message
+  -V, --version      : output version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
   -C, --color[=on|off] : color mode
-  -T, --trace       : trace mode
+  -T, --trace        : trace mode
 END
         ok {x} !~ /--debug/
       end
@@ -350,15 +350,15 @@ END
         x = @builder.__send__(:help_message__options, gschema, all: true)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
-  -h, --help        : show help message
-  -V, --version     : output version
-  -l, --list        : list actions
-  -a, --all         : list all actions/options including hidden ones
-  -v, --verbose     : verbose mode
-  -q, --quiet       : quiet mode
+  -h, --help         : show help message
+  -V, --version      : output version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
   -C, --color[=on|off] : color mode
-\e[2m      --debug       : debug mode\e[0m
-  -T, --trace       : trace mode
+\e[2m      --debug        : debug mode\e[0m
+  -T, --trace        : trace mode
 END
         ok {x} =~ /--debug/
       end
@@ -382,7 +382,7 @@ END
       spec "[!yn8ea] includes hidden actions into help message if `all: true` passed." do
         x = @builder.__send__(:help_message__actions, all: true)
         ok {x} =~ /debuginfo/
-        ok {x} =~ /^\e\[2m  debuginfo         : hidden action\e\[0m$/
+        ok {x} =~ /^\e\[2m  debuginfo          : hidden action\e\[0m$/
         #
         x = @builder.__send__(:help_message__actions)
         ok {x} !~ /debuginfo/
@@ -399,20 +399,20 @@ END
         x = @builder.__send__(:help_message__actions, _index: index, all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-\e[2m  debuginfo         : hidden action\e[0m
+\e[2m  debuginfo          : hidden action\e[0m
 END
         #
         index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
         x = @builder.__send__(:help_message__actions, _index: index)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-  hello             : greeting message
+  hello              : greeting message
 END
         x = @builder.__send__(:help_message__actions, _index: index, all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-\e[2m  debuginfo         : hidden action\e[0m
-  hello             : greeting message
+\e[2m  debuginfo          : hidden action\e[0m
+  hello              : greeting message
 END
       end
 
@@ -481,7 +481,7 @@ END
   $ \e[1mtestapp hello\e[0m [<options>] [<name>]
 
 \e[1;34mOptions:\e[0m
-  -l, --lang=<lang> : language name (en/fr/it)
+  -l, --lang=<lang>  : language name (en/fr/it)
 END
       end
 
@@ -495,7 +495,7 @@ END
   $ \e[1mtestapp debuginfo\e[0m [<options>]
 
 \e[1;34mOptions:\e[0m
-\e[2m  --val=<val>       : something value\e[0m
+\e[2m  --val=<val>        : something value\e[0m
 END
       end
 
@@ -611,7 +611,7 @@ END
         x = @builder.__send__(:help_message__options, metadata)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
-  -l, --lang=<lang> : language name (en/fr/it)
+  -l, --lang=<lang>  : language name (en/fr/it)
 END
       end
 
@@ -692,20 +692,20 @@ END
         x = @builder.build_action_list(_index: index, all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-\e[2m  debuginfo         : hidden action\e[0m
+\e[2m  debuginfo          : hidden action\e[0m
 END
         #
         index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
         x = @builder.build_action_list(_index: index)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-  hello             : greeting message
+  hello              : greeting message
 END
         x = @builder.build_action_list(_index: index, all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-\e[2m  debuginfo         : hidden action\e[0m
-  hello             : greeting message
+\e[2m  debuginfo          : hidden action\e[0m
+  hello              : greeting message
 END
       end
 
@@ -718,9 +718,9 @@ END
         x = @builder.build_action_list_filtered_by("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 
@@ -728,10 +728,10 @@ END
         x = @builder.build_action_list_filtered_by("git:", all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-\e[2m  git:correct       : same as `git commit --amend`\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 
@@ -741,12 +741,12 @@ END
         x = @builder.build_action_list_filtered_by("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 
 \e[1;34mAliases:\e[0m
-  git               : alias of 'git:stage'
+  git                : alias of 'git:stage'
 END
       end
 
@@ -756,12 +756,12 @@ END
         x = @builder.build_action_list_filtered_by("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 
 \e[1;34mAliases:\e[0m
-  add               : alias of 'git:stage'
+  add                : alias of 'git:stage'
 END
       end
 
@@ -771,21 +771,21 @@ END
         x = @builder.build_action_list_filtered_by("git:", all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-\e[2m  git:correct       : same as `git commit --amend`\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 
 \e[1;34mAliases:\e[0m
-\e[2m  add               : alias of 'git:stage'\e[0m
+\e[2m  add                : alias of 'git:stage'\e[0m
 END
         #
         x = @builder.build_action_list_filtered_by("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 

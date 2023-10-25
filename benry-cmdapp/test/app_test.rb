@@ -91,7 +91,7 @@ Oktest.scope do
         spec "[!zl9em] lists actions if default action is not set." do
           sout, serr = capture_sio { @app.run() }
           ok {sout} =~ /\AActions:\n/
-          ok {sout} =~ /^  hello             : greeting message$/
+          ok {sout} =~ /^  hello +: greeting message$/
           ok {serr} == ""
         end
 
@@ -99,7 +99,7 @@ Oktest.scope do
           sout, serr = capture_sio { @app.run() }
           ok {sout} !~ /^  debuginfo/
           sout, serr = capture_sio { @app.run("-a") }
-          ok {sout} =~ /^  debuginfo         : hidden action$/
+          ok {sout} =~ /^  debuginfo +: hidden action$/
         end
 
         spec "[!k4xxp] runs default action if it is set." do
@@ -117,9 +117,9 @@ Oktest.scope do
           sout, serr = capture_sio { @app.run("git:") }
           ok {sout} == <<END
 Actions:
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
         end
 
@@ -127,10 +127,10 @@ END
           sout, serr = capture_sio { @app.run("-a", "git:") }
           ok {sout} == <<END
 Actions:
-  git:correct       : same as `git commit --amend`
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:correct        : same as `git commit --amend`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
         end
 
@@ -183,7 +183,7 @@ END
   $ \e[1mtestapp hello\e[0m [<options>] [<name>]
 
 \e[1;34mOptions:\e[0m
-  -l, --lang=<lang> : language name (en/fr/it)
+  -l, --lang=<lang>  : language name (en/fr/it)
 END
       end
 
@@ -195,8 +195,8 @@ END
       end
 
       spec "[!tf2wp] includes hidden actions and options into help message if `all: true` passed." do
-        rexp1 = /^\e\[2m      --debug       : debug mode\e\[0m/
-        rexp2 = /^\e\[2m  debuginfo         : hidden action\e\[0m/
+        rexp1 = /^\e\[2m      --debug        : debug mode\e\[0m/
+        rexp2 = /^\e\[2m  debuginfo          : hidden action\e\[0m/
         #
         s = @app.render_help_message(nil, all: true)
         ok {s} =~ rexp1
@@ -305,8 +305,8 @@ END
       end
 
       spec "[!7mapy] includes hidden actions into help message if `-a, --all` specified." do
-        rexp1 = /^      --debug       : debug mode$/
-        rexp2 = /^  debuginfo         : hidden action$/
+        rexp1 = /^      --debug        : debug mode$/
+        rexp2 = /^  debuginfo          : hidden action$/
         #
         opts = {help: true}
         sout, serr = capture_sio do
@@ -340,7 +340,7 @@ END
       end
 
       spec "[!tyxwo] includes hidden actions into action list if `-a, --all` specified." do
-        rexp = /^  debuginfo         : hidden action$/
+        rexp = /^  debuginfo +: hidden action$/
         #
         opts = {list: true}
         sout, serr = capture_sio do
@@ -390,7 +390,7 @@ END
   $ \e[1mtestapp hello\e[0m [<options>] [<name>]
 
 \e[1;34mOptions:\e[0m
-  -l, --lang=<lang> : language name (en/fr/it)
+  -l, --lang=<lang>  : language name (en/fr/it)
 END
       end
 
@@ -408,16 +408,16 @@ END
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
 
 \e[1;34mOptions:\e[0m
-  -h, --help        : show help message
-  -V, --version     : output version
-  -l, --list        : list actions
-  -a, --all         : list all actions/options including hidden ones
+  -h, --help         : show help message
+  -V, --version      : output version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 \e[1;34mActions:\e[0m
 END
         ok {actual}.start_with?(expected)
-        ok {actual} =~ /^  hello             : greeting message$/
-        ok {actual} =~ /^  git:stage         : same as `git add -p`$/
+        ok {actual} =~ /^  hello              : greeting message$/
+        ok {actual} =~ /^  git:stage          : same as `git add -p`$/
       end
 
     end
@@ -499,9 +499,9 @@ END
           s = @app.instance_eval { render_action_list("git:") }
           ok {s} == <<"END"
 \e[1;34mActions:\e[0m
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
         end
 
@@ -554,9 +554,9 @@ END
         ok {ret} == 0
         ok {sout} == <<"END"
 Actions:
-  git:stage         : same as `git add -p`
-  git:staged        : same as `git diff --cached`
-  git:unstage       : same as `git reset HEAD`
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 
