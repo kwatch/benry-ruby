@@ -1230,7 +1230,7 @@ module Benry::CmdApp
         action = args.shift()
       end
       #; [!5yd8x] returns 0 when action invoked successfully.
-      return handle_action(action, args)
+      return handle_action(action, args, global_opts)
     ensure
       #; [!pf1d2] calls teardown method at end of this method.
       teardown()
@@ -1366,7 +1366,7 @@ module Benry::CmdApp
       return 0
     end
 
-    def handle_action(action_name, args)
+    def handle_action(action_name, args, global_opts)
       #; [!vbymd] runs action with args and returns `0`.
       INDEX.metadata_get(action_name)  or
         raise CommandError.new("#{action_name}: Action not found.")
