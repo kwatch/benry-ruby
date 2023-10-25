@@ -64,11 +64,11 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#boolean-onoff-option">Boolean (On/Off) Option</a></li>
 <li><a href="#prefix-of-action-name">Prefix of Action Name</a></li>
 <li><a href="#invoke-other-action">Invoke Other Action</a></li>
-<li><a href="#action-alias">Action Alias</a></li>
+<li><a href="#alias-of-action">Alias of Action</a></li>
 <li><a href="#default-action">Default Action</a></li>
-<li><a href="#default-help">Default Help</a></li>
-<li><a href="#private-hidden-action">Private (Hidden) Action</a></li>
-<li><a href="#private-hidden-option">Private (Hidden) Option</a></li>
+<li><a href="#action-list-and-prefix-list">Action List and Prefix List</a></li>
+<li><a href="#hidden-action">Hidden Action</a></li>
+<li><a href="#hidden-option">Hidden Option</a></li>
 </ul></li>
 <li><a href="#configuratoin-and-customization">Configuratoin and Customization</a>
 <ul>
@@ -76,14 +76,14 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#customization-of-global-options">Customization of Global Options</a></li>
 <li><a href="#customization-of-global-option-behaviour">Customization of Global Option Behaviour</a></li>
 <li><a href="#custom-hook-of-application">Custom Hook of Application</a></li>
-<li><a href="#customization-of-command-help-message">Customization of Command Help Message</a></li>
+<li><a href="#customization-of-application-help-message">Customization of Application Help Message</a></li>
 <li><a href="#customization-of-action-help-message">Customization of Action Help Message</a></li>
 </ul></li>
 <li><a href="#q--a">Q &amp; A</a>
 <ul>
 <li><a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a></li>
-<li><a href="#q-how-to-re-define-existing-action">Q: How to Re-define Existing Action?</a></li>
 <li><a href="#q-how-to-delete-existing-actionalias">Q: How to Delete Existing Action/Alias?</a></li>
+<li><a href="#q-how-to-re-define-existing-action">Q: How to Re-define Existing Action?</a></li>
 <li><a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a></li>
 <li><a href="#q-how-to-enabledisable-color-mode">Q: How to Enable/Disable Color Mode?</a></li>
 <li><a href="#q-how-to-define-multiple-option-like--i-option-of-ruby">Q: How to Define Multiple Option, like <code>-I</code> Option of Ruby?</a></li>
@@ -118,7 +118,7 @@ $ gem install benry-cmdapp
 </ul>
 <p>File: ex01.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 <strong>require 'benry/cmdapp'</strong>
 
 ## action
@@ -133,7 +133,6 @@ end
 
 ## configuration
 config = <strong>Benry::CmdApp::Config.new("sample app", "1.0.0")</strong>
-config.default_help = true
 
 ## run application
 app = <strong>Benry::CmdApp::Application.new(config)</strong>
@@ -151,22 +150,25 @@ Hello, <strong>Alice</strong>!
 <p>Help message of command:</p>
 <pre class="language-console">
 [bash]$ ruby ex01.rb <strong>-h</strong>     # or `<strong>--help</strong>`
-ex01.rb (1.0.0) -- sample app
+ex01.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex01.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex01.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
   -V, --version      : print version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   hello              : print greeting message
+  help               : print help message (of action if specified)
 </pre>
 <p>Help message of action:</p>
 <pre class="language-console">
-[bash]$ ruby ex01.rb <strong>-h hello</strong>
-ex01.rb hello -- print greeting message
+[bash]$ ruby ex01.rb <strong>-h hello</strong>     # or: ruby ex01.rb help hello
+ex01.rb hello --- print greeting message
 
 Usage:
   $ ex01.rb hello [&ltuser&gt;]
@@ -182,7 +184,7 @@ Usage:
 </ul>
 <p>File: ex02.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -201,7 +203,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
   ## 'foo__bar__baz' =&gt; 'foo:bar:baz'
   @action.("sample #3")
-  def foo<strong>__</strong>ba<strong>r__</strong>baz()          # !!!!
+  def foo<strong>__</strong>bar<strong>__</strong>baz()          # !!!!
     puts __method__
   end
 
@@ -209,22 +211,26 @@ end
 
 config = Benry::CmdApp::Config.new("test app")
 app = Benry::CmdApp::Application.new(config)
-exit app.main()
+status_code = app.main()
+exit status_code
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex02.rb --help
-ex02.rb -- test app
+ex02.rb --- test app
 
 Usage:
-  $ ex02.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex02.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   <strong>foo-bar-baz</strong>        : sample #2
   <strong>foo:bar:baz</strong>        : sample #3
+  help               : print help message (of action if specified)
   <strong>print</strong>              : sample #1
 </pre>
 <p>Output:</p>
@@ -241,11 +247,12 @@ foo__bar__baz
 </section>
 <section class="subsection" id="parameter-name-in-help-message-of-action">
 <h3>Parameter Name in Help Message of Action</h3>
-<p>In help message of action, positional parameters of action methods are printed under the name conversion rule.</p>
+<p>In help message of an action, positional parameters of action methods are printed under the name conversion rule.</p>
 <ul>
 <li>Parameter <code>foo</code> is printed as <code>&ltfoo&gt;</code>.</li>
 <li>Parameter <code>foo_bar_baz</code> is printed as <code>&ltfoo-bar-baz&gt;</code>.</li>
 <li>Parameter <code>foo_or_bar_or_baz</code> is printed as <code>&ltfoo|bar|baz&gt;</code>.</li>
+<li>Parameter <code>foobar__xxx</code> is printed as <code>&ltfoobar.xxx&gt;</code>.</li>
 </ul>
 <p>In addition, positional parameters are printed in different way according to its kind.</p>
 <ul>
@@ -255,13 +262,18 @@ foo__bar__baz
 </ul>
 <p>File: ex03.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
-  @action.("parameter names test")
-  def test1(<strong>aaa, bbb_or_ccc, ddd=nil, eee=nil, *fff</strong>)  # !!!!
+  @action.("name conversion test")
+  def test1(<strong>file_name, file_or_dir, file__html</strong>)  # !!!!
+    # ...
+  end
+
+  @action.("parameter kind test")
+  def test2(<strong>aaa, bbb, ccc=nil, ddd=nil, *eee</strong>)  # !!!!
     # ...
   end
 
@@ -269,15 +281,22 @@ end
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
-exit app.main()
+status_code = app.main()
+exit status_code
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex03.rb -h test1
-hoge.rb test1 -- parameter names test
+ex03.rb test1 --- name conversion test
 
 Usage:
-  $ ex03.rb test1 <strong>&ltaaa&gt; &ltbbb|ccc&gt; [&ltddd&gt; [&lteee&gt; [&ltfff&gt;...]]]</strong>  # !!!!
+  $ ex03.rb test1 <strong>&ltfile-name&gt; &ltfile|dir&gt; &ltfile.html&gt;</strong>  # !!!!
+
+[bash]$ ruby ex03.rb -h test2
+ex03.rb test2 --- parameter kind test
+
+Usage:
+  $ ex03.rb test2 <strong>&ltaaa&gt; &ltbbb&gt; [&ltccc&gt; [&ltddd&gt; [&lteee&gt;...]]]</strong>    # !!!!
 </pre>
 </section>
 <section class="subsection" id="options">
@@ -288,10 +307,9 @@ Usage:
 </ul>
 <p>File: ex04.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
-## action
 class MyAction &lt Benry::CmdApp::Action
 
   @action.("print greeting message")
@@ -308,11 +326,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-## configuration
 config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-config.default_help = true
-
-## run application
 app = Benry::CmdApp::Application.new(config)
 status_code = app.main()
 exit status_code
@@ -334,10 +348,9 @@ exit status_code
 </ul>
 <p>File: ex05.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
-## action
 class MyAction &lt Benry::CmdApp::Action
 
   @action.("print greeting message")
@@ -358,11 +371,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-## configuration
 config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-config.default_help = true
-
-## run application
 app = Benry::CmdApp::Application.new(config)
 status_code = app.main()
 exit status_code
@@ -373,13 +382,11 @@ exit status_code
 Bonjour, Alice!
 Bonjour, Alice!
 Bonjour, Alice!
-`````
-
-Help message:
-
-```console
+</pre>
+<p>Help message:</p>
+<pre class="language-console">
 [bash]$ ruby ex05.rb -h hello
-ex05.rb hello -- print greeting message
+ex05.rb hello --- print greeting message
 
 Usage:
   $ ex05.rb hello [&ltoptions&gt;] [&ltuser&gt;]
@@ -388,8 +395,8 @@ Options:
   -l, --lang=&lten|fr|it&gt; : language        # !!!!
   <strong>    --repeat=&ltN&gt;   : repeat &ltN&gt; times</strong>   # !!!!
 </pre>
-<p>For usability reason, Benry::CmdApp supports <code>--lang=&ltval&gt;</code> style long option
-and doesn't support <code>--lang &ltval&gt;</code> style option.
+<p>For usability reason, Benry::CmdApp supports <code>--lang=&ltval&gt;</code> style of long option
+but doesn't support <code>--lang &ltval&gt;</code> style.
 Benry::CmdApp regards <code>--lang &ltval&gt;</code> as 'long option without argument'
 and 'argument for command'.</p>
 <pre class="language-console">
@@ -413,7 +420,7 @@ and 'argument for command'.</p>
 </ul>
 <p>File: ex06.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -479,7 +486,7 @@ quiet=false, file=nil, <strong>indent="4"</strong>
 <p>Help message:</p>
 <pre class="language-ruby">
 [bash]$ ruby ex06.rb -h test1
-ex06.rb test1 -- short options
+ex06.rb test1 --- short options
 
 Usage:
   $ ex06.rb test1 [&ltoptions&gt;]
@@ -490,7 +497,7 @@ Options:
   <strong>-i[&ltN&gt;]</strong>            : indent width
 
 [bash]$ ruby ex06.rb -h test2
-ex06.rb test2 -- long options
+ex06.rb test2 --- long options
 
 Usage:
   $ ex06.rb test2 [&ltoptions&gt;]
@@ -501,7 +508,7 @@ Options:
   <strong>--indent[=&ltN&gt;]</strong>     : indent width
 
 [bash]$ ruby ex06.rb -h test3
-ex06.rb test3 -- short and long options
+ex06.rb test3 --- short and long options
 
 Usage:
   $ ex06.rb test3 [&ltoptions&gt;]
@@ -524,10 +531,9 @@ Options:
 </ul>
 <p>File: ex07.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
-## action
 class MyAction &lt Benry::CmdApp::Action
 
   @action.("print greeting message")
@@ -551,11 +557,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-## configuration
 config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-config.default_help = true
-
-## run application
 app = Benry::CmdApp::Application.new(config)
 status_code = app.main()
 exit status_code
@@ -563,13 +565,13 @@ exit status_code
 <p>Output:</p>
 <pre class="language-console">
 [bash]$ ruby ex07.rb hello <strong>-l japan</strong>
-<strong>[ERROR] -l japan: pattern unmatched.</strong>
+<strong>[ERROR] -l japan: Pattern unmatched.</strong>
 
 [bash]$ ruby ex07.rb hello <strong>-l ja</strong>
-<strong>[ERROR] -l ja: expected one of en/fr/it.</strong>
+<strong>[ERROR] -l ja: Expected one of en/fr/it.</strong>
 
 [bash]$ ruby ex07.rb hello <strong>--repeat=abc</strong>
-<strong>[ERROR] --repeat=abc: integer expected.</strong>
+<strong>[ERROR] --repeat=abc: Integer expected.</strong>
 
 [bash]$ ruby ex07.rb hello <strong>--repeat=100</strong>
 <strong>[ERROR] --repeat=100: Too large (max: 10).</strong>
@@ -585,10 +587,9 @@ Callback can:</p>
 </ul>
 <p>File: ex08.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
-## action
 class MyAction &lt Benry::CmdApp::Action
 
   @action.("print greeting message")
@@ -597,7 +598,7 @@ class MyAction &lt Benry::CmdApp::Action
 		  rexp: /\A\w\w\z/) <strong>{|v| v.downcase }</strong>    # !!!!
   @option.(:repeat, "    --repeat=&ltN&gt;", "repeat &ltN&gt; times",
                   type: Integer) <strong>{|v|</strong>                    # !!!!
-		    <strong>v &gt; 0 or raise "not positive value."</strong> # !!!!
+		    <strong>v &gt; 0 or raise "Not positive value."</strong> # !!!!
                     <strong>v</strong>                                    # !!!!
                   <strong>}</strong>                                      # !!!!
   def hello(user="world", lang: "en", repeat: 1)
@@ -614,11 +615,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-## configuration
 config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-config.default_help = true
-
-## run application
 app = Benry::CmdApp::Application.new(config)
 status_code = app.main()
 exit status_code
@@ -629,7 +626,7 @@ exit status_code
 Bonjour, world!
 
 [bash]$ ruby ex08.rb hello <strong>--repeat=0</strong>
-<strong>[ERROR] --repeat=0: not positive value.</strong>
+<strong>[ERROR] --repeat=0: Not positive value.</strong>
 </pre>
 </section>
 <section class="subsection" id="boolean-onoff-option">
@@ -643,7 +640,7 @@ Instead, define boolean (on/off) option.</p>
 </ul>
 <p>File: ex09.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -692,7 +689,7 @@ verbose=<strong>false</strong>
 </ul>
 <p>File: ex10.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -719,7 +716,7 @@ verbose=<strong>true</strong>
 verbose=<strong>false</strong>
 
 [bash]$ ruby ex10.rb flagtest2 <strong>--quiet=on</strong>   # error
-<strong>[ERROR] --quiet=on: unexpected argument.</strong>
+<strong>[ERROR] --quiet=on: Unexpected argument.</strong>
 </pre>
 <p>In above example, <code>--quiet=on</code> will be error because option is defined as
 <code>@option.(:verbose, "-q, --quiet", ...)</code> which means that this option takes no arguments.
@@ -728,8 +725,8 @@ If you want to allow <code>--quiet=on</code>, specify option argument and <code>
   ...(snip)...
 
   @action.("flag test")
-  @option.(:verbose, "-q, --quiet<strong>[=&lton|off]</strong>", "quiet mode",  # !!!!
-                     <strong>type: TrueClass</strong>, value: false)          # !!!!
+  @option.(:verbose, "-q, --quiet<strong>[=&lton|off&gt;]</strong>", "quiet mode",  # !!!!
+                     <strong>type: TrueClass</strong>, value: false)           # !!!!
   def flagtest2(verbose: true)
     puts "verbose=#{verbose.inspect}"
   end
@@ -740,16 +737,17 @@ If you want to allow <code>--quiet=on</code>, specify option argument and <code>
 <section class="subsection" id="prefix-of-action-name">
 <h3>Prefix of Action Name</h3>
 <ul>
-<li><code>prefix: "foo:bar"</code> in action class adds prefix <code>foo:bar:</code> to each action name.</li>
+<li><code>prefix "foo:bar:"</code> in action class adds prefix <code>foo:bar:</code> to each action name.</li>
+<li>Prefix name should end with <code>:</code>. For example, <code>prefix "foo:"</code> is OK but <code>prefix "foo"</code> will be error.</li>
 <li>Method name <code>def baz__test()</code> with <code>prefix: "foo:bar"</code> results in action name <code>foo:bar:baz:test</code>.</li>
 </ul>
 <p>File: ex11.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
-  <strong>prefix "foo:bar"</strong>            # !!!!
+  <strong>prefix "foo:bar:"</strong>           # !!!!
 
   @action.("test action #1")
   def <strong>test1</strong>()                 # action name: 'foo:bar:test1'
@@ -778,30 +776,31 @@ baz__test2
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex11.rb -h
-ex11.rb -- sample app
+ex11.rb --- sample app
 
 Usage:
-  $ ex11.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex11.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   <strong>foo:bar:baz:test2</strong>  : test action #2
   <strong>foo:bar:test1</strong>      : test action #1
+  help               : print help message (of action if specified)
 </pre>
 <ul>
-<li><code>prefix: "foo:bar", action: :test</code> defines <code>foo:bar</code> action (intead of <code>foo:bar:test</code>) with <code>test()</code> method.</li>
+<li><code>prefix "foo:bar:", action: "blabla"</code> defines <code>foo:bar</code> action (intead of <code>foo:bar:blabla</code>) with <code>blabla()</code> method.</li>
 </ul>
 <p>File: ex12.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
-  prefix "foo:bar", <strong>action: :test3_</strong>      # !!!!
-  ## or:
-  #prefix "foo:bar", <strong>action: "test3"</strong>     # !!!!
+  prefix "foo:bar:", <strong>action: "test3"</strong>      # !!!!
 
   @action.("test action #1")
   def test1()                 # action name: 'foo:bar:test1'
@@ -809,7 +808,7 @@ class SampleAction &lt Benry::CmdApp::Action
   end
 
   @action.("test action #3")
-  def <strong>test3_</strong>()                # action name: 'foo:bar'
+  def <strong>test3</strong>()                 # action name: 'foo:bar'
     puts __method__
   end
 
@@ -825,37 +824,40 @@ exit app.main()
 test1
 
 [bash]$ ruby ex12.rb <strong>foo:bar:test3</strong>
-[ERROR] foo:bar:test2: unknown action.
+[ERROR] foo:bar:test3: Action not found.
 
 [bash]$ ruby ex12.rb <strong>foo:bar</strong>
-test3_
+test3
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex12.rb -h
-ex12.rb -- sample app
+ex12.rb --- sample app
 
 Usage:
-  $ ex12.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex12.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   <strong>foo:bar</strong>            : test action #3
   foo:bar:test1      : test action #1
+  help               : print help message (of action if specified)
 </pre>
 </section>
 <section class="subsection" id="invoke-other-action">
 <h3>Invoke Other Action</h3>
 <ul>
-<li><code>run_action!()</code> invokes other action.</li>
+<li><code>run_action_anyway()</code> invokes other action.</li>
 <li><code>run_action_once()</code> invokes other action only once.
   This is equivarent to 'prerequisite task' feature in task runner application.</li>
 </ul>
 <p>File: ex13.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -893,7 +895,6 @@ zip -r build.zip build
 </ul>
 <p>File: ex14.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class LoopedAction &lt Benry::CmdApp::Action
@@ -922,24 +923,24 @@ exit app.main()
 <p>Output:</p>
 <pre class="language-console">
 [bash]$ ruby ex14.rb test1
-<strong>[ERROR] test1: looped action detected.</strong>
+<strong>[ERROR] test1: Looped action detected.</strong>
 
 [bash]$ ruby ex14.rb test3
-<strong>[ERROR] test3: looped action detected.</strong>
+<strong>[ERROR] test3: Looped action detected.</strong>
 </pre>
 </section>
-<section class="subsection" id="action-alias">
-<h3>Action Alias</h3>
+<section class="subsection" id="alias-of-action">
+<h3>Alias of Action</h3>
 <ul>
 <li>Alias of action provides alternative short name of action.</li>
 </ul>
 <p>File: ex15.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
-  <strong>prefix "foo:bar"</strong>
+  <strong>prefix "foo:bar:"</strong>
 
   @action.("test action #1")
   def <strong>test1</strong>()                 # action name: 'foo:bar:test1'
@@ -948,7 +949,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-<strong>Benry::CmdApp.action_alias "test", "foo:bar:test1"</strong>   # !!!!
+<strong>Benry::CmdApp.define_alias "test", "foo:bar:test1"</strong>   # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
@@ -965,24 +966,27 @@ test1
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex15.rb -h
-ex15.rb -- sample app
+ex15.rb --- sample app
 
 Usage:
-  $ ex15.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex15.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   foo:bar:test1      : test action #1
-  <strong>test               : alias to 'foo:bar:test1' action</strong>
+  help               : print help message (of action if specified)
+  <strong>test               : alias of 'foo:bar:test1'</strong>
 </pre>
 <ul>
 <li>Alias can include positional and keyword arguments in definition.</li>
 </ul>
 <p>File: ex16.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class MyAction &lt Benry::CmdApp::Action
@@ -1001,8 +1005,8 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-Benry::CmdApp.action_alias("bonjour", "hello", <strong>"--lang=fr"</strong>)        # !!!!
-Benry::CmdApp.action_alias("ciao"   , "hello", <strong>"Bob", "-l", "it"</strong>)  # !!!!
+Benry::CmdApp.define_alias("bonjour", "hello", <strong>"--lang=fr"</strong>)        # !!!!
+Benry::CmdApp.define_alias("ciao"   , "hello", <strong>"Bob", "-l", "it"</strong>)  # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
@@ -1026,13 +1030,13 @@ Ciao, Bob!
 <section class="subsection" id="default-action">
 <h3>Default Action</h3>
 <ul>
-<li><code>config.default = "test1"</code> defines default action.
+<li><code>config.default_action = "test1"</code> defines default action.
   In this case, action <code>test1</code> will be invoked if action name not specified in command-line.</li>
 <li>Default action name is shown in help message.</li>
 </ul>
 <p>File: ex17.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -1060,70 +1064,108 @@ test1
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex17.rb -h
-ex17.rb -- sample app
+ex17.rb --- sample app
 
 Usage:
-  $ ex17.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex17.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions: <strong>(default: test1)</strong>                   # !!!!
+  help               : print help message (of action if specified)
   test1              : test action #1
 </pre>
 </section>
-<section class="subsection" id="default-help">
-<h3>Default Help</h3>
-<ul>
-<li><code>config.default_help = true</code> prints help message if action not specified in command-line.</li>
-<li>This is very useful when you don't have proper default action. It's recommended.</li>
-<li><code>config.default_action</code> is prior than <code>config.default_help</code>.</li>
-</ul>
+<section class="subsection" id="action-list-and-prefix-list">
+<h3>Action List and Prefix List</h3>
+<p>When <code>config.default_action</code> is not specified, Benry-CmdAction lists action names if action name is not specified in command-line.</p>
 <p>File: ex18.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
   @action.("test action #1")
-  def test1()
-    puts __method__
+  def <strong>test1</strong>()
+  end
+
+  <strong>prefix "foo:"</strong> do
+
+    @action.("test action #2")
+    def <strong>test2</strong>()
+    end
+
+  end
+
+  <strong>prefix "bar:"</strong> do
+
+    @action.("test action #3")
+    def <strong>test3</strong>()
+    end
+
+    <strong>prefix "baz:"</strong> do
+
+      @action.("test action #4")
+      def <strong>test4</strong>()
+      end
+
+    end
+
   end
 
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-<strong>config.default_help = true</strong>     # !!!!
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ <strong>ruby ex18.rb</strong>            # no action name!!!!
-ex18.rb -- sample app
-
-Usage:
-  $ ex18.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
-
-Options:
-  -h, --help         : print help message (of action if action specified)
-
+[bash]$ ruby ex18.rb            # no action name!!!!
 Actions:
-  test1              : test action #1
+  <strong>bar:baz:test4</strong>      : test action #4
+  <strong>bar:test3</strong>          : test action #3
+  <strong>foo:test2</strong>          : test action #2
+  <strong>help</strong>               : print help message (of action if specified)
+  <strong>test1</strong>              : test action #1
+</pre>
+<p>If prefix (such as <code>xxx:</code>) is specified instead of action name,
+Benry-CmdApp lists action names which have that prefix.</p>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ruby ex18.rb <strong>foo:</strong>              # !!!!
+Actions:
+  <strong>foo:test2</strong>          : test action #2
+
+[bash]$ ruby ex18.rb <strong>bar:</strong>              # !!!!
+Actions:
+  <strong>bar:baz:test4</strong>      : test action #4
+  <strong>bar:test3</strong>          : test action #3
+</pre>
+<p>If <code>:</code> is specified instead of action name, Benry-CmdApp lists top prefixes of action names and number of actions under the each prefix.</p>
+<p>Outuput:</p>
+<pre class="language-console">
+[bash]$ ruby ex18.rb <strong>:</strong>                 # !!!!
+Prefixes:
+  <strong>bar: (2)</strong>           # !!! two actions ('bar:test3' and 'bar:baz:test4')
+  <strong>foo: (1)</strong>           # !!! one action ('foo:text2')
 </pre>
 </section>
-<section class="subsection" id="private-hidden-action">
-<h3>Private (Hidden) Action</h3>
+<section class="subsection" id="hidden-action">
+<h3>Hidden Action</h3>
 <ul>
 <li>If <code>hidden: true</code> keyword argument passed to <code>@action.()</code>,
-  or action method is private, then Benry::CmdApp regards that action as private.</li>
-<li>Private actions are hidden in help message.</li>
-<li>Private actions are shown when <code>-a</code> or <code>--all</code> option enabled and specified.</li>
+  or action method is private, then Benry::CmdApp regards that action as hidden.</li>
+<li>Hidden actions are not shown in help message nor action list by default.</li>
+<li>Hidden actions are shown when <code>-a</code> or <code>--all</code> option is specified in command-line.</li>
 </ul>
 <p>File: ex20.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -1148,53 +1190,36 @@ class SampleAction &lt Benry::CmdApp::Action
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-<strong>config.option_all = true</strong>       # !!!! enable '-a, --all' option !!!!
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 </pre>
-<p>Help message (without <code>-a</code> nor <code>--all</code>):</p>
+<p>Action list (without <code>-a</code> nor <code>--all</code>):</p>
 <pre class="language-console">
-[bash]$ ruby ex20.rb <strong>-h</strong>
-ex20.rb -- sample app
-
-Usage:
-  $ ex20.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
-
-Options:
-  -h, --help         : print help message (of action if action specified)
-  -a, --all          : list all actions/options including private (hidden) ones
-
+[bash]$ ruby ex20.rb
 Actions:
+  help               : print help message (of action if specified)
   test1              : test action #1
 </pre>
-<p>Help message (with <code>-a</code> or <code>--all</code>):</p>
+<p>Action list (with <code>-a</code> or <code>--all</code>):</p>
 <pre class="language-console">
-[bash]$ ruby ex20.rb <strong>-h --all</strong>      # !!!!
-ex20.rb -- sample app
-
-Usage:
-  $ ex20.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
-
-Options:
-  -h, --help         : print help message (of action if action specified)
-  -a, --all          : list all actions/options including private (hidden) ones
-
+[bash]$ ruby ex20.rb <strong>--all</strong>      # !!!!
 Actions:
+  help               : print help message (of action if specified)
   test1              : test action #1
   <strong>test2              : test action #2</strong>          # !!!!
   <strong>test3              : test action #3</strong>          # !!!!
 </pre>
 </section>
-<section class="subsection" id="private-hidden-option">
-<h3>Private (Hidden) Option</h3>
+<section class="subsection" id="hidden-option">
+<h3>Hidden Option</h3>
 <ul>
-<li>Options defined with <code>hidden: true</code> keyword argument are treated as private option.</li>
-<li>Private options are hidden in help message of action.</li>
-<li>Private options are shown when <code>-a</code> or <code>--all</code> option enabled and specified.</li>
+<li>Options defined with <code>hidden: true</code> keyword argument are treated as hidden option.</li>
+<li>Hidden options are not shown in help message of action.</li>
+<li>Hidden options are shown when <code>-a</code> or <code>--all</code> option is specified in command-line.</li>
 </ul>
 <p>File: ex21.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -1209,14 +1234,13 @@ class SampleAction &lt Benry::CmdApp::Action
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-<strong>config.option_all = true</strong>       # !!!! enable '-a, --all' option !!!!
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 </pre>
 <p>Help message (without <code>-a</code> nor <code>--all</code>):</p>
 <pre class="language-console">
 [bash]$ ruby ex21.rb -h test1
-ex21.rb test1 -- test action
+ex21.rb test1 --- test action
 
 Usage:
   $ ex21.rb test1 [&ltoptions&gt;]
@@ -1227,14 +1251,14 @@ Options:
 <p>Help message (with <code>-a</code> or <code>--all</code>)</p>
 <pre class="language-console">
 [bash]$ ruby ex21.rb -h <strong>--all</strong> test1           # !!!!
-ex21.rb test1 -- test action
+ex21.rb test1 --- test action
 
 Usage:
   $ ex21.rb test1 [&ltoptions&gt;]
 
 Options:
   -v                 : verbose mode
-  -D                 : debug mode             # !!!!
+  <strong>-D                 : debug mode</strong>             # !!!!
 </pre>
 </section>
 </section>
@@ -1247,77 +1271,72 @@ Options:
 <li><code>config.app_desc = "..."</code> sets command description which is shown in help message. (required)</li>
 <li><code>config.app_version = "1.0.0"</code> enables <code>-V</code> and <code>--version</code> option, and prints version number if <code>-V</code> or <code>--version</code> option specified. (default: <code>nil</code>)</li>
 <li><code>config.app_command = "&ltcommand&gt;"</code> sets command name which is shown in help message. (default: <code>File.basname($0)</code>)</li>
+<li><code>config.app_name = "&ltstring&gt;"</code> sets application name which is shown in help message. (default: same as <code>config.app_command</code>)</li>
+<li><code>config.app_usage = "&lttext&gt;" (or </code>["&lttext1&gt;", "&lttext2&gt;", ...]<code>) sets usage string in help message. (default: </code>" &ltaction&gt; [&ltarguments&gt;...]"``)</li>
 <li><code>config.app_detail = "&lttext&gt;"</code> sets detailed description of command which is showin in help message. (default: <code>nil</code>)</li>
+<li><code>config.help_postamble = {"&ltTitle&gt;:" =&gt; "&lttext&gt;"}</code> sets postamble of help message, such as 'Example:' or 'Tips:'. (default: <code>nil</code>)</li>
 <li><code>config.default_action = "&ltaction&gt;"</code> sets default action name. (default: <code>nil</code>)</li>
-<li><code>config.default_help = true</code> prints help message if no action names specified in command-line. (default: <code>false</code>)</li>
-<li><code>config.option_help = true</code> enables <code>-h</code> and <code>--help</code> options. (default: <code>true</code>)</li>
-<li><code>config.option_all = true</code> enables <code>-a</code> and <code>--all</code> options which shows private (hidden) actions and options into help message. (default: <code>false</code>)</li>
+<li><code>config.option_list = true</code> enables <code>-l</code> and <code>--list</code> options. (default: <code>true</code>)</li>
+<li><code>config.option_all = true</code> enables <code>-a</code> and <code>--all</code> options which shows private (hidden) actions and options into help message. (default: <code>true</code>)</li>
 <li><code>config.option_verbose = true</code> enables <code>-v</code> and <code>--verbose</code> options which sets <code>$QUIET_MODE = false</code>. (default: <code>false</code>)</li>
 <li><code>config.option_quiet = true</code> enables <code>-q</code> and <code>--quiet</code> options which sets <code>$QUIET_MODE = true</code>. (default: <code>false</code>)</li>
 <li><code>config.option_color = true</code> enables <code>--color[=&lton|off&gt;]</code> option which sets <code>$COLOR_MODE = true/false</code>. This affects to help message colorized or not. (default: <code>false</code>)</li>
 <li><code>config.option_debug = true</code> enables <code>-D</code> and <code>--debug</code> options which sets <code>$DEBUG_MODE = true</code>. (default: <code>false</code>)</li>
-<li><code>config.option_trace = true</code> enables <code>-T</code> and <code>--trace</code> options which sets <code>$TRACE_MODE = true</code>. Entering into and exitting from action are reported when trace mode is on. (default: <code>false</code>)</li>
-<li><code>config.help_aliases = true</code> adds <code>Aliases:</code> section in help message. (default: <code>false</code>)</li>
-<li><code>config.help_sections = [["&lttitle&gt;", "&lttext&gt;"], ...]</code> adds section title and text into help message. (default: <code>[]</code>)</li>
-<li><code>config.help_postamble = "&lttext&gt;"</code> sets postamble text in help message, such as 'Examples:' or 'Tips:'. (default: <code>nil</code>)</li>
-<li><code>config.feat_candidate = true</code> enables feature to list action names starting with 'foo:' when action name specified in command-line is <code>foo:</code>. (default: <code>true</code>)</li>
-<li><code>config.format_help = "  %-18s : %s"</code> sets format of options and actions in help message. (default: <code>"  \e[1m%-18s\e[0m : %s"</code>)</li>
-<li><code>config.format_usage = "  $ %s %s"</code> sets format of usage in help message. (default: <code>"  $ \e[1m%s\e[0m %s"</code>)</li>
-<li><code>config.format_heading = "[%s]"</code> sets format of heading in help message. (default: <code>"\e[34m%s\e[0m"</code>)</li>
+<li><code>config.option_trace = true</code> enables <code>-T</code> and <code>--trace</code> options. Entering into and exitting from action are reported when trace mode is on. (default: <code>false</code>)</li>
+<li><code>config.format_option = "  %-18s : %s"</code> sets format of options in help message. (default: <code>"  %-18s : %s"</code>)</li>
+<li><code>config.format_action = "  %-18s : %s"</code> sets format of actions in help message. (default: <code>"  %-18s : %s"</code>)</li>
+<li><code>config.format_usage = "  $ %s"</code> sets format of usage in help message. (default: <code>"  $ %s"</code>)</li>
 </ul>
 <p>File: ex22.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-#config.default_help = true
-
-config.class.instance_methods(false).each do |name|
-  next if name =~ /=$/
-  next if ! config.class.method_defined?("#{name}=")
-  val = config.__send__(name)
-  puts "%-25s = %s" % ["config.#{name}", val.inspect]
+config = Benry::CmdApp::Config.new("sample app", "1.0.0", app_name: "Sample App")
+config.each(sort: false) do |name, val|
+  puts "config.%-20s = %s" % [name, val.inspect]
 end
 </pre>
 <p>Output:</p>
 <pre class="language-console">
 [bash]$ ruby ex22.rb
-config<strong>.app_desc</strong>           = "sample app"
-config<strong>.app_version</strong>        = "1.0.0"
-config<strong>.app_name</strong>           = "ex22.rb"
-config<strong>.app_command</strong>        = "ex22.rb"
-config<strong>.app_detail</strong>         = nil
-config<strong>.default_action</strong>     = nil
-config<strong>.default_help</strong>       = false
-config<strong>.option_help</strong>        = true
-config<strong>.option_all</strong>         = false
-config<strong>.option_verbose</strong>     = false
-config<strong>.option_quiet</strong>       = false
-config<strong>.option_color</strong>       = false
-config<strong>.option_debug</strong>       = false
-config<strong>.option_trace</strong>       = false
-config<strong>.help_aliases</strong>       = false
-config<strong>.help_sections</strong>      = []
-config<strong>.help_postamble</strong>     = nil
-config<strong>.feat_candidate</strong>     = true
-config<strong>.format_help</strong>        = "  \e[1m%-18s\e[0m : %s"
-config<strong>.format_usage</strong>       = "  $ \e[1m%s\e[0m %s"
-config<strong>.format_heading</strong>     = "\e[34m%s\e[0m"
-config<strong>.format_appname</strong>     = "\e[1m%s\e[0m"
+config.<strong>app_desc</strong>             = "sample app"
+config.<strong>app_version</strong>          = "1.0.0"
+config.<strong>app_name</strong>             = "Sample App"
+config.<strong>app_command</strong>          = "ex22.rb"             # == File.basename($0)
+config.<strong>app_usage</strong>            = nil
+config.<strong>app_detail</strong>           = nil
+config.<strong>default_action</strong>       = nil
+config.<strong>help_postamble</strong>       = nil
+config.<strong>format_option</strong>        = "  %-18s : %s"
+config.<strong>format_action</strong>        = "  %-18s : %s"
+config.<strong>format_usage</strong>         = "  $ %s"
+config.<strong>deco_command</strong>         = "\e[1m%s\e[0m"        # bold
+config.<strong>deco_header</strong>          = "\e[1;34m%s\e[0m"     # bold, blue
+config.<strong>deco_strong</strong>          = "\e[1m%s\e[0m"        # bold
+config.<strong>deco_weak</strong>            = "\e[2m%s\e[0m"        # gray color
+config.<strong>deco_hidden</strong>          = "\e[2m%s\e[0m"        # gray color
+config.<strong>deco_error</strong>           = "\e[31m%s\e[0m"       # red
+config.<strong>option_verbose</strong>       = false
+config.<strong>option_quiet</strong>         = false
+config.<strong>option_color</strong>         = false
+config.<strong>option_debug</strong>         = nil
+config.<strong>option_trace</strong>         = false
+config.<strong>color_mode</strong>           = nil
+config.<strong>trace_mode</strong>           = nil
 </pre>
 </section>
 <section class="subsection" id="customization-of-global-options">
 <h3>Customization of Global Options</h3>
 <p>To add custom global options:</p>
 <ul>
-<li>(1) Create global option schema object.</li>
+<li>(1) Create a global option schema object.</li>
 <li>(2) Add custom options to it.</li>
 <li>(3) Pass it to <code>Application.new()</code>.</li>
 </ul>
 <p>File: ex23.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -1331,7 +1350,7 @@ end
 
 ## (1) create global option shema
 config = Benry::CmdApp::Config.new("sample app")
-<strong>schema = Benry::CmdApp::AppOptionSchema.new(config)</strong>  # !!!!
+<strong>schema = Benry::CmdApp::GlobalOptionSchema.new(config)</strong>  # !!!!
 
 ## (2) add custom options to it
 <strong>schema.add(:logging, "--logging", "enable logging")</strong>    # !!!!
@@ -1344,77 +1363,99 @@ exit app.main()
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex23.rb -h
-ex23.rb -- sample app
+ex23.rb --- sample app
 
 Usage:
-  $ ex23.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex23.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
   <strong>--logging          : enable logging</strong>          # !!!!
 
 Actions:
+  help               : print help message (of action if specified)
   test1              : test action
 </pre>
 <p>To customize global options entirely:</p>
 <ul>
-<li>(1) Create empty <code>AppOptionSchema</code> object.</li>
+<li>(1) Create empty <code>GlobalOptionSchema</code> object.</li>
 <li>(2) Add global options as you want.</li>
 <li>(3) Create and execute Application object with it.</li>
 </ul>
 <p>File: ex24.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
-## (1) Create empty ``AppOptionSchema`` object.
-<strong>schema = Benry::CmdApp::AppOptionSchema.new(nil)</strong>   # !!!!
+## (1) Create empty ``GlobalOptionSchema`` object.
+<strong>schema = Benry::CmdApp::GlobalOptionSchema.new(nil)</strong>   # !!!!
 
 ## (2) Add global options as you want.
 <strong>schema.add</strong>(:help   , "-h, --help"   , "print help message")
 <strong>schema.add</strong>(:version, "-V, --version", "print version")
-<strong>schema.add</strong>(:all    , "-a, --all"    , "list all actions/options")
+<strong>schema.add</strong>(:list   , "-l, --list"   , "list actions")
+<strong>schema.add</strong>(:all    , "-a, --all"    , "list all actions/options including hidden ones")
 <strong>schema.add</strong>(:verbose, "-v, --verbose", "verbose mode")
 <strong>schema.add</strong>(:quiet  , "-q, --quiet"  , "quiet mode")
-<strong>schema.add</strong>(:color  , "--color[=&lton|off&gt;]", "enable/disable color", type: TrueClass)
+<strong>schema.add</strong>(:color  , "--color[=&lton|off&gt;]", "enable/disable color mode", type: TrueClass)
 <strong>schema.add</strong>(:debug  , "-D, --debug"  , "set $DEBUG_MODE to true")
 <strong>schema.add</strong>(:trace  , "-T, --trace"  , "report enter into and exit from action")
 
 ## (3) Create and execute Application object with it.
-config = Benry::CmdApp::Config.new("sample app")
+config = Benry::CmdApp::Config.new("sample app", "1.0.0")
 app = Benry::CmdApp::Application.new(config, <strong>schema</strong>)  # !!!!
 exit app.main()
+</pre>
+<p>Help message:</p>
+<pre class="language-console">
+[bash]$ ruby ex24.rb -h
+ex24.rb (1.0.0) --- sample app
+
+Usage:
+  $ ex24.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+
+Options:
+  <strong>-h, --help         : print help message</strong>
+  <strong>-V, --version      : print version</strong>
+  <strong>-l, --list         : list actions</strong>
+  <strong>-a, --all          : list all actions/options including hidden ones</strong>
+  <strong>-v, --verbose      : verbose mode</strong>
+  <strong>-q, --quiet        : quiet mode</strong>
+  <strong>--color[=&lton|off&gt;] : enable/disable color mode</strong>
+  <strong>-D, --debug        : set $DEBUG_MODE to true</strong>
+  <strong>-T, --trace        : report enter into and exit from action</strong>
+
+Actions:
+  help               : print help message (of action if specified)
 </pre>
 </section>
 <section class="subsection" id="customization-of-global-option-behaviour">
 <h3>Customization of Global Option Behaviour</h3>
 <ul>
 <li>(1) Define subclass of <code>Application</code> class.</li>
-<li>(2) Override <code>#do_toggle_global_switches()</code> method.</li>
+<li>(2) Override <code>#toggle_global_options()</code> method.</li>
 <li>(3) Create and execute subclass object of <code>Application</code>.</li>
 </ul>
 <p>File: ex25.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 ## (1) Define subclass of ``Application`` class.
 <strong>class MyApplication &lt Benry::CmdApp::Application</strong>
 
-  ## (2) Override ``#do_toggle_global_switches()`` method.
-  <strong>def do_toggle_global_switches(_args, global_opts)</strong>
-    <strong>super</strong>
-    ## here is original behaviour
-    #global_opts.each do |key, val|
-    #  case key
-    #  when :verbose ; $QUIET_MODE = ! val
-    #  when :quiet   ; $QUIET_MODE = val
-    #  when :color   ; $COLOR_MODE = val
-    #  when :debug   ; $DEBUG_MODE = val
-    #  when :trace   ; $TRACE_MODE = val
-    #  else          ; # do nothing
-    #  end
-    #end
+  ## (2) Override ``#toggle_global_options()`` method.
+  <strong>def toggle_global_options(global_opts)</strong>
+    <strong>status_code = super</strong>
+    <strong>return status_code if status_code</strong>  # `return 0` means "stop process successfully",
+                                       # `return 1` means "stop process as failed".
+    if global_opts[:logging]
+      require 'logger'
+      $logger = Logger.new(STDOUT)
+    end
+    <strong>return nil</strong>                   # `return nil` means "continue process".
   end
 
 end
@@ -1427,12 +1468,12 @@ exit app.main()
 <p>Of course, prepending custom module to Application class is also effective way.</p>
 <p>File: ex26.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 <strong>module MyApplicationMod</strong>
 
-  <strong>def do_toggle_global_switches(_args, global_opts)</strong>
+  <strong>def toggle_global_options(global_opts)</strong>
     # ....
   end
 
@@ -1449,12 +1490,12 @@ exit app.main()
 <h3>Custom Hook of Application</h3>
 <ul>
 <li>(1) Define subclass of Application class.</li>
-<li>(2) Override callback method.</li>
+<li>(2) Override <code>#handle_action()</code> method.</li>
 <li>(3) Create and execute custom application object.</li>
 </ul>
 <p>File: ex27.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -1469,74 +1510,30 @@ end
 ## (1) Define subclass of Application class
 <strong>class MyApplication &lt Benry::CmdApp::Application</strong>   # !!!!
 
-  ## (2) Override callback method
-  <strong>def do_callback(args, global_opts)</strong>               # !!!!
+  ## (2) Override method
+  <strong>def handle_action(action, args)</strong>                  # !!!!
     #p @config
-    #p @schema
-    if global_opts[:logging]
-      require 'logger'
-      $logger = Logger.new(STDOUT)
-    end
-    ## if return :SKIP, action skipped (not invoked).
-    #return :SKIP
+    $logger.debug("action=#{action}, args=#{args.inspect}") if $logger
+    <strong>super</strong>                                          # !!!!
   end
-
-  ## or:
-  #def do_handle_global_options(args, global_opts)
-  #  if global_opts[:logging]
-  #    require 'logger'
-  #    $logger = Logger.new(STDOUT)
-  #  end
-  #  super
-  #end
 
 end
 
 ## (3) create and execute custom application object
 config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::AppOptionSchema.new(config)
+schema = Benry::CmdApp::GlobalOptionSchema.new(config)
 schema.add(:logging, "--logging", "enable logging")
 app = <strong>MyApplication</strong>.new(config, schema)             # !!!!
 exit app.main()
 </pre>
-<ul>
-<li>[EXPERIMENTAL] Instead of defining subclass of Application, you can pass callback block to Application object.</li>
-</ul>
-<p>File: ex28.rb</p>
-<pre class="language-ruby">
-#!/usr/bin/env ruby
-require 'benry/cmdapp'
-
-class SampleAction &lt Benry::CmdApp::Action
-
-  @action.("test action")
-  def test1()
-    $logger.info("logging message") if $logger
-  end
-
-end
-
-config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::AppOptionSchema.new(config)
-schema.add(:logging, "--logging", "enable logging")
-app = Benry::CmdApp::Application.new(config, schema) <strong>do</strong>   # !!!!
-  <strong>|args, global_opts, config|</strong>                             # !!!!
-  if global_opts[:logging]                                # !!!!
-    require 'logger'                                      # !!!!
-    $logger = Logger.new(STDOUT)                          # !!!!
-  end                                                     # !!!!
-  #:SKIP                                                  # !!!!
-end                                                       # !!!!
-exit app.main()
-</pre>
 </section>
-<section class="subsection" id="customization-of-command-help-message">
-<h3>Customization of Command Help Message</h3>
-<p>If you want to just add more text into command help message,
-set <code>config.app_detail</code>, <code>config.help_sections</code>, and/or <code>config.help_postamble</code>.</p>
+<section class="subsection" id="customization-of-application-help-message">
+<h3>Customization of Application Help Message</h3>
+<p>If you want to just add more text into application help message,
+set <code>config.app_detail</code> and/or <code>config.help_postamble</code>.</p>
 <p>File: ex29.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
@@ -1549,140 +1546,140 @@ class SampleAction &lt Benry::CmdApp::Action
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-<strong>config.app_detail</strong> = "Document: https://...."      # !!!!
-config.help_sections</strong> = [                          # !!!!
-  ["Example:", "  $ &ltcommand&gt; hello Alice"],      # !!!!
-]                                                 # !!!!
-<strong>config.help_postamble</strong> = "(Tips: ....)"            # !!!!
+<strong>config.app_detail = "See https://...."</strong>            # !!!!
+<strong>config.help_postamble = [</strong>                         # !!!!
+<strong>  {"Example:" =&gt; "  $ &ltcommand&gt; hello Alice\n"},</strong>  # !!!!
+<strong>  "(Tips: ....)",</strong>                                 # !!!!
+<strong>]</strong>                                                 # !!!!
+
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex29.rb -h
-ex29.rb -- sample app
+ex29.rb --- sample app
 
-<strong>Document: https://....</strong>              # !!!! app.detail !!!!
+<strong>See https://....</strong>
 
 Usage:
-  $ ex29.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex29.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   hello              : test action #1
 
-<strong>Example:</strong>                            # !!!! help_sections !!!!
-  <strong>$ &ltcommand&gt; hello Alice</strong>           # !!!! help_sections !!!!
+<strong>Example:</strong>
+  <strong>$ &ltcommand&gt; hello Alice</strong>
 
-<strong>(Tips: ....)</strong>                        # !!!! help_postamble !!!!
+<strong>(Tips: ....)</strong>
 </pre>
 <p>If you want to change behaviour of building command help message:</p>
 <ul>
-<li>(1) Define subclass of <code>Benry::CmdApp::AppHelpBuilder</code> class.</li>
+<li>(1) Define subclass of <code>Benry::CmdApp::ApplicationHelpBuilder</code> class.</li>
 <li>(2) Override methods.</li>
 <li>(3) Create an instance object of the class.</li>
 <li>(4) Pass it to Application object.</li>
 </ul>
 <p>File: ex30.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
-  @action.("greeting message")
+  @action.("print greeting message")
   def hello(user="world")
     puts "Hello, #{user}!"
   end
 
 end
 
-## (1) Define subclass of ``Benry::CmdApp::AppHelpBuilder`` class.
-<strong>class MyAppHelpBuilder &lt Benry::CmdApp::AppHelpBuilder</strong>
+## (1) Define subclass of ``Benry::CmdApp::ApplicationHelpBuilder`` class.
+<strong>class MyAppHelpBuilder &lt Benry::CmdApp::ApplicationHelpBuilder</strong>
 
   ## (2) Override methods.
-  def <strong>build_help_message</strong>(all=false, format=nil)
+  def <strong>build_help_message</strong>(gschema, all: false)
     super
   end
-  def <strong>build_preamble</strong>(all=false)
+  def <strong>help_message__preamble</strong>()
     super
   end
-  def <strong>build_usage</strong>(all=false)
+  def <strong>help_message__usage</strong>()
     super
   end
-  def <strong>build_options</strong>(all=false, format=nil)
+  def <strong>help_message__options</strong>(gschema, all: false)
     super
   end
-  def <strong>build_actions</strong>(all=false, format=nil)
+  def <strong>help_message__actions</strong>(all: false)
     super
   end
-  def <strong>build_postamble</strong>(all=false)
-    super
-  end
-  def <strong>heading</strong>(str)
+  def <strong>help_message__postamble</strong>()
     super
   end
 end
 
 ## (3) Create an instance object of the class.
 config = Benry::CmdApp::Config.new("sample app")
-schema = Benry::CmdApp::AppOptionSchema.new(config)
+schema = Benry::CmdApp::GlobalOptionSchema.new(config)
 schema.add(:logging, "--logging", "enable logging")
-help_builder = <strong>MyAppHelpBuilder</strong>.new(config, schema)     # !!!!
+<strong>app_help_builder = MyAppHelpBuilder.new(config)</strong>      # !!!!
 
 ## (4) Pass it to Application object.
-app = Benry::CmdApp::Application.new(config, schema, <strong>help_builder</strong>) # !!!!
+app = Benry::CmdApp::Application.new(config, schema, <strong>app_help_builder</strong>) # !!!!
 exit app.main()
 </pre>
 <p>More simple way:</p>
 <ul>
-<li>(1) Create a module and override methods of <code>Benry::CmdApp::AppHelpBuilder</code> class.</li>
-<li>(2) Prepend it to <code>Benry::CmdApp::AppHelpBuilder</code> class.</li>
+<li>(1) Create a module and override methods of <code>Benry::CmdApp::ApplicationHelpBuilder</code> class.</li>
+<li>(2) Prepend it to <code>Benry::CmdApp::ApplicationHelpBuilder</code> class.</li>
 <li>(3) Create and execute Application object.</li>
 </ul>
 <p>File: ex31.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
-  @action.("greeting message")
+  @action.("print greeting message")
   def hello(user="world")
     puts "Hello, #{user}!"
   end
 
 end
 
-## (1) Create a module and override methods of ``AppHelpBuilder`` class.
+## (1) Create a module and override methods of ``ApplicationHelpBuilder`` class.
 <strong>module MyHelpBuilderMod</strong>
   def build_help_message(all=false, format=nil)
     super
   end
-  def build_preamble(all=false)
+  def build_help_message(gschema, all: false)
     super
   end
-  def build_usage(all=false)
+  def help_message__preamble()
     super
   end
-  def build_options(all=false, format=nil)
+  def help_message__usage()
     super
   end
-  def build_actions(all=false, format=nil)
+  def help_message__options(gschema, all: false)
     super
   end
-  def build_postamble(all=false)
+  def help_message__actions(all: false)
     super
   end
-  def heading(str)
+  def help_message__postamble()
     super
   end
 end
 
-## (2) Prepend it to ``Benry::CmdApp::AppHelpBuilder`` class.
-<strong>Benry::CmdApp::AppHelpBuilder.prepend(MyHelpBuilderMod)</strong>
+## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
+<strong>Benry::CmdApp::ApplicationHelpBuilder.prepend(MyHelpBuilderMod)</strong>
 
 ## (3) Create and execute Application object.
 config = Benry::CmdApp::Config.new("sample app")
@@ -1696,14 +1693,14 @@ exit app.main()
 pass <code>detail:</code> and/or <code>postamble:</code> keyword arguments to <code>@action.()</code>.</p>
 <p>File: ex32.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
+# coding: utf-8
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
   @action.("test action #1",
-           <strong>detail:</strong> "Document: https://....",      # !!!!
-           <strong>postamble:</strong> "(Tips: ....)")             # !!!!
+           <strong>detail: "See https://...."</strong>,           # !!!!
+           <strong>postamble: {"Example:" =&gt; "  ...."}</strong>)  # !!!!
   def hello(user="world")
     puts "Hello, #{user}!"
   end
@@ -1716,80 +1713,31 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex32.rb -h
-ex32.rb hello -- test action #1
+[bash]$ ruby ex32.rb -h hello
+ex32.rb hello --- test action #1
 
-<strong>Document: https://....</strong>                  # !!!!
+<strong>See https://....</strong>                  # !!!!
 
 Usage:
   $ ex32.rb hello [&ltuser&gt;]
 
-<strong>(Tips: ....)</strong>                            # !!!!
+<strong>Example:</strong>
+  <strong>....</strong>                            # !!!!
 </pre>
 <p>If you want to change behaviour of building action help message:</p>
 <ul>
-<li>(1) Create a module and override methods of <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
-<li>(2) Prepend it to <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
-<li>(3) Create and execute Application object.</li>
+<li>(1) Define subclass of <code>ActionHelpBuilder</code> class.</li>
+<li>(2) Override methods.</li>
+<li>(3) Create an instance object of the class.</li>
+<li>(4) Pass it to Application object.</li>
 </ul>
 <p>File: ex33.rb</p>
 <pre class="language-ruby">
-#!/usr/bin/env ruby
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
-  @action.("greeting message")
-  def hello(user="world")
-    puts "Hello, #{user}!"
-  end
-
-end
-
-## (1) Create a module and override methods of ``ActionHelpBuilder`` class.
-<strong>module MyActionHelpBuilderMod</strong>
-  def <strong>build_help_message</strong>(command, all=false)
-    super
-  end
-  def <strong>build_preamble</strong>(command, all=false)
-    super
-  end
-  def <strong>build_usage</strong>(command, all=false)
-    super
-  end
-  def <strong>build_options</strong>(command, all=false)
-    super
-  end
-  def <strong>build_postamble</strong>(command, all=false)
-    super
-  end
-  def <strong>heading</strong>(str)
-    super
-  end
-end
-
-## (2) Prepend it to ``Benry::CmdApp::ActionHelpBuilder`` class.
-Benry::CmdApp::ActionHelpBuilder<strong>.prepend(MyActionHelpBuilderMod)</strong>  # !!!!
-
-## (3) Create and execute Application object.
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
-</pre>
-<p>Another way:</p>
-<ul>
-<li>(1) Define subclass of <code>ActionHelpBuilder</code> class.</li>
-<li>(2) Set it to <code>ACTION_HELP_BUILDER_CLASS</code> constant value.</li>
-<li>(3) Create and execute Application object.</li>
-</ul>
-<p>File: ex34.rb</p>
-<pre class="language-ruby">
-#!/usr/bin/env ruby
-require 'benry/cmdapp'
-
-class SampleAction &lt Benry::CmdApp::Action
-
-  @action.("greeting message")
+  @action.("print greeting message")
   def hello(user="world")
     puts "Hello, #{user}!"
   end
@@ -1798,31 +1746,74 @@ end
 
 ## (1) Define subclass of ``ActionHelpBuilder`` class.
 <strong>class MyActionHelpBuilder &lt Benry::CmdApp::ActionHelpBuilder</strong>
-  def build_help_message(command, all=false)
+  ## (2) Override methods.
+  def <strong>build_help_message</strong>(metadata, all: false)
     super
   end
-  def build_preamble(command, all=false)
+  def <strong>help_message__preamble</strong>(metadata)
     super
   end
-  def build_usage(command, all=false)
+  def <strong>help_message__usage</strong>(metadata, all: false)
     super
   end
-  def build_options(command, all=false)
+  def <strong>help_message__options</strong>(metadata, all: false)
     super
   end
-  def build_postamble(command, all=false)
-    super
-  end
-  def heading(str)
+  def <strong>help_message__postamble</strong>(metadata)
     super
   end
 end
 
-## (2) Set it to ``ACTION_HELP_BUILDER_CLASS`` constant value.
-Benry::CmdApp.module_eval do
-  <strong>remove_const :ACTION_HELP_BUILDER_CLASS</strong>
-  <strong>const_set :ACTION_HELP_BUILDER_CLASS, MyActionHelpBuilder</strong>
+## (3) Create an instance object of the class.
+config = Benry::CmdApp::Config.new("sample app")
+<strong>action_help_builder = MyActionHelpBuilder.new(config)</strong>
+
+## (4) Pass it to Application object.
+schema = Benry::CmdApp::GlobalOptionSchema.new(config)
+app = Benry::CmdApp::Application.new(config, schema, nil, <strong>action_help_builder</strong>)
+exit app.main()
+</pre>
+<p>Another way:</p>
+<ul>
+<li>(1) Create a module and override methods of <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
+<li>(2) Prepend it to <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
+<li>(3) Create and execute Application object.</li>
+</ul>
+<p>File: ex34.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/cmdapp'
+
+class SampleAction &lt Benry::CmdApp::Action
+
+  @action.("print greeting message")
+  def hello(user="world")
+    puts "Hello, #{user}!"
+  end
+
 end
+
+## (1) Create a module and override methods of ``ActionHelpBuilder`` class.
+<strong>module MyActionHelpBuilderMod</strong>
+  def <strong>build_help_message</strong>(metadata, all: false)
+    super
+  end
+  def <strong>help_message__preamble</strong>(metadata)
+    super
+  end
+  def <strong>help_message__usage</strong>(metadata, all: false)
+    super
+  end
+  def <strong>help_message__options</strong>(metadata, all: false)
+    super
+  end
+  def <strong>help_message__postamble</strong>(metadata)
+    super
+  end
+end
+
+## (2) Prepend it to ``Benry::CmdApp::ActionHelpBuilder`` class.
+Benry::CmdApp::ActionHelpBuilder<strong>.prepend(MyActionHelpBuilderMod)</strong>  # !!!!
 
 ## (3) Create and execute Application object.
 config = Benry::CmdApp::Config.new("sample app")
@@ -1891,6 +1882,10 @@ Hi, Alice!
 ~~~~ 8&lt ~~~~ 8&lt ~~~~
 </pre>
 </section>
+<section class="subsection" id="q-how-to-delete-existing-actionalias">
+<h3>Q: How to Delete Existing Action/Alias?</h3>
+<p>A: Call <code>Benry::CmdApp.undef_action("&ltaction&gt;")</code> or <code>Benry::CmdApp.undef_alias("&ltalias&gt;")</code>.</p>
+</section>
 <section class="subsection" id="q-how-to-re-define-existing-action">
 <h3>Q: How to Re-define Existing Action?</h3>
 <p>A: Remove existing action at first, and re-define action.</p>
@@ -1907,7 +1902,7 @@ class <strong>SampleAction</strong> &lt Benry::CmdApp::Action
 
 end
 
-Benry::CmdApp<strong>.delete_action("hello")</strong>        # !!!!
+Benry::CmdApp<strong>.undef_action("hello")</strong>        # !!!!
 
 class <strong>OtherAction</strong> &lt Benry::CmdApp::Action
 
@@ -1925,21 +1920,20 @@ exit app.main()
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex42.rb -h
-ex42.rb -- sample app
+ex42.rb --- sample app
 
 Usage:
-  $ ex42.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex42.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   <strong>hello              : other action</strong>       # !!!!
+  help               : print help message (of action if specified)
 </pre>
-</section>
-<section class="subsection" id="q-how-to-delete-existing-actionalias">
-<h3>Q: How to Delete Existing Action/Alias?</h3>
-<p>A: Call <code>Benry::CmdApp.delete_action("&ltaction&gt;")</code> or <code>Benry::CmdApp.delete_alias("&ltalias&gt;")</code>.</p>
 </section>
 <section class="subsection" id="q-how-to-show-entering-into-or-exitting-from-action">
 <h3>Q: How to Show Entering Into or Exitting From Action?</h3>
@@ -1971,12 +1965,12 @@ exit app.main()
 <p>Output:</p>
 <pre class="language-console">
 [bash]$ ruby ex43.rb -T build           # !!!!
-<strong>## enter: build</strong>
-<strong>## enter: prepare</strong>
+<strong>### enter: build</strong>
+<strong>### enter: prepare</strong>
 ... prepare something ...
-<strong>## exit:  prepare</strong>
+<strong>### exit:  prepare</strong>
 ... build something ...
-<strong>## exit:  build</strong>
+<strong>### exit:  build</strong>
 </pre>
 </section>
 <section class="subsection" id="q-how-to-enabledisable-color-mode">
@@ -1988,7 +1982,7 @@ require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
-  @action.("greeting message")
+  @action.("print greeting message")
   def hello(user="world")
     puts "Hello, #{user}!"
   end
@@ -2003,21 +1997,24 @@ exit app.main()
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex44.rb -h
-ex44.rb -- sample app
+ex44.rb --- sample app
 
 Usage:
-  $ ex44.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex44.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
   <strong>--color[=&lton|off&gt;] : enable/disable color</strong>      # !!!!
 
 Actions:
-  hello              : greeting message
+  hello              : print greeting message
 
 [bash]$ ruby ex44.rb -h <strong>--color=off</strong>              # !!!!
 
 [bash]$ ruby ex44.rb -h <strong>--color=on</strong>               # !!!!
+[bash]$ ruby ex44.rb -h <strong>--color</strong>                  # !!!!
 </pre>
 </section>
 <section class="subsection" id="q-how-to-define-multiple-option-like--i-option-of-ruby">
@@ -2037,7 +2034,7 @@ class TestAction &lt Benry::CmdApp::Action
     ## or:                                                   # !!!!
     #<strong>(options[key] || []) &lt&lt val</strong>                             # !!!!
   <strong>}</strong>                                                          # !!!!
-  def test(path: [])
+  def test_(path: [])
     puts "path=#{path.inspect}"     #=&gt; path=["/tmp", "/var/tmp"]
   end
 
@@ -2064,11 +2061,11 @@ class TestAction &lt Benry::CmdApp::Action
 
   @action.("detailed description test")
   @option.(:mode, "-m &ltmode&gt;", "output mode", <strong>detail:</strong> &lt&lt"END")
-    v, verbose: print many output
-    q, quiet:   print litte output
-    c, compact: print summary output
+   v, verbose: print many output
+   q, quiet:   print litte output
+   c, compact: print summary output
 END
-  def test(mode: nil)
+  def test_(mode: nil)
     puts "mode=#{mode.inspect}"
   end
 
@@ -2081,16 +2078,16 @@ exit app.main()
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex46.rb -h test
-ex46.rb test -- detailed description test
+ex46.rb test --- detailed description test
 
 Usage:
   $ ex46.rb test [&ltoptions&gt;]
 
 Options:
   -m &ltmode&gt;          : output mode
-                           <strong>v, verbose: print many output</strong>
-                           <strong>q, quiet:   print litte output</strong>
-                           <strong>c, compact: print summary output</strong>
+                          <strong>v, verbose: print many output</strong>
+                          <strong>q, quiet:   print litte output</strong>
+                          <strong>c, compact: print summary output</strong>
 </pre>
 </section>
 <section class="subsection" id="q-how-to-copy-all-options-from-other-action">
@@ -2126,7 +2123,7 @@ exit app.main()
 <p>Help message of <code>test2</code> action:</p>
 <pre class="language-console">
 [bash]$ ruby ex47.rb -h test2
-ex47.rb test2 -- test action #2
+ex47.rb test2 --- test action #2
 
 Usage:
   $ ex47.rb test2 [&ltoptions&gt;]
@@ -2146,7 +2143,7 @@ Options:
 require 'benry/cmdapp'
 
 class AaaAction &lt Benry::CmdApp::Action
-  prefix "aaa", <strong>alias_of:</strong> :print_        # (or) alias_of: "print"
+  prefix "aaa:", <strong>alias_of:</strong> "print"
 
   @action.("test #1")
   def print_()
@@ -2156,7 +2153,7 @@ class AaaAction &lt Benry::CmdApp::Action
 end
 
 class BbbAction &lt Benry::CmdApp::Action
-  prefix "bbb", <strong>action:</strong> :print_         # (or) action: "print"
+  prefix "bbb:", <strong>action:</strong> "print"
 
   @action.("test #2")
   def print_()
@@ -2171,61 +2168,66 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex48.rb
-ex48.rb -- sample app
+[bash]$ ruby ex48.rb -h
+ex48.rb --- sample app
 
 Usage:
-  $ ex48.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex48.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
   <strong>aaa                : alias of 'aaa:print' action</strong>    # !!!!
   aaa:print          : test #1
   <strong>bbb                : test #2</strong>                        # !!!!
+  help               : print help message (of action if specified)
 </pre>
 <p>In the above example, alias <code>aaa</code> is defined due to <code>prefix(alias_of:)</code>,
 and action <code>bbb</code> is not an alias due to <code>prefix(action:)</code>.</p>
 </section>
 <section class="subsection" id="q-how-to-change-order-of-options-in-help-message">
 <h3>Q: How to Change Order of Options in Help Message?</h3>
-<p>A: Call <code>AppOptionSchema#sort_options_in_this_order()</code>.</p>
+<p>A: Call <code>GlobalOptionSchema#reorder_options!()</code>.</p>
 <p>File: ex49.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
 config = Benry::CmdApp::Config.new("sample app", "1.0.0",
-  option_all:       true,
+  option_verbose:   true,
   option_quiet:     true,
   option_color:     true,
 )
-schema = Benry::CmdApp::AppOptionSchema.new(config)
-<strong>keys = [:all, :quiet, :color, :help, :version]</strong>         # !!!!
-<strong>schema.sort_options_in_this_order(*keys)</strong>               # !!!!
+schema = Benry::CmdApp::GlobalOptionSchema.new(config)
+<strong>keys = [:verbose, :quiet, :color, :help, :version, :all, :list]</strong>  # !!!!
+<strong>schema.reorder_options!(*keys)</strong>               # !!!!
 app = Benry::CmdApp::Application.new(config, schema)
 ## or:
 #app = Benry::CmdApp::Application.new(config)
-#<strong>app.schema.sort_options_in_this_order(*keys)</strong>          # !!!!
+#<strong>app.schema.reorder_options!(*keys)</strong>          # !!!!
 exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex49.rb -h
-ex49.rb (1.0.0) -- sample app
+ex49.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex49.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex49.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -a, --all          : list all actions/options including private (hidden) ones
+  -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
-  --color[=&lton|off&gt;] : enable/disable color
-  -h, --help         : print help message (of action if action specified)
+  --color[=&lton|off&gt;] : color mode
+  -h, --help         : print help message (of action if specified)
   -V, --version      : print version
+  -a, --all          : list all actions/options including hidden ones
+  -l, --list         : list actions
 
 Actions:
-
+  help               : print help message (of action if specified)
 </pre>
 </section>
 <section class="subsection" id="q-is-it-possible-to-make-action-names-emphasised-or-weaken">
@@ -2254,17 +2256,20 @@ exit app.main()
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex50.rb -h
-ex50.rb -- sample app
+ex50.rb --- sample app
 
 Usage:
-  $ ex50.rb [&ltoptions&gt;] [&ltaction&gt; [&ltarguments&gt;...]]
+  $ ex50.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
-  -h, --help         : print help message (of action if action specified)
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
 
 Actions:
-  <strong>test1              : empasized</strong>     # !!!! printed with underline !!!!
-  <strong>test2              : weaken</strong>        # !!!! printed in gray color !!!!
+  help               : print help message (of action if specified)
+  <strong>test1              : empasized</strong>     # !!!! bold font !!!!
+  <strong>test2              : weaken</strong>        # !!!! gray color !!!!
 </pre>
 </section>
 <section class="subsection" id="q-is-it-possible-to-add-metadata-to-action-or-option">
