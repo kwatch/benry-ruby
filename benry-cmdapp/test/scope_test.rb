@@ -141,6 +141,77 @@ Oktest.scope do
         ok {x.callback} == nil
       end
 
+      spec "[!aiwns] `@copy_options.()` copies options from other action." do
+        MyAction.class_eval do
+          @action.("hello 1291")
+          @option.(:lang, "-l <lang>", "language")
+          @option.(:color, "--color[=<on|off>]", "color mode", type: TrueClass)
+          @option.(:debug, "-D", "debug mode")
+          @option.(:trace, "-T", "trace mode")
+          @option.(:indent, "-i[<N>]", "indent", type: Integer)
+          def hello1291(lang: nil, color: false, debug: false, trace: false, indent: 0)
+          end
+          #
+          @action.("hello 3942")
+          @copy_options.("hello1291", except: [:debug, :trace])
+          @option.(:silent, "--silent", "silent mode")
+          def hello3942(lang: "en", color: false, indent: 0, silent: false)
+          end
+        end
+        at_end { Benry::CmdApp.undef_action("hello3942") }
+        #
+        md = Benry::CmdApp::INDEX.metadata_get("hello3942")
+        ok {md.schema.option_help()} == <<"END"
+  -l <lang>            : language
+  --color[=<on|off>]   : color mode
+  -i[<N>]              : indent
+  --silent             : silent mode
+END
+      end
+
+      spec "[!mhhn2] `@copy_options.()` raises DefinitionError when action not found." do
+        pr = proc do
+          MyAction.class_eval do
+            @action.("hello 4691")
+            @copy_options.("hello469100")
+            def hello4691()
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|@copy_options.("hello469100"): Action not found.|)
+      end
+
+      spec "[!0slo8] raises DefinitionError if `@copy_options.()` called without `@action.()`." do
+        pr = proc do
+          MyAction.class_eval do
+            @__actiondef__ = nil
+            @copy_options.("hello")
+            def hello8420()
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|@copy_options.("hello"): Called without `@action.()`.|)
+      end
+
+      spec "[!0qz0q] `@copy_options.()` stores arguments into option schema object." do
+        x1 = x2 = nil
+        MyAction.class_eval do
+          @action.("hello")
+          x1 = @__actiondef__[1]
+          @copy_options.("hello")
+          x2 = @__actiondef__[1]
+          @__actiondef__ = nil
+        end
+        ok {x1} == nil
+        ok {x2} != nil
+        ok {x2}.is_a?(Benry::CmdApp::OPTION_SCHEMA_CLASS)
+        ok {x2.to_s()} == <<"END"
+  -l, --lang=<lang>    : language name (en/fr/it)
+END
+      end
+
     end
 
 

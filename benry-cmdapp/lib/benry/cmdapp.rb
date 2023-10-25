@@ -377,6 +377,18 @@ module Benry::CmdApp
                      range: range, value: value, detail: detail,
                      tag: tag, important: important, hidden: hidden, &callback)
         end
+        #; [!aiwns] `@copy_options.()` copies options from other action.
+        @copy_options = lambda do |action_name, except: nil|
+          #; [!mhhn2] `@copy_options.()` raises DefinitionError when action not found.
+          metadata = INDEX.metadata_get(action_name)  or
+            raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Action not found.")
+          #; [!0slo8] raises DefinitionError if `@copy_options.()` called without `@action.()`.
+          @__actiondef__ != nil  or
+            raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
+          #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
+          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema.copy_from(metadata.schema, except: except)
+        end
       end
       nil
     end
