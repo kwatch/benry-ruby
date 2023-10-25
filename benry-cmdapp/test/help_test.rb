@@ -287,7 +287,7 @@ END
   -a, --all          : list all actions/options including hidden ones
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
-  -C, --color[=on|off] : color mode
+  --color[=<on|off>] : color mode
   -T, --trace        : trace mode
 
 \e[1;34mActions:\e[0m
@@ -313,7 +313,7 @@ END
   -a, --all          : list all actions/options including hidden ones
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
-  -C, --color[=on|off] : color mode
+  --color[=<on|off>] : color mode
       --debug        : debug mode
   -T, --trace        : trace mode
 
@@ -402,7 +402,7 @@ END
   -a, --all          : list all actions/options including hidden ones
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
-  -C, --color[=on|off] : color mode
+  --color[=<on|off>] : color mode
   -T, --trace        : trace mode
 END
         ok {x} !~ /--debug/
@@ -419,7 +419,7 @@ END
   -a, --all          : list all actions/options including hidden ones
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
-  -C, --color[=on|off] : color mode
+  --color[=<on|off>] : color mode
 \e[2m      --debug        : debug mode\e[0m
   -T, --trace        : trace mode
 END

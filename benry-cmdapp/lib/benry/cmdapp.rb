@@ -1150,7 +1150,7 @@ module Benry::CmdApp
       add(:all     , "-a, --all"     , "list all actions/options including hidden ones")
       add(:verbose , "-v, --verbose" , "verbose mode")    if c.option_verbose
       add(:quiet   , "-q, --quiet"   , "quiet mode")      if c.option_quiet
-      add(:color   , "-C, --color[=on|off]", "color mode", type: TrueClass) if c.option_color
+      add(:color   , "--color[=<on|off>]", "color mode", type: TrueClass) if c.option_color
       add(:debug   , "    --debug"   , "debug mode", hidden: ! c.option_debug)
       add(:trace   , "-T, --trace"   , "trace mode")      if c.option_trace
     end
