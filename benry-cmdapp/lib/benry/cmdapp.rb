@@ -590,6 +590,18 @@ module Benry::CmdApp
       return md
     end
 
+    def metadata_lookup(name)
+      #; [!dcs9v] looks up action metadata recursively if alias name specified.
+      #; [!f8fqx] returns action metadata and alias args.
+      alias_args = []
+      md = metadata_get(name)
+      while md != nil && md.alias?
+        alias_args = md.args + alias_args if md.args && ! md.args.empty?
+        md = metadata_get(md.action)
+      end
+      return md, alias_args
+    end
+
   end
 
 

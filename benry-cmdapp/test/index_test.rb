@@ -120,6 +120,38 @@ Oktest.scope do
     end
 
 
+    topic '#metadata_lookup()' do
+
+      spec "[!dcs9v] looks up action metadata recursively if alias name specified." do
+        Benry::CmdApp.define_alias("ali61", "hello")
+        Benry::CmdApp.define_alias("ali62", "ali61")
+        Benry::CmdApp.define_alias("ali63", "ali62")
+        #
+        hello_md = Benry::CmdApp::INDEX.metadata_get("hello")
+        ok {hello_md}.is_a?(Benry::CmdApp::ActionMetadata)
+        ok {hello_md.name} == "hello"
+        #
+        ok {Benry::CmdApp::INDEX.metadata_lookup("hello")} == [hello_md, []]
+        ok {Benry::CmdApp::INDEX.metadata_lookup("ali61")} == [hello_md, []]
+        ok {Benry::CmdApp::INDEX.metadata_lookup("ali62")} == [hello_md, []]
+        ok {Benry::CmdApp::INDEX.metadata_lookup("ali63")} == [hello_md, []]
+      end
+
+      spec "[!f8fqx] returns action metadata and alias args." do
+        Benry::CmdApp.define_alias("ali71", "hello", "a")
+        Benry::CmdApp.define_alias("ali72", "ali71")
+        Benry::CmdApp.define_alias("ali73", "ali72", "b", "c")
+        #
+        hello_md = Benry::CmdApp::INDEX.metadata_get("hello")
+        ok {Benry::CmdApp::INDEX.metadata_lookup("hello")} == [hello_md, []]
+        ok {Benry::CmdApp::INDEX.metadata_lookup("ali71")} == [hello_md, ["a"]]
+        ok {Benry::CmdApp::INDEX.metadata_lookup("ali72")} == [hello_md, ["a"]]
+        ok {Benry::CmdApp::INDEX.metadata_lookup("ali73")} == [hello_md, ["a", "b", "c"]]
+      end
+
+    end
+
+
   end
 
 
