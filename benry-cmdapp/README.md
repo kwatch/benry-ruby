@@ -896,8 +896,8 @@ Actions:
 
 ### Invoke Other Action
 
-* `run_action_anyway()` invokes other action.
-* `run_action_once()` invokes other action only once.
+* `run_action()` invokes other action.
+* `run_once()` invokes other action only once.
   This is equivarent to 'prerequisite task' feature in task runner application.
 
 File: ex13.rb
@@ -916,8 +916,8 @@ class SampleAction < Benry::CmdApp::Action
 
   @action.("build something")
   def build()
-    run_action_once("prepare")        # !!!!
-    run_action_once("prepare")        # skipped because already invoked
+    run_once("prepare")        # !!!!
+    run_once("prepare")        # skipped because already invoked
     puts "echo 'README' > build/README.txt"
     puts "zip -r build.zip build"
   end
@@ -950,17 +950,17 @@ class LoopedAction < Benry::CmdApp::Action
 
   @action.("test #1")
   def test1()
-    run_action_once("test2")
+    run_once("test2")
   end
 
   @action.("test #2")
   def test2()
-    run_action_once("test3")
+    run_once("test3")
   end
 
   @action.("test #3")
   def test3()
-    run_action_once("test1")          # !!!!
+    run_once("test1")          # !!!!
   end
 
 end
@@ -2133,7 +2133,7 @@ class SampleAction < Benry::CmdApp::Action
 
   @action.("build")
   def build()
-    run_action_once("prepare")
+    run_once("prepare")
     puts "... build something ..."
   end
 
