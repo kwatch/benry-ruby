@@ -158,7 +158,21 @@ module Benry::CmdApp
   end
 
 
+  SCHEMA_ITEM_FOR_HELP_OPTION = proc {|dummy_schema|
+    dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
+    #dummy_schema.get(:help).freeze()
+    dummy_schema.get(:help)
+  }.call(Benry::CmdOpt::Schema.new)
+
+
   class OptionSchema < Benry::CmdOpt::Schema
+
+    def initialize()
+      super
+      #; [!rruxi] adds '-h, --help' option as hidden automatically.
+      @items << SCHEMA_ITEM_FOR_HELP_OPTION
+    end
+
   end
 
 
