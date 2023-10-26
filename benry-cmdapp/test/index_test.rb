@@ -132,6 +132,37 @@ Oktest.scope do
     end
 
 
+    topic '#prefix_desc_put()' do
+
+      spec "[!62fxz] returns description registered." do
+        x = Benry::CmdApp::INDEX.prefix_desc_put("p2862", "some description")
+        ok {x} == "some description"
+      end
+
+      spec "[!3aot4] registers prefix description, whether already registered or not." do
+        x = Benry::CmdApp::INDEX.prefix_desc_put("p2262", "some description")
+        ok {x} == "some description"
+        x = Benry::CmdApp::INDEX.prefix_desc_put("p2262", "other description")
+        ok {x} == "other description"
+      end
+
+    end
+
+
+    topic '#prefix_desc_get()' do
+
+      spec "[!d47kq] returns description if prefix is registered." do
+        Benry::CmdApp::INDEX.prefix_desc_put("p5679", "bla bla")
+        ok {Benry::CmdApp::INDEX.prefix_desc_get("p5679")} == "bla bla"
+      end
+
+      spec "[!otp1b] returns nil if prefix is not registered." do
+        ok {Benry::CmdApp::INDEX.prefix_desc_get("p8233")} == nil
+      end
+
+    end
+
+
   end
 
 
