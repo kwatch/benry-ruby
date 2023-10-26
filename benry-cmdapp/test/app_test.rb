@@ -405,7 +405,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 \e[1;34mActions:\e[0m
 END
@@ -762,7 +762,7 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
-  -a, --all      : list all actions/options including hidden ones
+  -a, --all      : list hidden actions/options, too
 END
         ok {schema.get(:trace)}   == nil
         #
@@ -816,7 +816,7 @@ END
       --help           : print help message (of action if specified)
       --version        : print version
       --list           : list actions
-      --all            : list all actions/options including hidden ones
+      --all            : list hidden actions/options, too
       --verbose        : verbose mode
       --quiet          : quiet mode
   --color[=<on|off>]   : color mode
@@ -842,7 +842,7 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
-  -a, --all      : list all actions/options including hidden ones
+  -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
         #
@@ -850,7 +850,7 @@ END
         ok {schema.to_s} == <<'END'
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
-  -a, --all      : list all actions/options including hidden ones
+  -a, --all      : list hidden actions/options, too
       --debug    : debug mode
   -V, --version  : print version
 END
@@ -864,7 +864,7 @@ END
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
-  -a, --all      : list all actions/options including hidden ones
+  -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
       end
