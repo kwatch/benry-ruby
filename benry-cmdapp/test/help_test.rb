@@ -40,6 +40,15 @@ class HelpTestAction < Benry::CmdApp::Action
     end
   end
 
+  prefix "descdemo:", "prefix description demo" do
+    @action.("demo #1")
+    def demo1()
+    end
+    @action.("demo #2")
+    def demo2()
+    end
+  end
+
 end
 
 
@@ -921,6 +930,22 @@ END
         x = @builder.build_top_prefix_list(all: true)
         ok {x} =~ /^  git: \(\d+\)\n/
         ok {x} =~ /^  secret: \(\d+\)\n/
+      end
+
+      spec "[!qxoja] includes prefix description if registered." do
+        x = @builder.build_top_prefix_list(all: true)
+        ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
+      end
+
+      spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
+        @config.format_prefix = "  %-15s # %s"
+        x = @builder.build_top_prefix_list(all: true)
+        ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
+        #
+        @config.format_prefix = nil
+        @config.format_prefix = "    %-15s -- %s"
+        x = @builder.build_top_prefix_list(all: true)
+        ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
       end
 
     end
