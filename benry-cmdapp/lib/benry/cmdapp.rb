@@ -1111,7 +1111,7 @@ module Benry::CmdApp
     end
 
     def build_action_list_filtered_by(prefix, all: false)
-      index = INDEX
+      index = @_index || INDEX
       b = new_app_help_builder()
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
@@ -1153,7 +1153,7 @@ module Benry::CmdApp
     end
 
     def build_top_prefix_list(all: false)
-      index = INDEX
+      index = @_index || INDEX
       #; [!crbav] returns top prefix list.
       dict = {}
       index.metadata_each do |metadata|
