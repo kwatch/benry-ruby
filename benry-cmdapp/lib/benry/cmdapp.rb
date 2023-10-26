@@ -643,12 +643,7 @@ module Benry::CmdApp
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
       #; [!2mnh7] looks up action metadata with action or alias name.
-      alias_args = []
-      metadata = @index.metadata_get(action_name)
-      while metadata != nil && metadata.alias?
-        alias_args = metadata.args + alias_args if metadata.args
-        metadata = @index.metadata_get(metadata.action)
-      end
+      metadata, alias_args = @index.metadata_lookup(action_name)
       #; [!0ukvb] raises CommandError if action nor alias not found.
       metadata != nil  or
         raise CommandError.new("#{action_name}: Action nor alias not found.")
@@ -1360,7 +1355,8 @@ module Benry::CmdApp
 
     def render_action_help(action, all: false)
       #; [!c510c] returns action help message.
-      metadata = @index.action_lookup(action)  or
+      metadata, _alias_args = @index.metadata_lookup(action)
+      metadata  or
         raise CommandError.new("#{action}: Action not found.")
       builder = @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
       return builder.build_help_message(metadata, all: all)
