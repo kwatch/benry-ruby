@@ -259,14 +259,18 @@ END
         ok {$DEBUG_MODE} == true
       end
 
-      spec "[!510eb] sets `config.color_mode` if global option specified." do
+      spec "[!510eb] sets `$COLOR_MODE` according to global option." do
+        bkup = $COLOR_MODE
+        at_end { $COLOR_MODE = bkup }
+        $COLOR_MODE = nil
+        #
         opts = {color: true}
         @app.instance_eval { toggle_global_options(opts) }
-        ok {@config.color_mode} == true
+        ok {$COLOR_MODE} == true
         #
         opts = {color: false}
         @app.instance_eval { toggle_global_options(opts) }
-        ok {@config.color_mode} == false
+        ok {$COLOR_MODE} == false
       end
 
       spec "[!y9fow] sets `config.trace_mode` if global option specified." do

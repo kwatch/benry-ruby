@@ -1353,10 +1353,10 @@ module Benry::CmdApp
       if    d[:verbose] ; $VERBOSE_MODE = true ; $QUIET_MODE = false
       elsif d[:quiet]   ; $VERBOSE_MODE = false; $QUIET_MODE = true
       end
+      #; [!510eb] sets `$COLOR_MODE` according to global option.
+      $COLOR_MODE        = d[:color] if d[:color] != nil
       #; [!sucqp] sets `$DEBUG_MODE` according to global options.
       $DEBUG_MODE        = d[:debug] if d[:debug] != nil
-      #; [!510eb] sets `config.color_mode` if global option specified.
-      @config.color_mode = d[:color] if d[:color] != nil
       #; [!y9fow] sets `config.trace_mode` if global option specified.
       @config.trace_mode = d[:trace] if d[:trace] != nil
       nil
