@@ -1441,7 +1441,7 @@ module Benry::CmdApp
     end
 
     def render_action_list(prefix=nil, all: false)
-      builder = ACTION_LIST_BUILDER_CLASS.new(@config)
+      builder = ACTION_LIST_BUILDER_CLASS.new(@config, @app_help_builder)
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
