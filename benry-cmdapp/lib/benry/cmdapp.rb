@@ -13,8 +13,8 @@ module Benry::CmdApp
 
   $VERBOSE_MODE = nil    # true when global option '-v, --verbose' specified
   $QUIET_MODE   = nil    # true when global option '-q, --quiet' specified
+  $COLOR_MODE   = nil    # true when global option '--color' specified
   $DEBUG_MODE   = nil    # true when global option '--debug' specified
-  #$COLOR_MODE  = nil    # use `@config.color_mode?` instead.
   #$TRACE_MODE  = nil    # use `@config.trace_mode?` instead.
 
 
@@ -137,7 +137,13 @@ module Benry::CmdApp
       return str.gsub(/\e\[.*?m/, '')
     end
 
-    def self.method_override?(klass, meth)  # :nodoc:
+    def color_mode?()
+      #; [!xyta1] returns value of $COLOR_MODE if it is not nil.
+      #; [!8xufh] returns value of $stdout.tty? if $COLOR_MODE is nil.
+      return $COLOR_MODE != nil ? $COLOR_MODE : $stdout.tty?
+    end
+
+    def method_override?(klass, meth)  # :nodoc:
       #; [!ldd1x] returns true if method defined in parent or ancestor classes.
       klass.ancestors[1..-1].each do |cls|
         if cls.method_defined?(meth) || cls.private_method_defined?(meth)
@@ -148,7 +154,6 @@ module Benry::CmdApp
       #; [!bc65v] returns false if meethod not defined in parent nor ancestor classes.
       return false
     end
-
 
   end
 

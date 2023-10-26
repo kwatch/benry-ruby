@@ -154,6 +154,33 @@ Oktest.scope do
     end
 
 
+    topic '.#color_mode?()' do
+
+      spec "[!xyta1] returns value of $COLOR_MODE if it is not nil." do
+        bkup = $COLOR_MODE
+        at_end { $COLOR_MODE = bkup }
+        #
+        $COLOR_MODE = true
+        ok {Benry::CmdApp::Util.color_mode?} == true
+        $COLOR_MODE = false
+        ok {Benry::CmdApp::Util.color_mode?} == false
+      end
+
+      spec "[!8xufh] returns value of $stdout.tty? if $COLOR_MODE is nil." do
+        bkup = $COLOR_MODE
+        at_end { $COLOR_MODE = bkup }
+        #
+        $COLOR_MODE = nil
+        x = nil
+        capture_sio(tty: true) { x = Benry::CmdApp::Util.color_mode? }
+        ok {x} == true
+        capture_sio(tty: false) { x = Benry::CmdApp::Util.color_mode? }
+        ok {x} == false
+      end
+
+    end
+
+
     topic '.#method_override?()' do
 
       class DummyA
