@@ -470,7 +470,7 @@ module Benry::CmdApp
       return @__prefixdef__ ? @__prefixdef__[0] : nil
     end
 
-    def self.prefix(prefix, action: nil, alias_of: nil, &block)
+    def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
       ! (action != nil && alias_of != nil)  or
         raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias:` are exclusive.")
@@ -484,6 +484,8 @@ module Benry::CmdApp
         prev = @__prefixdef__
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
+        #; [!j00pk] registers prefix description if specified.
+        INDEX.prefix_desc_put(prefix, desc) if desc
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
@@ -503,6 +505,8 @@ module Benry::CmdApp
       else
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
+        #; [!ncskq] registers prefix description if specified.
+        INDEX.prefix_desc_put(prefix, desc) if desc
       end
       nil
     end
