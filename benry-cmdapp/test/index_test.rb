@@ -100,26 +100,6 @@ Oktest.scope do
     end
 
 
-    topic '#action_lookup()' do
-
-      spec "[!lfd9z] returns action metadata even if alias name specified." do
-        Benry::CmdApp.define_alias("a8323", "hello")
-        at_end { Benry::CmdApp.undef_alias("a8323") }
-        #
-        md = Benry::CmdApp::INDEX.metadata_get("a8323")
-        ok {md.name} == "a8323"
-        ok {md}.is_a?(Benry::CmdApp::AliasMetadata)
-        ok {md}.alias?
-        #
-        md = Benry::CmdApp::INDEX.action_lookup("a8323")   # !!!
-        ok {md.name} == "hello"
-        ok {md}.is_a?(Benry::CmdApp::ActionMetadata)
-        ok {md}.NOT.alias?
-      end
-
-    end
-
-
     topic '#metadata_lookup()' do
 
       spec "[!dcs9v] looks up action metadata recursively if alias name specified." do
