@@ -789,7 +789,7 @@ module Benry::CmdApp
       #
       #@verobse_mode       = nil
       #@quiet_mode         = nil
-      @color_mode         = nil
+      #@color_mode         = nil
       #@debug_mode         = nil
       @trace_mode         = nil
     end
@@ -803,13 +803,11 @@ module Benry::CmdApp
     attr_accessor :option_list, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
-    attr_accessor :color_mode, :trace_mode #, :verbose_mode, :quiet_mode, :debug_mode
+    attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
     alias trace_mode? trace_mode
 
     def color_mode?()
-      #; [!5ohdt] if `@color_mode` is set, returns it's value.
-      #; [!9dszi] if `@color_mode` is not set, returns true when stdout is a tty.
-      return (@color_mode != nil) ? @color_mode : $stdout.tty?
+      return Util.color_mode?
     end
 
     def each(sort: false, &b)

@@ -585,7 +585,8 @@ END
     topic '#print_str()' do
 
       spec "[!6kyv9] prints string as is if color mode is enabled." do
-        @config.color_mode = true
+        bkup = $COLOR_MODE; at_end { $COLOR_MODE = bkup }
+        $COLOR_MODE = true
         sout, serr = capture_sio do
           @app.instance_eval { print_str("\e[1mHello\e[0m") }
         end
@@ -593,7 +594,8 @@ END
       end
 
       spec "[!lxhvq] deletes escape characters from string and prints it if color mode is disabled." do
-        @config.color_mode = false
+        bkup = $COLOR_MODE; at_end { $COLOR_MODE = bkup }
+        $COLOR_MODE = false
         sout, serr = capture_sio do
           @app.instance_eval { print_str("\e[1mHello\e[0m") }
         end
