@@ -1424,12 +1424,14 @@ Options:
 * `config.app_detail = "<text>"` sets detailed description of command which is showin in help message. (default: `nil`)
 * `config.help_postamble = {"<Title>:" => "<text>"}` sets postamble of help message, such as 'Example:' or 'Tips:'. (default: `nil`)
 * `config.default_action = "<action>"` sets default action name. (default: `nil`)
+* `config.option_help = true` enables `-h` and `--help` options. (default: `true`)
+* `config.option_version = true` enables `-V` and `--version` options. (default: `true` if `app_version` provided, `false` if else)
 * `config.option_list = true` enables `-l` and `--list` options. (default: `true`)
 * `config.option_all = true` enables `-a` and `--all` options which shows private (hidden) actions and options into help message. (default: `true`)
 * `config.option_verbose = true` enables `-v` and `--verbose` options which sets `$QUIET_MODE = false`. (default: `false`)
 * `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$QUIET_MODE = true`. (default: `false`)
 * `config.option_color = true` enables `--color[=<on|off>]` option which sets `$COLOR_MODE = true/false`. This affects to help message colorized or not. (default: `false`)
-* `config.option_debug = true` enables `-D` and `--debug` options which sets `$DEBUG_MODE = true`. (default: `false`)
+* `config.option_debug = true` enables `-D` and `--debug` options which sets `$DEBUG_MODE = true`. (default: `:hidden`)
 * `config.option_trace = true` enables `-T` and `--trace` options. Entering into and exitting from action are reported when trace mode is on. (default: `false`)
 * `config.format_option = "  %-18s : %s"` sets format of options in help message. (default: `"  %-18s : %s"`)
 * `config.format_action = "  %-18s : %s"` sets format of actions in help message. (default: `"  %-18s : %s"`)
@@ -1462,19 +1464,47 @@ config.help_postamble       = nil
 config.format_option        = "  %-18s : %s"
 config.format_action        = "  %-18s : %s"
 config.format_usage         = "  $ %s"
+config.format_prefix        = nil
 config.deco_command         = "\e[1m%s\e[0m"        # bold
 config.deco_header          = "\e[1;34m%s\e[0m"     # bold, blue
 config.deco_strong          = "\e[1m%s\e[0m"        # bold
 config.deco_weak            = "\e[2m%s\e[0m"        # gray color
 config.deco_hidden          = "\e[2m%s\e[0m"        # gray color
 config.deco_error           = "\e[31m%s\e[0m"       # red
+config.option_help          = true
+config.option_version       = true
+config.option_list          = true
+config.option_all           = true
 config.option_verbose       = false
 config.option_quiet         = false
 config.option_color         = false
-config.option_debug         = nil
+config.option_debug         = :hidden
 config.option_trace         = false
-config.color_mode           = nil
 config.trace_mode           = nil
+```
+
+You may notice that the value of `config.option_debug` is `:hidden`.
+If value of `config.option_xxxx` is `:hidden`, then corresponding global option is enabled as hidden option.
+Therefore you can see `--debug` option in help message if you add `-h` and `-a` (or `--all`) option.
+
+Help message:
+
+```console
+$ ruby ex21.rb -h -a                          # !!!!
+ex21.rb --- sample app
+
+Usage:
+  $ ex21.rb [<options>] <action> [<arguments>...]
+
+Options:
+  -h, --help         : print help message (of action if specified)
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+      --debug        : debug mode             # !!!!
+
+Actions:
+  help               : print help message (of action if specified)
+  test1              : test action
 ```
 
 
