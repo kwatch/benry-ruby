@@ -1204,7 +1204,7 @@ module Benry::CmdApp
   ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
 
 
-  class GlobalOptionSchema < OptionSchema
+  class GlobalOptionSchema < Benry::CmdOpt::Schema
 
     def initialize(config)
       super()
