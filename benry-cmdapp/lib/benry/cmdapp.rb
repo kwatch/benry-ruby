@@ -470,7 +470,7 @@ module Benry::CmdApp
       return @__prefixdef__ ? @__prefixdef__[0] : nil
     end
 
-    def self.prefix(prefix, action: nil, alias_of: nil, &block)
+    def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
       ! (action != nil && alias_of != nil)  or
         raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias:` are exclusive.")
@@ -484,6 +484,8 @@ module Benry::CmdApp
         prev = @__prefixdef__
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
+        #; [!j00pk] registers prefix description if specified.
+        INDEX.prefix_desc_put(prefix, desc) if desc
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
@@ -503,6 +505,8 @@ module Benry::CmdApp
       else
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
+        #; [!ncskq] registers prefix description if specified.
+        INDEX.prefix_desc_put(prefix, desc) if desc
       end
       nil
     end
@@ -544,6 +548,7 @@ module Benry::CmdApp
 
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
+      @prefix_descs  = {}          # {prefix => description}
     end
 
     def metadata_add(metadata)
@@ -591,6 +596,19 @@ module Benry::CmdApp
         md = metadata_get(md.action)
       end
       return md, alias_args
+    end
+
+    def prefix_desc_put(prefix, desc)
+      #; [!3aot4] registers prefix description, whether already registered or not.
+      @prefix_descs[prefix] = desc
+      #; [!62fxz] returns description registered.
+      return desc
+    end
+
+    def prefix_desc_get(prefix)
+      #; [!d47kq] returns description if prefix is registered.
+      #; [!otp1b] returns nil if prefix is not registered.
+      return @prefix_descs[prefix]
     end
 
   end
@@ -719,6 +737,7 @@ module Benry::CmdApp
     FORMAT_OPTION         = "  %-18s : %s"
     FORMAT_ACTION         = "  %-18s : %s"
     FORMAT_USAGE          = "  $ %s"
+    FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
     DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
@@ -731,7 +750,7 @@ module Benry::CmdApp
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
                    help_postamble: nil,
-                   format_option: nil, format_action: nil, format_usage: nil,
+                   format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
                    option_list: true, option_all: true,
@@ -748,6 +767,7 @@ module Benry::CmdApp
       @format_option      = format_option || FORMAT_OPTION
       @format_action      = format_action || FORMAT_ACTION
       @format_usage       = format_usage  || FORMAT_USAGE
+      @format_prefix      = format_prefix   # nil means to use @format_action
       @deco_command       = deco_command || DECORATION_COMMAND
       @deco_header        = deco_header  || DECORATION_HEADER
       @deco_strong        = deco_strong  || DECORATION_STRONG
@@ -771,7 +791,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
-    attr_accessor :format_option, :format_action, :format_usage
+    attr_accessor :format_option, :format_action, :format_usage, :format_prefix
     attr_accessor :deco_command, :deco_header
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
@@ -1091,7 +1111,7 @@ module Benry::CmdApp
     end
 
     def build_action_list_filtered_by(prefix, all: false)
-      index = INDEX
+      index = @_index || INDEX
       b = new_app_help_builder()
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
@@ -1133,24 +1153,43 @@ module Benry::CmdApp
     end
 
     def build_top_prefix_list(all: false)
-      index = INDEX
+      index = @_index || INDEX
+      #; [!30l2j] includes number of actions per prefix.
+      dict = _count_actions_per_prefix(index, all: all)
+      #; [!p4j1o] returns nil if no prefix found.
+      return nil if dict.empty?
       #; [!crbav] returns top prefix list.
+      content = _render_prefix_list(dict, @config, index)
+      header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
+      return build_section(header, content)
+    end
+
+    private
+
+    def _count_actions_per_prefix(index, all: false)
       dict = {}
       index.metadata_each do |metadata|
         #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
         next if metadata.hidden? && ! all
         #
         if metadata.name =~ /:/
-          prefix = $`
+          prefix = $` + ":"
           dict[prefix] = (dict[prefix] || 0) + 1
         end
       end
-      #; [!p4j1o] returns nil if no prefix found.
-      return nil if dict.empty?
-      #; [!30l2j] includes number of actions per prefix.
-      arr = dict.keys.sort.collect {|x| "  #{x}: (#{dict[x]})\n" }
-      header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
-      return build_section(header, arr.join())
+      return dict
+    end
+
+    def _render_prefix_list(dict, config, index)
+      #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
+      format = (config.format_prefix || config.format_action) + "\n"
+      indent = /^( *)/.match(format)[1]
+      return dict.keys.sort.collect {|prefix|
+        s = "#{prefix} (#{dict[prefix]})"
+        #; [!qxoja] includes prefix description if registered.
+        desc = index.prefix_desc_get(prefix)
+        desc ? (format % [s, desc]) : "#{indent}#{s}\n"
+      }.join()
     end
 
   end

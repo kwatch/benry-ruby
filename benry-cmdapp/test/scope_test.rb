@@ -601,6 +601,30 @@ END
           ok {x3} == nil
         end
 
+        spec "[!j00pk] registers prefix description if specified." do
+          ScopeTestAction.class_eval do
+            prefix "p0516:", "bla bla" do
+              prefix "git:", "boom boom" do
+              end
+            end
+          end
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p0516:")} == "bla bla"
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p0516:git:")} == "boom boom"
+          #
+          ScopeTestAction.class_eval do
+            prefix "p3893:", "guu guu", action: "a1" do
+              prefix "git:", "gii gii", alias_of: "a2" do
+                @action.("x")
+                def a2(); end
+              end
+              @action.("x")
+              def a1(); end
+            end
+          end
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p3893:")} == "guu guu"
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p3893:git:")} == "gii gii"
+        end
+
         spec "[!w52y5] raises DefinitionError if `action:` specified but target action not defined." do
           at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
           pr = proc do
@@ -642,6 +666,21 @@ END
           end
           x = ScopeTestAction.class_eval { @__prefixdef__ }
           ok {x} == ["p6062:", nil, nil]
+        end
+
+        spec "[!ncskq] registers prefix description if specified." do
+          ScopeTestAction.class_eval do
+            prefix "p6712:", "bowow"
+          end
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p6712:")} == "bowow"
+          #
+          ScopeTestAction.class_eval do
+            prefix "p9461:", "hoo hoo", action: "homhom"
+            prefix "p0438:", "yaa yaa", alias_of: "homhom"
+            @__prefixdef__ = nil
+          end
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p9461:")} == "hoo hoo"
+          ok {Benry::CmdApp::INDEX.prefix_desc_get("p0438:")} == "yaa yaa"
         end
 
       end

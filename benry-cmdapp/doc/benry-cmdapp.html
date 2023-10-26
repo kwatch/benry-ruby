@@ -847,6 +847,12 @@ Actions:
   foo:bar:test1      : test action #1
   help               : print help message (of action if specified)
 </pre>
+<ul>
+<li><code>prefix()</code> can take a description text of prefix.
+  For example, <code>prefix "foo:", "Bla bla"</code> registers <code>"Bla bla</code> as a description of prefix <code>foo:</code>.
+  Description of prefix is displayed in list of prefix list.
+  See <a href="#action-list-and-prefix-list">Action List and Prefix List</a> section for details.</li>
+</ul>
 </section>
 <section class="subsection" id="invoke-other-action">
 <h3>Invoke Other Action</h3>
@@ -1163,6 +1169,46 @@ Actions:
 Prefixes:
   <strong>bar: (2)</strong>           # !!! two actions ('bar:test3' and 'bar:baz:test4')
   <strong>foo: (1)</strong>           # !!! one action ('foo:text2')
+</pre>
+<p><code>prefix()</code> can take a description of prefix as 2nd argument.
+Descriptions of prefix are displayed in the prefix list.</p>
+<p>File: ex19.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/cmdapp'
+
+class SampleAction &lt Benry::CmdApp::Action
+
+  prefix "foo:"<strong>, "description of Foo"</strong> do
+    @action.("test action #2")
+    def test2()
+    end
+  end
+
+  prefix "bar:"<strong>, "description of Bar"</strong> do
+    @action.("test action #3")
+    def <strong>test3</strong>()
+    end
+
+    prefix "baz:"<strong>, "description fo Baz"</strong> do
+      @action.("test action #4")
+      def <strong>test4</strong>()
+      end
+    end
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ruby ex19.rb <strong>:</strong>                       # !!!!
+Top Prefixes:
+  bar: (2)           : <strong>description of Bar</strong>    # !!!!
+  foo: (1)           : <strong>description of Foo</strong>    # !!!!
 </pre>
 </section>
 <section class="subsection" id="hidden-action">
