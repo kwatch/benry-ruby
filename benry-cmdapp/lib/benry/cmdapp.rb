@@ -189,7 +189,7 @@ module Benry::CmdApp
 
   ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
   OPTION_PARSER_CLASS = OptionParser
-  OPTION_EMPTY_SCHEMA = ACTION_OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
+  ACTION_OPTION_EMPTY_SCHEMA = ACTION_OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
 
 
   class BaseMetadata
@@ -458,7 +458,7 @@ module Benry::CmdApp
       (errmsg = __validate_action_method(action, meth, method_symbol)) == nil  or
         raise DefinitionError.new("def #{method_symbol}(): #{errmsg}")
       #; [!7fnh4] registers action metadata.
-      schema ||= OPTION_EMPTY_SCHEMA
+      schema ||= ACTION_OPTION_EMPTY_SCHEMA
       action_metadata = ActionMetadata.new(action, desc, schema, self, meth, **kws)
       INDEX.metadata_add(action_metadata)
       #; [!lyn0z] registers alias metadata if necessary.
