@@ -159,7 +159,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   hello              : print greeting message
@@ -236,7 +236,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   <strong>foo-bar-baz</strong>        : sample #2
@@ -795,7 +795,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   <strong>foo:bar:baz:test2</strong>  : test action #2
@@ -851,7 +851,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   <strong>foo:bar</strong>            : test action #3
@@ -991,7 +991,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   foo:bar:test1      : test action #1
@@ -1099,7 +1099,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions: <strong>(default: test1)</strong>                   # !!!!
   help               : print help message (of action if specified)
@@ -1412,7 +1412,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
       <strong>--debug        : debug mode</strong>             # !!!!
 
 Actions:
@@ -1465,7 +1465,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   <strong>--logging          : enable logging</strong>          # !!!!
 
 Actions:
@@ -1490,7 +1490,7 @@ require 'benry/cmdapp'
 <strong>schema.add</strong>(:help   , "-h, --help"   , "print help message")
 <strong>schema.add</strong>(:version, "-V, --version", "print version")
 <strong>schema.add</strong>(:list   , "-l, --list"   , "list actions")
-<strong>schema.add</strong>(:all    , "-a, --all"    , "list all actions/options including hidden ones")
+<strong>schema.add</strong>(:all    , "-a, --all"    , "list hidden actions/options, too")
 <strong>schema.add</strong>(:verbose, "-v, --verbose", "verbose mode")
 <strong>schema.add</strong>(:quiet  , "-q, --quiet"  , "quiet mode")
 <strong>schema.add</strong>(:color  , "--color[=&lton|off&gt;]", "enable/disable color mode", type: TrueClass)
@@ -1514,7 +1514,7 @@ Options:
   <strong>-h, --help         : print help message</strong>
   <strong>-V, --version      : print version</strong>
   <strong>-l, --list         : list actions</strong>
-  <strong>-a, --all          : list all actions/options including hidden ones</strong>
+  <strong>-a, --all          : list hidden actions/options, too</strong>
   <strong>-v, --verbose      : verbose mode</strong>
   <strong>-q, --quiet        : quiet mode</strong>
   <strong>--color[=&lton|off&gt;] : enable/disable color mode</strong>
@@ -1662,7 +1662,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   hello              : test action #1
@@ -2022,7 +2022,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   <strong>hello              : other action</strong>       # !!!!
@@ -2099,7 +2099,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   <strong>--color[=&lton|off&gt;] : enable/disable color</strong>      # !!!!
 
 Actions:
@@ -2271,7 +2271,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   <strong>aaa                : alias of 'aaa:print' action</strong>    # !!!!
@@ -2317,7 +2317,7 @@ Options:
   --color[=&lton|off&gt;] : color mode
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   -l, --list         : list actions
 
 Actions:
@@ -2358,7 +2358,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   help               : print help message (of action if specified)
