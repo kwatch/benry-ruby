@@ -758,9 +758,12 @@ module Benry::CmdApp
                    format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
-                   option_list: true, option_all: true,
+                   option_help: true, option_version: nil, option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
-                   option_debug: nil, option_trace: false)
+                   option_debug: :hidden, option_trace: false)
+      #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.
+      option_version = !! app_version if option_version == nil
+      #
       @app_desc           = app_desc
       @app_version        = app_version
       @app_name           = app_name
@@ -779,6 +782,8 @@ module Benry::CmdApp
       @deco_weak          = deco_weak    || DECORATION_WEAK
       @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
       @deco_error         = deco_error   || DECORATION_ERROR
+      @option_help        = option_help
+      @option_version     = option_version
       @option_list        = option_list
       @option_all         = option_all
       @option_verbose     = option_verbose
@@ -800,7 +805,7 @@ module Benry::CmdApp
     attr_accessor :deco_command, :deco_header
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
-    attr_accessor :option_list, :option_all
+    attr_accessor :option_help, :option_version, :option_list, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
@@ -1207,16 +1212,30 @@ module Benry::CmdApp
       return if ! config
       #; [!ppcvp] adds options according to config object.
       c = config
-      add(:help    , "-h, --help"    , "print help message (of action if specified)")
-      add(:version , "-V, --version" , "print version")   if c.app_version
-      add(:list    , "-l, --list"    , "list actions")    if c.option_list
-      add(:all     , "-a, --all"     , "list all actions/options including hidden ones") if c.option_all
-      add(:verbose , "-v, --verbose" , "verbose mode")    if c.option_verbose
-      add(:quiet   , "-q, --quiet"   , "quiet mode")      if c.option_quiet
-      add(:color   , "--color[=<on|off>]", "color mode", type: TrueClass) if c.option_color
-      add(:debug   , "    --debug"   , "debug mode", hidden: ! c.option_debug)
-      add(:trace   , "-T, --trace"   , "trace mode")      if c.option_trace
+      _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
+      _add(c, :version, "-V, --version", "print version")
+      _add(c, :list   , "-l, --list"   , "list actions")
+      _add(c, :all    , "-a, --all"    , "list all actions/options including hidden ones")
+      _add(c, :verbose, "-v, --verbose", "verbose mode")
+      _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
+      _add(c, :color  , "--color[=<on|off>]", "color mode", TrueClass)
+      _add(c, :debug  , "    --debug"  , "debug mode")
+      _add(c, :trace  , "-T, --trace"  , "trace mode")
     end
+
+    def _add(c, key, optstr, desc, type=nil)
+      flag = c.__send__("option_#{key}")
+      return unless flag
+      #; [!doj0k] if config option is `:hidden`, makes option as hidden.
+      if flag == :hidden
+        hidden = true
+        optstr = optstr.sub(/^-\w, /, "    ")  # ex: "-T, --trace" -> "    --trace"
+      else
+        hidden = nil
+      end
+      add(key, optstr, desc, hidden: hidden, type: type)
+    end
+    private :_add
 
     def reorder_options!(*keys)
       #; [!2cp9s] sorts options in order of keys specified.
