@@ -525,13 +525,13 @@ module Benry::CmdApp
       #; [!nqjxk] runs action and returns true if not runned ever.
       #; [!wcyut] not run action and returns false if already runned.
       ctx = (@__context__ ||= CONTEXT_CLASS.new)
-      return ctx.run_action(action_name, args, kwargs, once: true)
+      return ctx.invoke_action(action_name, args, kwargs, once: true)
     end
 
     def run_action_anyway(action_name, *args, **kwargs)
       #; [!uwi68] runs action and returns true.
       ctx = (@__context__ ||= CONTEXT_CLASS.new)
-      return ctx.run_action(action_name, args, kwargs, once: false)
+      return ctx.invoke_action(action_name, args, kwargs, once: false)
     end
 
   end
@@ -644,14 +644,14 @@ module Benry::CmdApp
       #; [!r3gfv] raises OptionError if invalid action options specified.
       options = metadata.parse_options(args)
       #; [!lg6br] runs action with command-line arguments.
-      _run_action(metadata, args, options, once: false)
+      _invoke_action(metadata, args, options, once: false)
       return nil
     ensure
       #; [!jcguj] clears instance variables.
       __clear()
     end
 
-    def run_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()
+    def invoke_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()
       action = action_name
       #; [!dri6e] if called from other action containing prefix, looks up action with the prefix firstly.
       metadata = nil
@@ -667,10 +667,10 @@ module Benry::CmdApp
       #; [!de6a9] raises ActionError if alias name specified.
       ! metadata.alias?  or
         raise ActionError.new("#{action}: Action expected, but it is an alias.")
-      return _run_action(metadata, args, kwargs, once: once)
+      return _invoke_action(metadata, args, kwargs, once: once)
     end
 
-    def _run_action(action_metadata, args, kwargs, once: false)
+    def _invoke_action(action_metadata, args, kwargs, once: false)
       ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
       #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
       action = action_metadata.name

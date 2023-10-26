@@ -109,7 +109,7 @@ Oktest.scope do
         ok {sout} == "args=[], kwargs={}\n"
         #
         r = recorder()
-        r.fake_method(@context, :_run_action => nil)
+        r.fake_method(@context, :_invoke_action => nil)
         @context.start_action("ali23", [])
         ok {r[0].args} == [metadata, [], {}, {:once=>false}]
       end
@@ -131,7 +131,7 @@ Oktest.scope do
         ok {sout} == "args=[\"aa\", \"bb\", \"cc\", \"xx\", \"yy\"], kwargs={}\n"
         #
         r = recorder()
-        r.fake_method(@context, :_run_action => nil)
+        r.fake_method(@context, :_invoke_action => nil)
         @context.start_action("ali33", [])
         ok {r[0].args} == [metadata, ["aa", "bb", "cc"], {}, {:once=>false}]
       end
@@ -146,7 +146,7 @@ Oktest.scope do
         ok {sout} == "Bonjour, Alice!\n"
         #
         r = recorder()
-        r.fake_method(@context, :_run_action => nil)
+        r.fake_method(@context, :_invoke_action => nil)
         @context.start_action("ali42", ["Alice"])
         ok {r[0].args} == [metadata, ["Alice"], {:lang=>"it"}, {:once=>false}]
       end
@@ -181,28 +181,28 @@ Oktest.scope do
     end
 
 
-    topic '#run_action()' do
+    topic '#invoke_action()' do
 
       spec "[!dri6e] if called from other action containing prefix, looks up action with the prefix firstly." do
-        sout, serr = capture_sio { @context.run_action("foo:ccc", [], {}) }
+        sout, serr = capture_sio { @context.invoke_action("foo:ccc", [], {}) }
         ok {sout} == "foo:prep\nfoo:ccc\n"
         #
-        sout, serr = capture_sio { @context.run_action("foo:bar:bbb", [], {}) }
+        sout, serr = capture_sio { @context.invoke_action("foo:bar:bbb", [], {}) }
         ok {sout} == "foo:bar:prep\nfoo:bar:bbb\n"
         #
-        sout, serr = capture_sio { @context.run_action("foo:bar:baz:aaa", [], {}) }
+        sout, serr = capture_sio { @context.invoke_action("foo:bar:baz:aaa", [], {}) }
         ok {sout} == "foo:bar:baz:prep\nfoo:bar:baz:aaa\n"
       end
 
       spec "[!ygpsw] raises ActionError if action not found." do
-        pr = proc { @context.run_action("foo:xxx", [], {}) }
+        pr = proc { @context.invoke_action("foo:xxx", [], {}) }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "foo:xxx: Action not found.")
       end
 
       spec "[!de6a9] raises ActionError if alias name specified." do
         Benry::CmdApp.define_alias("a0469", "hello")
-        pr = proc { @context.run_action("a0469", [], {}) }
+        pr = proc { @context.invoke_action("a0469", [], {}) }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "a0469: Action expected, but it is an alias.")
       end
@@ -210,9 +210,9 @@ Oktest.scope do
       spec "[!6hoir] don't run action and returns false if `once: true` specified and the action already done." do
         ret1 = ret2 = ret3 = nil
         sout, serr = capture_sio do
-          ret1 = @context.run_action("foo:prep", [], {}, once: true)
-          ret2 = @context.run_action("foo:prep", [], {}, once: true)
-          ret3 = @context.run_action("foo:prep", [], {}, once: true)
+          ret1 = @context.invoke_action("foo:prep", [], {}, once: true)
+          ret2 = @context.invoke_action("foo:prep", [], {}, once: true)
+          ret3 = @context.invoke_action("foo:prep", [], {}, once: true)
         end
         ok {sout} == "foo:prep\n"
         ok {ret1} == true
@@ -220,9 +220,9 @@ Oktest.scope do
         ok {ret3} == false
         #
         sout, serr = capture_sio do
-          ret1 = @context.run_action("foo:prep", [], {}, once: false)
-          ret2 = @context.run_action("foo:prep", [], {}, once: false)
-          ret3 = @context.run_action("foo:prep", [], {}, once: false)
+          ret1 = @context.invoke_action("foo:prep", [], {}, once: false)
+          ret2 = @context.invoke_action("foo:prep", [], {}, once: false)
+          ret3 = @context.invoke_action("foo:prep", [], {}, once: false)
         end
         ok {sout} == "foo:prep\n" * 3
         ok {ret1} == true
@@ -231,30 +231,30 @@ Oktest.scope do
       end
 
       spec "[!xwlou] raises ActionError if looped aciton detected." do
-        pr = proc { @context.run_action("foo:loop1", [], {}) }
+        pr = proc { @context.invoke_action("foo:loop1", [], {}) }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "foo:loop1: Looped action detected.")
       end
 
       spec "[!peqk8] raises ActionError if args and opts not matched to action method." do
-        pr = proc { @context.run_action("foo:err1", [], {}) }
+        pr = proc { @context.invoke_action("foo:err1", [], {}) }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "foo:err1: Argument required (but nothing specified).")
-        pr = proc { @context.run_action("foo:err1", ["X", "Y", "Z"], {}) }
+        pr = proc { @context.invoke_action("foo:err1", ["X", "Y", "Z"], {}) }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "foo:err1: Too much arguments (at most 2 args).")
       end
 
       spec "[!kao97] action invocation is nestable." do
         sout, serr = capture_sio do
-          @context.run_action("foo:nest1", [], {})
+          @context.invoke_action("foo:nest1", [], {})
         end
         ok {sout} == "nest3\n"
       end
 
       spec "[!5jdlh] runs action method with scope object." do
         sout, serr = capture_sio do
-          @context.run_action("foo:prep", [], {})
+          @context.invoke_action("foo:prep", [], {})
         end
         ok {sout} == "foo:prep\n"
       end
@@ -262,7 +262,7 @@ Oktest.scope do
       spec "[!9uue9] reports enter into and exit from action if global '-T' option specified." do
         @config.trace_mode = true
         sout, serr = capture_sio(tty: true) do
-          @context.run_action("foo:nest1", [], {})
+          @context.invoke_action("foo:nest1", [], {})
         end
         ok {sout} == <<"END"
 \e[33m### enter: foo:nest1\e[0m
@@ -275,7 +275,7 @@ nest3
 END
         #
         sout, serr = capture_sio(tty: false) do
-          @context.run_action("foo:nest1", [], {})
+          @context.invoke_action("foo:nest1", [], {})
         end
         ok {sout} == <<"END"
 ### enter: foo:nest1
@@ -291,7 +291,7 @@ END
       spec "[!ndxc3] returns true if action invoked." do
         ret = nil
         capture_sio() do
-          ret = @context.run_action("foo:bar:prep", [], {})
+          ret = @context.invoke_action("foo:bar:prep", [], {})
         end
         ok {ret} == true
       end
