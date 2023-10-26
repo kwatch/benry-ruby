@@ -679,21 +679,21 @@ END
     end
 
 
-    topic '#run_action_once()' do
+    topic '#run_once()' do
 
       spec "[!nqjxk] runs action and returns true if not runned ever." do
         scope = MyAction.new(@config)
         capture_sio do
-          ok {scope.run_action_once("hello")} == true
+          ok {scope.run_once("hello")} == true
         end
       end
 
       spec "[!wcyut] not run action and returns false if already runned." do
         scope = MyAction.new(@config)
         sout, serr = capture_sio do
-          ok {scope.run_action_once("hello")} == true
-          ok {scope.run_action_once("hello")} == false
-          ok {scope.run_action_once("hello")} == false
+          ok {scope.run_once("hello")} == true
+          ok {scope.run_once("hello")} == false
+          ok {scope.run_once("hello")} == false
         end
         ok {sout} == "Hello, world!\n"
       end
@@ -701,14 +701,14 @@ END
     end
 
 
-    topic '#run_action_anyway()' do
+    topic '#run_action()' do
 
       spec "[!uwi68] runs action and returns true." do
         scope = MyAction.new(@config)
         sout, serr = capture_sio do
-          ok {scope.run_action_anyway("hello")} == true
-          ok {scope.run_action_anyway("hello")} == true
-          ok {scope.run_action_anyway("hello")} == true
+          ok {scope.run_action("hello")} == true
+          ok {scope.run_action("hello")} == true
+          ok {scope.run_action("hello")} == true
         end
         ok {sout} == "Hello, world!\n" * 3
       end

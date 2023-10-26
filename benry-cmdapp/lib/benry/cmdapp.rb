@@ -521,14 +521,14 @@ module Benry::CmdApp
       return nil
     end
 
-    def run_action_once(action_name, *args, **kwargs)
+    def run_once(action_name, *args, **kwargs)
       #; [!nqjxk] runs action and returns true if not runned ever.
       #; [!wcyut] not run action and returns false if already runned.
       ctx = (@__context__ ||= CONTEXT_CLASS.new)
       return ctx.invoke_action(action_name, args, kwargs, once: true)
     end
 
-    def run_action_anyway(action_name, *args, **kwargs)
+    def run_action(action_name, *args, **kwargs)
       #; [!uwi68] runs action and returns true.
       ctx = (@__context__ ||= CONTEXT_CLASS.new)
       return ctx.invoke_action(action_name, args, kwargs, once: false)

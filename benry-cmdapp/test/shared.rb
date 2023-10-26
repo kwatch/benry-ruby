@@ -34,12 +34,12 @@ class MyAction < Benry::CmdApp::Action
 
   @action.("looped action")
   def testerr2()
-    run_action_once "testerr3"
+    run_once "testerr3"
   end
 
   @action.("looped action")
   def testerr3()
-    run_action_anyway "testerr2"
+    run_action "testerr2"
   end
 
 end
