@@ -118,7 +118,7 @@ Oktest.scope do
           end
         end
         schema = tuple[1]
-        ok {schema}.is_a?(Benry::CmdApp::OPTION_SCHEMA_CLASS)
+        ok {schema}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
         #
         x = schema.get(:lang)
         ok {x.key} == :lang
@@ -206,7 +206,7 @@ END
         end
         ok {x1} == nil
         ok {x2} != nil
-        ok {x2}.is_a?(Benry::CmdApp::OPTION_SCHEMA_CLASS)
+        ok {x2}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
         ok {x2.to_s()} == <<"END"
   -l, --lang=<lang>    : language name (en/fr/it)
 END

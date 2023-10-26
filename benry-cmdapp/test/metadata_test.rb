@@ -40,14 +40,14 @@ Oktest.scope do
     topic '#option_empty?()' do
 
       spec "[!14xgg] returns true if the action has no options." do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         args = ["hello", "Hello", schema, MyAction, :hello]
         md = Benry::CmdApp::ActionMetadata.new(*args)
         ok {md.option_empty?} == true
       end
 
       spec "[!dbtht] returns false if the action has at least one option." do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         schema.add(:verbose, "-v", "verbose")
         args = ["hello", "Hello", schema, MyAction, :hello]
         md = Benry::CmdApp::ActionMetadata.new(*args)
@@ -55,7 +55,7 @@ Oktest.scope do
       end
 
       spec "[!wa315] considers hidden options if `all: true` passed." do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         schema.add(:debug, "-D", "debug", hidden: true)
         args = ["hello", "Hello", schema, MyAction, :hello]
         md = Benry::CmdApp::ActionMetadata.new(*args)
@@ -69,7 +69,7 @@ Oktest.scope do
     topic '#option_help()' do
 
       before do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         schema.add(:lang, "-l <lang>", "language")
         schema.add(:color, "--color[=<on|off>]", "color mode", type: TrueClass)
         schema.add(:debug, "--debug", "debug mode", hidden: true)
@@ -99,7 +99,7 @@ END
     topic '#parse_options()' do
 
       before do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         schema.add(:lang, "-l <lang>", "language")
         schema.add(:color, "--color[=<on|off>]", "color mode", type: TrueClass)
         schema.add(:debug, "--debug", "debug mode", hidden: true)
@@ -127,7 +127,7 @@ END
     topic '#alias?()' do
 
       spec "[!c1eq3] returns false which means that this is not an alias metadata." do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         args = ["hello", "Hello", schema, MyAction, :hello]
         metadata = Benry::CmdApp::ActionMetadata.new(*args)
         ok {metadata.alias?} == false

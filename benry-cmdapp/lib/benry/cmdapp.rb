@@ -187,9 +187,9 @@ module Benry::CmdApp
   end
 
 
-  OPTION_SCHEMA_CLASS = ActionOptionSchema
+  ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
   OPTION_PARSER_CLASS = OptionParser
-  OPTION_EMPTY_SCHEMA = OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
+  OPTION_EMPTY_SCHEMA = ACTION_OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
 
 
   class BaseMetadata
@@ -392,7 +392,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("`@option.()` called without `@action.()`.")
           #; [!2p98r] `@option.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
           schema.add(key, optstr, desc,
                      type: type, rexp: rexp, pattern: pattern, enum: enum,
                      range: range, value: value, detail: detail,
@@ -407,7 +407,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
           #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
           schema.copy_from(metadata.schema, except: except)
         end
       end

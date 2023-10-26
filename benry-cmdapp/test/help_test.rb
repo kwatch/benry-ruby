@@ -139,7 +139,7 @@ END
     topic '#build_option_help()' do
 
       before do
-        @schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
+        @schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new()
         #@schema.add(:help  , "-h, --help"  , "help message")
         @schema.add(:silent, "-s, --silent", "silent mode")
         @schema.add(:file  , "-f <file>"   , "filename")
@@ -195,7 +195,7 @@ END
       end
 
       spec "[!jcqdf] returns nil if no options." do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new()
         x = @builder.__send__(:build_option_help, schema, @format)
         ok {x} == nil
       end
@@ -438,7 +438,7 @@ END
       end
 
       spec "[!fjhow] returns nil if no options." do
-        gschema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        gschema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         x = @builder.__send__(:build_options_part, gschema)
         ok {x} == nil
       end
