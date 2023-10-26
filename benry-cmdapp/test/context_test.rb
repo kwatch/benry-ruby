@@ -109,7 +109,7 @@ Oktest.scope do
         ok {sout} == "args=[], kwargs={}\n"
         #
         r = recorder()
-        r.fake_method(@context, {:_run_action => nil})
+        r.fake_method(@context, :_run_action => nil)
         @context.start_action("ali23", [])
         ok {r[0].args} == [metadata, [], {}, {:once=>false}]
       end
@@ -131,7 +131,7 @@ Oktest.scope do
         ok {sout} == "args=[\"aa\", \"bb\", \"cc\", \"xx\", \"yy\"], kwargs={}\n"
         #
         r = recorder()
-        r.fake_method(@context, {:_run_action => nil})
+        r.fake_method(@context, :_run_action => nil)
         @context.start_action("ali33", [])
         ok {r[0].args} == [metadata, ["aa", "bb", "cc"], {}, {:once=>false}]
       end
@@ -146,7 +146,7 @@ Oktest.scope do
         ok {sout} == "Bonjour, Alice!\n"
         #
         r = recorder()
-        r.fake_method(@context, {:_run_action => nil})
+        r.fake_method(@context, :_run_action => nil)
         @context.start_action("ali42", ["Alice"])
         ok {r[0].args} == [metadata, ["Alice"], {:lang=>"it"}, {:once=>false}]
       end
