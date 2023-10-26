@@ -22,24 +22,6 @@ Oktest.scope do
     end
 
 
-    topic '#color_mode?()' do
-
-      spec "[!5ohdt] if `@color_mode` is set, returns it's value." do
-        @config.color_mode = true
-        ok {@config.color_mode?} == true
-        @config.color_mode = false
-        ok {@config.color_mode?} == false
-      end
-
-      spec "[!9dszi] if `@color_mode` is not set, returns true when stdout is a tty." do
-        @config.color_mode = nil
-        capture_sio(tty: true ) { ok {@config.color_mode?} == true  }
-        capture_sio(tty: false) { ok {@config.color_mode?} == false }
-      end
-
-    end
-
-
     topic '#each()' do
 
       spec "[!yxi7r] returns Enumerator object if block not given." do

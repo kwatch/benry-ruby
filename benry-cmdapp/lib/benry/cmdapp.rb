@@ -13,8 +13,8 @@ module Benry::CmdApp
 
   $VERBOSE_MODE = nil    # true when global option '-v, --verbose' specified
   $QUIET_MODE   = nil    # true when global option '-q, --quiet' specified
+  $COLOR_MODE   = nil    # true when global option '--color' specified
   $DEBUG_MODE   = nil    # true when global option '--debug' specified
-  #$COLOR_MODE  = nil    # use `@config.color_mode?` instead.
   #$TRACE_MODE  = nil    # use `@config.trace_mode?` instead.
 
 
@@ -137,7 +137,13 @@ module Benry::CmdApp
       return str.gsub(/\e\[.*?m/, '')
     end
 
-    def self.method_override?(klass, meth)  # :nodoc:
+    def color_mode?()
+      #; [!xyta1] returns value of $COLOR_MODE if it is not nil.
+      #; [!8xufh] returns value of $stdout.tty? if $COLOR_MODE is nil.
+      return $COLOR_MODE != nil ? $COLOR_MODE : $stdout.tty?
+    end
+
+    def method_override?(klass, meth)  # :nodoc:
       #; [!ldd1x] returns true if method defined in parent or ancestor classes.
       klass.ancestors[1..-1].each do |cls|
         if cls.method_defined?(meth) || cls.private_method_defined?(meth)
@@ -148,7 +154,6 @@ module Benry::CmdApp
       #; [!bc65v] returns false if meethod not defined in parent nor ancestor classes.
       return false
     end
-
 
   end
 
@@ -710,7 +715,7 @@ module Benry::CmdApp
       #; [!5jdlh] runs action method with scope object.
       begin
         #; [!9uue9] reports enter into and exit from action if global '-T' option specified.
-        c1, c2 = @config.color_mode? ? ["\e[33m", "\e[0m"] : ["", ""]
+        c1, c2 = Util.color_mode? ? ["\e[33m", "\e[0m"] : ["", ""]
         puts "#{c1}### enter: #{md.name}#{c2}" if @config.trace_mode
         if kwargs.empty?                        # for Ruby < 2.7
           scope_obj.__send__(md.meth, *args)    # for Ruby < 2.7
@@ -784,7 +789,7 @@ module Benry::CmdApp
       #
       #@verobse_mode       = nil
       #@quiet_mode         = nil
-      @color_mode         = nil
+      #@color_mode         = nil
       #@debug_mode         = nil
       @trace_mode         = nil
     end
@@ -798,14 +803,8 @@ module Benry::CmdApp
     attr_accessor :option_list, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
-    attr_accessor :color_mode, :trace_mode #, :verbose_mode, :quiet_mode, :debug_mode
+    attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
     alias trace_mode? trace_mode
-
-    def color_mode?()
-      #; [!5ohdt] if `@color_mode` is set, returns it's value.
-      #; [!9dszi] if `@color_mode` is not set, returns true when stdout is a tty.
-      return (@color_mode != nil) ? @color_mode : $stdout.tty?
-    end
 
     def each(sort: false, &b)
       #; [!yxi7r] returns Enumerator object if block not given.
@@ -1348,10 +1347,10 @@ module Benry::CmdApp
       if    d[:verbose] ; $VERBOSE_MODE = true ; $QUIET_MODE = false
       elsif d[:quiet]   ; $VERBOSE_MODE = false; $QUIET_MODE = true
       end
+      #; [!510eb] sets `$COLOR_MODE` according to global option.
+      $COLOR_MODE        = d[:color] if d[:color] != nil
       #; [!sucqp] sets `$DEBUG_MODE` according to global options.
       $DEBUG_MODE        = d[:debug] if d[:debug] != nil
-      #; [!510eb] sets `config.color_mode` if global option specified.
-      @config.color_mode = d[:color] if d[:color] != nil
       #; [!y9fow] sets `config.trace_mode` if global option specified.
       @config.trace_mode = d[:trace] if d[:trace] != nil
       nil
@@ -1464,7 +1463,7 @@ module Benry::CmdApp
     def print_str(str)
       #; [!6kyv9] prints string as is if color mode is enabled.
       #; [!lxhvq] deletes escape characters from string and prints it if color mode is disabled.
-      str = Util.delete_escape_chars(str) unless @config.color_mode?
+      str = Util.delete_escape_chars(str) unless Util.color_mode?
       print str
       nil
     end

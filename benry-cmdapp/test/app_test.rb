@@ -259,14 +259,18 @@ END
         ok {$DEBUG_MODE} == true
       end
 
-      spec "[!510eb] sets `config.color_mode` if global option specified." do
+      spec "[!510eb] sets `$COLOR_MODE` according to global option." do
+        bkup = $COLOR_MODE
+        at_end { $COLOR_MODE = bkup }
+        $COLOR_MODE = nil
+        #
         opts = {color: true}
         @app.instance_eval { toggle_global_options(opts) }
-        ok {@config.color_mode} == true
+        ok {$COLOR_MODE} == true
         #
         opts = {color: false}
         @app.instance_eval { toggle_global_options(opts) }
-        ok {@config.color_mode} == false
+        ok {$COLOR_MODE} == false
       end
 
       spec "[!y9fow] sets `config.trace_mode` if global option specified." do
@@ -581,7 +585,8 @@ END
     topic '#print_str()' do
 
       spec "[!6kyv9] prints string as is if color mode is enabled." do
-        @config.color_mode = true
+        bkup = $COLOR_MODE; at_end { $COLOR_MODE = bkup }
+        $COLOR_MODE = true
         sout, serr = capture_sio do
           @app.instance_eval { print_str("\e[1mHello\e[0m") }
         end
@@ -589,7 +594,8 @@ END
       end
 
       spec "[!lxhvq] deletes escape characters from string and prints it if color mode is disabled." do
-        @config.color_mode = false
+        bkup = $COLOR_MODE; at_end { $COLOR_MODE = bkup }
+        $COLOR_MODE = false
         sout, serr = capture_sio do
           @app.instance_eval { print_str("\e[1mHello\e[0m") }
         end
