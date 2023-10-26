@@ -1854,19 +1854,19 @@ class MyAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
   def build_help_message(gschema, all: false)
     super
   end
-  def help_message__preamble()
+  def build_preamble_part()
     super
   end
-  def help_message__usage()
+  def build_usage_part()
     super
   end
-  def help_message__options(gschema, all: false)
+  def build_options_part(gschema, all: false)
     super
   end
-  def help_message__actions(all: false)
+  def build_actions_part(all: false, &filter)
     super
   end
-  def help_message__postamble()
+  def build_postamble_part()
     super
   end
 end
@@ -1911,19 +1911,19 @@ module MyHelpBuilderMod
   def build_help_message(gschema, all: false)
     super
   end
-  def help_message__preamble()
+  def build_preamble_part()
     super
   end
-  def help_message__usage()
+  def build_usage_part()
     super
   end
-  def help_message__options(gschema, all: false)
+  def build_options_part(gschema, all: false)
     super
   end
-  def help_message__actions(all: false)
+  def build_actions_part(all: false)
     super
   end
-  def help_message__postamble()
+  def build_postamble_part()
     super
   end
 end
@@ -2007,16 +2007,16 @@ class MyActionHelpBuilder < Benry::CmdApp::ActionHelpBuilder
   def build_help_message(metadata, all: false)
     super
   end
-  def help_message__preamble(metadata)
+  def build_preamble_part(metadata)
     super
   end
-  def help_message__usage(metadata, all: false)
+  def build_usage_part(metadata, all: false)
     super
   end
-  def help_message__options(metadata, all: false)
+  def build_options_part(metadata, all: false)
     super
   end
-  def help_message__postamble(metadata)
+  def build_postamble_part(metadata)
     super
   end
 end
@@ -2057,16 +2057,16 @@ module MyActionHelpBuilderMod
   def build_help_message(metadata, all: false)
     super
   end
-  def help_message__preamble(metadata)
+  def build_preamble_part(metadata)
     super
   end
-  def help_message__usage(metadata, all: false)
+  def build_usage_part(metadata, all: false)
     super
   end
-  def help_message__options(metadata, all: false)
+  def build_options_part(metadata, all: false)
     super
   end
-  def help_message__postamble(metadata)
+  def build_postamble_part(metadata)
     super
   end
 end
@@ -2232,7 +2232,7 @@ class SampleAction < Benry::CmdApp::Action
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-config.option_trace = true                          # !!!!
+config.option_trace = true                      # !!!! (or `:hidden`)
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 ```
@@ -2240,7 +2240,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex43.rb -T build           # !!!!
+[bash]$ ruby ex43.rb --trace build              # !!!!
 ### enter: build
 ### enter: prepare
 ... prepare something ...
