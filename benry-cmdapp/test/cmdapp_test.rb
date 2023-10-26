@@ -28,12 +28,17 @@ Oktest.scope do
         ok {metadata}.is_a?(Benry::CmdApp::AliasMetadata)
         ok {metadata.name} == "tmphello1"
         ok {metadata.action} == "hello"
+        ok {metadata.args} == []
+        #
+        Benry::CmdApp.define_alias("tmphello2", "hello", "aa", "bb", "cc")
+        metadata = Benry::CmdApp::INDEX.metadata_get("tmphello2")
+        ok {metadata.args} == ["aa", "bb", "cc"]
       end
 
       spec "[!wfbqu] returns alias metadata." do
-        ret = Benry::CmdApp.define_alias("tmphello2", "hello")
+        ret = Benry::CmdApp.define_alias("tmphello3", "hello")
         ok {ret}.is_a?(Benry::CmdApp::AliasMetadata)
-        ok {ret.name} == "tmphello2"
+        ok {ret.name} == "tmphello3"
         ok {ret.action} == "hello"
       end
 

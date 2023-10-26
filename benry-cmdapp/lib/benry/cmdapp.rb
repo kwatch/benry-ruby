@@ -246,14 +246,17 @@ module Benry::CmdApp
 
   class AliasMetadata < BaseMetadata
 
-    def initialize(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+    def initialize(alias_name, action_name, args, tag: nil, important: nil, hidden: nil)
       #; [!qtb61] sets description string automatically.
-      desc = "alias of '#{action_name}'"
+      #; [!kgic6] includes args value into description if provided.
+      desc = args && ! args.empty? ? "alias of '#{action_name} #{args.join(' ')}'" \
+                                   : "alias of '#{action_name}'"
       super(alias_name, desc, tag: tag, important: important, hidden: hidden)
       @action = action_name
+      @args   = args
     end
 
-    attr_reader :action
+    attr_reader :action, :args
 
     def alias?()
       #; [!c798o] returns true which means that this is an alias metadata.
@@ -263,13 +266,13 @@ module Benry::CmdApp
   end
 
 
-  def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+  def self.define_alias(alias_name, action_name, *args, tag: nil, important: nil, hidden: nil)
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
     errmsg = self.__validate_alias_and_action(alias_name, action_name)
     errmsg == nil  or
       raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_name.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
-    alias_metadata = AliasMetadata.new(alias_name, action_name, tag: tag, important: important, hidden: hidden)
+    alias_metadata = AliasMetadata.new(alias_name, action_name, args, tag: tag, important: important, hidden: hidden)
     INDEX.metadata_add(alias_metadata)
     #; [!wfbqu] returns alias metadata.
     return alias_metadata
@@ -443,7 +446,7 @@ module Benry::CmdApp
       #; [!lyn0z] registers alias metadata if necessary.
       if alias_p
         prefix != nil  or raise "** assertion failed: ailas_target=#{alias_target.inspect}"
-        alias_metadata = AliasMetadata.new(prefix.chomp(':'), action)
+        alias_metadata = AliasMetadata.new(prefix.chomp(':'), action, nil)
         INDEX.metadata_add(alias_metadata)
         #; [!4402s] clears `alias_of:` kwarg.
         @__prefixdef__[2] = nil
@@ -578,13 +581,16 @@ module Benry::CmdApp
       nil
     end
 
-    def action_lookup(name)
-      #; [!lfd9z] returns action metadata even if alias name specified.
+    def metadata_lookup(name)
+      #; [!dcs9v] looks up action metadata recursively if alias name specified.
+      #; [!f8fqx] returns action metadata and alias args.
+      alias_args = []
       md = metadata_get(name)
       while md != nil && md.alias?
+        alias_args = md.args + alias_args if md.args && ! md.args.empty?
         md = metadata_get(md.action)
       end
-      return md
+      return md, alias_args
     end
 
   end
@@ -627,13 +633,18 @@ module Benry::CmdApp
     private :__clear
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
+      #; [!2mnh7] looks up action metadata with action or alias name.
+      metadata, alias_args = @index.metadata_lookup(action_name)
       #; [!0ukvb] raises CommandError if action nor alias not found.
-      metadata = @index.action_lookup(action_name)  or
+      metadata != nil  or
         raise CommandError.new("#{action_name}: Action nor alias not found.")
+      #; [!9n46s] if alias has its own args, combines them with command-line args.
+      args = alias_args + cmdline_args
+      #; [!5ru31] options in alias args are also parsed as well as command-line options.
       #; [!r3gfv] raises OptionError if invalid action options specified.
-      options = metadata.parse_options(cmdline_args)
+      options = metadata.parse_options(args)
       #; [!lg6br] runs action with command-line arguments.
-      run_action(action_name, cmdline_args, options, once: false)
+      _run_action(metadata, args, options, once: false)
       return nil
     ensure
       #; [!jcguj] clears instance variables.
@@ -646,19 +657,29 @@ module Benry::CmdApp
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
         prefix = $1
-        metadata = @index.action_lookup(prefix + action)
+        metadata = @index.metadata_get(prefix + action)
         action = prefix + action if metadata
       end
       #; [!ygpsw] raises ActionError if action not found.
-      metadata ||= @index.action_lookup(action)  or
+      metadata ||= @index.metadata_get(action)
+      metadata != nil  or
         raise ActionError.new("#{action}: Action not found.")
+      #; [!de6a9] raises ActionError if alias name specified.
+      ! metadata.alias?  or
+        raise ActionError.new("#{action}: Action expected, but it is an alias.")
+      return _run_action(metadata, args, kwargs, once: once)
+    end
+
+    def _run_action(action_metadata, args, kwargs, once: false)
+      ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
       #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
+      action = action_metadata.name
       return false if once && @status_dict[action] == :done
       #; [!xwlou] raises ActionError if looped aciton detected.
       @status_dict[action] != :doing  or
         raise ActionError.new("#{action}: Looped action detected.")
       #; [!peqk8] raises ActionError if args and opts not matched to action method.
-      md = metadata
+      md = action_metadata
       scope_obj = md.klass.new(@config, self)
       #scope_obj = (@scope_objects[md.klass.name] ||= md.klass.new(@config, self))
       errmsg = Util.validate_args_and_kwargs(scope_obj, md.meth, args, kwargs)
@@ -1325,7 +1346,8 @@ module Benry::CmdApp
 
     def render_action_help(action, all: false)
       #; [!c510c] returns action help message.
-      metadata = @index.action_lookup(action)  or
+      metadata, _alias_args = @index.metadata_lookup(action)
+      metadata  or
         raise CommandError.new("#{action}: Action not found.")
       builder = @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
       return builder.build_help_message(metadata, all: all)

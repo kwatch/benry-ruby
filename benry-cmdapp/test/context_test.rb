@@ -74,8 +74,14 @@ class FooBarAction < Benry::CmdApp::Action
   @action.("nest3")
   def nest3(); puts "nest3"; end
 
-end
+  ##
 
+  @action.("takes any arguments")
+  def anyargs(*args, **kwargs)
+    puts "args=#{args.inspect}, kwargs=#{kwargs.inspect}"
+  end
+
+end
 
 
 Oktest.scope do
@@ -92,10 +98,57 @@ Oktest.scope do
 
     topic '#start_action()' do
 
+      spec "[!2mnh7] looks up action metadata with action or alias name." do
+        metadata = Benry::CmdApp::INDEX.metadata_get("foo:anyargs")
+        ok {metadata} != nil
+        Benry::CmdApp.define_alias("ali21", "foo:anyargs")
+        Benry::CmdApp.define_alias("ali22", "ali21")
+        Benry::CmdApp.define_alias("ali23", "ali22")
+        #
+        sout, serr = capture_sio() { @context.start_action("ali23", []) }
+        ok {sout} == "args=[], kwargs={}\n"
+        #
+        r = recorder()
+        r.fake_method(@context, {:_run_action => nil})
+        @context.start_action("ali23", [])
+        ok {r[0].args} == [metadata, [], {}, {:once=>false}]
+      end
+
       spec "[!0ukvb] raises CommandError if action nor alias not found." do
         pr = proc { @context.start_action("hello99", []) }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
                        "hello99: Action nor alias not found.")
+      end
+
+      spec "[!9n46s] if alias has its own args, combines them with command-line args." do
+        metadata = Benry::CmdApp::INDEX.metadata_get("foo:anyargs")
+        ok {metadata} != nil
+        Benry::CmdApp.define_alias("ali31", "foo:anyargs", "aa")
+        Benry::CmdApp.define_alias("ali32", "ali31")
+        Benry::CmdApp.define_alias("ali33", "ali32"      , "bb", "cc")
+        #
+        sout, serr = capture_sio() { @context.start_action("ali33", ["xx", "yy"]) }
+        ok {sout} == "args=[\"aa\", \"bb\", \"cc\", \"xx\", \"yy\"], kwargs={}\n"
+        #
+        r = recorder()
+        r.fake_method(@context, {:_run_action => nil})
+        @context.start_action("ali33", [])
+        ok {r[0].args} == [metadata, ["aa", "bb", "cc"], {}, {:once=>false}]
+      end
+
+      spec "[!5ru31] options in alias args are also parsed as well as command-line options." do
+        metadata = Benry::CmdApp::INDEX.metadata_get("hello")
+        ok {metadata} != nil
+        Benry::CmdApp.define_alias("ali41", "hello", "-l", "it")
+        Benry::CmdApp.define_alias("ali42", "ali41")
+        #
+        sout, serr = capture_sio() { @context.start_action("ali42", ["-l", "fr", "Alice"]) }
+        ok {sout} == "Bonjour, Alice!\n"
+        #
+        r = recorder()
+        r.fake_method(@context, {:_run_action => nil})
+        @context.start_action("ali42", ["Alice"])
+        ok {r[0].args} == [metadata, ["Alice"], {:lang=>"it"}, {:once=>false}]
       end
 
       spec "[!r3gfv] raises OptionError if invalid action options specified." do
@@ -145,6 +198,13 @@ Oktest.scope do
         pr = proc { @context.run_action("foo:xxx", [], {}) }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "foo:xxx: Action not found.")
+      end
+
+      spec "[!de6a9] raises ActionError if alias name specified." do
+        Benry::CmdApp.define_alias("a0469", "hello")
+        pr = proc { @context.run_action("a0469", [], {}) }
+        ok {pr}.raise?(Benry::CmdApp::ActionError,
+                       "a0469: Action expected, but it is an alias.")
       end
 
       spec "[!6hoir] don't run action and returns false if `once: true` specified and the action already done." do
