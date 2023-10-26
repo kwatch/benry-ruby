@@ -158,7 +158,20 @@ module Benry::CmdApp
   end
 
 
-  class OptionSchema < Benry::CmdOpt::Schema
+  class ActionOptionSchema < Benry::CmdOpt::Schema
+
+    HELP_OPTION_ITEM = proc {|dummy_schema|
+      dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
+      #dummy_schema.get(:help).freeze()
+      dummy_schema.get(:help)
+    }.call(Benry::CmdOpt::Schema.new)
+
+    def initialize()
+      super
+      #; [!rruxi] adds '-h, --help' option as hidden automatically.
+      @items << HELP_OPTION_ITEM
+    end
+
   end
 
 
@@ -174,9 +187,9 @@ module Benry::CmdApp
   end
 
 
-  OPTION_SCHEMA_CLASS = OptionSchema
-  OPTION_PARSER_CLASS = OptionParser
-  OPTION_EMPTY_SCHEMA = OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
+  ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
+  ACTION_OPTION_PARSER_CLASS = OptionParser
+  ACTION_OPTION_EMPTY_SCHEMA = ACTION_OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
 
 
   class BaseMetadata
@@ -237,7 +250,7 @@ module Benry::CmdApp
     def parse_options(args)
       #; [!gilca] returns parsed options.
       #; [!v34yk] raises OptionError if option has error.
-      parser = OPTION_PARSER_CLASS.new(@schema)
+      parser = ACTION_OPTION_PARSER_CLASS.new(@schema)
       return parser.parse(args, all: true)  # raises error if invalid option given
     end
 
@@ -379,7 +392,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("`@option.()` called without `@action.()`.")
           #; [!2p98r] `@option.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
           schema.add(key, optstr, desc,
                      type: type, rexp: rexp, pattern: pattern, enum: enum,
                      range: range, value: value, detail: detail,
@@ -394,7 +407,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
           #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
           schema.copy_from(metadata.schema, except: except)
         end
       end
@@ -445,7 +458,7 @@ module Benry::CmdApp
       (errmsg = __validate_action_method(action, meth, method_symbol)) == nil  or
         raise DefinitionError.new("def #{method_symbol}(): #{errmsg}")
       #; [!7fnh4] registers action metadata.
-      schema ||= OPTION_EMPTY_SCHEMA
+      schema ||= ACTION_OPTION_EMPTY_SCHEMA
       action_metadata = ActionMetadata.new(action, desc, schema, self, meth, **kws)
       INDEX.metadata_add(action_metadata)
       #; [!lyn0z] registers alias metadata if necessary.
@@ -695,8 +708,13 @@ module Benry::CmdApp
 
     def _invoke_action(action_metadata, args, kwargs, once: false)
       ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
-      #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
+      #; [!ev3qh] handles help option firstly if specified.
       action = action_metadata.name
+      if kwargs[:help]
+        invoke_action("help", [action], {}, once: false)
+        return nil
+      end
+      #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
       return false if once && @status_dict[action] == :done
       #; [!xwlou] raises ActionError if looped aciton detected.
       @status_dict[action] != :doing  or
@@ -1204,7 +1222,7 @@ module Benry::CmdApp
   ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
 
 
-  class GlobalOptionSchema < OptionSchema
+  class GlobalOptionSchema < Benry::CmdOpt::Schema
 
     def initialize(config)
       super()
@@ -1248,6 +1266,7 @@ module Benry::CmdApp
   end
 
   GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
+  GLOBAL_OPTION_PARSER_CLASS = OptionParser
 
 
   def self.current_app()   # :nodoc:
@@ -1355,7 +1374,7 @@ module Benry::CmdApp
 
     def parse_global_options(args)
       #; [!9c9r8] parses global options.
-      parser = OPTION_PARSER_CLASS.new(@option_schema)
+      parser = GLOBAL_OPTION_PARSER_CLASS.new(@option_schema)
       global_opts = parser.parse(args, all: false)  # raises OptionError
       return global_opts
     end

@@ -167,7 +167,18 @@ Actions:
 </pre>
 <p>Help message of action:</p>
 <pre class="language-console">
-[bash]$ ruby ex01.rb <strong>-h hello</strong>     # or: ruby ex01.rb help hello
+[bash]$ ruby ex01.rb <strong>-h hello</strong>     # or: ruby ex01.rb --help hello
+ex01.rb hello --- print greeting message
+
+Usage:
+  $ ex01.rb hello [&ltuser&gt;]
+</pre>
+<ul>
+<li>Benry-CmdApp adds <code>-h</code> and <code>--help</code> options to each action automatically.
+  Output of <code>ruby ex01.rb hello -h</code> and <code>ruby ex01.rb -h hello</code> will be the same.</li>
+</ul>
+<pre class="language-console">
+[bash]$ ruby ex01.rb <strong>hello -h</strong>     # or: ruby ex01.rb helo --help
 ex01.rb hello --- print greeting message
 
 Usage:

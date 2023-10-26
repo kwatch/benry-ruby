@@ -56,13 +56,29 @@ Oktest.scope do
   end
 
 
+  topic Benry::CmdApp::ActionOptionSchema do
+
+
+    topic '#initialize()' do
+
+      spec "[!rruxi] adds '-h, --help' option as hidden automatically." do
+        schema = Benry::CmdApp::ActionOptionSchema.new()
+        ok {schema.get(:help)} != nil
+        ok {schema.get(:help)}.hidden?
+      end
+
+    end
+
+  end
+
+
   topic Benry::CmdApp::OptionParser do
 
 
     topic '#parse()' do
 
       spec "[!iaawe] raises OptionError if option error found." do
-        schema = Benry::CmdApp::OptionSchema.new()
+        schema = Benry::CmdApp::ActionOptionSchema.new()
         schema.add(:help, "-h, --help", "help message")
         parser = Benry::CmdApp::OptionParser.new(schema)
         pr = proc { parser.parse(["-x", "foo"]) }

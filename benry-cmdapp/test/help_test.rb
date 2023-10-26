@@ -139,8 +139,9 @@ END
     topic '#build_option_help()' do
 
       before do
-        @schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
-        @schema.add(:help  , "-h, --help"  , "help message")
+        @schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new()
+        #@schema.add(:help  , "-h, --help"  , "help message")
+        @schema.add(:silent, "-s, --silent", "silent mode")
         @schema.add(:file  , "-f <file>"   , "filename")
         @schema.add(:debug , "    --debug" , "debug mode", hidden: true)
         config = Benry::CmdApp::Config.new("test app", "1.2.3")
@@ -150,7 +151,7 @@ END
       spec "[!muhem] returns option part of help message." do
         x = @builder.__send__(:build_option_help, @schema, @format)
         ok {x} == <<"END"
-  -h, --help         : help message
+  -s, --silent       : silent mode
   -f <file>          : filename
 END
       end
@@ -158,7 +159,8 @@ END
       spec "[!4z70n] includes hidden options when `all: true` passed." do
         x = @builder.__send__(:build_option_help, @schema, @format, all: true)
         ok {x} == <<"END"
-  -h, --help         : help message
+\e[2m  -h, --help         : print help message\e[0m
+  -s, --silent       : silent mode
   -f <file>          : filename
 \e[2m      --debug        : debug mode\e[0m
 END
@@ -173,7 +175,7 @@ END
         #
         x = @builder.__send__(:build_option_help, @schema, @format)
         ok {x} == <<"END"
-  -h, --help         : help message
+  -s, --silent       : silent mode
   -f <file>          : filename
   -m <mode>          : output mode
                        - v, verbose: print many output
@@ -183,7 +185,7 @@ END
         #
         x = @builder.__send__(:build_option_help, @schema, "  %-15s # %s")
         ok {x} == <<"END"
-  -h, --help      # help message
+  -s, --silent    # silent mode
   -f <file>       # filename
   -m <mode>       # output mode
                     - v, verbose: print many output
@@ -193,7 +195,7 @@ END
       end
 
       spec "[!jcqdf] returns nil if no options." do
-        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
+        schema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new()
         x = @builder.__send__(:build_option_help, schema, @format)
         ok {x} == nil
       end
@@ -436,7 +438,7 @@ END
       end
 
       spec "[!fjhow] returns nil if no options." do
-        gschema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        gschema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
         x = @builder.__send__(:build_options_part, gschema)
         ok {x} == nil
       end
@@ -572,6 +574,7 @@ END
   $ \e[1mtestapp debuginfo\e[0m [<options>]
 
 \e[1;34mOptions:\e[0m
+\e[2m  -h, --help         : print help message\e[0m
 \e[2m  --val=<val>        : something value\e[0m
 END
       end
@@ -583,7 +586,10 @@ END
 \e[1mtestapp noopt\e[0m --- no options
 
 \e[1;34mUsage:\e[0m
-  $ \e[1mtestapp noopt\e[0m <aa> [<bb>]
+  $ \e[1mtestapp noopt\e[0m [<options>] <aa> [<bb>]
+
+\e[1;34mOptions:\e[0m
+\e[2m  -h, --help         : print help message\e[0m
 END
       end
 
