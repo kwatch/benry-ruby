@@ -19,6 +19,23 @@ Oktest.scope do
 
     topic '#initialize()' do
 
+      spec "[!pzp34] if `option_version` is not specified, then set true if `app_version` is provided." do
+        c = Benry::CmdApp::Config.new("x", "1.0.0", option_version: nil)
+        ok {c.option_version} == true
+        c = Benry::CmdApp::Config.new("x",          option_version: nil)
+        ok {c.option_version} == false
+        #
+        c = Benry::CmdApp::Config.new("x", "1.0.0", option_version: true)
+        ok {c.option_version} == true
+        c = Benry::CmdApp::Config.new("x",          option_version: true)
+        ok {c.option_version} == true
+        #
+        c = Benry::CmdApp::Config.new("x", "1.0.0", option_version: false)
+        ok {c.option_version} == false
+        c = Benry::CmdApp::Config.new("x",          option_version: false)
+        ok {c.option_version} == false
+      end
+
     end
 
 

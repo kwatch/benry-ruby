@@ -761,6 +761,9 @@ module Benry::CmdApp
                    option_help: true, option_version: nil, option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: :hidden, option_trace: false)
+      #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.
+      option_version = !! app_version if option_version == nil
+      #
       @app_desc           = app_desc
       @app_version        = app_version
       @app_name           = app_name
@@ -780,7 +783,7 @@ module Benry::CmdApp
       @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
       @deco_error         = deco_error   || DECORATION_ERROR
       @option_help        = option_help
-      @option_version     = option_version != nil ? option_version : !! app_version
+      @option_version     = option_version
       @option_list        = option_list
       @option_all         = option_all
       @option_verbose     = option_verbose
