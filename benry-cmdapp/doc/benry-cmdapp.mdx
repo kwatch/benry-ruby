@@ -850,6 +850,12 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
+* ``prefix()`` can take a description text of prefix.
+  For example, ``prefix "foo:", "Bla bla"`` registers ``"Bla bla`` as a description of prefix ``foo:``.
+  Description of prefix is displayed in list of prefix list.
+  See [Action List and Prefix List](#action-list-and-prefix-list) section for details.
+
+
 
 === Invoke Other Action
 
@@ -1195,6 +1201,51 @@ Outuput:
 Prefixes:
   {{*bar: (2)*}}           # !!! two actions ('bar:test3' and 'bar:baz:test4')
   {{*foo: (1)*}}           # !!! one action ('foo:text2')
+```
+
+``prefix()`` can take a description of prefix as 2nd argument.
+Descriptions of prefix are displayed in the prefix list.
+
+File: ex19.rb
+
+```ruby
+# coding: utf-8
+require 'benry/cmdapp'
+
+class SampleAction < Benry::CmdApp::Action
+
+  prefix "foo:"{{*, "description of Foo"*}} do
+    @action.("test action #2")
+    def test2()
+    end
+  end
+
+  prefix "bar:"{{*, "description of Bar"*}} do
+    @action.("test action #3")
+    def {{*test3*}}()
+    end
+
+    prefix "baz:"{{*, "description fo Baz"*}} do
+      @action.("test action #4")
+      def {{*test4*}}()
+      end
+    end
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Output:
+
+```console
+[bash]$ ruby ex19.rb {{*:*}}                       # !!!!
+Top Prefixes:
+  bar: (2)           : {{*description of Bar*}}    # !!!!
+  foo: (1)           : {{*description of Foo*}}    # !!!!
 ```
 
 
