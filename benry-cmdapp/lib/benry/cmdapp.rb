@@ -737,6 +737,7 @@ module Benry::CmdApp
     FORMAT_OPTION         = "  %-18s : %s"
     FORMAT_ACTION         = "  %-18s : %s"
     FORMAT_USAGE          = "  $ %s"
+    FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
     DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
@@ -749,7 +750,7 @@ module Benry::CmdApp
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
                    help_postamble: nil,
-                   format_option: nil, format_action: nil, format_usage: nil,
+                   format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
                    option_list: true, option_all: true,
@@ -766,6 +767,7 @@ module Benry::CmdApp
       @format_option      = format_option || FORMAT_OPTION
       @format_action      = format_action || FORMAT_ACTION
       @format_usage       = format_usage  || FORMAT_USAGE
+      @format_prefix      = format_prefix   # nil means to use @format_action
       @deco_command       = deco_command || DECORATION_COMMAND
       @deco_header        = deco_header  || DECORATION_HEADER
       @deco_strong        = deco_strong  || DECORATION_STRONG
@@ -789,7 +791,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
-    attr_accessor :format_option, :format_action, :format_usage
+    attr_accessor :format_option, :format_action, :format_usage, :format_prefix
     attr_accessor :deco_command, :deco_header
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
