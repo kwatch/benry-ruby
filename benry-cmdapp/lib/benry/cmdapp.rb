@@ -158,7 +158,7 @@ module Benry::CmdApp
   end
 
 
-  class OptionSchema < Benry::CmdOpt::Schema
+  class ActionOptionSchema < Benry::CmdOpt::Schema
 
     HELP_OPTION_ITEM = proc {|dummy_schema|
       dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
@@ -187,7 +187,7 @@ module Benry::CmdApp
   end
 
 
-  OPTION_SCHEMA_CLASS = OptionSchema
+  OPTION_SCHEMA_CLASS = ActionOptionSchema
   OPTION_PARSER_CLASS = OptionParser
   OPTION_EMPTY_SCHEMA = OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
 
