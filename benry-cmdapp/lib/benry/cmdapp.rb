@@ -758,9 +758,9 @@ module Benry::CmdApp
                    format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
-                   option_list: true, option_all: true,
+                   option_help: true, option_version: nil, option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
-                   option_debug: nil, option_trace: false)
+                   option_debug: :hidden, option_trace: false)
       @app_desc           = app_desc
       @app_version        = app_version
       @app_name           = app_name
@@ -779,6 +779,8 @@ module Benry::CmdApp
       @deco_weak          = deco_weak    || DECORATION_WEAK
       @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
       @deco_error         = deco_error   || DECORATION_ERROR
+      @option_help        = option_help
+      @option_version     = option_version != nil ? option_version : !! app_version
       @option_list        = option_list
       @option_all         = option_all
       @option_verbose     = option_verbose
@@ -800,7 +802,7 @@ module Benry::CmdApp
     attr_accessor :deco_command, :deco_header
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
-    attr_accessor :option_list, :option_all
+    attr_accessor :option_help, :option_version, :option_list, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
