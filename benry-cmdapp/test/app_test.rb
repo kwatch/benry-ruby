@@ -766,7 +766,8 @@ END
 END
         ok {schema.get(:trace)}   == nil
         #
-        config.app_version   = nil
+        config.option_help   = false
+        config.option_version = false
         config.option_list   = false
         config.option_all    = false
         config.option_verbose = true
@@ -776,7 +777,7 @@ END
         config.option_trace  = true
         #
         schema = new_schema(config)
-        ok {schema.get(:help)}    != nil
+        ok {schema.get(:help)}    == nil
         ok {schema.get(:version)} == nil
         ok {schema.get(:list)}    == nil
         ok {schema.get(:all)}     == nil
@@ -785,6 +786,43 @@ END
         ok {schema.get(:color)}   != nil
         ok {schema.get(:trace)}   != nil
         ok {schema.get(:debug)}.NOT.hidden?
+      end
+
+      spec "[!doj0k] if config option is `:hidden`, makes option as hidden." do
+        config = Benry::CmdApp::Config.new("sample app", "1.2.3")
+        config.option_help    = :hidden
+        config.option_version = :hidden
+        config.option_list    = :hidden
+        config.option_all     = :hidden
+        config.option_verbose = :hidden
+        config.option_quiet   = :hidden
+        config.option_color   = :hidden
+        config.option_debug   = :hidden
+        config.option_trace   = :hidden
+        #
+        schema = new_schema(config)
+        ok {schema.get(:help   ).hidden?} == true
+        ok {schema.get(:version).hidden?} == true
+        ok {schema.get(:list   ).hidden?} == true
+        ok {schema.get(:all    ).hidden?} == true
+        ok {schema.get(:verbose).hidden?} == true
+        ok {schema.get(:quiet  ).hidden?} == true
+        ok {schema.get(:color  ).hidden?} == true
+        ok {schema.get(:debug  ).hidden?} == true
+        ok {schema.get(:trace  ).hidden?} == true
+        #
+        ok {schema.option_help()} == ""
+        ok {schema.option_help(all: true)} == <<'END'
+      --help           : print help message (of action if specified)
+      --version        : print version
+      --list           : list actions
+      --all            : list all actions/options including hidden ones
+      --verbose        : verbose mode
+      --quiet          : quiet mode
+  --color[=<on|off>]   : color mode
+      --debug          : debug mode
+      --trace          : trace mode
+END
       end
 
       spec "[!umjw5] add nothing if config is nil." do

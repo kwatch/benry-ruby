@@ -1209,16 +1209,30 @@ module Benry::CmdApp
       return if ! config
       #; [!ppcvp] adds options according to config object.
       c = config
-      add(:help    , "-h, --help"    , "print help message (of action if specified)")
-      add(:version , "-V, --version" , "print version")   if c.app_version
-      add(:list    , "-l, --list"    , "list actions")    if c.option_list
-      add(:all     , "-a, --all"     , "list all actions/options including hidden ones") if c.option_all
-      add(:verbose , "-v, --verbose" , "verbose mode")    if c.option_verbose
-      add(:quiet   , "-q, --quiet"   , "quiet mode")      if c.option_quiet
-      add(:color   , "--color[=<on|off>]", "color mode", type: TrueClass) if c.option_color
-      add(:debug   , "    --debug"   , "debug mode", hidden: ! c.option_debug)
-      add(:trace   , "-T, --trace"   , "trace mode")      if c.option_trace
+      _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
+      _add(c, :version, "-V, --version", "print version")
+      _add(c, :list   , "-l, --list"   , "list actions")
+      _add(c, :all    , "-a, --all"    , "list all actions/options including hidden ones")
+      _add(c, :verbose, "-v, --verbose", "verbose mode")
+      _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
+      _add(c, :color  , "--color[=<on|off>]", "color mode", TrueClass)
+      _add(c, :debug  , "    --debug"  , "debug mode")
+      _add(c, :trace  , "-T, --trace"  , "trace mode")
     end
+
+    def _add(c, key, optstr, desc, type=nil)
+      flag = c.__send__("option_#{key}")
+      return unless flag
+      #; [!doj0k] if config option is `:hidden`, makes option as hidden.
+      if flag == :hidden
+        hidden = true
+        optstr = optstr.sub(/^-\w, /, "    ")  # ex: "-T, --trace" -> "    --trace"
+      else
+        hidden = nil
+      end
+      add(key, optstr, desc, hidden: hidden, type: type)
+    end
+    private :_add
 
     def reorder_options!(*keys)
       #; [!2cp9s] sorts options in order of keys specified.
