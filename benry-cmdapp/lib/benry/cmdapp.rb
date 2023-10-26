@@ -1233,7 +1233,7 @@ module Benry::CmdApp
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
-      _add(c, :all    , "-a, --all"    , "list all actions/options including hidden ones")
+      _add(c, :all    , "-a, --all"    , "list hidden actions/options, too")
       _add(c, :verbose, "-v, --verbose", "verbose mode")
       _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
       _add(c, :color  , "--color[=<on|off>]", "color mode", TrueClass)

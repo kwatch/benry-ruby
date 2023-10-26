@@ -145,7 +145,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   hello              : print greeting message
@@ -227,7 +227,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   foo-bar-baz        : sample #2
@@ -835,7 +835,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   foo:bar:baz:test2  : test action #2
@@ -896,7 +896,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   foo:bar            : test action #3
@@ -1047,7 +1047,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   foo:bar:test1      : test action #1
@@ -1163,7 +1163,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions: (default: test1)                   # !!!!
   help               : print help message (of action if specified)
@@ -1510,7 +1510,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
       --debug        : debug mode             # !!!!
 
 Actions:
@@ -1567,7 +1567,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   --logging          : enable logging          # !!!!
 
 Actions:
@@ -1594,7 +1594,7 @@ schema = Benry::CmdApp::GlobalOptionSchema.new(nil)   # !!!!
 schema.add(:help   , "-h, --help"   , "print help message")
 schema.add(:version, "-V, --version", "print version")
 schema.add(:list   , "-l, --list"   , "list actions")
-schema.add(:all    , "-a, --all"    , "list all actions/options including hidden ones")
+schema.add(:all    , "-a, --all"    , "list hidden actions/options, too")
 schema.add(:verbose, "-v, --verbose", "verbose mode")
 schema.add(:quiet  , "-q, --quiet"  , "quiet mode")
 schema.add(:color  , "--color[=<on|off>]", "enable/disable color mode", type: TrueClass)
@@ -1620,7 +1620,7 @@ Options:
   -h, --help         : print help message
   -V, --version      : print version
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
   --color[=<on|off>] : enable/disable color mode
@@ -1814,7 +1814,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   hello              : test action #1
@@ -2199,7 +2199,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   hello              : other action       # !!!!
@@ -2286,7 +2286,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   --color[=<on|off>] : enable/disable color      # !!!!
 
 Actions:
@@ -2478,7 +2478,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   aaa                : alias of 'aaa:print' action    # !!!!
@@ -2530,7 +2530,7 @@ Options:
   --color[=<on|off>] : color mode
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
   -l, --list         : list actions
 
 Actions:
@@ -2576,7 +2576,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -a, --all          : list all actions/options including hidden ones
+  -a, --all          : list hidden actions/options, too
 
 Actions:
   help               : print help message (of action if specified)
