@@ -1119,22 +1119,22 @@ module Benry::CmdApp
     HEADER_ALIASES    = "Aliases:"
     HEADER_PREFIXES   = "Top Prefixes:"
 
-    def new_app_help_builder()
-      return APPLICATION_HELP_BUILDER_CLASS.new(@config)
+    def initialize(config, app_help_builder=nil)
+      super(config)
+      @app_help_builder = app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
     end
-    private :new_app_help_builder
 
     def build_action_list(all: false)
       #; [!q12ju] returns list of actions and aliases.
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
       #; [!k2tts] returns nil if no actions found.
-      b = new_app_help_builder()
+      b = @app_help_builder
       return b.__send__(:build_actions_part, all: all)
     end
 
     def build_action_list_filtered_by(prefix, all: false)
       index = @_index || INDEX
-      b = new_app_help_builder()
+      b = @app_help_builder
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       found = false
@@ -1441,7 +1441,7 @@ module Benry::CmdApp
     end
 
     def render_action_list(prefix=nil, all: false)
-      builder = ACTION_LIST_BUILDER_CLASS.new(@config)
+      builder = ACTION_LIST_BUILDER_CLASS.new(@config, @app_help_builder)
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil

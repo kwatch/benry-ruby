@@ -1700,19 +1700,19 @@ end
   def <strong>build_help_message</strong>(gschema, all: false)
     super
   end
-  def <strong>help_message__preamble</strong>()
+  def <strong>build_preamble_part</strong>()
     super
   end
-  def <strong>help_message__usage</strong>()
+  def <strong>build_usage_part</strong>()
     super
   end
-  def <strong>help_message__options</strong>(gschema, all: false)
+  def <strong>build_options_part</strong>(gschema, all: false)
     super
   end
-  def <strong>help_message__actions</strong>(all: false)
+  def <strong>build_actions_part</strong>(all: false, &amp;filter)
     super
   end
-  def <strong>help_message__postamble</strong>()
+  def <strong>build_postamble_part</strong>()
     super
   end
 end
@@ -1755,19 +1755,19 @@ end
   def build_help_message(gschema, all: false)
     super
   end
-  def help_message__preamble()
+  def build_preamble_part()
     super
   end
-  def help_message__usage()
+  def build_usage_part()
     super
   end
-  def help_message__options(gschema, all: false)
+  def build_options_part(gschema, all: false)
     super
   end
-  def help_message__actions(all: false)
+  def build_actions_part(all: false)
     super
   end
-  def help_message__postamble()
+  def build_postamble_part()
     super
   end
 end
@@ -1844,16 +1844,16 @@ end
   def <strong>build_help_message</strong>(metadata, all: false)
     super
   end
-  def <strong>help_message__preamble</strong>(metadata)
+  def <strong>build_preamble_part</strong>(metadata)
     super
   end
-  def <strong>help_message__usage</strong>(metadata, all: false)
+  def <strong>build_usage_part</strong>(metadata, all: false)
     super
   end
-  def <strong>help_message__options</strong>(metadata, all: false)
+  def <strong>build_options_part</strong>(metadata, all: false)
     super
   end
-  def <strong>help_message__postamble</strong>(metadata)
+  def <strong>build_postamble_part</strong>(metadata)
     super
   end
 end
@@ -1892,16 +1892,16 @@ end
   def <strong>build_help_message</strong>(metadata, all: false)
     super
   end
-  def <strong>help_message__preamble</strong>(metadata)
+  def <strong>build_preamble_part</strong>(metadata)
     super
   end
-  def <strong>help_message__usage</strong>(metadata, all: false)
+  def <strong>build_usage_part</strong>(metadata, all: false)
     super
   end
-  def <strong>help_message__options</strong>(metadata, all: false)
+  def <strong>build_options_part</strong>(metadata, all: false)
     super
   end
-  def <strong>help_message__postamble</strong>(metadata)
+  def <strong>build_postamble_part</strong>(metadata)
     super
   end
 end
@@ -2052,13 +2052,13 @@ class SampleAction &lt Benry::CmdApp::Action
 end
 
 config = Benry::CmdApp::Config.new("sample app")
-<strong>config.option_trace = true</strong>                          # !!!!
+<strong>config.option_trace = true</strong>                      # !!!! (or `:hidden`)
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex43.rb -T build           # !!!!
+[bash]$ ruby ex43.rb <strong>--trace</strong> build              # !!!!
 <strong>### enter: build</strong>
 <strong>### enter: prepare</strong>
 ... prepare something ...
