@@ -1,38 +1,522 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 
-require 'oktest'
 
-require 'benry/cmdapp'
-require_relative './shared'
+require_relative 'shared'
+
+
+class HelpTestAction < Benry::CmdApp::Action
+
+  @action.("preamble and postamble",
+           detail: "See https://....",
+           postamble: [{"Examples:"=>"  $ echo\n"}, "(Tips: blabla)"])
+  def prepostamble()
+  end
+
+  @action.("no options")
+  def noopt(aa, bb=nil)
+    puts "aa=#{aa.inspect}, bb=#{bb.inspect}"
+  end
+
+  @action.("usage sample", usage: "input.txt > output.txt")
+  def usagesample1(aa, bb, cc=nil)
+  end
+
+  @action.("usage sample", usage: ["input.txt | less", "input.txt > output.txt"])
+  @option.(:file, "-f <file>", "filename")
+  def usagesample2(aa, bb, cc=nil)
+  end
+
+  @action.("arguments sample")
+  @option.(:xx, "--xx", "XX")
+  @option.(:yy, "--yy", "YY")
+  def argsample(aa, bb, cc=nil, dd=nil, *rest, xx: nil, yy: nil)
+    puts "aa=#{aa.inspect}, bb=#{bb.inspect}, cc=#{cc.inspect}, dd=#{dd.inspect}, rest=#{rest.inspect}, xx=#{xx.inspect}, yy=#{yy.inspect}"
+  end
+
+  prefix "secret:" do
+    @action.("secret action", hidden: true)
+    def crypt()
+    end
+  end
+
+end
 
 
 Oktest.scope do
 
 
-  topic Benry::CmdApp::HelpBuilder do
+  def with_dummy_index(index, &b)
+    bkup = nil
+    Benry::CmdApp.module_eval {
+      bkup = const_get :INDEX
+      remove_const :INDEX
+      const_set :INDEX, index
+    }
+    yield
+  ensure
+    Benry::CmdApp.module_eval {
+      remove_const :INDEX
+      const_set :INDEX, bkup
+    }
+  end
+
+
+  topic Benry::CmdApp::BaseHelpBuilder do
 
 
     before do
-      @builder = Benry::CmdApp::HelpBuilder.new()
+      @config  = Benry::CmdApp::Config.new("test app", "1.2.3", app_command: "testapp")
+      @builder = Benry::CmdApp::BaseHelpBuilder.new(@config)
+    end
+
+
+    topic '#build_help_message()' do
+
+      spec "[!0hy81] this is an abstract method." do
+        pr = proc { @builder.build_help_message(nil) }
+        ok {pr}.raise?(NotImplementedError,
+                       "Benry::CmdApp::BaseHelpBuilder#build_help_message(): not implemented yet.")
+      end
+
     end
 
 
     topic '#build_section()' do
 
-      spec "[!cfijh] includes section title and content if specified by config." do
-        msg = @builder.build_section("Example", "  $ echo 'Hello, world!'")
-        ok {msg} == <<"END"
-\e[34mExample:\e[0m
-  $ echo 'Hello, world!'
+      spec "[!61psk] returns section string with decorating header." do
+        s = @builder.__send__(:build_section, "Document:", "http://example.com/doc/\n")
+        ok {s} == ("\e[1;34mDocument:\e[0m\n" \
+                   "http://example.com/doc/\n")
+      end
+
+      spec "[!0o8w4] appends '\n' to content if it doesn't end with '\n'." do
+        s = @builder.__send__(:build_section, "Document:", "http://...")
+        ok {s} == ("\e[1;34mDocument:\e[0m\n" \
+                   "http://...\n")
+        ok {s}.end_with?("\n")
+      end
+
+    end
+
+
+    topic '#build_sections()' do
+
+      spec "[!tqau1] returns nil if value is nil or empty." do
+        ok {@builder.__send__(:build_sections, nil, 'config.app_postamble')} == nil
+        ok {@builder.__send__(:build_sections, [] , 'config.app_postamble')} == nil
+      end
+
+      spec "[!ezb0d] returns value unchanged if value is a string." do
+        ok {@builder.__send__(:build_sections, "ABC\n", 'xxx')} == "ABC\n"
+      end
+
+      spec "[!gipxn] builds sections of help message if value is a hash object." do
+        ok {@builder.__send__(:build_sections, {"Doc:"=>"ABC\n"}, 'xxx')} == <<"END"
+\e[1;34mDoc:\e[0m
+ABC
 END
       end
 
-      spec "[!09jzn] third argument can be nil." do
-        msg = @builder.build_section("Example", "  $ echo 'Hello, world!'", "(see https://...)")
-        ok {msg} == <<"END"
-\e[34mExample:\e[0m (see https://...)
-  $ echo 'Hello, world!'
+      spec "[!944rt] raises ActionError if unexpected value found in value." do
+        pr = proc { @builder.__send__(:build_sections, 123, 'xxx') }
+        ok {pr}.raise?(Benry::CmdApp::ActionError,
+                       "123: Unexpected value found in `xxx`.")
+      end
+
+    end
+
+
+    topic '#build_option_help()' do
+
+      before do
+        @schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
+        @schema.add(:help  , "-h, --help"  , "help message")
+        @schema.add(:file  , "-f <file>"   , "filename")
+        @schema.add(:debug , "    --debug" , "debug mode", hidden: true)
+        config = Benry::CmdApp::Config.new("test app", "1.2.3")
+        @format = config.format_option
+      end
+
+      spec "[!muhem] returns option part of help message." do
+        x = @builder.__send__(:build_option_help, @schema, @format)
+        ok {x} == <<"END"
+  -h, --help         : help message
+  -f <file>          : filename
 END
+      end
+
+      spec "[!4z70n] includes hidden options when `all: true` passed." do
+        x = @builder.__send__(:build_option_help, @schema, @format, all: true)
+        ok {x} == <<"END"
+  -h, --help         : help message
+  -f <file>          : filename
+\e[2m      --debug        : debug mode\e[0m
+END
+      end
+
+      spec "[!hxy1f] includes `detail:` kwarg value with indentation." do
+        @schema.add(:mode, "-m <mode>", "output mode", detail: <<END)
+- v, verbose: print many output
+- q, quiet:   print litte output
+- c, compact: print summary output
+END
+        #
+        x = @builder.__send__(:build_option_help, @schema, @format)
+        ok {x} == <<"END"
+  -h, --help         : help message
+  -f <file>          : filename
+  -m <mode>          : output mode
+                       - v, verbose: print many output
+                       - q, quiet:   print litte output
+                       - c, compact: print summary output
+END
+        #
+        x = @builder.__send__(:build_option_help, @schema, "  %-15s # %s")
+        ok {x} == <<"END"
+  -h, --help      # help message
+  -f <file>       # filename
+  -m <mode>       # output mode
+                    - v, verbose: print many output
+                    - q, quiet:   print litte output
+                    - c, compact: print summary output
+END
+      end
+
+      spec "[!jcqdf] returns nil if no options." do
+        schema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new()
+        x = @builder.__send__(:build_option_help, schema, @format)
+        ok {x} == nil
+      end
+
+    end
+
+
+    topic '#build_action_line()' do
+
+      spec "[!ferqn] returns '  <action> : <descriptn>' line." do
+        metadata = Benry::CmdApp::INDEX.metadata_get("hello")
+        x = @builder.__send__(:build_action_line, metadata)
+        ok {x} == "  hello              : greeting message\n"
+        #
+        metadata = Benry::CmdApp::INDEX.metadata_get("debuginfo")
+        x = @builder.__send__(:build_action_line, metadata)
+        ok {x} == "\e[2m  debuginfo          : hidden action\e[0m\n"
+      end
+
+    end
+
+
+    topic '#decorate_command()' do
+
+      spec "[!zffx5] decorates command string." do
+        x = @builder.__send__(:decorate_command, "cmdname")
+        ok {x} == "\e[1mcmdname\e[0m"
+      end
+
+    end
+
+
+    topic '#decorate_header()' do
+
+      spec "[!zffx5] decorates header string." do
+        x = @builder.__send__(:decorate_header, "Header:")
+        ok {x} == "\e[1;34mHeader:\e[0m"
+      end
+
+    end
+
+
+    topic '#decorate_str()' do
+
+      spec "[!9qesd] decorates string if `hidden` is true." do
+        b = @builder
+        ok {b.__send__(:decorate_str, "FOOBAR", true, nil)}  == "\e[2mFOOBAR\e[0m"
+        ok {b.__send__(:decorate_str, "FOOBAR", false, nil)} == "FOOBAR"
+        ok {b.__send__(:decorate_str, "FOOBAR", nil, nil)}   == "FOOBAR"
+      end
+
+      spec "[!uql2d] decorates string if `important` is true." do
+        b = @builder
+        ok {b.__send__(:decorate_str, "FOOBAR", nil, true)} == "\e[1mFOOBAR\e[0m"
+      end
+
+      spec "[!mdhhr] decorates string if `important` is false." do
+        b = @builder
+        ok {b.__send__(:decorate_str, "FOOBAR", nil, false)} == "\e[2mFOOBAR\e[0m"
+      end
+
+      spec "[!6uzbi] not decorates string if `hidden` is falthy and `important` is nil." do
+        b = @builder
+        ok {b.__send__(:decorate_str, "FOOBAR", nil, nil)} == "FOOBAR"
+      end
+
+    end
+
+
+  end
+
+
+  topic Benry::CmdApp::ApplicationHelpBuilder do
+
+    before do
+      @config = Benry::CmdApp::Config.new("test app", "1.2.3",
+                                          app_name: "TestApp", app_command: "testapp",
+                                          option_verbose: true, option_quiet: true,
+                                          option_color: true, #option_debug: true,
+                                          option_trace: true)
+      @builder = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+    end
+
+
+    topic '#build_help_message()' do
+
+      spec "[!ezcs4] returns help message string of application." do
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
+        actual = @builder.build_help_message(gschema)
+        expected = <<"END"
+\e[1mTestApp\e[0m (1.2.3) --- test app
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+
+\e[1;34mOptions:\e[0m
+  -h, --help         : print help message (of action if specified)
+  -V, --version      : print version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
+  --color[=<on|off>] : color mode
+  -T, --trace        : trace mode
+
+\e[1;34mActions:\e[0m
+END
+        ok {actual}.start_with?(expected)
+        ok {actual} !~ /^ *--debug/
+      end
+
+      spec "[!ntj2y] includes hidden actions and options if `all: true` passed." do
+        @config.option_debug = true
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
+        actual = @builder.build_help_message(gschema)
+        expected = <<"END"
+\e[1mTestApp\e[0m (1.2.3) --- test app
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+
+\e[1;34mOptions:\e[0m
+  -h, --help         : print help message (of action if specified)
+  -V, --version      : print version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
+  --color[=<on|off>] : color mode
+      --debug        : debug mode
+  -T, --trace        : trace mode
+
+\e[1;34mActions:\e[0m
+END
+        ok {actual}.start_with?(expected)
+        ok {actual} =~ /^ +--debug +: debug mode$/
+      end
+
+    end
+
+
+    topic '#build_preamble_part()' do
+
+      spec "[!51v42] returns preamble part of application help message." do
+        x = @builder.__send__(:build_preamble_part)
+        ok {x} == "\e[1mTestApp\e[0m (1.2.3) --- test app\n"
+      end
+
+      spec "[!bmh17] includes `config.app_name` or `config.app_command` into preamble." do
+        @config.app_name = "TestApp"
+        @config.app_command = "testapp"
+        x = @builder.__send__(:build_preamble_part)
+        ok {x} == "\e[1mTestApp\e[0m (1.2.3) --- test app\n"
+        #
+        @config.app_name = nil
+        x = @builder.__send__(:build_preamble_part)
+        ok {x} == "\e[1mtestapp\e[0m (1.2.3) --- test app\n"
+      end
+
+      spec "[!opii8] includes `config.app_versoin` into preamble if it is set." do
+        @config.app_version = "3.4.5"
+        x = @builder.__send__(:build_preamble_part)
+        ok {x} == "\e[1mTestApp\e[0m (3.4.5) --- test app\n"
+        #
+        @config.app_version = nil
+        x = @builder.__send__(:build_preamble_part)
+        ok {x} == "\e[1mTestApp\e[0m --- test app\n"
+      end
+
+      spec "[!3h380] includes `config.app_detail` into preamble if it is set." do
+        @config.app_detail = "https://www.example.com/"
+        x = @builder.__send__(:build_preamble_part)
+        ok {x} == <<"END"
+\e[1mTestApp\e[0m (1.2.3) --- test app
+
+https://www.example.com/
+END
+      end
+
+    end
+
+
+    topic '#build_usage_part()' do
+
+      spec "[!h98me] returns 'Usage:' section of application help message." do
+        x = @builder.__send__(:build_usage_part)
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+END
+      end
+
+      spec "[!i9d4r] includes `config.app_usage` into help message if it is set." do
+        @config.app_usage = "<command> [<args>...]"
+        x = @builder.__send__(:build_usage_part)
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp\e[0m [<options>] <command> [<args>...]
+END
+      end
+
+    end
+
+
+    topic '#build_options_part()' do
+
+      spec "[!f2n70] returns 'Options:' section of application help message." do
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
+        x = @builder.__send__(:build_options_part, gschema)
+        ok {x} == <<"END"
+\e[1;34mOptions:\e[0m
+  -h, --help         : print help message (of action if specified)
+  -V, --version      : print version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
+  --color[=<on|off>] : color mode
+  -T, --trace        : trace mode
+END
+        ok {x} !~ /--debug/
+      end
+
+      spec "[!0bboq] includes hidden options into help message if `all: true` passed." do
+        gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
+        x = @builder.__send__(:build_options_part, gschema, all: true)
+        ok {x} == <<"END"
+\e[1;34mOptions:\e[0m
+  -h, --help         : print help message (of action if specified)
+  -V, --version      : print version
+  -l, --list         : list actions
+  -a, --all          : list all actions/options including hidden ones
+  -v, --verbose      : verbose mode
+  -q, --quiet        : quiet mode
+  --color[=<on|off>] : color mode
+\e[2m      --debug        : debug mode\e[0m
+  -T, --trace        : trace mode
+END
+        ok {x} =~ /--debug/
+      end
+
+      spec "[!fjhow] returns nil if no options." do
+        gschema = Benry::CmdApp::OPTION_SCHEMA_CLASS.new
+        x = @builder.__send__(:build_options_part, gschema)
+        ok {x} == nil
+      end
+
+    end
+
+
+    topic '#build_actions_part()' do
+
+      spec "[!typ67] returns 'Actions:' section of help message." do
+        x = @builder.__send__(:build_actions_part)
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
+      end
+
+      spec "[!yn8ea] includes hidden actions into help message if `all: true` passed." do
+        x = @builder.__send__(:build_actions_part, all: true)
+        ok {x} =~ /debuginfo/
+        ok {x} =~ /^\e\[2m  debuginfo          : hidden action\e\[0m$/
+        #
+        x = @builder.__send__(:build_actions_part)
+        ok {x} !~ /debuginfo/
+      end
+
+      spec "[!24by5] returns nil if no actions defined." do
+        debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
+        hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
+        index = Benry::CmdApp::MetadataIndex.new()
+        with_dummy_index(index) do
+          #
+          x = @builder.__send__(:build_actions_part)
+          ok {x} == nil
+          #
+          index.metadata_add(debuginfo_md)
+          x = @builder.__send__(:build_actions_part)
+          ok {x} == nil
+          x = @builder.__send__(:build_actions_part, all: true)
+          ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  debuginfo          : hidden action\e[0m
+END
+          #
+          index.metadata_add(hello_md)
+          x = @builder.__send__(:build_actions_part)
+          ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  hello              : greeting message
+END
+          x = @builder.__send__(:build_actions_part, all: true)
+          ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  debuginfo          : hidden action\e[0m
+  hello              : greeting message
+END
+        end
+      end
+
+      spec "[!8qz6a] adds default action name after header if it is set." do
+        @config.default_action = "help"
+        x = @builder.__send__(:build_actions_part)
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \(default: help\)$/
+        #
+        @config.default_action = "hello"
+        x = @builder.__send__(:build_actions_part)
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \(default: hello\)$/
+      end
+
+    end
+
+
+    topic '#build_postamble_part()' do
+
+      spec "[!64hj1] returns postamble of application help message." do
+        @config.help_postamble = [
+          {"Examples:" => "  $ echo yes\n  yes\n"},
+          "(Tips: blablabla)",
+        ]
+        x = @builder.__send__(:build_postamble_part)
+        ok {x} == <<"END"
+\e[1;34mExamples:\e[0m
+  $ echo yes
+  yes
+
+(Tips: blablabla)
+END
+      end
+
+      spec "[!z5k2w] returns nil if postamble not set." do
+        x = @builder.__send__(:build_postamble_part)
+        ok {x} == nil
       end
 
     end
@@ -42,174 +526,200 @@ END
 
 
   topic Benry::CmdApp::ActionHelpBuilder do
-    include ActionMetadataTestingHelper
 
+    before do
+      @config = Benry::CmdApp::Config.new("test app", "1.2.3",
+                                          app_name: "TestApp", app_command: "testapp",
+                                          option_verbose: true, option_quiet: true,
+                                          option_color: true, #option_debug: true,
+                                          option_trace: true)
+      @builder = Benry::CmdApp::ActionHelpBuilder.new(@config)
+      @index = Benry::CmdApp::INDEX
+    end
 
     topic '#build_help_message()' do
 
-      spec "[!pqoup] adds detail text into help if specified." do
-        expected = <<END
-testapp halo1 -- greeting
+      spec "[!f3436] returns help message of an action." do
+        metadata = @index.metadata_get("hello")
+        x = @builder.build_help_message(metadata)
+        ok {x} == <<"END"
+\e[1mtestapp hello\e[0m --- greeting message
 
-See: https://example.com/doc.html
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp hello\e[0m [<options>] [<name>]
 
-Usage:
-  $ testapp halo1 [<options>] [<user>]
-
-Options:
-  -l, --lang=<en|fr|it> : language
+\e[1;34mOptions:\e[0m
+  -l, --lang=<lang>  : language name (en/fr/it)
 END
-        detail = "See: https://example.com/doc.html"
-        [detail, detail+"\n"].each do |detail_|
-          metadata = new_metadata(new_schema(), detail: detail)
-          msg = metadata.help_message("testapp")
-          msg = uncolorize(msg)
-          ok {msg} == expected
-        end
       end
 
-      spec "[!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist." do
-        schema = new_schema(lang: false)
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg}.include?("Usage:\n" +
-                          "  $ testapp halo1 [<user>]\n")
+      spec "[!8acs1] includes hidden options if `all: true` passed." do
+        metadata = @index.metadata_get("debuginfo")
+        x = @builder.build_help_message(metadata, all: true)
+        ok {x} == <<"END"
+\e[1mtestapp debuginfo\e[0m --- hidden action
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp debuginfo\e[0m [<options>]
+
+\e[1;34mOptions:\e[0m
+\e[2m  --val=<val>        : something value\e[0m
+END
+      end
+
+      spec "[!vcg9w] not include 'Options:' section if action has no options." do
+        metadata = @index.metadata_get("noopt")
+        x = @builder.build_help_message(metadata, all: true)
+        ok {x} == <<"END"
+\e[1mtestapp noopt\e[0m --- no options
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp noopt\e[0m <aa> [<bb>]
+END
+      end
+
+      spec "[!1auu5] not include '[<options>]' in 'Usage:'section if action has no options." do
+        metadata = @index.metadata_get("debuginfo")
+        x = @builder.build_help_message(metadata)
+        ok {x} == <<"END"
+\e[1mtestapp debuginfo\e[0m --- hidden action
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp debuginfo\e[0m
+END
+      end
+
+    end
+
+
+    topic '#build_preamble_part()' do
+
+      spec "[!a6nk4] returns preamble of action help message." do
+        metadata = @index.metadata_get("hello")
+        x = @builder.__send__(:build_preamble_part, metadata)
+        ok {x} == <<"END"
+\e[1mtestapp hello\e[0m --- greeting message
+END
+      end
+
+      spec "[!imxdq] includes `config.app_command`, not `config.app_name`, into preamble." do
+        @config.app_name    = "TestApp1"
+        @config.app_command = "testapp1"
+        metadata = @index.metadata_get("hello")
+        x = @builder.__send__(:build_preamble_part, metadata)
+        ok {x} == <<"END"
+\e[1mtestapp1 hello\e[0m --- greeting message
+END
+      end
+
+      spec "[!7uy4f] includes `detail:` kwarg value of `@action.()` if specified." do
+        @config.app_command = "testapp1"
+        metadata = @index.metadata_get("prepostamble")
+        x = @builder.__send__(:build_preamble_part, metadata)
+        ok {x} == <<"END"
+\e[1mtestapp1 prepostamble\e[0m --- preamble and postamble
+
+See https://....
+END
+      end
+
+    end
+
+
+    topic '#build_usage_part()' do
+
+      spec "[!jca5d] not add '[<options>]' if action has no options." do
+        metadata = @index.metadata_get("noopt")
+        x = @builder.__send__(:build_usage_part, metadata)
+        ok {x}.NOT.include?("[<options>]")
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp noopt\e[0m <aa> [<bb>]
+END
         #
-        schema = new_schema(lang: true)
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg}.include?("Usage:\n" +
-                          "  $ testapp halo1 [<options>] [<user>]\n")
-      end
-
-      spec "[!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified." do
-        schema = new_schema(lang: false)
-        schema.add(:lang, "-l, --lang=<en|fr|it>", "language", hidden: true)
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp halo1 \[<user>\]\n/
-        ok {msg} =~ /^Usage:\n  \$ testapp halo1 \[<user>\]$/
-      end
-
-      spec "[!ou3md] not add extra whiespace when no arguments of command." do
-        schema = new_schema(lang: true)
-        msg = new_metadata(schema, :halo3).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp halo3 \[<options>\]\n/
-        ok {msg} =~ /^Usage:\n  \$ testapp halo3 \[<options>\]$/
-      end
-
-      spec "[!g2ju5] adds 'Options:' section." do
-        schema = new_schema(lang: true)
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg}.include?("Options:\n" +
-                          "  -l, --lang=<en|fr|it> : language\n")
-      end
-
-      spec "[!pvu56] ignores 'Options:' section when no options exist." do
-        schema = new_schema(lang: false)
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg}.NOT.include?("Options:\n")
-      end
-
-      spec "[!hghuj] ignores 'Options:' section when only hidden options speicified." do
-        schema = new_schema(lang: false)
-        schema.add(:lang, "-l, --lang=<en|fr|it>", "language", hidden: true)  # hidden option
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg}.NOT.include?("Options:\n")
-      end
-
-      spec "[!vqqq1] hidden option should be shown in weak format." do
-        schema = new_schema(lang: false)
-        schema.add(:file , "-f, --file=<file>", "filename")
-        schema.add(:lang, "-l, --lang=<lang>", "language", hidden: true)  # hidden option
-        msg = new_metadata(schema).help_message("testapp", true)
-        ok {msg}.end_with?(<<"END")
-\e[34mOptions:\e[0m
-  \e[1m-f, --file=<file> \e[0m : filename
-  \e[1m\e[2m-l, --lang=<lang>\e[0m \e[0m : language
+        metadata = @index.metadata_get("debuginfo")   # has a hidden option
+        x = @builder.__send__(:build_usage_part, metadata)
+        ok {x}.NOT.include?("[<options>]")
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp debuginfo\e[0m
 END
       end
 
-      spec "[!dukm7] includes detailed description of option." do
-        schema = new_schema(lang: false)
-        schema.add(:lang, "-l, --lang=<lang>", "language",
-                   detail: "detailed description1\ndetailed description2")
-        msg = new_metadata(schema).help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg}.end_with?(<<"END")
-Options:
-  -l, --lang=<lang>  : language
-                       detailed description1
-                       detailed description2
+      spec "[!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string." do
+        metadata = @index.metadata_get("usagesample1")
+        x = @builder.__send__(:build_usage_part, metadata)
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp usagesample1\e[0m input.txt > output.txt
 END
       end
 
-      spec "[!0p2gt] adds postamble text if specified." do
-        postamble = "Tips: `testapp -h <action>` print help message of action."
-        schema = new_schema(lang: false)
-        ameta = new_metadata(schema, postamble: postamble)
-        msg = ameta.help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} == <<END
-testapp halo1 -- greeting
-
-Usage:
-  $ testapp halo1 [<user>]
-
-Tips: `testapp -h <action>` print help message of action.
+      spec "[!nfuxz] `usage:` kwarg can be a string or an array of string." do
+        metadata = @index.metadata_get("usagesample2")
+        x = @builder.__send__(:build_usage_part, metadata)
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp usagesample2\e[0m [<options>] input.txt | less
+  $ \e[1mtestapp usagesample2\e[0m [<options>] input.txt > output.txt
 END
       end
 
-      spec "[!v5567] adds '\n' at end of preamble text if it doesn't end with '\n'." do
-        postamble = "END"
-        schema = new_schema(lang: false)
-        ameta = new_metadata(schema, postamble: postamble)
-        msg = ameta.help_message("testapp")
-        ok {msg}.end_with?("\nEND\n")
+      spec "[!z3lh9] if `usage:` kwarg not specified in `@action.()`, generates usage string from method parameters." do
+        metadata = @index.metadata_get("argsample")
+        x = @builder.__send__(:build_usage_part, metadata)
+        ok {x}.include?("[<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]")
       end
 
-      spec "[!x0z89] required arg is represented as '<arg>'." do
-        schema = new_schema(lang: false)
-        metadata = Benry::CmdApp::ActionMetadata.new("args1", MetadataTestAction, :args1, "", schema)
-        msg = metadata.help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp args1 <aa> <bb>$/
+      spec "[!iuctx] returns 'Usage:' section of action help message." do
+        metadata = @index.metadata_get("argsample")
+        x = @builder.__send__(:build_usage_part, metadata)
+        ok {x} == <<"END"
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp argsample\e[0m [<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]
+END
       end
 
-      spec "[!md7ly] optional arg is represented as '[<arg>]'." do
-        schema = new_schema(lang: false)
-        metadata = Benry::CmdApp::ActionMetadata.new("args2", MetadataTestAction, :args2, "", schema)
-        msg = without_tty { metadata.help_message("testapp") }
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp args2 <aa> \[<bb> \[<cc>\]\]$/
+    end
+
+
+    topic '#build_options_part()' do
+
+      spec "[!pafgs] returns 'Options:' section of help message." do
+        metadata = @index.metadata_get("hello")
+        x = @builder.__send__(:build_options_part, metadata)
+        ok {x} == <<"END"
+\e[1;34mOptions:\e[0m
+  -l, --lang=<lang>  : language name (en/fr/it)
+END
       end
 
-      spec "[!xugkz] variable args are represented as '[<arg>...]'." do
-        schema = new_schema(lang: false)
-        metadata = Benry::CmdApp::ActionMetadata.new("args3", MetadataTestAction, :args3, "", schema)
-        msg = metadata.help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp args3 <aa> \[<bb> \[<cc> \[<dd>...\]\]\]$/
+      spec "[!85wus] returns nil if action has no options." do
+        metadata = @index.metadata_get("noopt")
+        x = @builder.__send__(:build_options_part, metadata)
+        ok {x} == nil
       end
 
-      spec "[!eou4h] converts arg name 'xx_or_yy_or_zz' into 'xx|yy|zz'." do
-        schema = new_schema(lang: false)
-        metadata = Benry::CmdApp::ActionMetadata.new("args4", MetadataTestAction, :args4, "", schema)
-        msg = metadata.help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp args4 <xx\|yy\|zz>$/
+    end
+
+
+    topic '#build_postamble_part()' do
+
+      spec "[!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`." do
+        metadata = @index.metadata_get("prepostamble")
+        x = @builder.__send__(:build_postamble_part, metadata)
+        ok {x} == <<"END"
+\e[1;34mExamples:\e[0m
+  $ echo
+
+(Tips: blabla)
+END
       end
 
-      spec "[!naoft] converts arg name '_xx_yy_zz' into '_xx-yy-zz'." do
-        schema = new_schema(lang: false)
-        metadata = Benry::CmdApp::ActionMetadata.new("args5", MetadataTestAction, :args5, "", schema)
-        msg = metadata.help_message("testapp")
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  \$ testapp args5 <_xx-yy-zz>$/
+      spec "[!jajse] returns nil if postamble is not set." do
+        metadata = @index.metadata_get("hello")
+        x = @builder.__send__(:build_postamble_part, metadata)
+        ok {x} == nil
       end
 
     end
@@ -218,532 +728,199 @@ END
   end
 
 
-  topic Benry::CmdApp::AppHelpBuilder do
-    include CommonTestingHelper
+  topic Benry::CmdApp::ActionListBuilder do
 
     before do
-      @config = Benry::CmdApp::Config.new("test app", "1.0.0").tap do |config|
-        config.app_name     = "TestApp"
-        config.app_command  = "testapp"
-        config.option_all   = true
-        config.option_debug = true
-        config.default_action = nil
-      end
-      @schema = Benry::CmdApp::AppOptionSchema.new(@config)
-      @builder = Benry::CmdApp::AppHelpBuilder.new(@config, @schema)
+      @config = Benry::CmdApp::Config.new("test app", "1.2.3",
+                                          app_name: "TestApp", app_command: "testapp",
+                                          option_verbose: true, option_quiet: true,
+                                          option_color: true, #option_debug: true,
+                                          option_trace: true)
+      @builder = Benry::CmdApp::ActionListBuilder.new(@config)
+      @index = Benry::CmdApp::INDEX
     end
 
-    topic '#build_help_message()' do
 
-      class HelpMessageTest < Benry::CmdApp::ActionScope
-        @action.("greeting #1")
-        def yo_yo()
-        end
-        @action.("greeting #2")
-        def ya__ya()
-        end
-        @action.("greeting #3")
-        def _aha()
-        end
-        @action.("greeting #4")
-        def ya___mada()
-        end
+    topic '#build_action_list()' do
+
+      spec "[!q12ju] returns list of actions and aliases." do
+        x = @builder.build_action_list()
+        ok {x} !~ /Usage:/
+        ok {x} !~ /Options:/
+        ok {x} =~ /Actions:/
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m\n/
       end
 
-      Benry::CmdApp.action_alias("yes", "yo-yo")
-
-      before do
-        clear_index_except(HelpMessageTest)
-      end
-
-      after do
-        restore_index()
-      end
-
-      expected_color = <<"END"
-\e[1mTestApp\e[0m (1.0.0) -- test app
-
-\e[34mUsage:\e[0m
-  $ \e[1mtestapp\e[0m [<options>] [<action> [<arguments>...]]
-
-\e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message
-  \e[1m-V, --version     \e[0m : print version
-  \e[1m-a, --all         \e[0m : list all actions including private (hidden) ones
-  \e[1m-D, --debug       \e[0m : debug mode (set $DEBUG_MODE to true)
-
-\e[34mActions:\e[0m
-  \e[1mya:ya             \e[0m : greeting #2
-  \e[1myes               \e[0m : alias of 'yo-yo' action
-  \e[1myo-yo             \e[0m : greeting #1
-END
-
-      expected_mono = <<'END'
-TestApp (1.0.0) -- test app
-
-Usage:
-  $ testapp [<options>] [<action> [<arguments>...]]
-
-Options:
-  -h, --help         : print help message
-  -V, --version      : print version
-  -a, --all          : list all actions including private (hidden) ones
-  -D, --debug        : debug mode (set $DEBUG_MODE to true)
-
-Actions:
-  ya:ya              : greeting #2
-  yes                : alias of 'yo-yo' action
-  yo-yo              : greeting #1
-END
-
-      spec "[!rvpdb] returns help message." do
-        msg = @builder.build_help_message()
-        msg_color = msg
-        msg_mono  = uncolorize(msg)
-        ok {msg_mono}  == expected_mono
-        ok {msg_color} == expected_color
-      end
-
-      def _with_color_mode(val, &b)
-        bkup = $COLOR_MODE
-        $COLOR_MODE = val
-        yield
-      ensure
-        $COLOR_MODE = bkup
-      end
-
-      spec "[!34y8e] includes application name specified by config." do
-        @config.app_name = "MyGreatApp"
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} =~ /^MyGreatApp \(1\.0\.0\) -- test app$/
-      end
-
-      spec "[!744lx] includes application description specified by config." do
-        @config.app_desc = "my great app"
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} =~ /^TestApp \(1\.0\.0\) -- my great app$/
-      end
-
-      spec "[!d1xz4] includes version number if specified by config." do
-        @config.app_version = "1.2.3"
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} =~ /^TestApp \(1\.2\.3\) -- test app$/
+      spec "[!90rjk] includes hidden actions and aliases if `all: true` passed." do
+        x = @builder.build_action_list()
+        ok {x} !~ /  debuginfo/
         #
-        @config.app_version = nil
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} =~ /^TestApp -- test app$/
+        x = @builder.build_action_list(all: true)
+        ok {x} =~ /  debuginfo/
+        ok {x} =~ /^\e\[2m  debuginfo/
       end
 
-      spec "[!775jb] includes detail text if specified by config." do
-        @config.app_detail = "See https://example.com/doc.html"
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg}.start_with?(<<END)
-TestApp (1.0.0) -- test app
-
-See https://example.com/doc.html
-
-Usage:
+      spec "[!k2tts] returns nil if no actions found." do
+        debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
+        hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
+        index = Benry::CmdApp::MetadataIndex.new()
+        with_dummy_index(index) do
+          #
+          x = @builder.build_action_list()
+          ok {x} == nil
+          #
+          index.metadata_add(debuginfo_md)
+          x = @builder.build_action_list()
+          ok {x} == nil
+          x = @builder.build_action_list(all: true)
+          ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  debuginfo          : hidden action\e[0m
 END
-      #
-      @config.app_detail = nil
-      msg = @builder.build_help_message()
-      msg = uncolorize(msg)
-      ok {msg}.start_with?(<<END)
-TestApp (1.0.0) -- test app
-
-Usage:
+          #
+          index.metadata_add(hello_md)
+          x = @builder.build_action_list()
+          ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  hello              : greeting message
 END
-      end
-
-      spec "[!t3tbi] adds '\\n' before detail text only when app desc specified." do
-        @config.app_desc   = nil
-        @config.app_detail = "See https://..."
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg}.start_with?(<<END)
-See https://...
-
-Usage:
-  $ testapp [<options>] [<action> [<arguments>...]]
-
-END
-      end
-
-      spec "[!rvhzd] no preamble when neigher app desc nor detail specified." do
-        @config.app_desc   = nil
-        @config.app_detail = nil
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg}.start_with?(<<END)
-Usage:
-  $ testapp [<options>] [<action> [<arguments>...]]
-
-END
-      end
-
-      spec "[!o176w] includes command name specified by config." do
-        @config.app_name = "GreatCommand"
-        @config.app_command = "greatcmd"
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg}.start_with?(<<END)
-GreatCommand (1.0.0) -- test app
-
-Usage:
-  $ greatcmd [<options>] [<action> [<arguments>...]]
-
-Options:
-END
-      end
-
-      spec "[!proa4] includes description of global options." do
-        @config.app_version = "1.0.0"
-        @config.option_debug = true
-        app = Benry::CmdApp::Application.new(@config)
-        msg = without_tty { app.help_message() }
-        msg = uncolorize(msg)
-        ok {msg}.include?(<<END)
-Options:
-  -h, --help         : print help message
-  -V, --version      : print version
-  -a, --all          : list all actions including private (hidden) ones
-  -D, --debug        : debug mode (set $DEBUG_MODE to true)
-
-Actions:
-END
-        #
-        @config.app_version = nil
-        @config.option_debug = false
-        app = Benry::CmdApp::Application.new(@config)
-        msg = without_tty { app.help_message() }
-        msg = uncolorize(msg)
-        ok {msg}.include?(<<END)
-Options:
-  -h, --help         : print help message
-  -a, --all          : list all actions including private (hidden) ones
-
-Actions:
-END
-      end
-
-      spec "[!in3kf] ignores private (hidden) options." do
-        @config.app_version = nil
-        @config.option_debug = false
-        app = Benry::CmdApp::Application.new(@config)
-        schema = app.instance_variable_get('@schema')
-        schema.add(:log, "-L", "private option", hidden: true)
-        msg = app.help_message()
-        msg = uncolorize(msg)
-        ok {msg} !~ /^  -L /
-        ok {msg}.include?(<<END)
-Options:
-  -h, --help         : print help message
-  -a, --all          : list all actions including private (hidden) ones
-
-Actions:
-END
-      end
-
-      spec "[!ywarr] not ignore private (hidden) options if 'all' flag is true." do
-        @config.app_version = nil
-        @config.option_debug = false
-        app = Benry::CmdApp::Application.new(@config)
-        schema = app.instance_variable_get('@schema')
-        schema.add(:log, "-L", "private option", hidden: true)
-        msg = app.help_message(true)
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  -L /
-        ok {msg}.include?(<<END)
-Options:
-  -h, --help         : print help message
-  -a, --all          : list all actions including private (hidden) ones
-  -L                 : private option
-
-Actions:
-END
-      end
-
-      fixture :app3 do
-        config = Benry::CmdApp::Config.new(nil)
-        schema = Benry::CmdApp::AppOptionSchema.new(nil)
-        schema.add(:help, "-h, --help", "print help message")
-        app = Benry::CmdApp::Application.new(config, schema)
-      end
-
-      spec "[!p1tu9] prints option in weak format if option is hidden." do
-        |app3|
-        app3.schema.add(:log, "-L", "private option", hidden: true)   # !!!
-        msg = app3.help_message(true)
-        ok {msg}.include?(<<END)
-\e[34mOptions:\e[0m
-  \e[1m-h, --help        \e[0m : print help message
-  \e[1m\e[2m-L\e[0m                \e[0m : private option
-
-END
-      end
-
-      spec "[!bm71g] ignores 'Options:' section if no options exist." do
-        @config.option_help = false
-        @config.option_all = false
-        @config.app_version = nil
-        @config.option_debug = false
-        app = Benry::CmdApp::Application.new(@config)
-        schema = app.instance_variable_get('@schema')
-        schema.add(:log, "-L", "private option", hidden: true)
-        msg = app.help_message()
-        msg = uncolorize(msg)
-        ok {msg} !~ /^Options:$/
-      end
-
-      spec "[!jat15] includes action names ordered by name." do
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg}.end_with?(<<'END')
-Actions:
-  ya:ya              : greeting #2
-  yes                : alias of 'yo-yo' action
-  yo-yo              : greeting #1
-END
-      end
-
-      spec "[!df13s] includes default action name if specified by config." do
-        @config.default_action = nil
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} =~ /^Actions:$/
-        #
-        @config.default_action = "yo-yo"
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} =~ /^Actions: \(default: yo-yo\)$/
-      end
-
-      spec "[!b3l3m] not show private (hidden) action names in default." do
-        msg = @builder.build_help_message()
-        msg = uncolorize(msg)
-        ok {msg} !~ /^  _aha /
-        ok {msg} !~ /^  ya:_mada /
-        ok {msg}.end_with?(<<END)
-Actions:
-  ya:ya              : greeting #2
-  yes                : alias of 'yo-yo' action
-  yo-yo              : greeting #1
-END
-      end
-
-      spec "[!yigf3] shows private (hidden) action names if 'all' flag is true." do
-        msg = @builder.build_help_message(true)
-        msg = uncolorize(msg)
-        ok {msg} =~ /^  _aha /
-        ok {msg} =~ /^  ya:_mada /
-        ok {msg}.end_with?(<<END)
-Actions:
-  _aha               : greeting #3
-  ya:_mada           : greeting #4
-  ya:ya              : greeting #2
-  yes                : alias of 'yo-yo' action
-  yo-yo              : greeting #1
-END
-      end
-
-      spec "[!5d9mc] shows hidden action in weak format." do
-        HelpMessageTest.class_eval { private :yo_yo }
-        #
-        begin
-          msg = @builder.build_help_message(true)
-          ok {msg}.end_with?(<<END)
-\e[34mActions:\e[0m
-  \e[1m_aha              \e[0m : greeting #3
-  \e[1mya:_mada          \e[0m : greeting #4
-  \e[1mya:ya             \e[0m : greeting #2
-  \e[1m\e[2myes\e[0m               \e[0m : alias of 'yo-yo' action
-  \e[1m\e[2myo-yo\e[0m             \e[0m : greeting #1
-END
-        ensure
-          HelpMessageTest.class_eval { public :yo_yo }
-        end
-      end
-
-      spec "[!awk3l] shows important action in strong format." do
-        with_important("yo-yo"=>true) do
-          msg = @builder.build_help_message()
-          ok {msg}.end_with?(<<END)
-\e[34mActions:\e[0m
-  \e[1mya:ya             \e[0m : greeting #2
-  \e[1m\e[4myes\e[0m               \e[0m : alias of 'yo-yo' action
-  \e[1m\e[4myo-yo\e[0m             \e[0m : greeting #1
+          x = @builder.build_action_list(all: true)
+          ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  debuginfo          : hidden action\e[0m
+  hello              : greeting message
 END
         end
-      end
-
-      spec "[!9k4dv] shows unimportant action in weak fomrat." do
-        with_important("yo-yo"=>false) do
-          msg = @builder.build_help_message()
-          ok {msg}.end_with?(<<END)
-\e[34mActions:\e[0m
-  \e[1mya:ya             \e[0m : greeting #2
-  \e[1m\e[2myes\e[0m               \e[0m : alias of 'yo-yo' action
-  \e[1m\e[2myo-yo\e[0m             \e[0m : greeting #1
-END
-        end
-      end
-
-      spec "[!i04hh] includes postamble text if specified by config." do
-        @config.help_postamble = "Home:\n  https://example.com/\n"
-        msg = @builder.build_help_message()
-        ok {msg}.end_with?(<<"END")
-Home:
-  https://example.com/
-END
-      end
-
-      spec "[!ckagw] adds '\\n' at end of postamble text if it doesn't end with '\\n'." do
-        @config.help_postamble = "END"
-        msg = @builder.build_help_message()
-        ok {msg}.end_with?("\nEND\n")
-      end
-
-      spec "[!oxpda] prints 'Aliases:' section only when 'config.help_aliases' is true." do
-        app = Benry::CmdApp::Application.new(@config)
-        #
-        @config.help_aliases = true
-        msg = app.help_message()
-        msg = Benry::CmdApp::Util.del_escape_seq(msg)
-        ok {msg}.end_with?(<<'END')
-Actions:
-  ya:ya              : greeting #2
-  yo-yo              : greeting #1
-
-Aliases:
-  yes                : alias of 'yo-yo' action
-END
-        #
-        @config.help_aliases = false
-        msg = app.help_message()
-        msg = Benry::CmdApp::Util.del_escape_seq(msg)
-        ok {msg}.end_with?(<<'END')
-Actions:
-  ya:ya              : greeting #2
-  yes                : alias of 'yo-yo' action
-  yo-yo              : greeting #1
-END
-      end
-
-      spec "[!kqnxl] array of section may have two or three elements." do
-        @config.help_sections = [
-          ["Example", "  $ echo foobar", "(see https://...)"],
-          ["Tips", "  * foobar"],
-        ]
-        app = Benry::CmdApp::Application.new(@config)
-        msg = app.help_message()
-        ok {msg}.end_with?(<<"END")
-
-\e[34mExample:\e[0m (see https://...)
-  $ echo foobar
-
-\e[34mTips:\e[0m
-  * foobar
-END
       end
 
     end
 
 
-    topic '#build_aliases()' do
+    topic '#build_action_list_filtered_by()' do
 
-      class BuildAliasTest < Benry::CmdApp::ActionScope
-        prefix "help25"
-        @action.("test #1")
-        def test1; end
-        @action.("test #2")
-        def test2; end
-        @action.("test #3")
-        def test3; end
-        @action.("test #4")
-        def test4; end
-      end
-
-      Benry::CmdApp.action_alias "h25t3", "help25:test3"
-      Benry::CmdApp.action_alias "h25t1", "help25:test1"
-      Benry::CmdApp.action_alias "_h25t4", "help25:test4"
-
-      before do
-        clear_index_except(BuildAliasTest)
-      end
-
-      after do
-        restore_index()
-      end
-
-      def new_help_builder(**kws)
-        config  = Benry::CmdApp::Config.new("test app", "1.2.3", **kws)
-        schema  = Benry::CmdApp::AppOptionSchema.new(config)
-        builder = Benry::CmdApp::AppHelpBuilder.new(config, schema)
-        return builder
-      end
-
-      spec "[!tri8x] includes alias names in order of registration." do
-        hb = new_help_builder(help_aliases: true)
-        msg = hb.__send__(:build_aliases)
-        ok {msg} == <<"END"
-\e[34mAliases:\e[0m
-  \e[1mh25t3             \e[0m : alias of 'help25:test3' action
-  \e[1mh25t1             \e[0m : alias of 'help25:test1' action
+      spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
+        x = @builder.build_action_list_filtered_by("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 
-      spec "[!5g72a] not show hidden alias names in default." do
-        hb = new_help_builder(help_aliases: true)
-        msg = hb.__send__(:build_aliases)
-        ok {msg} !~ /_h25t4/
-      end
-
-      spec "[!ekuqm] shows all alias names including private ones if 'all' flag is true." do
-        hb = new_help_builder(help_aliases: true)
-        msg = hb.__send__(:build_aliases, true)
-        ok {msg} =~ /_h25t4/
-        ok {msg} == <<"END"
-\e[34mAliases:\e[0m
-  \e[1mh25t3             \e[0m : alias of 'help25:test3' action
-  \e[1mh25t1             \e[0m : alias of 'help25:test1' action
-  \e[1m_h25t4            \e[0m : alias of 'help25:test4' action
+      spec "[!idm2h] includes hidden actions when `all: true` passed." do
+        x = @builder.build_action_list_filtered_by("git:", all: true)
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 
-      spec "[!aey2k] shows alias in strong or weak format according to action." do
-        with_important("help25:test1"=>true, "help25:test3"=>false) do
-          hb = new_help_builder(help_aliases: true)
-          msg = hb.__send__(:build_aliases, true)
-          ok {msg} == <<"END"
-\e[34mAliases:\e[0m
-  \e[1m\e[2mh25t3\e[0m             \e[0m : alias of 'help25:test3' action
-  \e[1m\e[4mh25t1\e[0m             \e[0m : alias of 'help25:test1' action
-  \e[1m_h25t4            \e[0m : alias of 'help25:test4' action
+      spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
+        Benry::CmdApp.define_alias("git", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("git") }
+        x = @builder.build_action_list_filtered_by("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+  git                : alias of 'git:stage'
 END
+      end
+
+      spec "[!otvbt] includes name of alias which corresponds to action starting with prefix." do
+        Benry::CmdApp.define_alias("add", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_action_list_filtered_by("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+  add                : alias of 'git:stage'
+END
+      end
+
+      spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
+        Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_action_list_filtered_by("git:", all: true)
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+\e[2m  add                : alias of 'git:stage'\e[0m
+END
+        #
+        x = @builder.build_action_list_filtered_by("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+END
+      end
+
+      spec "[!80t51] alias names are displayed in separated section from actions." do
+        Benry::CmdApp.define_alias("add", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_action_list_filtered_by("git:")
+        ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
+      end
+
+      spec "[!rqx7w] returns nil if both no actions nor aliases found with names starting with prefix." do
+        x = @builder.build_action_list_filtered_by("blabla:")
+        ok {x} == nil
+      end
+
+    end
+
+
+    topic '#build_top_prefix_list()' do
+
+      spec "[!crbav] returns top prefix list." do
+        x = @builder.build_top_prefix_list()
+        ok {x} =~ /\A\e\[1;34mTop Prefixes:\e\[0m\n/
+        ok {x} =~ /^  git: \(\d+\)\n/
+      end
+
+      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
+        x = @builder.build_top_prefix_list(all: true)
+        ok {x} =~ /^  secret:/
+        x = @builder.build_top_prefix_list()
+        ok {x} !~ /^  secret:/
+      end
+
+      spec "[!p4j1o] returns nil if no prefix found." do
+        index = Benry::CmdApp::MetadataIndex.new
+        ["hello", "secret:crypt"].each do |action|
+          index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
+        end
+        #
+        with_dummy_index(index) do
+          x = @builder.build_top_prefix_list()
+          ok {x} == nil
+          x = @builder.build_top_prefix_list(all: true)
+          ok {x} != nil
         end
       end
 
-      spec "[!p3oh6] now show 'Aliases:' section if no aliases defined." do
-        Benry::CmdApp::INDEX.instance_variable_get('@aliases').clear()
-        hb = new_help_builder(help_aliases: true)
-        msg = hb.__send__(:build_aliases)
-        ok {msg} == nil
-      end
-
-      spec "[!we1l8] shows 'Aliases:' section if any aliases defined." do
-        hb = new_help_builder(help_aliases: true)
-        msg = hb.__send__(:build_aliases)
-        ok {msg} != nil
-        ok {msg} == <<"END"
-\e[34mAliases:\e[0m
-  \e[1mh25t3             \e[0m : alias of 'help25:test3' action
-  \e[1mh25t1             \e[0m : alias of 'help25:test1' action
-END
+      spec "[!30l2j] includes number of actions per prefix." do
+        x = @builder.build_top_prefix_list(all: true)
+        ok {x} =~ /^  git: \(\d+\)\n/
+        ok {x} =~ /^  secret: \(\d+\)\n/
       end
 
     end

@@ -1,731 +1,534 @@
 # -*- coding: utf-8 -*-
 # frozen_string_literal: true
 
-###
-### $Release: 0.0.0 $
-### $Copyright: copyright(c) 2023 kwatch@gmail.com $
-### $License: MIT License $
-###
-
-
 require 'benry/cmdopt'
+
+
+module Benry
+end
 
 
 module Benry::CmdApp
 
 
-  SCHEMA_CLASS   = Benry::CmdOpt::Schema
-  PARSER_CLASS   = Benry::CmdOpt::Parser
+  $VERBOSE_MODE = nil    # true when global option '-v, --verbose' specified
+  $QUIET_MODE   = nil    # true when global option '-q, --quiet' specified
+  $DEBUG_MODE   = nil    # true when global option '--debug' specified
+  #$COLOR_MODE  = nil    # use `@config.color_mode?` instead.
+  #$TRACE_MODE  = nil    # use `@config.trace_mode?` instead.
 
 
-  class BaseError < StandardError; end
+  class BaseError < StandardError
+    def should_report_backtrace?()
+      #; [!oj9x3] returns true in base exception class to report backtrace.
+      return true
+    end
+  end
 
-  class DefinitionError     < BaseError; end
-  class ActionDefError      < DefinitionError; end
-  class OptionDefError      < DefinitionError; end
-  class AliasDefError       < DefinitionError; end
+  class DefinitionError < BaseError
+  end
 
-  class ExecutionError      < BaseError; end
-  class CommandError        < ExecutionError; end
-  class InvalidOptionError  < ExecutionError; end
-  class ActionNotFoundError < ExecutionError; end
-  class LoopedActionError   < ExecutionError; end
+  class ExecutionError < BaseError
+  end
+
+  class ActionError < ExecutionError
+  end
+
+  class OptionError < ExecutionError
+    def should_report_backtrace?()
+      #; [!6qvnc] returns false in OptionError class because no need to report backtrace.
+      return false
+    end
+  end
+
+  class CommandError < ExecutionError
+    def should_report_backtrace?()
+      #; [!o9xu2] returns false in ComamndError class because no need to report backtrace.
+      return false
+    end
+  end
 
 
   module Util
     module_function
 
-    def hidden_name?(name)
-      #; [!fcfic] returns true if name is '_foo'.
-      #; [!po5co] returns true if name is '_foo:bar'.
-      return true if name =~ /\A_/
-      #; [!9iqz3] returns true if name is 'foo:_bar'.
-      return true if name =~ /:_[-\w]*\z/
-      #; [!mjjbg] returns false if else.
-      return false
-    end
-
-    def schema_empty?(schema, all=false)
-      #; [!8t5ju] returns true if schema empty.
-      #; [!c4ljy] returns true if schema contains only private (hidden) options.
-      schema.each {|item| return false if all || ! item.hidden? }
-      return true
-    end
-
-    def method2action(name)
-      #; [!801f9] converts action name 'aa_bb_cc_' into 'aa_bb_cc'.
-      name = name.sub(/_+\z/, '')  # ex: 'aa_bb_cc_' => 'aa_bb_cc'
-      #; [!9pahu] converts action name 'aa__bb__cc' into 'aa:bb:cc'.
-      name = name.gsub(/__/, ':')  # ex: 'aa__bb__cc' => 'aa:bb:cc'
-      #; [!7a1s7] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'.
-      name = name.gsub(/(?<=\w)_/, '-')   # ex: 'aa_bb:_cc_dd' => 'aa-bb:_cc-dd'
-      return name
-    end
-
-    def colorize?()
-      #; [!801y1] returns $COLOR_MODE value if it is not nil.
-      return $COLOR_MODE if $COLOR_MODE != nil
-      #; [!0harg] returns true if stdout is a tty.
-      #; [!u1j1x] returns false if stdout is not a tty.
-      return $stdout.tty?
-    end
-
-    def del_escape_seq(str)
-      #; [!wgp2b] deletes escape sequence.
-      return str.gsub(/\e\[.*?m/, '')
-    end
-
-    class Doing    # :nodoc:
-      def inspect(); "<DOING>"; end
-      alias to_s inspect
-    end
-
-    DOING = Doing.new   # :nodoc:
-
-    ## (obsolete)
-    def _important?(tag)  # :nodoc:
-      #; [!0yz2h] returns nil if tag == nil.
-      #; [!h5pid] returns true if tag == :important.
-      #; [!7zval] returns false if tag == :unimportant.
-      #; [!z1ygi] supports nested tag.
-      case tag
-      when nil                         ; return nil
-      when :important, "important"     ; return true
-      when :unimportant, "unimportant" ; return false
-      when Array
-        return true  if tag.include?(:important)
-        return false if tag.include?(:unimportant)
-        return nil
-      else
-        return nil
-      end
-    end
-
-    def str_strong(s)
-      return "\e[4m#{s}\e[0m"
-    end
-
-    def str_weak(s)
-       return "\e[2m#{s}\e[0m"
-    end
-
-    def format_help_line(format, name, desc, important)
-      #; [!xx1vj] if `important == nil` then format help line with no decoration.
-      #; [!oaxp1] if `important == true` then format help line with strong decoration.
-      #; [!bdhh6] if `important == false` then format help line with weak decoration.
-      if important != nil
-        name = fill_with_decoration(format, name) {|s|
-          important ? str_strong(s) : str_weak(s)
-        }
-        format = format.sub(/%-?(\d+)s/, '%s')
-      end
-      return format % [name, desc]
-    end
-
-    def fill_with_decoration(format, name, &block)
-      #; [!udrbj] returns decorated string with padding by white spaces.
-      if format =~ /%(-)?(\d+)s/
-        leftside = !! $1
-        width = $2.to_i
-        n = width - name.length
-        n = 0 if n < 0
-        s = " " * n
-        #; [!7bl2b] considers minus sign in format.
-        return leftside ? (yield name) + s : s + (yield name)
-      else
-        return yield name
-      end
-    end
-
-  end
-
-
-  class ActionIndex
-
-    def initialize()
-      @actions   = {}   # {action_name => ActionMetadata}
-      @aliases   = {}   # {alias_name  => Alias}
-      @done      = {}   # {action_name => (Object|DOING)}
-    end
-
-    def lookup_action(action_name)
-      name = action_name.to_s
-      #; [!tnwq0] supports alias name.
-      alias_obj = nil
-      if @aliases[name]
-        alias_obj = @aliases[name]
-        name = alias_obj.action_name
-      end
-      #; [!vivoa] returns action metadata object.
-      #; [!z15vu] returns ActionWithArgs object if alias has args and/or kwargs.
-      metadata = @actions[name]
-      if alias_obj && alias_obj.args && ! alias_obj.args.empty?
-        args = alias_obj.args.dup()
-        opts = metadata.parse_options(args)
-        return ActionWithArgs.new(metadata, args, opts)
-      else
-        return metadata
-      end
-    end
-
-    def each_action_name_and_desc(include_alias=true, all: false, &block)
-      #; [!5lahm] yields action name, description, and important flag.
-      #; [!27j8b] includes alias names when the first arg is true.
-      #; [!8xt8s] rejects hidden actions if 'all: false' kwarg specified.
-      #; [!5h7s5] includes hidden actions if 'all: true' kwarg specified.
-      #; [!arcia] action names are sorted.
-      metadatas = @actions.values()
-      metadatas = metadatas.reject {|ameta| ameta.hidden? } if ! all
-      pairs = metadatas.collect {|ameta|
-        [ameta.name, ameta.desc, ameta.important?]
-      }
-      pairs += @aliases.collect {|name, aliobj|
-        [name, aliobj.desc, aliobj.important?]
-      } if include_alias
-      pairs.sort_by {|name, _, _| name }.each(&block)
-    end
-
-    def get_action(action_name)
-      return @actions[action_name.to_s]
-    end
-
-    def register_action(action_name, action_metadata)
-      @actions[action_name.to_s] = action_metadata
-      action_metadata
-    end
-
-    def delete_action(action_name)
-      #; [!08e1s] unregisters action.
-      #; [!zjpq0] raises error if action not registered.
-      @actions.delete(action_name.to_s)  or
-        raise ActionNotFoundError.new("delete_action(#{action_name.inspect}): Action not found.")
-    end
-
-    def action_exist?(action_name)
-      return @actions.key?(action_name.to_s)
-    end
-
-    def each_action(&block)
-      @actions.values().each(&block)
-      nil
-    end
-
-    def action_result(action_name)
-      return @done[action_name.to_s]
-    end
-
-    def action_done(action_name, val)
-      @done[action_name.to_s] = val
-      val
-    end
-
-    def action_done?(action_name)
-      return @done.key?(action_name.to_s) && ! action_doing?(action_name)
-    end
-
-    def action_doing(action_name)
-      @done[action_name.to_s] = Util::DOING
-      nil
-    end
-
-    def action_doing?(action_name)
-      return action_result(action_name) == Util::DOING
-    end
-
-    def register_alias(alias_name, alias_obj)
-      @aliases[alias_name.to_s] = alias_obj
-      alias_obj
-    end
-
-    def delete_alias(alias_name)
-      #; [!8ls45] unregisters alias.
-      #; [!fdfyq] raises error if alias not registered.
-      @aliases.delete(alias_name.to_s)  or
-        raise ActionNotFoundError.new("delete_alias(#{alias_name.inspect}): Alias not found.")
-    end
-
-    def get_alias(alias_name)
-      return @aliases[alias_name.to_s]
-    end
-
-    def alias_exist?(alias_name)
-      return @aliases.key?(alias_name)
-    end
-
-    def each_alias(&block)
-      @aliases.values().each(&block)
-    end
-
-  end
-
-
-  INDEX = ActionIndex.new
-
-
-  def self.delete_action(action_name)
-    #; [!era7d] deletes action.
-    #; [!ifaj1] raises error if action not exist.
-    INDEX.delete_action(action_name)
-  end
-
-  def self.delete_alias(alias_name)
-    #; [!9g0x9] deletes alias.
-    #; [!r49vi] raises error if alias not exist.
-    INDEX.delete_alias(alias_name)
-  end
-
-
-  class ActionMetadata
-
-    def initialize(name, klass, method, desc, schema, detail: nil, postamble: nil, important: nil, tag: nil, hidden: nil)
-      @name   = name
-      @klass  = klass
-      @method = method
-      @schema = schema
-      @desc   = desc
-      @detail = detail       if detail != nil
-      @postamble = postamble if postamble != nil
-      @important = important if important != nil
-      @tag    = tag          if tag != nil
-      @hidden = hidden       if hidden != nil
-    end
-
-    attr_reader :name, :method, :klass, :schema, :desc, :detail, :postamble, :important, :tag, :hidden
-
-    def hidden?()
-      #; [!kp10p] returns true when action method is private.
-      #; [!nw322] returns false when action method is not private.
-      return @hidden != nil ? @hidden : ! @klass.method_defined?(@method)
-    end
-
-    def important?()
-      #; [!52znh] returns true if `@important == true`.
-      #; [!rlfac] returns false if `@important == false`.
-      #; [!j3trl] returns false if `@important == nil`. and action is hidden.
-      #; [!hhef8] returns nil if `@important == nil`.
-      return @important if @important != nil
-      return false if hidden?()
-      return nil
-    end
-
-    def parse_options(argv, all=true)
-      #; [!ab3j8] parses argv and returns options.
-      return PARSER_CLASS.new(@schema).parse(argv, all: all)
-      #; [!56da8] raises InvalidOptionError if option value is invalid.
-    rescue Benry::CmdOpt::OptionError => exc
-      raise InvalidOptionError.new(exc.message)
-    end
-
-    def run_action(*args, **kwargs)
-      if ! $TRACE_MODE
-        __run_action(*args, **kwargs)
-      else
-        #; [!tubhv] if $TRACE_MODE is on, prints tracing info.
-        #; [!zgp14] tracing info is colored when stdout is a tty.
-        s = "## enter: #{@name}"
-        s = "\e[33m#{s}\e[0m" if Util.colorize?
-        puts s
-        __run_action(*args, **kwargs)
-        s = "## exit:  #{@name}"
-        s = "\e[33m#{s}\e[0m" if Util.colorize?
-        puts s
-      end
-      nil
-    end
-
-    def __run_action(*args, **kwargs)
-      #; [!veass] runs action with args and kwargs.
-      action_obj = _new_action_object()
-      if kwargs.empty?                        # for Ruby < 2.7
-        action_obj.__send__(@method, *args)   # for Ruby < 2.7
-      else
-        action_obj.__send__(@method, *args, **kwargs)
-      end
-    end
-    private :__run_action
-
-    def _new_action_object()
-      return @klass.new
-    end
-    protected :_new_action_object
-
-    def method_arity()
-      #; [!7v4tp] returns min and max number of positional arguments.
-      n_req = 0
-      n_opt = 0
-      has_rest = false
-      @klass.instance_method(@method).parameters.each do |kind, _|
-        case kind
-        when :req     ; n_req += 1
-        when :opt     ; n_opt += 1
-        when :rest    ; has_rest = true
-        when :key     ; nil
-        when :keyrest ; nil
-        else          ; nil
-        end
-      end
-      #; [!w3rer] max is nil if variable argument exists.
-      return has_rest ? [n_req, nil] : [n_req, n_req + n_opt]
-    end
-
-    def validate_method_params()
-      #; [!plkhs] returns error message if keyword parameter for option not exist.
-      #; [!1koi8] returns nil if all keyword parameters for option exist.
-      kw_params = []
-      method_obj = @klass.instance_method(@method)
-      method_obj.parameters.each {|kind, param| kw_params << param if kind == :key }
-      opt_keys = @schema.each.collect {|item| item.key }
-      key = (opt_keys - kw_params).first
-      return nil if key == nil
-      return "Should have keyword parameter '#{key}' for '@option.(#{key.inspect})', but not."
-    end
-
-    def help_message(command, all=false)
-      #; [!i7siu] returns help message of action.
-      builder = ACTION_HELP_BUILDER_CLASS.new(self)
-      return builder.build_help_message(command, all)
-    end
-
-  end
-
-
-  ACTION_METADATA_CLASS = ActionMetadata
-
-
-  class ActionWithArgs
-
-    def initialize(action_metadata, args, kwargs)
-      #; [!6jklb] keeps ActionMetadata, args, and kwargs.
-      @action_metadata = action_metadata
-      @args   = args
-      @kwargs = kwargs
-    end
-
-    attr_reader :action_metadata, :args, :kwargs
-
-    def method_missing(meth, *args, **kwargs)
-      #; [!14li3] behaves as ActionMetadata.
-      if kwargs.empty?                                  # Ruby < 2.7
-        return @action_metadata.__send__(meth, *args)   # Ruby < 2.7
-      else
-        return @action_metadata.__send__(meth, *args, **kwargs)
-      end
-    end
-
-    def method()
-      return @action_metadata.method
-    end
-
-    def run_action(*args, **kwargs)
-      #; [!fl26i] invokes action with args and kwargs.
-      args = @args + args if @args
-      kwargs = @kwargs.merge(kwargs) if @kwargs
-      super(*args, **kwargs)
-    end
-
-  end
-
-
-  class HelpBuilder
-
-    def build_section(title, content, desc=nil)
-      #; [!cfijh] includes section title and content if specified by config.
-      #; [!09jzn] third argument can be nil.
-      sb = []
-      if desc
-        sb << heading(title) << " " << desc << "\n"
-      else
-        sb << heading(title) << "\n"
-      end
-      sb << content
-      sb << "\n" unless content.end_with?("\n")
-      return sb.join()
-    end
-
-    def config()
-      nil
-    end
-
-    def heading(title)
-      c = config()
-      format = c ? c.format_heading : Config::FORMAT_HEADING
-      return format % title
-    end
-
-  end
-
-
-  class ActionHelpBuilder < HelpBuilder
-
-    def initialize(action_metadata)
-      @am = action_metadata
-    end
-
-    def build_help_message(command, all=false)
-      sb = []
-      sb << build_preamble(command, all)
-      sb << build_usage(command, all)
-      sb << build_options(command, all)
-      sb << build_postamble(command, all)
-      return sb.reject {|x| x.nil? || x.empty? }.join("\n")
-    end
-
-    protected
-
-    def build_preamble(command, all=false)
-      #; [!pqoup] adds detail text into help if specified.
-      sb = []
-      sb << "#{command} #{@am.name} -- #{@am.desc}\n"
-      if @am.detail
-        sb << "\n"
-        sb << @am.detail
-        sb << "\n" unless @am.detail.end_with?("\n")
-      end
-      return sb.join()
-    end
-
-    def build_usage(command, all=false)
-      config = $cmdapp_config
-      format = config ? config.format_usage : Config::FORMAT_USAGE
-      #; [!zbc4y] adds '[<options>]' into 'Usage:' section only when any options exist.
-      #; [!8b02e] ignores '[<options>]' in 'Usage:' when only hidden options speicified.
-      #; [!ou3md] not add extra whiespace when no arguments of command.
-      s = build_argstr().strip()
-      s = "[<options>] " + s unless Util.schema_empty?(@am.schema, all)
-      s = s.rstrip()
-      sb = []
-      sb << (format % ["#{command} #{@am.name}", s]) << "\n"
-      return build_section("Usage", sb.join(), nil)
-    end
-
-    def build_options(command, all=false)
-      config = $cmdapp_config
-      format = config ? config.format_help : Config::FORMAT_HELP
-      format += "\n"
-      #; [!g2ju5] adds 'Options:' section.
-      sb = []; width = nil; indent = nil
-      @am.schema.each do |item|
-        #; [!hghuj] ignores 'Options:' section when only hidden options speicified.
-        next unless all || ! item.hidden?
-        #; [!vqqq1] hidden option should be shown in weak format.
-        important = item.hidden? ? false : nil
-        sb << Util.format_help_line(format, item.optdef, item.desc, important)
-        #; [!dukm7] includes detailed description of option.
-        if item.detail
-          width  ||= (Util.del_escape_seq(format % ["", ""])).length
-          indent ||= " " * (width - 1)    # `-1` means "\n"
-          sb << item.detail.gsub(/^/, indent)
-          sb << "\n" unless item.detail.end_with?("\n")
-        end
-      end
-      #; [!pvu56] ignores 'Options:' section when no options exist.
-      return nil if sb.empty?
-      return build_section("Options", sb.join(), nil)
-    end
-
-    def build_postamble(command, all=false)
-      #; [!0p2gt] adds postamble text if specified.
-      s = @am.postamble
-      if s
-        #; [!v5567] adds '\n' at end of preamble text if it doesn't end with '\n'.
-        s += "\n" unless s.end_with?("\n")
-      end
+    def method2action(meth)
+      #; [!bt77a] converts method name (Symbol) to action name (String).
+      #; [!o5822] converts `:foo_` into `'foo'`.
+      #; [!msgjc] converts `:aa__bb____cc` into `'aa:bb:cc'`.
+      #; [!qmkfv] converts `:aa_bb_cc` into `'aa-bb-cc'`.
+      #; [!tvczb] converts `:_aa_bb:_cc_dd:_ee` into `'_aa-bb:_cc-dd:_ee'`.
+      s = meth.to_s                # ex: :foo            => "foo"
+      s = s.sub(/_+\z/, '')        # ex: "foo_"          => "foo"
+      s = s.gsub(/(__)+/, ':')     # ex: "aa__bb__cc"    => "aa:bb:cc"
+      s = s.gsub(/(?<=\w)_/, '-')  # ex: '_aa_bb:_cc_dd' => '_aa-bb:_cc-dd'
       return s
     end
 
-    def config()
-      return @cmdapp_config
-    end
-
-    private
-
-    def build_argstr()
-      #; [!x0z89] required arg is represented as '<arg>'.
-      #; [!md7ly] optional arg is represented as '[<arg>]'.
-      #; [!xugkz] variable args are represented as '[<arg>...]'.
-      method_obj = @am.klass.instance_method(@am.method)
+    def method2help(obj, meth)
+      #; [!q3y3a] returns command argument string which represents method parameters.
+      #; [!r6u58] converts `.foo(x)` into `' <x>'`.
+      #; [!r6u58] converts `.foo(x=0)` into `' [<x>]'`.
+      #; [!r6u58] converts `.foo(*x)` into `' [<x>...]'`.
+      #; [!61xy6] converts `.foo(x, y=0, *z)` into `' <x> [<y> [<z>...]]'`.
+      #; [!0342t] ignores keyword parameters.
       sb = []; n = 0
-      method_obj.parameters.each do |kind, param|
-        arg = param2arg(param)
+      obj.method(meth).parameters.each do |kind, param|
         case kind
-        when :req     ; sb <<  " <#{arg}>"
-        when :opt     ; sb << " [<#{arg}>"    ; n += 1
-        when :rest    ; sb << " [<#{arg}>..." ; n += 1
-        when :key     ; nil
-        when :keyrest ; nil
-        else          ; nil
+        when :req  ; sb << " <#{param2arg(param)}>"
+        when :opt  ; sb << " [<#{param2arg(param)}>"     ; n += 1
+        when :rest ; sb << " [<#{param2arg(param)}>...]"
+        when :key
+        when :keyrest
         end
       end
-      sb << ("]" * n)
+      sb << ("]" * n) if n > 0
       return sb.join()
     end
 
     def param2arg(param)
-      #; [!eou4h] converts arg name 'xx_or_yy_or_zz' into 'xx|yy|zz'.
-      #; [!naoft] converts arg name '_xx_yy_zz' into '_xx-yy-zz'.
+      #; [!ahvsn] converts parameter name (Symbol) into argument name (String).
+      #; [!27dpw] converts `:aa_or_bb_or_cc` into `'aa|bb|cc'`.
+      #; [!to41h] converts `:aa__bb__cc` into `'aa.bb.cc'`.
+      #; [!2ma08] converts `:aa_bb_cc` into `'aa-bb-cc'`.
       s = param.to_s
-      s = s.gsub(/_or_/, '|')          # ex: 'file_or_dir' => 'file|dir'
-      s = s.gsub(/(?<=\w)_/, '-')      # ex: 'aa_bb_cc' => 'aa-bb-cc'
+      s = s.gsub('_or_', '|')    # ex: 'file_or_dir' => 'file|dir'
+      s = s.gsub('__'  , '.')    # ex: 'file__html'  => 'file.html'
+      s = s.gsub('_'   , '-')    # ex: 'foo_bar_baz' => 'foo-bar-baz'
       return s
+    end
+
+    def validate_args_and_kwargs(obj, meth, args, kwargs)
+      n_req = 0; n_opt = 0; rest_p = false; keyrest_p = false
+      kws = kwargs.dup
+      obj.method(meth).parameters.each do |kind, param|
+        case kind
+        when :req     ; n_req += 1           # ex: f(x)
+        when :opt     ; n_opt += 1           # ex: f(x=0)
+        when :rest    ; rest_p = true        # ex: f(*x)
+        when :key     ; kws.delete(param)    # ex: f(x: 0)
+        when :keyrest ; keyrest_p = true     # ex: f(**x)
+        end
+      end
+      #; [!jalnr] returns error message if argument required but no args specified.
+      #; [!gv6ow] returns error message if too less arguments.
+      if args.length < n_req
+        return (args.length == 0) \
+               ? "Argument required (but nothing specified)." \
+               : "Too less arguments (at least #{n_req} args)."
+      end
+      #; [!q5rp3] returns error message if argument specified but no args expected.
+      #; [!dewkt] returns error message if too much arguments specified.
+      if args.length > n_req + n_opt && ! rest_p
+        return (n_req + n_opt == 0) \
+               ? "#{args[0].inspect}: Unexpected argument (expected no args)." \
+               : "Too much arguments (at most #{n_req + n_opt} args)."
+      end
+      #; [!u7wgm] returns error message if unknown keyword argument specified.
+      if ! kws.empty? && ! keyrest_p
+        return "#{kws.keys.first}: Unknown keyword argument."
+      end
+      #; [!2ep76] returns nil if no error found.
+      return nil
+    end
+
+    def delete_escape_chars(str)
+      #; [!snl3e] removes escape chars from string.
+      return str.gsub(/\e\[.*?m/, '')
+    end
+
+    def self.method_override?(klass, meth)  # :nodoc:
+      #; [!ldd1x] returns true if method defined in parent or ancestor classes.
+      klass.ancestors[1..-1].each do |cls|
+        if cls.method_defined?(meth) || cls.private_method_defined?(meth)
+          return true
+        end
+        break if cls.is_a?(Class)
+      end
+      #; [!bc65v] returns false if meethod not defined in parent nor ancestor classes.
+      return false
+    end
+
+
+  end
+
+
+  class OptionSchema < Benry::CmdOpt::Schema
+  end
+
+
+  class OptionParser < Benry::CmdOpt::Parser
+
+    def parse(args, all: true)
+      #; [!iaawe] raises OptionError if option error found.
+      super(args, all: all)
+    rescue Benry::CmdOpt::OptionError => exc
+      raise OptionError.new(exc.message)
     end
 
   end
 
 
-  ACTION_HELP_BUILDER_CLASS = ActionHelpBuilder
+  OPTION_SCHEMA_CLASS = OptionSchema
+  OPTION_PARSER_CLASS = OptionParser
+  OPTION_EMPTY_SCHEMA = OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
+
+
+  class BaseMetadata
+
+    def initialize(name, desc, tag: nil, important: nil, hidden: nil)
+      @name      = name
+      @desc      = desc
+      @tag       = tag        if nil != tag
+      @important = important  if nil != important
+      @hidden    = hidden     if nil != hidden
+    end
+
+    attr_reader :name, :desc, :tag, :important, :hidden
+    alias important? important
+    alias hidden? hidden
+
+    def alias?()
+      raise NotImplementedError.new("#{self.class.name}#alias?(): not implemented yet.")
+    end
+
+  end
+
+
+  class ActionMetadata < BaseMetadata
+
+    def initialize(name, desc, schema, klass, meth, usage: nil, detail: nil, postamble: nil, tag: nil, important: nil, hidden: nil)
+      super(name, desc, tag: tag, important: important, hidden: hidden)
+      @schema    = schema
+      @klass     = klass
+      @meth      = meth
+      @usage     = usage       if nil != usage
+      @detail    = detail      if nil != detail
+      @postamble = postamble   if nil != postamble
+    end
+
+    attr_reader :schema, :klass, :meth, :usage, :detail, :postamble
+
+    def hidden?()
+      #; [!stied] returns true/false if `hidden:` kwarg provided.
+      #; [!eumhz] returns true/false if method is private or not.
+      return @hidden if @hidden != nil
+      return ! @klass.method_defined?(@meth)
+    end
+
+    def option_empty?(all: false)
+      #; [!14xgg] returns true if the action has no options.
+      #; [!dbtht] returns false if the action has at least one option.
+      #; [!wa315] considers hidden options if `all: true` passed.
+      return @schema.empty?(all: all)
+    end
+
+    def option_help(format, all: false)
+      #; [!bpkwn] returns help message string of the action.
+      #; [!76hni] includes hidden options in help message if `all:` is truthy.
+      return @schema.option_help(format, all: all)
+    end
+
+    def parse_options(args)
+      #; [!gilca] returns parsed options.
+      #; [!v34yk] raises OptionError if option has error.
+      parser = OPTION_PARSER_CLASS.new(@schema)
+      return parser.parse(args, all: true)  # raises error if invalid option given
+    end
+
+    def alias?()
+      #; [!c1eq3] returns false which means that this is not an alias metadata.
+      return false
+    end
+
+  end
+
+
+  class AliasMetadata < BaseMetadata
+
+    def initialize(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+      #; [!qtb61] sets description string automatically.
+      desc = "alias of '#{action_name}'"
+      super(alias_name, desc, tag: tag, important: important, hidden: hidden)
+      @action = action_name
+    end
+
+    attr_reader :action
+
+    def alias?()
+      #; [!c798o] returns true which means that this is an alias metadata.
+      return true
+    end
+
+  end
+
+
+  def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+    #; [!hqc27] raises DefinitionError if something error exists in alias or action.
+    errmsg = self.__validate_alias_and_action(alias_name, action_name)
+    errmsg == nil  or
+      raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_name.inspect}): #{errmsg}")
+    #; [!oo91b] registers new metadata of alias.
+    alias_metadata = AliasMetadata.new(alias_name, action_name, tag: tag, important: important, hidden: hidden)
+    INDEX.metadata_add(alias_metadata)
+    #; [!wfbqu] returns alias metadata.
+    return alias_metadata
+  end
+
+  def self.__validate_alias_and_action(alias_name, action_name)  # :nodoc:
+    #; [!zh0a9] returns error message if other alias already exists.
+    #; [!ohow0] returns error message if other action exists with the same name as alias.
+    alias_md = INDEX.metadata_get(alias_name)
+    if    alias_md == nil  ; nil   # ok: new alias should be not defined
+    elsif alias_md.alias?  ; return "Alias '#{alias_name}' already defined."
+    else                   ; return "Can't define new alias '#{alias_name}' because already defined as an action."
+    end
+    #; [!r24qn] returns error message if action doesn't exist.
+    #; [!9phlr] returns no error message if other alias exists with the same name as action.
+    action_md = INDEX.metadata_get(action_name)
+    if    action_md == nil ; return "Action '#{action_name}' not found."
+    elsif action_md.alias? ; nil   # ok: allow to define an alias of other alias
+    else                   ; nil   # ok: action should be defined
+    end
+    #; [!b6my2] returns nil if no errors found.
+    return nil
+  end
+
+  def self.undef_alias(alias_name)
+    #; [!krdkt] raises DefinitionError if alias not exist.
+    #; [!juykx] raises DefinitionError if action specified instead of alias.
+    md = INDEX.metadata_get(alias_name)
+    errmsg = (
+      if    md == nil ; "Alias not exist."
+      elsif md.alias? ; nil
+      else            ; "Alias expected but action name specified."
+      end
+    )
+    errmsg == nil  or
+      raise DefinitionError.new("undef_alias(#{alias_name.inspect}): #{errmsg}")
+    #; [!ocyso] deletes existing alias.
+    INDEX.metadata_del(alias_name)
+    nil
+  end
+
+  def self.undef_action(action_name)
+    #; [!bvu95] raises error if action not exist.
+    #; [!717fw] raises error if alias specified instead of action.
+    md = INDEX.metadata_get(action_name)
+    errmsg = (
+      if    md == nil ; "Action not exist."
+      elsif md.alias? ; "Action expected but alias name specified."
+      else            ; nil
+      end
+    )
+    errmsg == nil  or
+      raise DefinitionError.new("undef_action(#{action_name.inspect}): #{errmsg}")
+    #; [!01sx1] deletes existing action.
+    INDEX.metadata_del(action_name)
+    #; [!op8z5] deletes action method from action class.
+    md.klass.class_eval { remove_method(md.meth) }
+    nil
+  end
 
 
   class ActionScope
 
+    def initialize(config, context=nil)
+      @config      = config
+      @__context__ = context || CONTEXT_CLASS.new(config)
+    end
+
+    def __clear_recursive_reference()  # :nodoc:
+      #; [!i68z0] clears instance var which refers context object.
+      @__context__ = nil
+      nil
+    end
+
+    def inspect()
+      return super.split().first() + ">"
+    end
+
+    def self.inherited(subclass)
+      subclass.class_eval do
+        @__actiondef__ = nil
+        @__prefixdef__ = nil
+        #; [!8cck9] sets Proc object to `@action` in subclass.
+        @action = lambda do |desc, usage: nil, detail: nil, postamble: nil, tag: nil, important: nil, hidden: nil|
+          #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
+          @__actiondef__ == nil  or
+            raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
+          schema = nil
+          #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
+          kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
+          @__actiondef__ = [desc, schema, kws]
+        end
+        #; [!en6n0] sets Proc object ot `@option` in subclass.
+        @option = lambda do |key, optstr, desc,
+                             type: nil, rexp: nil, pattern: nil, enum: nil,
+                             range: nil, value: nil, detail: nil,
+                             tag: nil, important: nil, hidden: nil, &callback|
+          #; [!68hf8] raises DefinitionError if `@option.()` called without `@action.()`.
+          @__actiondef__ != nil  or
+            raise DefinitionError.new("`@option.()` called without `@action.()`.")
+          #; [!2p98r] `@option.()` stores arguments into option schema object.
+          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema.add(key, optstr, desc,
+                     type: type, rexp: rexp, pattern: pattern, enum: enum,
+                     range: range, value: value, detail: detail,
+                     tag: tag, important: important, hidden: hidden, &callback)
+        end
+        #; [!aiwns] `@copy_options.()` copies options from other action.
+        @copy_options = lambda do |action_name, except: nil|
+          #; [!mhhn2] `@copy_options.()` raises DefinitionError when action not found.
+          metadata = INDEX.metadata_get(action_name)  or
+            raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Action not found.")
+          #; [!0slo8] raises DefinitionError if `@copy_options.()` called without `@action.()`.
+          @__actiondef__ != nil  or
+            raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
+          #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
+          schema = (@__actiondef__[1] ||= OPTION_SCHEMA_CLASS.new)
+          schema.copy_from(metadata.schema, except: except)
+        end
+      end
+      nil
+    end
+
+    def self.method_added(method_symbol)
+      #; [!6frgx] do nothing if `@action.()` is not called.
+      return false if @__actiondef__ == nil
+      #; [!e3yjo] clears `@__actiondef__`.
+      meth = method_symbol
+      desc, schema, kws = @__actiondef__
+      @__actiondef__ = nil
+      #; [!ejdlo] converts method name to action name.
+      action = Util.method2action(meth)  # ex: :a__b_c => "a:b-c"
+      #; [!w9qat] when `prefix()` called before defining action method...
+      alias_p = false
+      if @__prefixdef__
+        prefix, prefix_action, alias_target = @__prefixdef__
+        #; [!3pl1r] renames method name to new name with prefix.
+        meth = "#{prefix.gsub(':', '__')}#{meth}".intern
+        alias_method(meth, method_symbol)
+        remove_method(method_symbol)
+        #; [!mil2g] when action name matched to 'action:' kwarg of `prefix()`...
+        if action == prefix_action
+          #; [!hztpp] uses pefix name as action name.
+          action = prefix.chomp(':')
+          #; [!cydex] clears `action:` kwarg.
+          @__prefixdef__[1] = nil
+        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `prefix()`...
+        elsif action == alias_target
+          #; [!iguvp] adds prefix name to action name.
+          action = prefix + action
+          alias_p = true
+        #; [!wmevh] else...
+        else
+          #; [!9cyc2] adds prefix name to action name.
+          action = prefix + action
+        end
+      #; [!y8lh0] else...
+      else
+        #; [!0ki5g] not add prefix to action name.
+        prefix = alias_target = nil
+      end
+      #; [!dad1q] raises DefinitionError if action with same name already defined.
+      #; [!ur8lp] raises DefinitionError if method already defined in parent or ancestor class.
+      #; [!dj0ql] method override check is done with new method name (= prefixed name).
+      (errmsg = __validate_action_method(action, meth, method_symbol)) == nil  or
+        raise DefinitionError.new("def #{method_symbol}(): #{errmsg}")
+      #; [!7fnh4] registers action metadata.
+      schema ||= OPTION_EMPTY_SCHEMA
+      action_metadata = ActionMetadata.new(action, desc, schema, self, meth, **kws)
+      INDEX.metadata_add(action_metadata)
+      #; [!lyn0z] registers alias metadata if necessary.
+      if alias_p
+        prefix != nil  or raise "** assertion failed: ailas_target=#{alias_target.inspect}"
+        alias_metadata = AliasMetadata.new(prefix.chomp(':'), action)
+        INDEX.metadata_add(alias_metadata)
+        #; [!4402s] clears `alias_of:` kwarg.
+        @__prefixdef__[2] = nil
+      end
+      return true    # for testing purpose
+    end
+
+    def self.__validate_action_method(action, meth, method_symbol)  # :nodoc:
+      #; [!5a4d3] returns error message if action with same name already defined.
+      ! INDEX.metadata_exist?(action)  or
+        return "Action '#{action}' already defined (to redefine it, delete it beforehand by `undef_action()`)."
+      #; [!uxsx3] returns error message if method already defined in parent or ancestor class.
+      #; [!3fmpo] method override check is done with new method name (= prefixed name).
+      ! Util.method_override?(self, meth)  or
+        return "Please rename it to `#{method_symbol}_()` because same method defined in parent or ancestor class."
+      return nil
+    end
+
+    def self.current_prefix()
+      #; [!2zt0f] returns current prefix name such as 'foo:bar:'.
+      return @__prefixdef__ ? @__prefixdef__[0] : nil
+    end
+
+    def self.prefix(prefix, action: nil, alias_of: nil, &block)
+      #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
+      ! (action != nil && alias_of != nil)  or
+        raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias:` are exclusive.")
+      #; [!mp1p5] raises DefinitionError if prefix is invalid.
+      errmsg = self.__validate_prefix(prefix)
+      errmsg == nil  or
+        raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
+      #; [!kwst6] if block given...
+      if block_given?()
+        #; [!t8wwm] saves previous prefix data and restore them at end of block.
+        prev = @__prefixdef__
+        prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
+        @__prefixdef__ = [prefix, action, alias_of]
+        begin
+          yield
+          #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
+          if action
+            @__prefixdef__[1] == nil  or
+              raise DefinitionError.new("prefx(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
+          end
+          #; [!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined.
+          if alias_of
+            @__prefixdef__[2] == nil  or
+              raise DefinitionError.new("prefx(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
+          end
+        ensure
+          @__prefixdef__ = prev
+        end
+      #; [!yqhm8] else...
+      else
+        #; [!tgux9] just stores arguments into class.
+        @__prefixdef__ = [prefix, action, alias_of]
+      end
+      nil
+    end
+
+    def self.__validate_prefix(prefix)  # :nodoc:
+      #; [!bac19] returns error message if prefix is not a string.
+      #; [!608fc] returns error message if prefix doesn't end with ':'.
+      #; [!vupza] returns error message if prefix contains '_'.
+      #; [!5vgn3] returns error message if prefix is invalid.
+      #; [!7rphu] returns nil if prefix is valid.
+      prefix.is_a?(String)  or return "String expected, but got #{prefix.class.name}."
+      prefix =~ /:\z/       or return "Prefix name should be end with ':'."
+      prefix !~ /_/         or return "Prefix name should not contain '_' (use '-' instead)."
+      rexp = /\A[a-z][-a-zA-Z0-9]*:([a-z][-a-zA-Z0-9]*:)*\z/
+      prefix =~ rexp        or return "Invalid prefix name."
+      return nil
+    end
+
     def run_action_once(action_name, *args, **kwargs)
-      #; [!oh8dc] don't invoke action if already invoked.
-      return __run_action(action_name, true, args, kwargs)
+      #; [!nqjxk] runs action and returns true if not runned ever.
+      #; [!wcyut] not run action and returns false if already runned.
+      ctx = (@__context__ ||= CONTEXT_CLASS.new)
+      return ctx.run_action(action_name, args, kwargs, once: true)
     end
 
     def run_action_anyway(action_name, *args, **kwargs)
-      #; [!2yrc2] invokes action even if already invoked.
-      return __run_action(action_name, false, args, kwargs)
-    end
-
-    private
-
-    def __run_action(action_name, once, args, kwargs)
-      #; [!lbp9r] invokes action name with prefix if prefix defined.
-      #; [!7vszf] raises error if action specified not found.
-      prefix = self.class.instance_variable_get('@__prefix__')
-      metadata = INDEX.lookup_action("#{prefix}#{action_name}") || \
-                 INDEX.lookup_action(action_name)  or
-        raise ActionNotFoundError.new("#{action_name}: Action not found.")
-      name = metadata.name
-      #; [!u8mit] raises error if action flow is looped.
-      ! INDEX.action_doing?(name)  or
-          raise LoopedActionError.new("#{name}: Action loop detected.")
-      #; [!vhdo9] don't invoke action twice if 'once' arg is true.
-      if INDEX.action_done?(name)
-        return INDEX.action_result(name) if once
-      end
-      #; [!r8fbn] invokes action.
-      INDEX.action_doing(name)
-      ret = metadata.run_action(*args, **kwargs)
-      INDEX.action_done(name, ret)
-      return ret
-    end
-
-    def self.prefix(str, alias_of: nil, action: nil)
-      #; [!1gwyv] converts symbol into string.
-      str = str.to_s
-      #; [!pz46w] error if prefix contains extra '_'.
-      str =~ /\A\w[-a-zA-Z0-9]*(:\w[-a-zA-Z0-9]*)*\z/  or
-        raise ActionDefError.new("#{str}: Invalid prefix name (please use ':' or '-' instead of '_' as word separator).")
-      #; [!9pu01] adds ':' at end of prefix name if prefix not end with ':'.
-      str += ':' unless str.end_with?(':')
-      @__prefix__  = str
-      @__aliasof__ = alias_of  # method name if symbol, or action name if string
-      @__default__ = action    # method name if symbol, or action name if string
-    end
-
-    SUBCLASSES = []
-
-    def self.inherited(subclass)
-      #; [!f826w] registers all subclasses into 'ActionScope::SUBCLASSES'.
-      SUBCLASSES << subclass
-      #; [!2imrb] sets class instance variables in subclass.
-      subclass.instance_eval do
-        @__action__   = nil    # ex: ["action desc", {detail: nil, postamble: nil}]
-        @__option__   = nil    # Benry::CmdOpt::Schema object
-        @__prefix__   = nil    # ex: "foo:bar:"
-        @__aliasof__  = nil    # ex: :method_name or "action-name"
-        @__default__  = nil    # ex: :method_name or "action-name"
-        #; [!1qv12] @action is a Proc object and saves args.
-        @action = proc do |desc, detail: nil, postamble: nil, important: nil, tag: nil, hidden: nil|
-          @__action__ = [desc, {detail: detail, postamble: postamble, important: important, tag: tag, hidden: hidden}]
-        end
-        #; [!33ma7] @option is a Proc object and saves args.
-        @option = proc do |param, optdef, desc, *rest, type: nil, rexp: nil, enum: nil, range: nil, value: nil, detail: nil, important: nil, tag: nil, hidden: nil, &block|
-          #; [!gxybo] '@option.()' raises error when '@action.()' not called.
-          @__action__ != nil  or
-            raise OptionDefError.new("@option.(#{param.inspect}): `@action.()` Required but not called.")
-          schema = (@__option__ ||= SCHEMA_CLASS.new)
-          #; [!ga6zh] '@option.()' raises error when invalid option info specified.
-          begin
-            schema.add(param, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, important: important, tag: tag, hidden: hidden, &block)
-          rescue Benry::CmdOpt::SchemaError => exc
-            raise OptionDefError.new(exc.message)
-          end
-        end
-        #; [!yrkxn] @copy_options is a Proc object and copies options from other action.
-        @copy_options = proc do |action_name, except: nil|
-          #; [!mhhn2] '@copy_options.()' raises error when action not found.
-          metadata = INDEX.get_action(action_name)  or
-            raise OptionDefError.new("@copy_options.(#{action_name.inspect}): Action not found.")
-          @__option__ ||= SCHEMA_CLASS.new
-          @__option__.copy_from(metadata.schema, except: except)
-        end
-      end
-    end
-
-    def self.method_added(method)
-      #; [!idh1j] do nothing if '@__action__' is nil.
-      return unless @__action__
-      #; [!ernnb] clears both '@__action__' and '@__option__'.
-      desc, kws = @__action__
-      schema = @__option__ || SCHEMA_CLASS.new
-      @__action__ = @__option__ = nil
-      #; [!n8tem] creates ActionMetadata object if '@__action__' is not nil.
-      name = __method2action(method)
-      metadata = ACTION_METADATA_CLASS.new(name, self, method, desc, schema, **kws)
-      #; [!4pbsc] raises error if keyword param for option not exist in method.
-      errmsg = metadata.validate_method_params()
-      errmsg == nil  or
-        raise ActionDefError.new("def #{method}(): #{errmsg}")
-      #; [!t8vbf] raises error if action name duplicated.
-      ! INDEX.action_exist?(name)  or
-        raise ActionDefError.new("def #{method}(): Action '#{name}' already exist.")
-      INDEX.register_action(name, metadata)
-      #; [!jpzbi] defines same name alias of action as prefix.
-      #; [!997gs] not raise error when action not found.
-      self.__define_alias_of_action(method, name)
-    end
-
-    def self.__method2action(method)   # :nodoc:
-      #; [!5e5o0] when method name is same as default action name...
-      if method == @__default__      # when Symbol
-        #; [!myj3p] uses prefix name (expect last char ':') as action name.
-        @__prefix__ != nil  or raise "** assertion failed"
-        name = @__prefix__.chomp(":")
-        #; [!j5oto] clears '@__default__'.
-        @__default__ = nil
-      #; [!agpwh] else...
-      else
-        #; [!3icc4] uses method name as action name.
-        #; [!c643b] converts action name 'aa_bb_cc_' into 'aa_bb_cc'.
-        #; [!3fkb3] converts action name 'aa__bb__cc' into 'aa:bb:cc'.
-        #; [!o9s9h] converts action name 'aa_bb:_cc_dd' into 'aa-bb:_cc-dd'.
-        name = Util.method2action(method.to_s)
-        #; [!8hlni] when action name is same as default name, uses prefix as action name.
-        if name == @__default__      # when String
-          name = @__prefix__.chomp(":")
-          #; [!q8oxi] clears '@__default__' when default name matched to action name.
-          @__default__ = nil
-        #; [!xfent] when prefix is provided, adds it to action name.
-        elsif @__prefix__
-          name = "#{@__prefix__}#{name}"
-        end
-      end
-      return name
-    end
-
-    def self.__define_alias_of_action(method, action_name)
-      return if @__aliasof__ == nil
-      @__prefix__ != nil  or raise "** internal error"
-      alias_of = @__aliasof__
-      if alias_of == method || alias_of == Util.method2action(method.to_s)
-        alias_name = @__prefix__.chomp(":")
-        #; [!349nr] raises error when same name action or alias with prefix already exists.
-        Benry::CmdApp.action_alias(alias_name, action_name)
-        #; [!tvjb0] clears '@__aliasof__' only when alias created.
-        @__aliasof__ = nil
-      end
+      #; [!uwi68] runs action and returns true.
+      ctx = (@__context__ ||= CONTEXT_CLASS.new)
+      return ctx.run_action(action_name, args, kwargs, once: false)
     end
 
   end
@@ -734,644 +537,926 @@ module Benry::CmdApp
   Action = ActionScope
 
 
+  class MetadataIndex
+
+    def initialize()
+      @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
+    end
+
+    def metadata_add(metadata)
+      ! @metadata_dict.key?(metadata.name)  or raise "** assertion failed: metadata.name=#{metadata.name.inspect}"
+      #; [!8bhxu] registers metadata with it's name as key.
+      @metadata_dict[metadata.name] = metadata
+      #; [!k07kp] returns registered metadata objet.
+      return metadata
+    end
+
+    def metadata_get(name)
+      #; [!l5m49] returns metadata object corresponding to name.
+      #; [!rztk2] returns nil if metadata not found for the name.
+      return @metadata_dict[name]
+    end
+
+    def metadata_del(name)
+      @metadata_dict.key?(name)  or raise "** assertion failed: name=#{name.inspect}"
+      #; [!69vo7] deletes metadata object corresponding to name.
+      #; [!8vg6w] returns deleted metadata object.
+      return @metadata_dict.delete(name)
+    end
+
+    def metadata_exist?(name)
+      #; [!0ck5n] returns true if metadata object registered.
+      #; [!x7ziz] returns false if metadata object not registered.
+      return @metadata_dict.key?(name)
+    end
+
+    def metadata_each(&b)
+      #; [!3l6r7] returns Enumerator object if block not given.
+      return enum_for(:metadata_each) unless block_given?()
+      #; [!r8mb3] yields each metadata object if block given.
+      @metadata_dict.keys.sort.each {|name| yield @metadata_dict[name] }
+      nil
+    end
+
+    def action_lookup(name)
+      #; [!lfd9z] returns action metadata even if alias name specified.
+      md = metadata_get(name)
+      while md != nil && md.alias?
+        md = metadata_get(md.action)
+      end
+      return md
+    end
+
+  end
+
+
+  INDEX = MetadataIndex.new()
+
+
   class BuiltInAction < ActionScope
 
-    @action.("print help message (of action)")
-    @option.(:all, "-a, --all", "show private (hidden) options, too")
+    @action.("print help message (of action if specified)")
+    @option.(:all, "-a, --all", "show all options, including private ones")
     def help(action=nil, all: false)
-      action_name = action
-      #; [!jfgsy] prints help message of action if action name specified.
-      if action_name
-        action_metadata = INDEX.get_action(action_name)  or
-          raise ActionNotFoundError.new("#{action}: Action not found.")
-        help_builder = ACTION_HELP_BUILDER_CLASS.new(action_metadata)
-        config = $cmdapp_config
-        msg = help_builder.build_help_message(config.app_command, all)
-      #; [!fhpjg] prints help message of command if action name not specified.
-      else
-        app = $cmdapp_application
-        msg = app.help_message(all)
+      #; [!2n99u] raises ActionError if current application is not nil.
+      app = Benry::CmdApp.current_app()  or
+        raise ActionError.new("'help' aciton is available only when invoked from application.")
+      #; [!g0n06] prints application help message if action name not specified.
+      #; [!epj74] prints action help message if action name specified.
+      print app.render_help_message(action, all: all)
+    end
+
+  end
+
+
+  class ActionContext
+
+    def initialize(config, _index: INDEX)
+      @config        = config
+      @index         = _index
+      #@scope_objects = {}     # {action_name => ActionScope}
+      @status_dict   = {}      # {action_name => (:done|:doing)}
+      @curr_action   = nil     # ActionMetadata
+    end
+
+    def __clear()  # :nodoc:
+      #@scope_objects.each {|_, scope| scope.__clear_recursive_reference() }
+      #@scope_objects.clear()
+      @status_dict.clear()
+    end
+    private :__clear
+
+    def start_action(action_name, cmdline_args)  ## called from Application#run()
+      #; [!0ukvb] raises CommandError if action nor alias not found.
+      metadata = @index.action_lookup(action_name)  or
+        raise CommandError.new("#{action_name}: Action nor alias not found.")
+      #; [!r3gfv] raises OptionError if invalid action options specified.
+      options = metadata.parse_options(cmdline_args)
+      #; [!lg6br] runs action with command-line arguments.
+      run_action(action_name, cmdline_args, options, once: false)
+      return nil
+    ensure
+      #; [!jcguj] clears instance variables.
+      __clear()
+    end
+
+    def run_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()
+      action = action_name
+      #; [!dri6e] if called from other action containing prefix, looks up action with the prefix firstly.
+      metadata = nil
+      if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
+        prefix = $1
+        metadata = @index.action_lookup(prefix + action)
+        action = prefix + action if metadata
       end
-      #; [!6g7jh] prints colorized help message when color mode is on.
-      #; [!ihr5u] prints non-colorized help message when color mode is off.
-      msg = Util.del_escape_seq(msg) unless Util.colorize?
-      print msg
-    end
-
-  end
-
-
-  def self.action_alias(alias_name, action_name, *args, important: nil, tag: nil)
-    invocation = "action_alias(#{alias_name.inspect}, #{action_name.inspect})"
-    #; [!5immb] convers both alias name and action name into string.
-    alias_  = alias_name.to_s
-    action_ = action_name.to_s
-    #; [!nrz3d] error if action not found.
-    INDEX.action_exist?(action_)  or
-      raise AliasDefError.new("#{invocation}: Action not found.")
-    #; [!vvmwd] error when action with same name as alias exists.
-    ! INDEX.action_exist?(alias_)  or
-      raise AliasDefError.new("#{invocation}: Not allowed to define same name alias as existing action.")
-    #; [!i9726] error if alias already defined.
-    ! INDEX.alias_exist?(alias_)  or
-      raise AliasDefError.new("#{invocation}: Alias name duplicated.")
-    #; [!vzlrb] registers alias name with action name.
-    #; [!0cq6o] supports args.
-    #; [!4wtxj] supports 'tag:' keyword arg.
-    INDEX.register_alias(alias_, Alias.new(alias_, action_, *args, important: important, tag: tag))
-  end
-
-
-  class Alias
-
-    def initialize(alias_name, action_name, *args, important: nil, tag: nil)
-      @alias_name  = alias_name
-      @action_name = action_name
-      @args        = args.freeze   if ! args.empty?
-      @important   = important     if important != nil
-      @tag         = tag           if tag != nil
-    end
-
-    attr_reader :alias_name, :action_name, :args, :important, :tag
-
-    def desc()
-      if @args && ! @args.empty?
-        return "alias of '#{@action_name} #{@args.join(' ')}'"
-      else
-        return "alias of '#{@action_name}' action"
+      #; [!ygpsw] raises ActionError if action not found.
+      metadata ||= @index.action_lookup(action)  or
+        raise ActionError.new("#{action}: Action not found.")
+      #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
+      return false if once && @status_dict[action] == :done
+      #; [!xwlou] raises ActionError if looped aciton detected.
+      @status_dict[action] != :doing  or
+        raise ActionError.new("#{action}: Looped action detected.")
+      #; [!peqk8] raises ActionError if args and opts not matched to action method.
+      md = metadata
+      scope_obj = md.klass.new(@config, self)
+      #scope_obj = (@scope_objects[md.klass.name] ||= md.klass.new(@config, self))
+      errmsg = Util.validate_args_and_kwargs(scope_obj, md.meth, args, kwargs)
+      errmsg == nil  or
+        raise ActionError.new("#{md.name}: #{errmsg}")
+      #; [!kao97] action invocation is nestable.
+      @status_dict[action] ||= :doing
+      prev_action = @curr_action
+      @curr_action = md
+      #; [!5jdlh] runs action method with scope object.
+      begin
+        #; [!9uue9] reports enter into and exit from action if global '-T' option specified.
+        c1, c2 = @config.color_mode? ? ["\e[33m", "\e[0m"] : ["", ""]
+        puts "#{c1}### enter: #{md.name}#{c2}" if @config.trace_mode
+        if kwargs.empty?                        # for Ruby < 2.7
+          scope_obj.__send__(md.meth, *args)    # for Ruby < 2.7
+        else
+          scope_obj.__send__(md.meth, *args, **kwargs)
+        end
+        puts "#{c1}### exit:  #{md.name}#{c2}" if @config.trace_mode
+      ensure
+        @curr_action = prev_action
       end
-    end
-
-    def important?()
-      #; [!5juwq] returns true if `@important == true`.
-      #; [!1gnbc] returns false if `@important == false`.
-      return @important if @important != nil
-      #; [!h3nm3] returns true or false according to action object if `@important == nil`.
-      action_obj = INDEX.get_action(@action_name)
-      return action_obj.important?
+      @status_dict[action] = :done
+      #; [!ndxc3] returns true if action invoked.
+      return true
     end
 
   end
 
 
-  class Config  #< BasicObject
+  CONTEXT_CLASS = ActionContext
 
-    #FORMAT_HELP      = "  %-18s : %s"
-    FORMAT_HELP       = "  \e[1m%-18s\e[0m : %s"   # bold
-    #FORMAT_HELP      = "  \e[34m%-18s\e[0m : %s"  # blue
 
-    FORMAT_APPNAME    = "\e[1m%s\e[0m"
+  class Config
 
-    #FORMAT_USAGE     = "  $ %s %s"
-    FORMAT_USAGE      = "  $ \e[1m%s\e[0m %s"      # bold
-    #FORMAT_USAGE     = "  $ \e[34m%s\e[0m %s"     # blue
-
-    #FORMAT_HEADING   = "%s:"
-    #FORMAT_HEADING   = "\e[1m%s:\e[0m"            # bold
-    #FORMAT_HEADING   = "\e[1;4m%s:\e[0m"          # bold, underline
-    FORMAT_HEADING    = "\e[34m%s:\e[0m"           # blue
-    #FORMAT_HEADING   = "\e[33;4m%s:\e[0m"         # yellow, underline
+    FORMAT_OPTION         = "  %-18s : %s"
+    FORMAT_ACTION         = "  %-18s : %s"
+    FORMAT_USAGE          = "  $ %s"
+    DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
+    DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
+    DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
+    DECORATION_WEAK       = "\e[2m%s\e[0m"      # gray color
+    DECORATION_HIDDEN     = "\e[2m%s\e[0m"      # gray color
+    DECORATION_ERROR      = "\e[31m%s\e[0m"     # red color
+    APP_USAGE             = "<action> [<arguments>...]"
 
     def initialize(app_desc, app_version=nil,
-                   app_name: nil, app_command: nil, app_detail: nil,
-                   default_action: "help", default_help: false,
-                   option_help: true, option_all: false,
+                   app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
+                   default_action: nil,
+                   help_postamble: nil,
+                   format_option: nil, format_action: nil, format_usage: nil,
+                   deco_command: nil, deco_header: nil,
+                   deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
+                   option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
-                   option_debug: false, option_trace: false,
-                   help_action: true, help_aliases: false, help_sections: [], help_postamble: nil,
-                   format_help: nil, format_appname: nil, format_usage: nil, format_heading: nil,
-                   feat_candidate: true)
-      #; [!uve4e] sets command name automatically if not provided.
-      @app_desc       = app_desc        # ex: "sample application"
-      @app_version    = app_version     # ex: "1.0.0"
-      @app_name       = app_name    || ::File.basename($0)   # ex: "MyApp"
-      @app_command    = app_command || ::File.basename($0)   # ex: "myapp"
-      @app_detail     = app_detail      # ex: "See https://.... for details.\n"
-      @default_action = default_action  # default action name
-      @default_help   = default_help    # print help message if action not specified
-      @option_help    = option_help     # '-h' and '--help' are enabled when true
-      @option_all     = option_all      # '-a' and '--all' are enable when true
-      @option_verbose = option_verbose  # '-v' and '--verbose' are enabled when true
-      @option_quiet   = option_quiet    # '-q' and '--quiet' are enabled when true
-      @option_color   = option_color    # '--color[=<on|off>]' enabled when true
-      @option_debug   = option_debug    # '-D' and '--debug' are enabled when true
-      @option_trace   = option_trace    # '-T' and '--trace' are enabled when true
-      @help_action    = help_action     # define built-in 'help' action when true
-      @help_aliases   = help_aliases    # 'Aliases:' section printed when true
-      @help_sections  = help_sections   # ex: [["Example", "..text.."], ...]
-      @help_postamble = help_postamble  # ex: "(Tips: ....)\n"
-      @format_help    = format_help    || FORMAT_HELP
-      @format_appname = format_appname || FORMAT_APPNAME
-      @format_usage   = format_usage   || FORMAT_USAGE
-      @format_heading = format_heading || FORMAT_HEADING
-      @feat_candidate = feat_candidate  # if arg is 'foo:', list actions starting with 'foo:'
+                   option_debug: nil, option_trace: false)
+      @app_desc           = app_desc
+      @app_version        = app_version
+      @app_name           = app_name
+      @app_command        = app_command || File.basename($0)
+      @app_usage          = app_usage
+      @app_detail         = app_detail
+      @default_action     = default_action
+      @help_postamble     = help_postamble
+      @format_option      = format_option || FORMAT_OPTION
+      @format_action      = format_action || FORMAT_ACTION
+      @format_usage       = format_usage  || FORMAT_USAGE
+      @deco_command       = deco_command || DECORATION_COMMAND
+      @deco_header        = deco_header  || DECORATION_HEADER
+      @deco_strong        = deco_strong  || DECORATION_STRONG
+      @deco_weak          = deco_weak    || DECORATION_WEAK
+      @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
+      @deco_error         = deco_error   || DECORATION_ERROR
+      @option_list        = option_list
+      @option_all         = option_all
+      @option_verbose     = option_verbose
+      @option_quiet       = option_quiet
+      @option_color       = option_color
+      @option_debug       = option_debug
+      @option_trace       = option_trace
+      #
+      #@verobse_mode       = nil
+      #@quiet_mode         = nil
+      @color_mode         = nil
+      #@debug_mode         = nil
+      @trace_mode         = nil
     end
 
-    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_detail
-    attr_accessor :default_action, :default_help
-    attr_accessor :option_help, :option_all
+    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
+    attr_accessor :default_action
+    attr_accessor :format_option, :format_action, :format_usage
+    attr_accessor :deco_command, :deco_header
+    attr_accessor :help_postamble
+    attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
+    attr_accessor :option_list, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
-    attr_accessor :help_action, :help_aliases, :help_sections, :help_postamble
-    attr_accessor :format_help, :format_appname, :format_usage, :format_heading
-    attr_accessor :feat_candidate
+    attr_accessor :color_mode, :trace_mode #, :verbose_mode, :quiet_mode, :debug_mode
+    alias trace_mode? trace_mode
 
-  end
-
-
-  class AppOptionSchema < Benry::CmdOpt::Schema
-
-    def initialize(config=nil)
-      super()
-      #; [!3ihzx] do nothing when config is nil.
-      c = config
-      return nil if c == nil
-      #; [!tq2ol] adds '-h, --help' option if 'config.option_help' is set.
-      add(:help   , "-h, --help"   , "print help message") if c.option_help
-      #; [!mbtw0] adds '-V, --version' option if 'config.app_version' is set.
-      add(:version, "-V, --version", "print version") if c.app_version
-      #; [!f5do6] adds '-a, --all' option if 'config.option_all' is set.
-      add(:all    , "-a, --all"    , "list all actions including private (hidden) ones") if c.option_all
-      #; [!cracf] adds '-v, --verbose' option if 'config.option_verbose' is set.
-      add(:verbose, "-v, --verbose", "verbose mode") if c.option_verbose
-      #; [!2vil6] adds '-q, --quiet' option if 'config.option_quiet' is set.
-      add(:quiet  , "-q, --quiet"  , "quiet mode") if c.option_quiet
-      #; [!6zw3j] adds '--color=<on|off>' option if 'config.option_color' is set.
-      add(:color  , "--color[=<on|off>]", "enable/disable color", type: TrueClass) if c.option_color
-      #; [!29wfy] adds '-D, --debug' option if 'config.option_debug' is set.
-      add(:debug  , "-D, --debug"  , "debug mode (set $DEBUG_MODE to true)") if c.option_debug
-      #; [!s97go] adds '-T, --trace' option if 'config.option_trace' is set.
-      add(:trace  , "-T, --trace"  , "report enter into and exit from actions") if c.option_trace
+    def color_mode?()
+      #; [!5ohdt] if `@color_mode` is set, returns it's value.
+      #; [!9dszi] if `@color_mode` is not set, returns true when stdout is a tty.
+      return (@color_mode != nil) ? @color_mode : $stdout.tty?
     end
 
-    def sort_options_in_this_order(*keys)
-      #; [!6udxr] sorts options in order of keys specified.
-      #; [!8hhuf] options which key doesn't appear in keys are moved at end of options.
-      len = @items.length
-      @items.sort_by! {|item| keys.index(item.key) || @items.index(item) + len }
+    def each(sort: false, &b)
+      #; [!yxi7r] returns Enumerator object if block not given.
+      return enum_for(:each, sort: sort) unless block_given?()
+      #; [!64zkf] yields each config name and value.
+      #; [!0zatj] sorts key names if `sort: true` passed.
+      ivars = instance_variables()
+      ivars = ivars.sort() if sort
+      ivars.each do |ivar|
+        val = instance_variable_get(ivar)
+        yield ivar.to_s[1..-1].intern, val
+      end
       nil
     end
 
   end
 
 
-  APP_OPTION_SCHEMA_CLASS = AppOptionSchema
+  class BaseHelpBuilder
+
+    def initialize(config)
+      @config = config
+    end
+
+    attr_reader :config
+
+    HEADER_USAGE   = "Usage:"
+    HEADER_OPTIONS = "Options:"
+    HEADER_ACTIONS = "Actions:"
+    HEADER_ALIASES = "Aliases:"
+
+    def build_help_message(x, all: false)
+      #; [!0hy81] this is an abstract method.
+      raise NotImplementedError.new("#{self.class.name}#build_help_message(): not implemented yet.")
+    end
+
+    protected
+
+    def build_section(header, content, extra=nil)
+      #; [!61psk] returns section string with decorating header.
+      #; [!0o8w4] appends '\n' to content if it doesn't end with '\n'.
+      nl = content.end_with?("\n") ? nil : "\n"
+      return "#{decorate_header(header)}#{extra}\n#{content}#{nl}"
+    end
+
+    def build_sections(value, item, &b)
+      #; [!tqau1] returns nil if value is nil or empty.
+      #; [!ezb0d] returns value unchanged if value is a string.
+      #; [!gipxn] builds sections of help message if value is a hash object.
+      xs = value.is_a?(Array) ? value : [value]
+      sb = []
+      xs.each do |x|
+        case x
+        when nil     ; nil
+        when String  ; sb << (x.end_with?("\n") ? x : x + "\n")
+        when Hash    ; x.each {|k, v| sb << build_section(k, v) }
+        else
+          #; [!944rt] raises ActionError if unexpected value found in value.
+          raise ActionError.new("#{x.inspect}: Unexpected value found in `#{item}`.")
+        end
+      end
+      return sb.empty? ? nil : sb.join("\n")
+    end
+
+    def build_option_help(schema, format, all: false)
+      #; [!muhem] returns option part of help message.
+      #; [!4z70n] includes hidden options when `all: true` passed.
+      #; [!hxy1f] includes `detail:` kwarg value with indentation.
+      #; [!jcqdf] returns nil if no options.
+      c = @config
+      sb = []
+      schema.each do |x|
+        next if x.hidden? && ! all
+        s = format % [x.optdef, x.desc]
+        if x.detail
+          space = (format % ["", ""]).gsub(/\S/, " ")
+          s += "\n"
+          s += x.detail.chomp("\n").gsub(/^/, space)
+        end
+        s = decorate_str(s, x.hidden?, x.important?)
+        sb << s << "\n"
+      end
+      return sb.empty? ? nil : sb.join()
+    end
+
+    def build_action_line(metadata)
+      #; [!ferqn] returns '  <action> : <descriptn>' line.
+      md = metadata
+      format = @config.format_action
+      s = format % [md.name, md.desc]
+      s = decorate_str(s, md.hidden?, md.important?)
+      return s + "\n"
+    end
+
+    def decorate_command(s)
+      #; [!zffx5] decorates command string.
+      return @config.deco_command % s
+    end
+
+    def decorate_header(s)
+      #; [!zffx5] decorates header string.
+      return @config.deco_header % s
+    end
+
+    def decorate_str(s, hidden, important)
+      #; [!9qesd] decorates string if `hidden` is true.
+      #; [!uql2d] decorates string if `important` is true.
+      #; [!mdhhr] decorates string if `important` is false.
+      #; [!6uzbi] not decorates string if `hidden` is falthy and `important` is nil.
+      c = @config
+      if    hidden             ; return c.deco_hidden % s
+      elsif important == true  ; return c.deco_strong % s
+      elsif important == false ; return c.deco_weak % s
+      else                     ; return s
+      end
+    end
+
+  end
+
+
+  class ApplicationHelpBuilder < BaseHelpBuilder
+
+    def build_help_message(gschema, all: false)
+      #; [!ezcs4] returns help message string of application.
+      #; [!ntj2y] includes hidden actions and options if `all: true` passed.
+      sb = []
+      sb << build_preamble_part()
+      sb << build_usage_part()
+      sb << build_options_part(gschema, all: all)
+      sb << build_actions_part(all: all)
+      sb << build_postamble_part()
+      return sb.compact().join("\n")
+    end
+
+    protected
+
+    def build_preamble_part()
+      #; [!51v42] returns preamble part of application help message.
+      #; [!bmh17] includes `config.app_name` or `config.app_command` into preamble.
+      #; [!opii8] includes `config.app_versoin` into preamble if it is set.
+      #; [!3h380] includes `config.app_detail` into preamble if it is set.
+      c = @config
+      s = c.deco_command % (c.app_name || c.app_command)
+      sb = []
+      if c.app_version
+        sb << "#{s} (#{c.app_version}) --- #{c.app_desc}\n"
+      else
+        sb << "#{s} --- #{c.app_desc}\n"
+      end
+      if c.app_detail
+        sb << "\n"
+        sb << build_sections(c.app_detail, 'config.app_detail')
+      end
+      return sb.join()
+    end
+
+    def build_usage_part()
+      #; [!h98me] returns 'Usage:' section of application help message.
+      c = @config
+      s = c.deco_command % c.app_command
+      s = c.format_usage % s + " [<options>] "
+      #; [!i9d4r] includes `config.app_usage` into help message if it is set.
+      usage = s + (c.app_usage || @config.class.const_get(:APP_USAGE))
+      header = self.class.const_get(:HEADER_USAGE)    # "Usage:"
+      return build_section(header, usage + "\n")
+    end
+
+    def build_options_part(gschema, all: false)
+      #; [!f2n70] returns 'Options:' section of application help message.
+      #; [!0bboq] includes hidden options into help message if `all: true` passed.
+      #; [!fjhow] returns nil if no options.
+      format = @config.format_option
+      s = build_option_help(gschema, format, all: all)
+      return nil if s == nil
+      header = self.class.const_get(:HEADER_OPTIONS)    # "Options:"
+      return build_section(header, s)
+    end
+
+    def build_actions_part(all: false, &filter)
+      index = INDEX
+      #; [!typ67] returns 'Actions:' section of help message.
+      #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
+      c = @config
+      sb = []
+      index.metadata_each do |metadata|
+        md = metadata
+        next if block_given?() && ! yield(md)
+        next if md.hidden? && ! all
+        sb << build_action_line(md)
+      end
+      #; [!24by5] returns nil if no actions defined.
+      return nil if sb.empty?
+      #; [!8qz6a] adds default action name after header if it is set.
+      extra = nil
+      if c.default_action
+        metadata = index.metadata_get(c.default_action)
+        if metadata && (all || ! metadata.hidden?)
+          extra = " (default: #{c.default_action})"
+        end
+      end
+      header = self.class.const_get(:HEADER_ACTIONS)    # "Actions:"
+      return build_section(header, sb.join(), extra)
+    end
+
+    def build_postamble_part()
+      #; [!64hj1] returns postamble of application help message.
+      #; [!z5k2w] returns nil if postamble not set.
+      return build_sections(@config.help_postamble, 'config.help_postamble')
+    end
+
+  end
+
+
+  class ActionHelpBuilder < BaseHelpBuilder
+
+    def build_help_message(metadata, all: false)
+      #; [!f3436] returns help message of an action.
+      #; [!8acs1] includes hidden options if `all: true` passed.
+      #; [!vcg9w] not include 'Options:' section if action has no options.
+      #; [!1auu5] not include '[<options>]' in 'Usage:'section if action has no options.
+      sb = []
+      sb << build_preamble_part(metadata)
+      sb << build_usage_part(metadata, all: all)
+      sb << build_options_part(metadata, all: all)
+      sb << build_postamble_part(metadata)
+      return sb.compact().join("\n")
+    end
+
+    protected
+
+    def build_preamble_part(metadata)
+      #; [!a6nk4] returns preamble of action help message.
+      #; [!imxdq] includes `config.app_command`, not `config.app_name`, into preamble.
+      #; [!7uy4f] includes `detail:` kwarg value of `@action.()` if specified.
+      md = metadata
+      sb = []
+      c = @config
+      s = c.deco_command % "#{c.app_command} #{md.name}"
+      sb << "#{s} --- #{md.desc}\n"
+      if md.detail
+        sb << "\n"
+        sb << build_sections(md.detail, '@action.(detail: ...)')
+      end
+      return sb.join()
+    end
+
+    def build_usage_part(metadata, all: false)
+      md = metadata
+      c = @config
+      s = c.deco_command % "#{c.app_command} #{md.name}"
+      s = c.format_usage % s
+      #; [!jca5d] not add '[<options>]' if action has no options.
+      s += " [<options>]" unless md.option_empty?(all: all)
+      #; [!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string.
+      if md.usage != nil
+        #; [!nfuxz] `usage:` kwarg can be a string or an array of string.
+        sb = [md.usage].flatten.collect {|x| "#{s} #{x}\n" }
+      #; [!z3lh9] if `usage:` kwarg not specified in `@action.()`, generates usage string from method parameters.
+      else
+        sb = [s]
+        sb << Util.method2help(md.klass.new(c), md.meth) << "\n"
+      end
+      #; [!iuctx] returns 'Usage:' section of action help message.
+      header = self.class.const_get(:HEADER_USAGE)    # "Usage:"
+      return build_section(header, sb.join())
+    end
+
+    def build_options_part(metadata, all: false)
+      #; [!pafgs] returns 'Options:' section of help message.
+      #; [!85wus] returns nil if action has no options.
+      format = @config.format_option
+      s = build_option_help(metadata.schema, format, all: all)
+      return nil if s == nil
+      header = self.class.const_get(:HEADER_OPTIONS)  # "Options:"
+      return build_section(header, s)
+    end
+
+    def build_postamble_part(metadata)
+      #; [!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`.
+      #; [!jajse] returns nil if postamble is not set.
+      return build_sections(metadata.postamble, '@action.(postamble: "...")')
+    end
+
+  end
+
+
+  class ActionListBuilder < BaseHelpBuilder
+
+    HEADER_ALIASES    = "Aliases:"
+    HEADER_PREFIXES   = "Top Prefixes:"
+
+    def new_app_help_builder()
+      return APPLICATION_HELP_BUILDER_CLASS.new(@config)
+    end
+    private :new_app_help_builder
+
+    def build_action_list(all: false)
+      #; [!q12ju] returns list of actions and aliases.
+      #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
+      #; [!k2tts] returns nil if no actions found.
+      b = new_app_help_builder()
+      return b.__send__(:build_actions_part, all: all)
+    end
+
+    def build_action_list_filtered_by(prefix, all: false)
+      index = INDEX
+      b = new_app_help_builder()
+      #; [!idm2h] includes hidden actions when `all: true` passed.
+      prefix2 = prefix.chomp(':')
+      found = false
+      s1 = b.__send__(:build_actions_part, all: all) {|metadata|
+        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
+        md = metadata
+        if md.name.start_with?(prefix)
+          matched = true
+        elsif md.name.start_with?(prefix2)
+          matched = ! (md.alias? && md.action.start_with?(prefix))
+        else
+          matched = false
+        end
+        found = true if matched
+        matched
+      }
+      s1 = nil unless found
+      #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
+      #; [!h5ek7] includes hidden aliases when `all: true` passed.
+      sb = []
+      index.metadata_each do |metadata|
+        md = metadata
+        if md.alias? && md.action.start_with?(prefix) && (all || ! md.hidden?)
+          sb << build_action_line(md)
+        end
+      end
+      #; [!80t51] alias names are displayed in separated section from actions.
+      if sb.empty?
+        s2 = nil
+      else
+        header = self.class.const_get(:HEADER_ALIASES)    # "Aliases:"
+        s2 = build_section(header, sb.join())
+      end
+      #; [!rqx7w] returns nil if both no actions nor aliases found with names starting with prefix.
+      return nil if s1 == nil && s2 == nil
+      #; [!3c3f1] returns list of actions which name starts with prefix specified.
+      return [s1, s2].compact().join("\n")
+    end
+
+    def build_top_prefix_list(all: false)
+      index = INDEX
+      #; [!crbav] returns top prefix list.
+      dict = {}
+      index.metadata_each do |metadata|
+        #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
+        next if metadata.hidden? && ! all
+        #
+        if metadata.name =~ /:/
+          prefix = $`
+          dict[prefix] = (dict[prefix] || 0) + 1
+        end
+      end
+      #; [!p4j1o] returns nil if no prefix found.
+      return nil if dict.empty?
+      #; [!30l2j] includes number of actions per prefix.
+      arr = dict.keys.sort.collect {|x| "  #{x}: (#{dict[x]})\n" }
+      header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
+      return build_section(header, arr.join())
+    end
+
+  end
+
+
+  APPLICATION_HELP_BUILDER_CLASS = ApplicationHelpBuilder
+  ACTION_HELP_BUILDER_CLASS      = ActionHelpBuilder
+  ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
+
+
+  class GlobalOptionSchema < OptionSchema
+
+    def initialize(config)
+      super()
+      #; [!umjw5] add nothing if config is nil.
+      return if ! config
+      #; [!ppcvp] adds options according to config object.
+      c = config
+      add(:help    , "-h, --help"    , "print help message (of action if specified)")
+      add(:version , "-V, --version" , "print version")   if c.app_version
+      add(:list    , "-l, --list"    , "list actions")    if c.option_list
+      add(:all     , "-a, --all"     , "list all actions/options including hidden ones") if c.option_all
+      add(:verbose , "-v, --verbose" , "verbose mode")    if c.option_verbose
+      add(:quiet   , "-q, --quiet"   , "quiet mode")      if c.option_quiet
+      add(:color   , "--color[=<on|off>]", "color mode", type: TrueClass) if c.option_color
+      add(:debug   , "    --debug"   , "debug mode", hidden: ! c.option_debug)
+      add(:trace   , "-T, --trace"   , "trace mode")      if c.option_trace
+    end
+
+    def reorder_options!(*keys)
+      #; [!2cp9s] sorts options in order of keys specified.
+      #; [!xe7e1] moves options which are not included in specified keys to end of option list.
+      n = @items.length
+      @items.sort_by! {|item| keys.index(item.key) || @items.index(item) + n }
+      nil
+    end
+
+  end
+
+  GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
+
+
+  def self.current_app()   # :nodoc:
+    #; [!xdjce] returns current application.
+    return @current_app
+  end
+
+  def self._set_current_app(app)   # :nodoc:
+    #; [!1yqwl] sets current application.
+    @current_app = app
+    nil
+  end
 
 
   class Application
 
-    def initialize(config, schema=nil, help_builder=nil, &callback)
-      @config = config
-      #; [!h786g] acceps callback block.
-      @callback = callback
-      #; [!jkprn] creates option schema object according to config.
-      @schema = schema || do_create_global_option_schema(config)
-      @help_builder = help_builder
-      @global_options = nil
+    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _index: INDEX)
+      @config        = config
+      @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
+      @index         = _index
+      @app_help_builder    = app_help_builder
+      @action_help_builder = action_help_builder
     end
 
-    attr_reader :config, :schema, :help_builder, :callback
+    attr_reader :config, :option_schema
 
-    def main(argv=ARGV, &block)
-      begin
-        #; [!y6q9z] runs action with options.
-        self.run(*argv)
-      rescue ExecutionError, DefinitionError => exc
-        #; [!6ro6n] not catch error when $DEBUG_MODE is on.
-        raise if $DEBUG_MODE
-        #; [!a7d4w] prints error message with '[ERROR]' prompt.
-        $stderr.puts "\033[0;31m[ERROR]\033[0m #{exc.message}"
-        #; [!r7opi] prints filename and line number on where error raised if DefinitionError.
-        if exc.is_a?(DefinitionError)
-          #; [!v0zrf] error location can be filtered by block.
-          if block_given?()
-            loc = exc.backtrace_locations.find(&block)
-          else
-            loc = exc.backtrace_locations.find {|x| x.path != __FILE__ }
-          end
-          raise unless loc
-          $stderr.puts "\t(file: #{loc.path}, line: #{loc.lineno})"
-        end
-        #; [!qk5q5] returns 1 as exit code when error occurred.
-        return 1
-      else
-        #; [!5oypr] returns 0 as exit code when no errors occurred.
-        return 0
-      end
+    def inspect()
+      return super.split().first() + ">"
+    end
+
+    def main(argv=ARGV)
+      #; [!65e9n] returns `0` as status code.
+      status_code = run(*argv)
+      return status_code
+    #rescue Benry::CmdOpt::OptionError => exc
+    #  raise if $DEBUG_MODE
+    #  print_error(exc)
+    #  return 1
+    #; [!bkbb4] when error raised...
+    rescue BaseError => exc
+      #; [!k4qov] not catch error if debug mode is enabled.
+      raise if $DEBUG_MODE
+      #; [!35x5p] prints error into stderr.
+      print_error(exc)
+      #; [!z39bh] prints backtrace unless error is a CommandError.
+      print_backtrace(exc) if exc.should_report_backtrace?()
+      #; [!dzept] returns `1` as status code.
+      return 1
     end
 
     def run(*args)
-      #; [!t4ypg] sets $cmdapp_config at beginning.
-      do_setup()
-      #; [!pyotc] sets global options to '@global_options'.
-      global_opts = do_parse_global_options(args)
-      @global_options = global_opts
-      #; [!go9kk] sets global variables according to global options.
-      do_toggle_global_switches(args, global_opts)
-      #; [!pbug7] skip actions if callback method throws `:SKIP`.
-      skip_action = true
-      catch :SKIP do
-        #; [!5iczl] skip actions if help option or version option specified.
-        do_handle_global_options(args, global_opts)
-        #; [!w584g] calls callback method.
-        do_callback(args, global_opts)
-        skip_action = false
+      #; [!etbbc] calls setup method at beginning of this method.
+      setup()
+      #; [!hguvb] handles global options.
+      global_opts = parse_global_options(args)  # raises OptionError
+      toggle_global_options(global_opts)
+      status_code = perform_global_options(global_opts, args)
+      return status_code if status_code
+      #; [!3qw3p] when no arguments specified...
+      if args.empty?
+        #; [!zl9em] lists actions if default action is not set.
+        #; [!89hqb] lists all actions including hidden ones if `-a` or `--all` specified.
+        if @config.default_action == nil
+          return handle_blank_action(all: global_opts[:all])
+        end
+        #; [!k4xxp] runs default action if it is set.
+        action = @config.default_action
+      #; [!xaamy] when prefix specified...
+      elsif args[0].end_with?(':')
+        #; [!7l3fh] lists actions starting with prefix.
+        #; [!g0k1g] lists all actions including hidden ones if `-a` or `--all` specified.
+        prefix = args.shift()
+        return handle_prefix(prefix, all: global_opts[:all])
+      #; [!vphz3] else...
+      else
+        #; [!bq39a] runs action with arguments.
+        action = args.shift()
       end
-      return if skip_action
-      #; [!avxos] prints candidate actions if action name ends with ':'.
-      #; [!eeh0y] candidates are not printed if 'config.feat_candidate' is false.
-      if ! args.empty? && args[0].end_with?(':') && @config.feat_candidate
-        do_print_candidates(args, global_opts)
-        return
-      end
-      #; [!agfdi] reports error when action not found.
-      #; [!o5i3w] reports error when default action not found.
-      #; [!n60o0] reports error when action nor default action not specified.
-      #; [!7h0ku] prints help if no action but 'config.default_help' is true.
-      #; [!l0g1l] skip actions if no action specified and 'config.default_help' is set.
-      metadata = do_find_action(args, global_opts)
-      if metadata == nil
-        do_print_help_message([], global_opts)
-        do_validate_actions(args, global_opts)
-        return
-      end
-      #; [!x1xgc] run action with options and arguments.
-      #; [!v5k56] runs default action if action not specified.
-      do_run_action(metadata, args, global_opts)
-    rescue => exc
-      raise
+      #; [!5yd8x] returns 0 when action invoked successfully.
+      return handle_action(action, args)
     ensure
-      #; [!hk6iu] unsets $cmdapp_config at end.
-      #; [!wv22u] calls teardown method at end of running action.
-      #; [!dhba4] calls teardown method even if exception raised.
-      do_teardown(exc)
+      #; [!pf1d2] calls teardown method at end of this method.
+      teardown()
+    end
+
+    def render_help_message(action=nil, all: false)
+      #; [!2oax5] returns action help message if action name is specified.
+      #; [!d6veb] returns application help message if action name is not specified.
+      #; [!tf2wp] includes hidden actions and options into help message if `all: true` passed.
+      return render_action_help(action, all: all) if action
+      return render_application_help(all: all)
     end
 
     protected
 
-    def do_create_global_option_schema(config)
-      #; [!u3zdg] creates global option schema object according to config.
-      return APP_OPTION_SCHEMA_CLASS.new(config)
+    def setup()
+      #; [!6hi1y] stores current application.
+      Benry::CmdApp._set_current_app(self)
     end
 
-    def do_create_help_message_builder(config, schema)
-      #; [!pk5da] creates help message builder object.
-      return APP_HELP_BUILDER_CLASS.new(config, schema)
+    def teardown()
+      #; [!t44mv] removes current applicatin from data store.
+      Benry::CmdApp._set_current_app(nil)
     end
 
-    def do_parse_global_options(args)
-      #; [!5br6t] parses only global options and not parse action options.
-      parser = PARSER_CLASS.new(@schema)
-      global_opts = parser.parse(args, all: false)
+    def parse_global_options(args)
+      #; [!9c9r8] parses global options.
+      parser = OPTION_PARSER_CLASS.new(@option_schema)
+      global_opts = parser.parse(args, all: false)  # raises OptionError
       return global_opts
-      #; [!kklah] raises InvalidOptionError if global option value is invalid.
-    rescue Benry::CmdOpt::OptionError => exc
-      raise InvalidOptionError.new(exc.message)
     end
 
-    def do_toggle_global_switches(_args, global_opts)
-      #; [!j6u5x] sets $QUIET_MODE to false if '-v' or '--verbose' specified.
-      #; [!p1l1i] sets $QUIET_MODE to true if '-q' or '--quiet' specified.
-      #; [!2zvf9] sets $COLOR_MODE to true/false according to '--color' option.
-      #; [!ywl1a] sets $DEBUG_MODE to true if '-D' or '--debug' specified.
-      #; [!8trmz] sets $TRACE_MODE to true if '-T' or '--trace' specified.
-      global_opts.each do |key, val|
-        case key
-        when :verbose ; $QUIET_MODE = ! val
-        when :quiet   ; $QUIET_MODE = val
-        when :color   ; $COLOR_MODE = val
-        when :debug   ; $DEBUG_MODE = val
-        when :trace   ; $TRACE_MODE = val
-        else          ; # do nothing
-        end
+    def toggle_global_options(global_opts)
+      #; [!xwcyl] sets `$VERBOSE_MODE` and `$QUIET_MODE` according to global options.
+      d = global_opts
+      if    d[:verbose] ; $VERBOSE_MODE = true ; $QUIET_MODE = false
+      elsif d[:quiet]   ; $VERBOSE_MODE = false; $QUIET_MODE = true
       end
+      #; [!sucqp] sets `$DEBUG_MODE` according to global options.
+      $DEBUG_MODE        = d[:debug] if d[:debug] != nil
+      #; [!510eb] sets `config.color_mode` if global option specified.
+      @config.color_mode = d[:color] if d[:color] != nil
+      #; [!y9fow] sets `config.trace_mode` if global option specified.
+      @config.trace_mode = d[:trace] if d[:trace] != nil
+      nil
     end
 
-    def do_handle_global_options(args, global_opts)
-      #; [!xvj6s] prints help message if '-h' or '--help' specified.
-      #; [!lpoz7] prints help message of action if action name specified with help option.
+    def perform_global_options(global_opts, args)
+      all = global_opts[:all]
+      #; [!dkjw8] prints help message if global option `-h, --help` specified.
+      #; [!7mapy] includes hidden actions into help message if `-a, --all` specified.
       if global_opts[:help]
-        do_print_help_message(args, global_opts)
-        do_validate_actions(args, global_opts)
-        throw :SKIP  # done
+        action = args.empty? ? nil : args[0]
+        print_str render_action_help(action, all: all)   if action
+        print_str render_application_help(all: all)  unless action
+        return 0
       end
-      #; [!fslsy] prints version if '-V' or '--version' specified.
+      #; [!dkjw8] prints version number if global option `-V, --version` specified.
       if global_opts[:version]
-        puts @config.app_version
-        throw :SKIP  # done
+        print_str render_version()
+        return 0
       end
+      #; [!hj4hf] prints action list if global option `-l, --list` specified.
+      #; [!tyxwo] includes hidden actions into action list if `-a, --all` specified.
+      if global_opts[:list]
+        print_str render_action_list(nil, all: all)
+        return 0
+      end
+      #; [!k31ry] returns `0` if help or version or actions printed.
+      #; [!9agnb] returns `nil` if do nothing.
+      return nil       # do action
     end
 
-    def do_callback(args, global_opts)
-      #; [!xwo0v] calls callback if provided.
-      #; [!lljs1] calls callback only once.
-      if @callback && ! @__called
-        @__called = true
-        @callback.call(args, global_opts, @config)
-      end
+    def render_action_help(action, all: false)
+      #; [!c510c] returns action help message.
+      metadata = @index.action_lookup(action)  or
+        raise CommandError.new("#{action}: Action not found.")
+      builder = @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
+      return builder.build_help_message(metadata, all: all)
     end
 
-    def do_find_action(args, _global_opts)
-      c = @config
-      #; [!bm8np] returns action metadata.
-      if ! args.empty?
-        action_name = args.shift()
-        #; [!vl0zr] error when action not found.
-        metadata = INDEX.lookup_action(action_name)  or
-          raise CommandError.new("#{action_name}: Unknown action.")
-      #; [!gucj7] if no action specified, finds default action instead.
-      elsif c.default_action
-        action_name = c.default_action
-        #; [!388rs] error when default action not found.
-        metadata = INDEX.lookup_action(action_name)  or
-          raise CommandError.new("#{action_name}: Unknown default action.")
-      #; [!drmls] returns nil if no action specified but 'config.default_help' is set.
-      elsif c.default_help
-        #do_print_help_message([])
-        return nil
-      #; [!hs589] error when action nor default action not specified.
+    def render_application_help(all: false)
+      #; [!iyxxb] returns application help message.
+      builder = @app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
+      return builder.build_help_message(@option_schema, all: all)
+    end
+
+    def render_version()
+      #; [!bcp2g] returns version number string.
+      return (@config.app_version || "?.?.?") + "\n"
+    end
+
+    def render_action_list(prefix=nil, all: false)
+      builder = ACTION_LIST_BUILDER_CLASS.new(@config)
+      case prefix
+      #; [!tftl5] when prefix is not specified...
+      when nil
+        #; [!36vz6] returns action list string if any actions defined.
+        #; [!znuy4] raises CommandError if no actions defined.
+        s = builder.build_action_list(all: all)  or
+          raise CommandError.new("No actions defined.")
+        return s
+      #; [!jcq4z] when ':' is specified as prefix...
+      when ":"
+        #; [!w1j1e] returns top prefix list if ':' specified.
+        #; [!tiihg] raises CommandError if no actions found having prefix.
+        s = builder.build_top_prefix_list(all: all)  or
+          raise CommandError.new("Prefix of actions not found.")
+        return s
+      #; [!xut9o] when prefix is specified...
+      when /:\z/
+        #; [!z4dqn] filters action list by prefix if specified.
+        #; [!1834c] raises CommandError if no actions found with names starting with that prefix.
+        s = builder.build_action_list_filtered_by(prefix, all: all)  or
+          raise CommandError.new("No actions found with names starting with '#{prefix}'.")
+        return s
+      #; [!xjdrm] else...
       else
-        raise CommandError.new("#{c.app_command}: Action name required (run `#{c.app_command} -h` for details).")
-      end
-      return metadata
-    end
-
-    def do_run_action(metadata, args, _global_opts)
-      action_name = metadata.name
-      #; [!62gv9] parses action options even if specified after args.
-      options = metadata.parse_options(args, true)
-      #; [!6mlol] error if action requries argument but nothing specified.
-      #; [!72jla] error if action requires N args but specified less than N args.
-      #; [!zawxe] error if action requires N args but specified over than N args.
-      #; [!y97o3] action can take any much args if action has variable arg.
-      min, max = metadata.method_arity()
-      n = args.length
-      if n < min
-        raise CommandError.new("#{action_name}: Argument required.") if n == 0
-        raise CommandError.new("#{action_name}: Too less arguments (at least #{min}).")
-      elsif max && max < n
-        raise CommandError.new("#{action_name}: Too much arguments (at most #{max}).")
-      end
-      #; [!cf45e] runs action with arguments and options.
-      #; [!tsal4] detects looped action.
-      INDEX.action_doing(action_name)
-      ret = metadata.run_action(*args, **options)
-      INDEX.action_done(action_name, ret)
-      return ret
-    end
-
-    def do_print_help_message(args, global_opts)
-      #; [!4qs7y] shows private (hidden) actions/options if '--all' option specified.
-      #; [!l4d6n] `all` flag should be true or false, not nil.
-      all = !! global_opts[:all]
-      #; [!eabis] prints help message of action if action name provided.
-      action_name = args[0]
-      if action_name
-        #; [!cgxkb] error if action for help option not found.
-        metadata = INDEX.lookup_action(action_name)  or
-          raise CommandError.new("#{action_name}: Action not found.")
-        msg = metadata.help_message(@config.app_command, all)
-      #; [!nv0x3] prints help message of command if action name not provided.
-      else
-        msg = help_message(all)
-      end
-      #; [!efaws] prints colorized help message when stdout is a tty.
-      #; [!9vdy1] prints non-colorized help message when stdout is not a tty.
-      #; [!gsdcu] prints colorized help message when '--color[=on]' specified.
-      #; [!be8y2] prints non-colorized help message when '--color=off' specified.
-      msg = Util.del_escape_seq(msg) unless Util.colorize?
-      puts msg
-    end
-
-    def do_validate_actions(_args, _global_opts)
-      #; [!6xhvt] reports warning at end of help message.
-      nl = "\n"
-      ActionScope::SUBCLASSES.each do |klass|
-        #; [!iy241] reports warning if `alias_of:` specified in action class but corresponding action not exist.
-        alias_of = klass.instance_variable_get(:@__aliasof__)
-        if alias_of
-          warn "#{nl}** [warning] in '#{klass.name}' class, `alias_of: #{alias_of.inspect}` specified but corresponding action not exist."
-          nl = ""
-        end
-        #; [!h7lon] reports warning if `action:` specified in action class but corresponding action not exist.
-        default = klass.instance_variable_get(:@__default__)
-        if default
-          warn "#{nl}** [warning] in '#{klass.name}' class, `action: #{default.inspect}` specified but corresponding action not exist."
-          nl = ""
-        end
+        #; [!9r4w9] raises ArgumentError.
+        raise ArgumentError.new("#{prefix.inspect}: Invalid value as a prefix.")
       end
     end
 
-    def do_print_candidates(args, _global_opts)
-      #; [!0e8vt] prints candidate action names including prefix name without tailing ':'.
-      prefix  = args[0]
-      prefix2 = prefix.chomp(':')
-      pairs = []
-      aname2aliases = {}
-      INDEX.each_action do |ameta|
-        aname = ameta.name
-        next unless aname.start_with?(prefix) || aname == prefix2
-        #; [!k3lw0] private (hidden) action should not be printed as candidates.
-        next if ameta.hidden?
-        #
-        pairs << [aname, ameta.desc, ameta.important?]
-        aname2aliases[aname] = []
-      end
-      #; [!85i5m] candidate actions should include alias names.
-      INDEX.each_alias do |ali_obj|
-        ali_name = ali_obj.alias_name
-        next unless ali_name.start_with?(prefix) || ali_name == prefix2
-        pairs << [ali_name, ali_obj.desc(), ali_obj.important?]
-      end
-      #; [!i2azi] raises error when no candidate actions found.
-      ! pairs.empty?  or
-        raise CommandError.new("No actions starting with '#{prefix}'.")
-      INDEX.each_alias do |alias_obj|
-        alias_  = alias_obj.alias_name
-        action_ = alias_obj.action_name
-        aname2aliases[action_] << alias_ if aname2aliases.key?(action_)
-      end
+    def handle_blank_action(all: false)
+      #; [!seba7] prints action list and returns `0`.
+      print_str render_action_list(nil, all: all)
+      return 0
+    end
+
+    def handle_prefix(prefix, all: false)
+      #; [!8w301] prints action list starting with prefix and returns `0`.
+      print_str render_action_list(prefix, all: all)
+      return 0
+    end
+
+    def handle_action(action_name, args)
+      #; [!vbymd] runs action with args and returns `0`.
+      INDEX.metadata_get(action_name)  or
+        raise CommandError.new("#{action_name}: Action not found.")
+      new_context().start_action(action_name, args)
+      return 0
+    end
+
+    private
+
+    def new_context()
+      #; [!9ddcl] creates new context object with config object.
+      return CONTEXT_CLASS.new(@config)
+    end
+
+    def print_str(str)
+      #; [!6kyv9] prints string as is if color mode is enabled.
+      #; [!lxhvq] deletes escape characters from string and prints it if color mode is disabled.
+      str = Util.delete_escape_chars(str) unless @config.color_mode?
+      print str
+      nil
+    end
+
+    def print_error(exc)
+      #; [!sdbj8] prints exception as error message.
+      #; [!6z0mu] prints colored error message if stderr is a tty.
+      #; [!k1s3o] prints non-colored error message if stderr is not a tty.
+      prompt = "[ERROR]"
+      prompt = @config.deco_error % prompt if $stderr.tty?
+      $stderr.puts "#{prompt} #{exc.message}"
+      nil
+    end
+
+    def print_backtrace(exc)
+      cache = {}    # {filename => [line]}
+      color_p = $stderr.tty?
       sb = []
-      sb << @config.format_heading % "Actions" << "\n"
-      format = @config.format_help
-      indent = " " * (Util.del_escape_seq(format) % ['', '']).length
-      pairs.sort_by {|aname, _, _| aname }.each do |aname, adesc, important|
-        #; [!j4b54] shows candidates in strong format if important.
-        #; [!q3819] shows candidates in weak format if not important.
-        sb << Util.format_help_line(format, aname, adesc, important) << "\n"
-        aliases = aname2aliases[aname]
-        if aliases && ! aliases.empty?
-          sb << indent << "(alias: " << aliases.join(", ") << ")\n"
+      exc.backtrace().each do |bt|
+        #; [!i010e] skips backtrace in `benry/cmdapp.rb`.
+        next if bt.start_with?(__FILE__)
+        #; [!ilaxg] skips backtrace if `#skip_backtrace?()` returns truthy value.
+        next if skip_backtrace?(bt)
+        #; [!5sa5k] prints filename and line number in slant format if stdout is a tty.
+        s = "From #{bt}"
+        s = "\e[3m#{s}\e[0m" if color_p   # slant
+        sb << "    #{s}\n"
+        if bt =~ /:(\d+)/
+          #; [!2sg9r] not to try to read file content if file not found.
+          fname = $`; lineno = $1.to_i
+          next unless File.exist?(fname)
+          #; [!ihizf] prints lines of each backtrace entry.
+          cache[fname] ||= read_file_as_lines(fname)
+          line = cache[fname][lineno - 1]
+          sb << "        #{line.strip()}\n" if line
         end
       end
-      s = sb.join()
-      s = Util.del_escape_seq(s) unless Util.colorize?
-      puts s
+      #; [!8wzxg] prints backtrace of exception.
+      $stderr.print sb.join()
+      cache.clear()
+      nil
     end
 
-    def do_setup()
-      #; [!pkio4] sets config object to '$cmdapp_config'.
-      $cmdapp_config = @config
-      #; [!qwjjv] sets application object to '$cmdapp_application'.
-      $cmdapp_application = self
-      #; [!kqfn1] remove built-in 'help' action if `config.help_action == false`.
-      if ! @config.help_action
-        INDEX.delete_action("help") if INDEX.action_exist?("help")
-      end
+    def skip_backtrace?(bt)
+      return false
     end
 
-    def do_teardown(exc)
-      #; [!zxeo7] clears '$cmdapp_config'.
-      $cmdapp_config = nil
-      #; [!ufm1d] clears '$cmdapp_application'.
-      $cmdapp_application = nil
-    end
-
-    public
-
-    def help_message(all=false, format=nil)
-      #; [!owg9y] returns help message.
-      @help_builder ||= do_create_help_message_builder(@config, @schema)
-      return @help_builder.build_help_message(all, format)
+    def read_file_as_lines(filename)
+      #; [!e9c74] reads file content as an array of line.
+      return File.read(filename, encoding: 'utf-8').each_line().to_a()
     end
 
   end
-
-
-  class AppHelpBuilder < HelpBuilder
-
-    def initialize(config, schema)
-      @config = config
-      @schema = schema
-    end
-
-    def build_help_message(all=false, format=nil)
-      #; [!rvpdb] returns help message.
-      format ||= @config.format_help
-      sb = []
-      sb << build_preamble(all)
-      sb << build_usage(all)
-      sb << build_options(all, format)
-      sb << build_actions(all, format)
-      #; [!oxpda] prints 'Aliases:' section only when 'config.help_aliases' is true.
-      sb << build_aliases(all, format) if @config.help_aliases
-      @config.help_sections.each do |title, content, desc|
-        #; [!kqnxl] array of section may have two or three elements.
-        sb << build_section(title, content, desc)
-      end if @config.help_sections
-      sb << build_postamble(all)
-      return sb.reject {|s| s.nil? || s.empty? }.join("\n")
-    end
-
-    protected
-
-    def build_preamble(all=false)
-      #; [!34y8e] includes application name specified by config.
-      #; [!744lx] includes application description specified by config.
-      #; [!d1xz4] includes version number if specified by config.
-      c = @config
-      sb = []
-      if c.app_desc
-        app_name = c.format_appname % c.app_name
-        ver = c.app_version ? " (#{c.app_version})" : ""
-        sb << "#{app_name}#{ver} -- #{c.app_desc}\n"
-      end
-      #; [!775jb] includes detail text if specified by config.
-      #; [!t3tbi] adds '\n' before detail text only when app desc specified.
-      if c.app_detail
-        sb << "\n" unless sb.empty?
-        sb << c.app_detail
-        sb << "\n" unless c.app_detail.end_with?("\n")
-      end
-      #; [!rvhzd] no preamble when neigher app desc nor detail specified.
-      return nil if sb.empty?
-      return sb.join()
-    end
-
-    def build_usage(all=false)
-      c = @config
-      format = c.format_usage + "\n"
-      #; [!o176w] includes command name specified by config.
-      sb = []
-      sb << (format % [c.app_command, "[<options>] [<action> [<arguments>...]]"])
-      return build_section("Usage", sb.join(), nil)
-    end
-
-    def build_options(all=false, format=nil)
-      format ||= @config.format_help
-      format += "\n"
-      #; [!in3kf] ignores private (hidden) options.
-      #; [!ywarr] not ignore private (hidden) options if 'all' flag is true.
-      sb = []
-      @schema.each do |item|
-        if all || ! item.hidden?
-          #; [!p1tu9] prints option in weak format if option is hidden.
-          important = item.hidden? ? false : nil
-          sb << Util.format_help_line(format, item.optdef, item.desc, important)
-        end
-      end
-      #; [!bm71g] ignores 'Options:' section if no options exist.
-      return nil if sb.empty?
-      #; [!proa4] includes description of global options.
-      return build_section("Options", sb.join(), nil)
-    end
-
-    def build_actions(all=false, format=nil)
-      c = @config
-      format ||= c.format_help
-      format += "\n"
-      sb = []
-      #; [!df13s] includes default action name if specified by config.
-      desc = c.default_action ? "(default: #{c.default_action})" : nil
-      #; [!jat15] includes action names ordered by name.
-      include_alias = ! @config.help_aliases
-      INDEX.each_action_name_and_desc(include_alias, all: all) do |name, desc, important|
-        #; [!b3l3m] not show private (hidden) action names in default.
-        #; [!yigf3] shows private (hidden) action names if 'all' flag is true.
-        if all || ! Util.hidden_name?(name)
-          #; [!5d9mc] shows hidden action in weak format.
-          #; [!awk3l] shows important action in strong format.
-          #; [!9k4dv] shows unimportant action in weak fomrat.
-          sb << Util.format_help_line(format, name, desc, important)
-        end
-      end
-      return build_section("Actions", sb.join(), desc)
-    end
-
-    def build_aliases(all=false, format=nil)
-      format ||= @config.format_help
-      format += "\n"
-      #; [!tri8x] includes alias names in order of registration.
-      sb = []
-      INDEX.each_alias do |alias_obj|
-        alias_name = alias_obj.alias_name
-        #; [!5g72a] not show hidden alias names in default.
-        #; [!ekuqm] shows all alias names including private ones if 'all' flag is true.
-        if all || ! Util.hidden_name?(alias_name)
-          #; [!aey2k] shows alias in strong or weak format according to action.
-          sb << Util.format_help_line(format, alias_name, alias_obj.desc(), alias_obj.important?)
-        end
-      end
-      #; [!p3oh6] now show 'Aliases:' section if no aliases defined.
-      return nil if sb.empty?
-      #; [!we1l8] shows 'Aliases:' section if any aliases defined.
-      return build_section("Aliases", sb.join(), nil)
-    end
-
-    def build_postamble(all=false)
-      #; [!i04hh] includes postamble text if specified by config.
-      s = @config.help_postamble
-      if s
-        #; [!ckagw] adds '\n' at end of postamble text if it doesn't end with '\n'.
-        s += "\n" unless s.end_with?("\n")
-      end
-      return s
-    end
-
-  end
-
-
-  APP_HELP_BUILDER_CLASS = AppHelpBuilder
 
 
 end
