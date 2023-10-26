@@ -995,7 +995,7 @@ Actions:
   {{*test               : alias of 'foo:bar:test1'*}}
 ```
 
-* Alias can include positional and keyword arguments in definition.
+* Alias can include options an arguments in definition.
 
 File: ex16.rb
 
@@ -1020,7 +1020,7 @@ class MyAction < Benry::CmdApp::Action
 end
 
 Benry::CmdApp.define_alias("bonjour", "hello", {{*"--lang=fr"*}})        # !!!!
-Benry::CmdApp.define_alias("ciao"   , "hello", {{*"Bob", "-l", "it"*}})  # !!!!
+Benry::CmdApp.define_alias("ciao"   , "hello", {{*"-l", "it", "Bob"*}})  # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
@@ -1041,6 +1041,16 @@ Bonjour, Alice!
 
 [bash]$ ruby ex16.rb {{*ciao*}}              # !!!!
 Ciao, Bob!
+```
+
+* It is allowed to define an alias of other alias, but not recommended.
+
+```
+## define an alias
+Benry::CmdApp.define_alias({{*"hello-it"*}}   , "hello", "-l", "it")
+
+## define an alias of other alias
+Benry::CmdApp.define_alias("ciao"       , {{*"hello-it"*}})   # !!!!
 ```
 
 
