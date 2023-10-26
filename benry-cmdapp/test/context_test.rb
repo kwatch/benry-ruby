@@ -23,36 +23,36 @@ class FooBarAction < Benry::CmdApp::Action
       def prep; puts "foo:bar:baz:prep"; end
 
       @action.("aaa")
-      def aaa(); run_action_anyway("prep"); puts "foo:bar:baz:aaa"; end
+      def aaa(); run_action("prep"); puts "foo:bar:baz:aaa"; end
 
     end
 
     @action.("bbb")
-    def bbb(); run_action_anyway("prep"); puts "foo:bar:bbb"; end
+    def bbb(); run_action("prep"); puts "foo:bar:bbb"; end
 
   end
 
   @action.("ccc")
-  def ccc(); run_action_anyway("prep"); puts "foo:ccc"; end
+  def ccc(); run_action("prep"); puts "foo:ccc"; end
 
   @action.("ddd")
-  def ddd(); run_action_anyway("prep"); puts "foo:ddd"; end
+  def ddd(); run_action("prep"); puts "foo:ddd"; end
 
   ### looped action
 
   @action.("looped")
   def loop1()
-    run_action_once("loop2")
+    run_once("loop2")
   end
 
   @action.("looped")
   def loop2()
-    run_action_once("loop3")
+    run_once("loop3")
   end
 
   @action.("looped")
   def loop3()
-    run_action_once("loop1")
+    run_once("loop1")
   end
 
   ##
@@ -66,10 +66,10 @@ class FooBarAction < Benry::CmdApp::Action
   ##
 
   @action.("nest1")
-  def nest1(); run_action_anyway("nest2"); end
+  def nest1(); run_action("nest2"); end
 
   @action.("nest2")
-  def nest2(); run_action_anyway("nest3"); end
+  def nest2(); run_action("nest3"); end
 
   @action.("nest3")
   def nest3(); puts "nest3"; end

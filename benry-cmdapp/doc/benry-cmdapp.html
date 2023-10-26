@@ -851,8 +851,8 @@ Actions:
 <section class="subsection" id="invoke-other-action">
 <h3>Invoke Other Action</h3>
 <ul>
-<li><code>run_action_anyway()</code> invokes other action.</li>
-<li><code>run_action_once()</code> invokes other action only once.
+<li><code>run_action()</code> invokes other action.</li>
+<li><code>run_once()</code> invokes other action only once.
   This is equivarent to 'prerequisite task' feature in task runner application.</li>
 </ul>
 <p>File: ex13.rb</p>
@@ -870,8 +870,8 @@ class SampleAction &lt Benry::CmdApp::Action
 
   @action.("build something")
   def build()
-    <strong>run_action_once("prepare")</strong>        # !!!!
-    <strong>run_action_once("prepare")</strong>        # skipped because already invoked
+    <strong>run_once("prepare")</strong>        # !!!!
+    <strong>run_once("prepare")</strong>        # skipped because already invoked
     puts "echo 'README' &gt; build/README.txt"
     puts "zip -r build.zip build"
   end
@@ -901,17 +901,17 @@ class LoopedAction &lt Benry::CmdApp::Action
 
   @action.("test #1")
   def test1()
-    run_action_once("test2")
+    run_once("test2")
   end
 
   @action.("test #2")
   def test2()
-    run_action_once("test3")
+    run_once("test3")
   end
 
   @action.("test #3")
   def test3()
-    <strong>run_action_once("test1")</strong>          # !!!!
+    <strong>run_once("test1")</strong>          # !!!!
   end
 
 end
@@ -1961,7 +1961,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
   @action.("build")
   def build()
-    run_action_once("prepare")
+    run_once("prepare")
     puts "... build something ..."
   end
 
