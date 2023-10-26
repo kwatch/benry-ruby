@@ -112,7 +112,18 @@ Actions:
 Help message of action:
 
 ```console
-[bash]$ ruby ex01.rb {{*-h hello*}}     # or: ruby ex01.rb help hello
+[bash]$ ruby ex01.rb {{*-h hello*}}     # or: ruby ex01.rb --help hello
+ex01.rb hello --- print greeting message
+
+Usage:
+  $ ex01.rb hello [<user>]
+```
+
+* Benry-CmdApp adds ``-h`` and ``--help`` options to each action automatically.
+  Output of ``ruby ex01.rb hello -h`` and ``ruby ex01.rb -h hello`` will be the same.
+
+```console
+[bash]$ ruby ex01.rb {{*hello -h*}}     # or: ruby ex01.rb helo --help
 ex01.rb hello --- print greeting message
 
 Usage:
