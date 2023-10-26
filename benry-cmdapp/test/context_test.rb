@@ -207,6 +207,34 @@ Oktest.scope do
                        "a0469: Action expected, but it is an alias.")
       end
 
+      spec "[!ev3qh] handles help option firstly if specified." do
+        config = Benry::CmdApp::Config.new("x", app_command: "testapp")
+        app = Benry::CmdApp::Application.new(config)
+        Benry::CmdApp._set_current_app(app)
+        at_end { Benry::CmdApp._set_current_app(nil) }
+        #
+        expected = <<"END"
+\e[1mtestapp hello\e[0m --- greeting message
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp hello\e[0m [<options>] [<name>]
+
+\e[1;34mOptions:\e[0m
+  -l, --lang=<lang>  : language name (en/fr/it)
+END
+        #
+        sout, serr = capture_sio do
+          @context.invoke_action("hello", [], {:help=>true})
+        end
+        ok {sout} == expected
+        #
+        sout, serr = capture_sio { app.run("hello", "--help", "--lang=en") }
+        ok {sout} == expected
+        #
+        sout, serr = capture_sio { app.run("hello", "-h", "-lfr") }
+        ok {sout} == expected
+      end
+
       spec "[!6hoir] don't run action and returns false if `once: true` specified and the action already done." do
         ret1 = ret2 = ret3 = nil
         sout, serr = capture_sio do

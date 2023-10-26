@@ -709,8 +709,13 @@ module Benry::CmdApp
 
     def _invoke_action(action_metadata, args, kwargs, once: false)
       ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
-      #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
+      #; [!ev3qh] handles help option firstly if specified.
       action = action_metadata.name
+      if kwargs[:help]
+        invoke_action("help", [action], {}, once: false)
+        return nil
+      end
+      #; [!6hoir] don't run action and returns false if `once: true` specified and the action already done.
       return false if once && @status_dict[action] == :done
       #; [!xwlou] raises ActionError if looped aciton detected.
       @status_dict[action] != :doing  or
