@@ -188,7 +188,7 @@ module Benry::CmdApp
 
 
   ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
-  OPTION_PARSER_CLASS = OptionParser
+  ACTION_OPTION_PARSER_CLASS = OptionParser
   ACTION_OPTION_EMPTY_SCHEMA = ACTION_OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
 
 
@@ -250,7 +250,7 @@ module Benry::CmdApp
     def parse_options(args)
       #; [!gilca] returns parsed options.
       #; [!v34yk] raises OptionError if option has error.
-      parser = OPTION_PARSER_CLASS.new(@schema)
+      parser = ACTION_OPTION_PARSER_CLASS.new(@schema)
       return parser.parse(args, all: true)  # raises error if invalid option given
     end
 
@@ -1266,6 +1266,7 @@ module Benry::CmdApp
   end
 
   GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
+  GLOBAL_OPTION_PARSER_CLASS = OptionParser
 
 
   def self.current_app()   # :nodoc:
@@ -1373,7 +1374,7 @@ module Benry::CmdApp
 
     def parse_global_options(args)
       #; [!9c9r8] parses global options.
-      parser = OPTION_PARSER_CLASS.new(@option_schema)
+      parser = GLOBAL_OPTION_PARSER_CLASS.new(@option_schema)
       global_opts = parser.parse(args, all: false)  # raises OptionError
       return global_opts
     end
