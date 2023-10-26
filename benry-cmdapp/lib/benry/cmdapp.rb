@@ -715,7 +715,7 @@ module Benry::CmdApp
       #; [!5jdlh] runs action method with scope object.
       begin
         #; [!9uue9] reports enter into and exit from action if global '-T' option specified.
-        c1, c2 = @config.color_mode? ? ["\e[33m", "\e[0m"] : ["", ""]
+        c1, c2 = Util.color_mode? ? ["\e[33m", "\e[0m"] : ["", ""]
         puts "#{c1}### enter: #{md.name}#{c2}" if @config.trace_mode
         if kwargs.empty?                        # for Ruby < 2.7
           scope_obj.__send__(md.meth, *args)    # for Ruby < 2.7
@@ -805,10 +805,6 @@ module Benry::CmdApp
     attr_accessor :option_debug, :option_trace
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
     alias trace_mode? trace_mode
-
-    def color_mode?()
-      return Util.color_mode?
-    end
 
     def each(sort: false, &b)
       #; [!yxi7r] returns Enumerator object if block not given.
@@ -1467,7 +1463,7 @@ module Benry::CmdApp
     def print_str(str)
       #; [!6kyv9] prints string as is if color mode is enabled.
       #; [!lxhvq] deletes escape characters from string and prints it if color mode is disabled.
-      str = Util.delete_escape_chars(str) unless @config.color_mode?
+      str = Util.delete_escape_chars(str) unless Util.color_mode?
       print str
       nil
     end
