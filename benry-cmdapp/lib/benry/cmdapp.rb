@@ -267,14 +267,19 @@ module Benry::CmdApp
     def initialize(alias_name, action_name, args, tag: nil, important: nil, hidden: nil)
       #; [!qtb61] sets description string automatically.
       #; [!kgic6] includes args value into description if provided.
-      desc = args && ! args.empty? ? "alias of '#{action_name} #{args.join(' ')}'" \
-                                   : "alias of '#{action_name}'"
+      desc = _build_desc(action_name, args)
       super(alias_name, desc, tag: tag, important: important, hidden: hidden)
       @action = action_name
       @args   = args
     end
 
     attr_reader :action, :args
+
+    def _build_desc(action_name, args)
+      return args && ! args.empty? ? "alias of '#{action_name} #{args.join(' ')}'" \
+                                   : "alias of '#{action_name}'"
+    end
+    private :_build_desc
 
     def alias?()
       #; [!c798o] returns true which means that this is an alias metadata.
