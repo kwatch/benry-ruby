@@ -291,12 +291,12 @@ END
     end
 
 
-    topic '#perform_global_options()' do
+    topic '#handle_global_options()' do
 
       spec "[!dkjw8] prints help message if global option `-h, --help` specified." do
         opts = {help: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ /^Usage:/
         ok {sout} =~ /^Options:/
@@ -309,14 +309,14 @@ END
         #
         opts = {help: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} !~ rexp1
         ok {sout} !~ rexp2
         #
         opts = {help: true, all: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ rexp1
         ok {sout} =~ rexp2
@@ -325,7 +325,7 @@ END
       spec "[!dkjw8] prints version number if global option `-V, --version` specified." do
         opts = {version: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} == "1.2.3\n"
       end
@@ -333,7 +333,7 @@ END
       spec "[!hj4hf] prints action list if global option `-l, --list` specified." do
         opts = {list: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ /\AActions:$/
       end
@@ -343,13 +343,13 @@ END
         #
         opts = {list: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} !~ rexp
         #
         opts = {list: true, all: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ rexp
       end
@@ -360,7 +360,7 @@ END
           ret = nil
           opts = {key => true}
           capture_sio do
-            ret = @app.instance_eval { perform_global_options(opts, []) }
+            ret = @app.instance_eval { handle_global_options(opts, []) }
           end
           ok {ret} == 0
         end
@@ -370,7 +370,7 @@ END
         ret = nil
         opts = {color: true, debug: true}
         capture_sio do
-          ret = @app.instance_eval { perform_global_options(opts, []) }
+          ret = @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {ret} == nil
       end

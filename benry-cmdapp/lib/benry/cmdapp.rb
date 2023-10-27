@@ -1328,7 +1328,7 @@ module Benry::CmdApp
       #; [!hguvb] handles global options.
       global_opts = parse_global_options(args)  # raises OptionError
       toggle_global_options(global_opts)
-      status_code = perform_global_options(global_opts, args)
+      status_code = handle_global_options(global_opts, args)
       return status_code if status_code
       return handle_action(args, global_opts)
     ensure
@@ -1404,7 +1404,7 @@ module Benry::CmdApp
       nil
     end
 
-    def perform_global_options(global_opts, args)
+    def handle_global_options(global_opts, args)
       all = global_opts[:all]
       #; [!dkjw8] prints help message if global option `-h, --help` specified.
       #; [!7mapy] includes hidden actions into help message if `-a, --all` specified.
