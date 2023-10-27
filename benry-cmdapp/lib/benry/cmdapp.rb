@@ -713,6 +713,8 @@ module Benry::CmdApp
       return _invoke_action(metadata, args, kwargs, once: once)
     end
 
+    private
+
     def _invoke_action(action_metadata, args, kwargs, once: false)
       ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
       #; [!ev3qh] handles help option firstly if specified.
