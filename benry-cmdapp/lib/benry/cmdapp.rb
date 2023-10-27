@@ -172,6 +172,10 @@ module Benry::CmdApp
 
     def initialize()
       super
+      setup()
+    end
+
+    def setup()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
       @items << HELP_OPTION_ITEM
     end
