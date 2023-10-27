@@ -658,7 +658,7 @@ module Benry::CmdApp
   end
 
 
-  class ActionContext
+  class ApplicationContext
 
     def initialize(config, _index: INDEX)
       @config        = config
@@ -770,7 +770,7 @@ module Benry::CmdApp
   end
 
 
-  CONTEXT_CLASS = ActionContext
+  CONTEXT_CLASS = ApplicationContext
 
 
   class Config

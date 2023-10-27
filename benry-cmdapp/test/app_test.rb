@@ -580,7 +580,7 @@ END
 
       spec "[!9ddcl] creates new context object with config object." do
         x = @app.instance_eval { new_context() }
-        ok {x}.is_a?(Benry::CmdApp::ActionContext)
+        ok {x}.is_a?(Benry::CmdApp::ApplicationContext)
         ok {x.instance_variable_get(:@config)} == @config
       end
 

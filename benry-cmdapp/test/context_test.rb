@@ -87,12 +87,12 @@ end
 Oktest.scope do
 
 
-  topic Benry::CmdApp::ActionContext do
+  topic Benry::CmdApp::ApplicationContext do
 
 
     before do
       @config  = Benry::CmdApp::Config.new("test app", "1.2.3", app_command: "testapp")
-      @context = Benry::CmdApp::ActionContext.new(@config)
+      @context = Benry::CmdApp::ApplicationContext.new(@config)
     end
 
 
