@@ -683,12 +683,15 @@ module Benry::CmdApp
       @curr_action   = nil     # ActionMetadata
     end
 
-    def __clear()  # :nodoc:
+    private
+
+    def teardown()  # :nodoc:
       #@scope_objects.each {|_, scope| scope.__clear_recursive_reference() }
       #@scope_objects.clear()
       @status_dict.clear()
     end
-    private :__clear
+
+    public
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
       #; [!2mnh7] looks up action metadata with action or alias name.
@@ -706,7 +709,7 @@ module Benry::CmdApp
       return nil
     ensure
       #; [!jcguj] clears instance variables.
-      __clear()
+      teardown()
     end
 
     def invoke_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()

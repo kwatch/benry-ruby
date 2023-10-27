@@ -169,11 +169,11 @@ Oktest.scope do
         @context.instance_eval { @status_dict[:x] = :done }
         ok {@context.instance_eval { @status_dict } }.NOT.empty?
         r = recorder()
-        r.record_method(@context, :__clear)
+        r.record_method(@context, :teardown)
         sout, serr = capture_sio do
           @context.start_action("hello", ["-lit", "Alice"])
         end
-        ok {r[0].name} == :__clear
+        ok {r[0].name} == :teardown
         ok {r[0].args} == []
         ok {@context.instance_eval { @status_dict } }.empty?
       end
