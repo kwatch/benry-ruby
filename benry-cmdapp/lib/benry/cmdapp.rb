@@ -1317,6 +1317,9 @@ module Benry::CmdApp
       print_backtrace(exc) if exc.should_report_backtrace?()
       #; [!dzept] returns `1` as status code.
       return 1
+    ensure
+      #; [!pf1d2] calls teardown method at end of this method.
+      teardown()
     end
 
     def run(*args)
@@ -1325,8 +1328,15 @@ module Benry::CmdApp
       #; [!hguvb] handles global options.
       global_opts = parse_global_options(args)  # raises OptionError
       toggle_global_options(global_opts)
-      status_code = perform_global_options(global_opts, args)
+      status_code = handle_global_options(global_opts, args)
       return status_code if status_code
+      return handle_action(args, global_opts)
+    ensure
+      #; [!pf1d2] calls teardown method at end of this method.
+      teardown()
+    end
+
+    def handle_action(args, global_opts)
       #; [!3qw3p] when no arguments specified...
       if args.empty?
         #; [!zl9em] lists actions if default action is not set.
@@ -1348,11 +1358,9 @@ module Benry::CmdApp
         action = args.shift()
       end
       #; [!5yd8x] returns 0 when action invoked successfully.
-      return handle_action(action, args)
-    ensure
-      #; [!pf1d2] calls teardown method at end of this method.
-      teardown()
+      return start_action(action, args)
     end
+    protected :handle_action
 
     def render_help_message(action=nil, all: false)
       #; [!2oax5] returns action help message if action name is specified.
@@ -1396,7 +1404,7 @@ module Benry::CmdApp
       nil
     end
 
-    def perform_global_options(global_opts, args)
+    def handle_global_options(global_opts, args)
       all = global_opts[:all]
       #; [!dkjw8] prints help message if global option `-h, --help` specified.
       #; [!7mapy] includes hidden actions into help message if `-a, --all` specified.
@@ -1485,7 +1493,7 @@ module Benry::CmdApp
       return 0
     end
 
-    def handle_action(action_name, args)
+    def start_action(action_name, args)
       #; [!vbymd] runs action with args and returns `0`.
       INDEX.metadata_get(action_name)  or
         raise CommandError.new("#{action_name}: Action not found.")

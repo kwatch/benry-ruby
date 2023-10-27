@@ -76,6 +76,29 @@ Oktest.scope do
         ok {serr} == ""
       end
 
+      spec "[!pf1d2] calls teardown method at end of this method." do
+        r = recorder()
+        r.record_method(@app, :teardown)
+        capture_sio { @app.run("hello", "Alice") }
+        ok {r.length} == 1
+        ok {r[0].name} == :teardown
+        ok {r[0].args} == []
+        #
+        begin
+          capture_sio { @app.run("testerr1") }
+        rescue ZeroDivisionError
+          nil
+        end
+        ok {r.length} == 2
+        ok {r[0].name} == :teardown
+        ok {r[0].args} == []
+      end
+
+    end
+
+
+    topic '#handle_action()' do
+
       case_when "[!3qw3p] when no arguments specified..." do
 
         spec "[!zl9em] lists actions if default action is not set." do
@@ -137,24 +160,6 @@ END
           ret = nil
           capture_sio { ret = @app.run("hello", "Alice") }
           ok {ret} == 0
-        end
-
-        spec "[!pf1d2] calls teardown method at end of this method." do
-          r = recorder()
-          r.record_method(@app, :teardown)
-          capture_sio { @app.run("hello", "Alice") }
-          ok {r.length} == 1
-          ok {r[0].name} == :teardown
-          ok {r[0].args} == []
-          #
-          begin
-            capture_sio { @app.run("testerr1") }
-          rescue ZeroDivisionError
-            nil
-          end
-          ok {r.length} == 2
-          ok {r[0].name} == :teardown
-          ok {r[0].args} == []
         end
 
       end
@@ -286,12 +291,12 @@ END
     end
 
 
-    topic '#perform_global_options()' do
+    topic '#handle_global_options()' do
 
       spec "[!dkjw8] prints help message if global option `-h, --help` specified." do
         opts = {help: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ /^Usage:/
         ok {sout} =~ /^Options:/
@@ -304,14 +309,14 @@ END
         #
         opts = {help: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} !~ rexp1
         ok {sout} !~ rexp2
         #
         opts = {help: true, all: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ rexp1
         ok {sout} =~ rexp2
@@ -320,7 +325,7 @@ END
       spec "[!dkjw8] prints version number if global option `-V, --version` specified." do
         opts = {version: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} == "1.2.3\n"
       end
@@ -328,7 +333,7 @@ END
       spec "[!hj4hf] prints action list if global option `-l, --list` specified." do
         opts = {list: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ /\AActions:$/
       end
@@ -338,13 +343,13 @@ END
         #
         opts = {list: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} !~ rexp
         #
         opts = {list: true, all: true}
         sout, serr = capture_sio do
-          @app.instance_eval { perform_global_options(opts, []) }
+          @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ rexp
       end
@@ -355,7 +360,7 @@ END
           ret = nil
           opts = {key => true}
           capture_sio do
-            ret = @app.instance_eval { perform_global_options(opts, []) }
+            ret = @app.instance_eval { handle_global_options(opts, []) }
           end
           ok {ret} == 0
         end
@@ -365,7 +370,7 @@ END
         ret = nil
         opts = {color: true, debug: true}
         capture_sio do
-          ret = @app.instance_eval { perform_global_options(opts, []) }
+          ret = @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {ret} == nil
       end
@@ -557,12 +562,12 @@ END
     end
 
 
-    topic '#handle_action()' do
+    topic '#start_action()' do
 
       spec "[!vbymd] runs action with args and returns `0`." do
         ret = nil
         sout, serr = capture_sio do
-          ret = @app.instance_eval { handle_action("hello", ["-l", "it", "Alice"]) }
+          ret = @app.instance_eval { start_action("hello", ["-l", "it", "Alice"]) }
         end
         ok {ret} == 0
         ok {sout} == "Chao, Alice!\n"
