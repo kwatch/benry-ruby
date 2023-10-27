@@ -158,16 +158,24 @@ module Benry::CmdApp
   end
 
 
-  class ActionOptionSchema < Benry::CmdOpt::Schema
+  class OptionSchema < Benry::CmdOpt::Schema
+  end
+
+
+  class ActionOptionSchema < OptionSchema
 
     HELP_OPTION_ITEM = proc {|dummy_schema|
       dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
       #dummy_schema.get(:help).freeze()
       dummy_schema.get(:help)
-    }.call(Benry::CmdOpt::Schema.new)
+    }.call(OptionSchema.new)
 
     def initialize()
       super
+      setup()
+    end
+
+    def setup()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
       @items << HELP_OPTION_ITEM
     end
@@ -1247,10 +1255,14 @@ module Benry::CmdApp
   ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
 
 
-  class GlobalOptionSchema < Benry::CmdOpt::Schema
+  class GlobalOptionSchema < OptionSchema
 
     def initialize(config)
       super()
+      setup(config)
+    end
+
+    def setup(config)
       #; [!umjw5] add nothing if config is nil.
       return if ! config
       #; [!ppcvp] adds options according to config object.
