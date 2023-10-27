@@ -87,12 +87,12 @@ end
 Oktest.scope do
 
 
-  topic Benry::CmdApp::ActionContext do
+  topic Benry::CmdApp::ApplicationContext do
 
 
     before do
       @config  = Benry::CmdApp::Config.new("test app", "1.2.3", app_command: "testapp")
-      @context = Benry::CmdApp::ActionContext.new(@config)
+      @context = Benry::CmdApp::ApplicationContext.new(@config)
     end
 
 
@@ -326,6 +326,18 @@ END
 
     end
 
+
+    topic '#new_scope_object()' do
+
+      spec "[!1uzs3] creates new scope object." do
+        md = Benry::CmdApp::INDEX.metadata_get("hello")
+        x = @context.__send__(:new_scope_object, md)
+        ok {x}.is_a?(md.klass)
+        ok {x}.is_a?(MyAction)
+        ok {x.instance_variable_get(:@__context__)} == @context
+      end
+
+    end
 
   end
 

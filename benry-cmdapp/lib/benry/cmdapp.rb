@@ -658,7 +658,7 @@ module Benry::CmdApp
   end
 
 
-  class ActionContext
+  class ApplicationContext
 
     def initialize(config, _index: INDEX)
       @config        = config
@@ -713,6 +713,8 @@ module Benry::CmdApp
       return _invoke_action(metadata, args, kwargs, once: once)
     end
 
+    private
+
     def _invoke_action(action_metadata, args, kwargs, once: false)
       ! action_metadata.alias?  or raise "** assertion failed: action_metadata=#{action_metadata.inspect}"
       #; [!ev3qh] handles help option firstly if specified.
@@ -728,8 +730,7 @@ module Benry::CmdApp
         raise ActionError.new("#{action}: Looped action detected.")
       #; [!peqk8] raises ActionError if args and opts not matched to action method.
       md = action_metadata
-      scope_obj = md.klass.new(@config, self)
-      #scope_obj = (@scope_objects[md.klass.name] ||= md.klass.new(@config, self))
+      scope_obj = new_scope_object(md)
       errmsg = Util.validate_args_and_kwargs(scope_obj, md.meth, args, kwargs)
       errmsg == nil  or
         raise ActionError.new("#{md.name}: #{errmsg}")
@@ -756,10 +757,20 @@ module Benry::CmdApp
       return true
     end
 
+    protected
+
+    def new_scope_object(action_metadata)
+      #; [!1uzs3] creates new scope object.
+      md = action_metadata
+      scope_obj = md.klass.new(@config, self)
+      #scope_obj = (@scope_objects[md.klass.name] ||= md.klass.new(@config, self))
+      return scope_obj
+    end
+
   end
 
 
-  CONTEXT_CLASS = ActionContext
+  CONTEXT_CLASS = ApplicationContext
 
 
   class Config
