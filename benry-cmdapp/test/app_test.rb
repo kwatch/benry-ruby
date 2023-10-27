@@ -557,12 +557,12 @@ END
     end
 
 
-    topic '#handle_action()' do
+    topic '#start_action()' do
 
       spec "[!vbymd] runs action with args and returns `0`." do
         ret = nil
         sout, serr = capture_sio do
-          ret = @app.instance_eval { handle_action("hello", ["-l", "it", "Alice"]) }
+          ret = @app.instance_eval { start_action("hello", ["-l", "it", "Alice"]) }
         end
         ok {ret} == 0
         ok {sout} == "Chao, Alice!\n"
