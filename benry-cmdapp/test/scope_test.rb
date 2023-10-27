@@ -212,6 +212,23 @@ END
 END
       end
 
+      spec "[!dezh1] `@copy_options.()` ignores help option automatically." do
+        x = nil
+        MyAction.class_eval do
+          @action.("copy of hello")
+          @__actiondef__[1] = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
+          @__actiondef__[1].instance_eval { @items.clear() }
+          @copy_options.("hello")
+          x = @__actiondef__[1]
+          @__actiondef__ = nil
+        end
+        ok {x} != nil
+        ok {x}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
+        ok {x.to_s()} == <<"END"
+  -l, --lang=<lang>    : language name (en/fr/it)
+END
+      end
+
     end
 
 
