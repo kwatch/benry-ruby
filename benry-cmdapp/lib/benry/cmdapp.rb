@@ -158,13 +158,17 @@ module Benry::CmdApp
   end
 
 
+  class OptionSchema < Benry::CmdOpt::Schema
+  end
+
+
   class ActionOptionSchema < Benry::CmdOpt::Schema
 
     HELP_OPTION_ITEM = proc {|dummy_schema|
       dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
       #dummy_schema.get(:help).freeze()
       dummy_schema.get(:help)
-    }.call(Benry::CmdOpt::Schema.new)
+    }.call(OptionSchema.new)
 
     def initialize()
       super
