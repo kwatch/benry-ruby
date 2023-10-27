@@ -123,9 +123,9 @@ Oktest.scope do
       spec "[!9n46s] if alias has its own args, combines them with command-line args." do
         metadata = Benry::CmdApp::INDEX.metadata_get("foo:anyargs")
         ok {metadata} != nil
-        Benry::CmdApp.define_alias("ali31", "foo:anyargs", "aa")
+        Benry::CmdApp.define_alias("ali31", ["foo:anyargs", "aa"])
         Benry::CmdApp.define_alias("ali32", "ali31")
-        Benry::CmdApp.define_alias("ali33", "ali32"      , "bb", "cc")
+        Benry::CmdApp.define_alias("ali33", ["ali32"      , "bb", "cc"])
         #
         sout, serr = capture_sio() { @context.start_action("ali33", ["xx", "yy"]) }
         ok {sout} == "args=[\"aa\", \"bb\", \"cc\", \"xx\", \"yy\"], kwargs={}\n"
@@ -139,8 +139,8 @@ Oktest.scope do
       spec "[!5ru31] options in alias args are also parsed as well as command-line options." do
         metadata = Benry::CmdApp::INDEX.metadata_get("hello")
         ok {metadata} != nil
-        Benry::CmdApp.define_alias("ali41", "hello", "-l", "it")
-        Benry::CmdApp.define_alias("ali42", "ali41")
+        Benry::CmdApp.define_alias("ali41", ["hello", "-l", "it"])
+        Benry::CmdApp.define_alias("ali42", ["ali41"])
         #
         sout, serr = capture_sio() { @context.start_action("ali42", ["-l", "fr", "Alice"]) }
         ok {sout} == "Bonjour, Alice!\n"

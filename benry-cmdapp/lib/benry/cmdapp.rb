@@ -289,11 +289,18 @@ module Benry::CmdApp
   end
 
 
-  def self.define_alias(alias_name, action_name, *args, tag: nil, important: nil, hidden: nil)
+  def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+    #; [!zawcd] action arg can be a string or an array of string.
+    action_arg = action_name
+    if action_arg.is_a?(Array)
+      action_name, *args = action_arg
+    else
+      args = []
+    end
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
     errmsg = self.__validate_alias_and_action(alias_name, action_name)
     errmsg == nil  or
-      raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_name.inspect}): #{errmsg}")
+      raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
     alias_metadata = AliasMetadata.new(alias_name, action_name, args, tag: tag, important: important, hidden: hidden)
     INDEX.metadata_add(alias_metadata)

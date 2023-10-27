@@ -1012,7 +1012,8 @@ Actions:
   {{*test               : alias of 'foo:bar:test1'*}}
 ```
 
-* Alias can include options an arguments in definition.
+* Target action (second argument of `define_alias()`) can be an array of string
+  which contains action name and options.
 
 File: ex16.rb
 
@@ -1036,8 +1037,8 @@ class MyAction < Benry::CmdApp::Action
 
 end
 
-Benry::CmdApp.define_alias("bonjour", "hello", {{*"--lang=fr"*}})        # !!!!
-Benry::CmdApp.define_alias("ciao"   , "hello", {{*"-l", "it", "Bob"*}})  # !!!!
+Benry::CmdApp.define_alias("bonjour", {{*["hello", "--lang=fr"]*}})        # !!!!
+Benry::CmdApp.define_alias("ciao"   , {{*["hello", "-l", "it", "Bob"]*}})  # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
@@ -1064,7 +1065,7 @@ Ciao, Bob!
 
 ```
 ## define an alias
-Benry::CmdApp.define_alias({{*"hello-it"*}}   , "hello", "-l", "it")
+Benry::CmdApp.define_alias({{*"hello-it"*}}   , ["hello", "-l", "it"])
 
 ## define an alias of other alias
 Benry::CmdApp.define_alias("ciao"       , {{*"hello-it"*}})   # !!!!

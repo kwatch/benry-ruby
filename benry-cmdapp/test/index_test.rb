@@ -118,9 +118,9 @@ Oktest.scope do
       end
 
       spec "[!f8fqx] returns action metadata and alias args." do
-        Benry::CmdApp.define_alias("ali71", "hello", "a")
+        Benry::CmdApp.define_alias("ali71", ["hello", "a"])
         Benry::CmdApp.define_alias("ali72", "ali71")
-        Benry::CmdApp.define_alias("ali73", "ali72", "b", "c")
+        Benry::CmdApp.define_alias("ali73", ["ali72", "b", "c"])
         #
         hello_md = Benry::CmdApp::INDEX.metadata_get("hello")
         ok {Benry::CmdApp::INDEX.metadata_lookup("hello")} == [hello_md, []]
