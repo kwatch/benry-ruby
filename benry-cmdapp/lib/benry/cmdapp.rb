@@ -701,6 +701,12 @@ module Benry::CmdApp
     end
 
     def teardown()  # :nodoc:
+      #; [!4df2f] invokes end blocks in reverse order of registration.
+      #; [!vskre] end block list should be cleared.
+      while ! @end_blocks.empty?
+        block = @end_blocks.pop()
+        block.call()
+      end
       #@scope_objects.each {|_, scope| scope.__clear_recursive_reference() }
       #@scope_objects.clear()
       @status_dict.clear()
