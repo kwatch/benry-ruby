@@ -327,6 +327,18 @@ END
     end
 
 
+    topic '#new_scope_object()' do
+
+      spec "[!1uzs3] creates new scope object." do
+        md = Benry::CmdApp::INDEX.metadata_get("hello")
+        x = @context.__send__(:new_scope_object, md)
+        ok {x}.is_a?(md.klass)
+        ok {x}.is_a?(MyAction)
+        ok {x.instance_variable_get(:@__context__)} == @context
+      end
+
+    end
+
   end
 
 
