@@ -13,6 +13,17 @@ Oktest.scope do
 
     topic '.define_alias()' do
 
+      spec "[!zawcd] action arg can be a string or an array of string." do
+        pr = proc { Benry::CmdApp.define_alias("a4983-1", "hello") }
+        ok {pr}.NOT.raise?(Exception)
+        pr = proc { Benry::CmdApp.define_alias("a4983-2", ["hello", "-l", "it"]) }
+        ok {pr}.NOT.raise?(Exception)
+        md = Benry::CmdApp.define_alias("a4983-3", ["hello", "-l", "it"])
+        ok {md.name}   == "a4983-3"
+        ok {md.action} == "hello"
+        ok {md.args}   == ["-l", "it"]
+      end
+
       spec "[!hqc27] raises DefinitionError if something error exists in alias or action." do
         pr = proc { Benry::CmdApp.define_alias("hello2", "hello1") }
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
@@ -30,7 +41,7 @@ Oktest.scope do
         ok {metadata.action} == "hello"
         ok {metadata.args} == []
         #
-        Benry::CmdApp.define_alias("tmphello2", "hello", "aa", "bb", "cc")
+        Benry::CmdApp.define_alias("tmphello2", ["hello", "aa", "bb", "cc"])
         metadata = Benry::CmdApp::INDEX.metadata_get("tmphello2")
         ok {metadata.args} == ["aa", "bb", "cc"]
       end
