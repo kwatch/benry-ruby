@@ -543,7 +543,7 @@ module Benry::CmdApp
       #; [!5vgn3] returns error message if prefix is invalid.
       #; [!7rphu] returns nil if prefix is valid.
       prefix.is_a?(String)  or return "String expected, but got #{prefix.class.name}."
-      prefix =~ /:\z/       or return "Prefix name should be end with ':'."
+      prefix =~ /:\z/       or return "Prefix name should end with ':'."
       prefix !~ /_/         or return "Prefix name should not contain '_' (use '-' instead)."
       rexp = /\A[a-z][-a-zA-Z0-9]*:([a-z][-a-zA-Z0-9]*:)*\z/
       prefix =~ rexp        or return "Invalid prefix name."

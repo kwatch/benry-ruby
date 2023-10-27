@@ -596,7 +596,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       "prefix(\"p2737\"): Prefix name should be end with ':'.")
+                       "prefix(\"p2737\"): Prefix name should end with ':'.")
       end
 
       case_when "[!kwst6] if block given..." do
@@ -714,7 +714,7 @@ END
 
       spec "[!608fc] returns error message if prefix doesn't end with ':'." do
         errmsg = ScopeTestAction.__validate_prefix("foo")
-        ok {errmsg} == "Prefix name should be end with ':'."
+        ok {errmsg} == "Prefix name should end with ':'."
       end
 
       spec "[!vupza] returns error message if prefix contains '_'." do
