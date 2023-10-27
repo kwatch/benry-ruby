@@ -76,6 +76,29 @@ Oktest.scope do
         ok {serr} == ""
       end
 
+      spec "[!pf1d2] calls teardown method at end of this method." do
+        r = recorder()
+        r.record_method(@app, :teardown)
+        capture_sio { @app.run("hello", "Alice") }
+        ok {r.length} == 1
+        ok {r[0].name} == :teardown
+        ok {r[0].args} == []
+        #
+        begin
+          capture_sio { @app.run("testerr1") }
+        rescue ZeroDivisionError
+          nil
+        end
+        ok {r.length} == 2
+        ok {r[0].name} == :teardown
+        ok {r[0].args} == []
+      end
+
+    end
+
+
+    topic '#handle_action()' do
+
       case_when "[!3qw3p] when no arguments specified..." do
 
         spec "[!zl9em] lists actions if default action is not set." do
@@ -137,24 +160,6 @@ END
           ret = nil
           capture_sio { ret = @app.run("hello", "Alice") }
           ok {ret} == 0
-        end
-
-        spec "[!pf1d2] calls teardown method at end of this method." do
-          r = recorder()
-          r.record_method(@app, :teardown)
-          capture_sio { @app.run("hello", "Alice") }
-          ok {r.length} == 1
-          ok {r[0].name} == :teardown
-          ok {r[0].args} == []
-          #
-          begin
-            capture_sio { @app.run("testerr1") }
-          rescue ZeroDivisionError
-            nil
-          end
-          ok {r.length} == 2
-          ok {r[0].name} == :teardown
-          ok {r[0].args} == []
         end
 
       end

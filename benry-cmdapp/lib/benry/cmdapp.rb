@@ -1317,6 +1317,9 @@ module Benry::CmdApp
       print_backtrace(exc) if exc.should_report_backtrace?()
       #; [!dzept] returns `1` as status code.
       return 1
+    ensure
+      #; [!pf1d2] calls teardown method at end of this method.
+      teardown()
     end
 
     def run(*args)
@@ -1327,6 +1330,13 @@ module Benry::CmdApp
       toggle_global_options(global_opts)
       status_code = perform_global_options(global_opts, args)
       return status_code if status_code
+      return handle_action(args, global_opts)
+    ensure
+      #; [!pf1d2] calls teardown method at end of this method.
+      teardown()
+    end
+
+    def handle_action(args, global_opts)
       #; [!3qw3p] when no arguments specified...
       if args.empty?
         #; [!zl9em] lists actions if default action is not set.
@@ -1349,10 +1359,8 @@ module Benry::CmdApp
       end
       #; [!5yd8x] returns 0 when action invoked successfully.
       return start_action(action, args)
-    ensure
-      #; [!pf1d2] calls teardown method at end of this method.
-      teardown()
     end
+    protected :handle_action
 
     def render_help_message(action=nil, all: false)
       #; [!2oax5] returns action help message if action name is specified.
