@@ -685,6 +685,9 @@ module Benry::CmdApp
 
     private
 
+    def setup()  # :nodoc:
+    end
+
     def teardown()  # :nodoc:
       #@scope_objects.each {|_, scope| scope.__clear_recursive_reference() }
       #@scope_objects.clear()
@@ -694,6 +697,7 @@ module Benry::CmdApp
     public
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
+      setup()
       #; [!2mnh7] looks up action metadata with action or alias name.
       metadata, alias_args = @index.metadata_lookup(action_name)
       #; [!0ukvb] raises CommandError if action nor alias not found.
