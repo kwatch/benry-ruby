@@ -578,6 +578,12 @@ module Benry::CmdApp
       return ctx.invoke_action(action_name, args, kwargs, once: false)
     end
 
+    def at_end(&block)
+      #; [!3mqcz] registers proc object to context object.
+      @__context__._add_end_block(block)
+      nil
+    end
+
   end
 
 
@@ -681,6 +687,12 @@ module Benry::CmdApp
       #@scope_objects = {}     # {action_name => ActionScope}
       @status_dict   = {}      # {action_name => (:done|:doing)}
       @curr_action   = nil     # ActionMetadata
+      @end_blocks    = []      # [Proc]
+    end
+
+    def _add_end_block(block)  # :nodoc:
+      @end_blocks << block
+      nil
     end
 
     private
