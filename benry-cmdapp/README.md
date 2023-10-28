@@ -73,6 +73,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to Change Order of Options in Help Message?](#q-how-to-change-order-of-options-in-help-message)
   * [Q: Is It Possible to Make Action Names Emphasised or Weaken?](#q-is-it-possible-to-make-action-names-emphasised-or-weaken)
   * [Q: Is It Possible to Add Metadata to Action or Option?](#q-is-it-possible-to-add-metadata-to-action-or-option)
+  * [How To Remove Common Help Option from All Actions?](#how-to-remove-common-help-option-from-all-actions)
   * [Q: How to Make Error Messages I18Ned?](#q-how-to-make-error-messages-i18ned)
 * [License and Copyright](#license-and-copyright)
 
@@ -2676,6 +2677,20 @@ end
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
+```
+
+
+### How To Remove Common Help Option from All Actions?
+
+A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.
+
+File: ex52.rb
+
+```ruby
+require 'benry/cmdapp'
+
+arr = Benry::CmdApp::ACTION_SHARED_OPTIONS
+arr.clear()
 ```
 
 

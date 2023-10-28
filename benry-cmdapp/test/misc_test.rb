@@ -61,12 +61,6 @@ Oktest.scope do
 
     topic '#initialize()' do
 
-      spec "[!rruxi] adds '-h, --help' option as hidden automatically." do
-        schema = Benry::CmdApp::ActionOptionSchema.new()
-        ok {schema.get(:help)} != nil
-        ok {schema.get(:help)}.hidden?
-      end
-
     end
 
   end

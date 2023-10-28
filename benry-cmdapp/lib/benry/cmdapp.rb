@@ -4,7 +4,12 @@
 require 'benry/cmdopt'
 
 
-module Benry
+Benry::CmdOpt::Schema.class_eval do
+  unless method_defined?(:add_item)
+    def add_item(item)
+      @items << item
+    end
+  end
 end
 
 
@@ -163,23 +168,6 @@ module Benry::CmdApp
 
 
   class ActionOptionSchema < OptionSchema
-
-    HELP_OPTION_ITEM = proc {|dummy_schema|
-      dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
-      #dummy_schema.get(:help).freeze()
-      dummy_schema.get(:help)
-    }.call(OptionSchema.new)
-
-    def initialize()
-      super
-      setup()
-    end
-
-    def setup()
-      #; [!rruxi] adds '-h, --help' option as hidden automatically.
-      @items << HELP_OPTION_ITEM
-    end
-
   end
 
 
@@ -187,7 +175,7 @@ module Benry::CmdApp
 
     def parse(args, all: true)
       #; [!iaawe] raises OptionError if option error found.
-      super(args, all: all)
+      return super
     rescue Benry::CmdOpt::OptionError => exc
       raise OptionError.new(exc.message)
     end
@@ -197,7 +185,11 @@ module Benry::CmdApp
 
   ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
   ACTION_OPTION_PARSER_CLASS = OptionParser
-  ACTION_OPTION_EMPTY_SCHEMA = ACTION_OPTION_SCHEMA_CLASS.new.freeze()    # should be lazy?
+  ACTION_SHARED_OPTIONS      = proc {|dummy_schema|
+    arr = []
+    arr << dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)#.freeze
+    arr
+  }.call(OptionSchema.new)
 
 
   class BaseMetadata
@@ -398,7 +390,7 @@ module Benry::CmdApp
           #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
           @__actiondef__ == nil  or
             raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
-          schema = nil
+          schema = new_option_schema()
           #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
           kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
@@ -412,7 +404,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("`@option.()` called without `@action.()`.")
           #; [!2p98r] `@option.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
+          schema = @__actiondef__[1]
           schema.add(key, optstr, desc,
                      type: type, rexp: rexp, pattern: pattern, enum: enum,
                      range: range, value: value, detail: detail,
@@ -428,12 +420,20 @@ module Benry::CmdApp
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
           #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
           #; [!dezh1] `@copy_options.()` ignores help option automatically.
-          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
+          schema = @__actiondef__[1]
           except = except.is_a?(Array) ? except : (exept == nil ? [] : [except])
           schema.copy_from(metadata.schema, except: [:help] + except)
         end
       end
       nil
+    end
+
+    def self.new_option_schema()
+      #; [!zuxmj] creates new option schema object.
+      schema = ACTION_OPTION_SCHEMA_CLASS.new()
+      #; [!rruxi] adds '-h, --help' option as hidden automatically.
+      ACTION_SHARED_OPTIONS.each {|item| schema.add_item(item) }
+      return schema
     end
 
     def self.method_added(method_symbol)
@@ -480,7 +480,6 @@ module Benry::CmdApp
       (errmsg = __validate_action_method(action, meth, method_symbol)) == nil  or
         raise DefinitionError.new("def #{method_symbol}(): #{errmsg}")
       #; [!7fnh4] registers action metadata.
-      schema ||= ACTION_OPTION_EMPTY_SCHEMA
       action_metadata = ActionMetadata.new(action, desc, schema, self, meth, **kws)
       INDEX.metadata_add(action_metadata)
       #; [!lyn0z] registers alias metadata if necessary.

@@ -86,7 +86,6 @@ END
 
       spec "[!76hni] includes hidden options in help message if `all:` is truthy." do
         ok {@metadata.option_help("  %-15s : %s", all: true)} == <<"END"
-  -h, --help      : print help message
   -l <lang>       : language
   --color[=<on|off>] : color mode
   --debug         : debug mode
