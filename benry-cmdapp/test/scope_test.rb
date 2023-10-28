@@ -232,6 +232,16 @@ END
     end
 
 
+    topic '.new_option_schema()' do
+
+      spec "[!zuxmj] creates new option schema object." do
+        x = Benry::CmdApp::ActionScope.new_option_schema()
+        ok {x}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
+      end
+
+    end
+
+
     topic '.method_added()' do
 
       spec "[!6frgx] do nothing if `@action.()` is not called." do

@@ -412,7 +412,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("`@option.()` called without `@action.()`.")
           #; [!2p98r] `@option.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
+          schema = (@__actiondef__[1] ||= new_option_schema())
           schema.add(key, optstr, desc,
                      type: type, rexp: rexp, pattern: pattern, enum: enum,
                      range: range, value: value, detail: detail,
@@ -428,12 +428,17 @@ module Benry::CmdApp
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
           #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
           #; [!dezh1] `@copy_options.()` ignores help option automatically.
-          schema = (@__actiondef__[1] ||= ACTION_OPTION_SCHEMA_CLASS.new)
+          schema = (@__actiondef__[1] ||= new_option_schema())
           except = except.is_a?(Array) ? except : (exept == nil ? [] : [except])
           schema.copy_from(metadata.schema, except: [:help] + except)
         end
       end
       nil
+    end
+
+    def self.new_option_schema()
+      #; [!zuxmj] creates new option schema object.
+      return ACTION_OPTION_SCHEMA_CLASS.new()
     end
 
     def self.method_added(method_symbol)
