@@ -164,12 +164,6 @@ module Benry::CmdApp
 
   class ActionOptionSchema < OptionSchema
 
-    HELP_OPTION_ITEM = proc {|dummy_schema|
-      dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
-      #dummy_schema.get(:help).freeze()
-      dummy_schema.get(:help)
-    }.call(OptionSchema.new)
-
     def initialize()
       super
       setup()
@@ -177,7 +171,7 @@ module Benry::CmdApp
 
     def setup()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
-      @items << HELP_OPTION_ITEM
+      @items << ACTION_OPTION_HELP_ITEM
     end
 
   end
@@ -197,6 +191,11 @@ module Benry::CmdApp
 
   ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
   ACTION_OPTION_PARSER_CLASS = OptionParser
+  ACTION_OPTION_HELP_ITEM    = proc {|dummy_schema|
+    dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
+    #dummy_schema.get(:help).freeze()
+    dummy_schema.get(:help)
+  }.call(OptionSchema.new)
 
 
   class BaseMetadata
