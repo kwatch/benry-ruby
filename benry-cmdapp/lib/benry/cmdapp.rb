@@ -163,15 +163,6 @@ module Benry::CmdApp
 
 
   class ActionOptionSchema < OptionSchema
-
-    def initialize()
-      super
-      setup()
-    end
-
-    def setup()
-    end
-
   end
 
 
