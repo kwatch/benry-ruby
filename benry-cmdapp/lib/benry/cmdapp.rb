@@ -4,15 +4,6 @@
 require 'benry/cmdopt'
 
 
-Benry::CmdOpt::Schema.class_eval do
-  unless method_defined?(:add_item)
-    def add_item(item)
-      @items << item
-    end
-  end
-end
-
-
 module Benry::CmdApp
 
 
