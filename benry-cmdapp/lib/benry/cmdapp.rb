@@ -4,7 +4,12 @@
 require 'benry/cmdopt'
 
 
-module Benry
+Benry::CmdOpt::Schema.class_eval do
+  unless method_defined?(:add_item)
+    def add_item(item)
+      @items << item
+    end
+  end
 end
 
 
@@ -428,7 +433,7 @@ module Benry::CmdApp
       schema = ACTION_OPTION_SCHEMA_CLASS.new()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
       #schema.add(:help, "-h, --help", "print help message", hidden: true)  # dedicaded object
-      schema.instance_eval { @items << ACTION_OPTION_HELP_ITEM }            # shared object
+      schema.add_item(ACTION_OPTION_HELP_ITEM)    # shared object
       return schema
     end
 
