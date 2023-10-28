@@ -1481,13 +1481,13 @@ module Benry::CmdApp
       metadata, _alias_args = @index.metadata_lookup(action)
       metadata  or
         raise CommandError.new("#{action}: Action not found.")
-      builder = @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
+      builder = get_action_help_builder()
       return builder.build_help_message(metadata, all: all)
     end
 
     def render_application_help(all: false)
       #; [!iyxxb] returns application help message.
-      builder = @app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
+      builder = get_app_help_builder()
       return builder.build_help_message(@option_schema, all: all)
     end
 
@@ -1497,7 +1497,7 @@ module Benry::CmdApp
     end
 
     def render_action_list(prefix=nil, all: false)
-      builder = ACTION_LIST_BUILDER_CLASS.new(@config, @app_help_builder)
+      builder = get_action_list_builder()
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
@@ -1548,6 +1548,18 @@ module Benry::CmdApp
     end
 
     private
+
+    def get_app_help_builder()
+      return @app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
+    end
+
+    def get_action_help_builder()
+      return @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
+    end
+
+    def get_action_list_builder()
+      return ACTION_LIST_BUILDER_CLASS.new(@config, @app_help_builder)
+    end
 
     def new_context()
       #; [!9ddcl] creates new context object with config object.
