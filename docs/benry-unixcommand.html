@@ -1,0 +1,894 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#fafafa">
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <title></title>
+  <link rel="stylesheet" href="lib/sanitize.css/2.0.0/sanitize.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+<section class="chapter" id="benry-unixcommand">
+<h1>Benry-UnixCommand</h1>
+<nav class="nav">
+  <ul class="nav">
+  </ul>
+</nav>
+<p>($Release: 1.0.0 $)</p>
+<section class="section" id="whats-this">
+<h2>What's this?</h2>
+<p>Benry-UnixCommand implements popular UNIX commands, like FileUtils,
+but much better than it.</p>
+<ul>
+<li>Document: <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">https://kwatch.github.io/benry-ruby/benry-unixcommand.html</a></li>
+<li>GitHub: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-unixcommand">https://github.com/kwatch/benry-ruby/tree/main/benry-unixcommand</a></li>
+<li>Changes: <a href="https://github.com/kwatch/benry-ruby/blob/main/benry-unixcommand/CHANGES.md">https://github.com/kwatch/benry-ruby/blob/main/benry-unixcommand/CHANGES.md</a></li>
+</ul>
+<p>Features compared to FileUtils:</p>
+<ul>
+<li>supports file patterns (<code>*</code>, <code>.</code>, <code>{}</code>) directly.</li>
+<li>provides <code>cp :r</code>, <code>mv :p</code>, <code>rm :rf</code>, ... instead of <code>cp_r</code>, <code>mv_p</code>, <code>rm_rf</code>, ...</li>
+<li>prints command prompt <code>$ </code> before command echoback.</li>
+<li>provides <code>pushd</code> which is similar to <code>cd</code> but supports nested calls naturally.</li>
+<li>implements <code>capture2</code>, <code>capture2e</code>, and <code>capture3</code> which calls
+  <code>Popen3.capture2</code>, <code>Popen3.capture2</code>, and <code>Popen3.capture3</code> respectively.</li>
+<li>supports <code>touch -r reffile</code>.</li>
+<li>provides <code>sys</code> command which is similar to <code>sh</code> in Rake but different in details.</li>
+<li>provides <code>zip</code> and <code>unzip</code> commands (requires <code>rubyzip</code> gem).</li>
+<li>provides <code>store</code> command which copies files recursively into target directory, keeping file path.</li>
+<li>provides <code>atomic_symlink!</code> command which switches symlink atomically.</li>
+</ul>
+<p>(Benry-UnixCommand requires Ruby &gt;= 2.3)</p>
+<section class="subsection" id="table-of-contents">
+<h3>Table of Contents</h3>
+<div class="toc">
+<ul>
+<li><a href="#whats-this">What's this?</a></li>
+<li><a href="#install">Install</a></li>
+<li><a href="#command-reference">Command Reference</a>
+<ul>
+<li><a href="#echo"><code>echo</code></a></li>
+<li><a href="#echoback"><code>echoback</code></a></li>
+<li><a href="#cp"><code>cp</code></a></li>
+<li><a href="#mv"><code>mv</code></a></li>
+<li><a href="#rm"><code>rm</code></a></li>
+<li><a href="#mkdir"><code>mkdir</code></a></li>
+<li><a href="#rmdir"><code>rmdir</code></a></li>
+<li><a href="#ln"><code>ln</code></a></li>
+<li><a href="#atomic_symlink"><code>atomic_symlink!</code></a></li>
+<li><a href="#touch"><code>touch</code></a></li>
+<li><a href="#chmod"><code>chmod</code></a></li>
+<li><a href="#chown"><code>chown</code></a></li>
+<li><a href="#pwd"><code>pwd</code></a></li>
+<li><a href="#cd"><code>cd</code></a></li>
+<li><a href="#pushd"><code>pushd</code></a></li>
+<li><a href="#store"><code>store</code></a></li>
+<li><a href="#sys"><code>sys</code></a></li>
+<li><a href="#ruby"><code>ruby</code></a></li>
+<li><a href="#capture2"><code>capture2</code></a></li>
+<li><a href="#capture2e"><code>capture2e</code></a></li>
+<li><a href="#capture3"><code>capture3</code></a></li>
+<li><a href="#zip"><code>zip</code></a></li>
+<li><a href="#unzip"><code>unzip</code></a></li>
+<li><a href="#time"><code>time</code></a></li>
+</ul></li>
+<li><a href="#faq">FAQ</a>
+<ul>
+<li><a href="#why-mv-or-cp-requires-to-option">Why <code>mv</code> or <code>cp</code> requires <code>to:</code> option?</a></li>
+<li><a href="#how-to-use-in-rakefile">How to use in Rakefile?</a></li>
+<li><a href="#how-to-change-prompt-string">How to change prompt string?</a></li>
+<li><a href="#how-to-make-prompt-colored">How to make prompt colored?</a></li>
+<li><a href="#how-to-disable-command-echoback">How to disable command echoback?</a></li>
+</ul></li>
+<li><a href="#license-and-copyright">License and Copyright</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section class="section" id="install">
+<h2>Install</h2>
+<pre>
+$ gem install benry-unixcommand
+</pre>
+<p>File: ex1.rb</p>
+<pre class="language-ruby">
+<strong>require 'benry/unixcommand'</strong>      # !!!!!
+<strong>include Benry::UnixCommand</strong>       # !!!!!
+
+output = <strong>capture2</strong> "uname -srmp"   # run command and return output
+p output
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ ruby ex1.rb
+$ uname -srmp
+"Darwin 22.5.0 arm64 arm\n"
+</pre>
+</section>
+<section class="section" id="command-reference">
+<h2>Command Reference</h2>
+<section class="subsection" id="echo">
+<h3><code>echo</code></h3>
+<p>File: ex-echo1.rb</p>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+<strong>echo</strong> "aa", "bb", "cc"
+
+<strong>echo :n</strong>, "aa"        # not print "\n"
+<strong>echo</strong> "bb"
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ ruby ex_echo1.rb
+$ echo aa bb cc
+aa bb cc
+$ echo -n aa
+aa$ echo bb
+bb
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>echo :n</code> -- don't print "\n".</li>
+</ul>
+</section>
+<section class="subsection" id="echoback">
+<h3><code>echoback</code></h3>
+<ul>
+<li><code>echoback "command"</code> prints <code>$ command</code> string into stdout.</li>
+<li><code>echoback "command"</code> indents command if in block of <code>cd</code> or <code>pushd</code>.</li>
+</ul>
+<p>File: ex-echoback1.rb</p>
+<pre>
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+<strong>echoback</strong> "command 123"
+cd "dir1" do
+  <strong>echoback</strong> "command 456"
+  cd "dir2" do
+    <strong>echoback</strong> "command 789"
+  end
+end
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ ruby ex_echoback1.rb
+$ command 123
+$ cd dir1
+$  command 456
+$  cd dir2
+$   command 789
+$  cd -
+$ cd -
+</pre>
+</section>
+<section class="subsection" id="cp">
+<h3><code>cp</code></h3>
+<ul>
+<li><code>cp "x", "y"</code> copies <code>x</code> to new file <code>y'. Fails when </code>y`` already exists.</li>
+<li><code>cp! "x", "y"</code> is similar to above, but overwrites <code>y</code> even if it exists.</li>
+<li><code>cp "x", "y", to: "dir"</code> copies <code>x</code> and <code>y</code> into <code>dir</code>.</li>
+<li><code>cp "x", "y", "dir"</code> will be error! (use <code>to: "dir"</code> instead.)</li>
+<li>Glob pattern such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
+<li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
+<li>If you want to copy files with keeping directory structure, use <code>store</code> instead of <code>cp</code>.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## copy file to newfile
+<strong>cp</strong>  "file1.txt", "newfile.txt"      # error if newfile.txt already exists.
+<strong>cp!</strong> "file1.txt", "newfile.txt"      # overrides newfile.txt if exists.
+
+## copy dir to newdir recursively
+<strong>cp :r</strong>, "dir1", "newdir"             # error if newdir already exists.
+
+## copy files to existing directory
+<strong>cp :pr</strong>, "file*.txt", "lib/**/*.rb", <strong>to:</strong> "dir1"   # error if dir1 not exist.
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>cp :p</code> -- preserves timestamps and permission.</li>
+<li><code>cp :r</code> -- copies files and directories recursively.</li>
+<li><code>cp :l</code> -- creates hard links instead of copying files.</li>
+<li><code>cp :f</code> -- ignores non-existing source files.
+             Notice that this is different from <code>cp -f</code> of unix command.</li>
+</ul>
+</section>
+<section class="subsection" id="mv">
+<h3><code>mv</code></h3>
+<ul>
+<li><code>mv "x", "y"</code> renames <code>x</code> to <code>y</code>. Fails when <code>y</code> already exists.</li>
+<li><code>mv! "x", "y"</code> is similar to above, but overwrites <code>y</code> even if it exists.</li>
+<li><code>mv "x", "y", to: "dir"</code> moves <code>x</code> and <code>y</code> into <code>dir</code>.</li>
+<li><code>mv "x", "y", "dir"</code> will be error! (use <code>to: "dir"</code> instead.)</li>
+<li>Glob patten such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
+<li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## rename file
+<strong>mv</strong>  "file1.txt", "newfile.txt"      # error if newfile.txt already exists.
+<strong>mv!</strong> "file1.txt", "newfile.txt"      # overrides newfile.txt if exists.
+
+## rename directory
+<strong>mv</strong> "dir1", "newdir"                 # error if newdir already exists.
+
+## move files and directories to existing directory
+<strong>mv</strong> "file*.txt", "lib", <strong>to:</strong> "dir1"   # error if dir1 not exist.
+
+## ignore non-existing files.
+<strong>mv</strong>     "foo*.txt", <strong>to:</strong> "dir1"       # error if foo*.txt not exist.
+<strong>mv :f</strong>, "foo*.txt", <strong>to:</strong> "dir1"       # not error even if foo*.txt not exist.
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>mv :f</code> -- ignores non-existing source files.</li>
+</ul>
+</section>
+<section class="subsection" id="rm">
+<h3><code>rm</code></h3>
+<ul>
+<li><code>rm "x", "y"</code> removes file <code>x</code> and <code>y</code>.</li>
+<li><code>rm :r, "dir1"</code> removes directory recursively.</li>
+<li><code>rm "dir1"</code> will raise error because <code>:r</code> option not specified.</li>
+<li><code>rm "foo*.txt"</code> will raise error if <code>foo*.txt</code> not exists.</li>
+<li><code>rm :f, "foo*.txt"</code> will not raise error even if <code>foo*.txt</code> not exists.</li>
+<li>Glob patten such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## remove files
+<strong>rm</strong>  "foo*.txt", "bar*.txt"          # error if files not exist.
+<strong>rm :f</strong>, "foo*.txt", "bar*.txt"       # not error even if files not exist.
+
+## remove directory
+<strong>rm :r</strong>,  "dir1"                      # error if dir1 not exist.
+<strong>rm :rf</strong>, "dir1"                      # not error even if dir1 not exist.
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>rm :r</code> -- remove files and directories recursively.</li>
+<li><code>rm :f</code> -- ignores non-existing files and directories.</li>
+</ul>
+</section>
+<section class="subsection" id="mkdir">
+<h3><code>mkdir</code></h3>
+<ul>
+<li><code>mkdir "x", "y"</code> creates <code>x</code> and <code>y</code> directories.</li>
+<li><code>mkdir :p, "x/y/z"</code> creates <code>x/y/z</code> directory.</li>
+<li><code>mkdir "x"</code> will be error if <code>x</code> already exists.</li>
+<li><code>mkdir :p, "x"</code> will not be error even if <code>x</code> already exists.</li>
+<li><code>mkdir :m, 0775, "x"</code> creates new directory with permission 0775.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## creates new directory
+<strong>mkdir</strong> "newdir"
+
+## creates new directory with path
+<strong>mkdir :p</strong>, "dir/x/y/z"
+
+## creats new directory with specific permission
+<strong>mkdir :m, 0755</strong>, "newdir"
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>mkdir :p</code> -- creates intermediate path.</li>
+<li><code>mkdir :m, 0XXX</code> -- specifies directory permission.</li>
+</ul>
+</section>
+<section class="subsection" id="rmdir">
+<h3><code>rmdir</code></h3>
+<ul>
+<li><code>rmdir "x", "y"</code> removed empty directores.</li>
+<li>Raises error when directory not empty.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## remove empty directory
+<strong>rmdir</strong> "dir"     # error if directory not empty.
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="ln">
+<h3><code>ln</code></h3>
+<ul>
+<li><code>ln "x", "y"</code> creates hard link.</li>
+<li><code>ln :s, "x", "y"</code> creates symbolic link. Error if <code>y</code> already exists.</li>
+<li><code>ln! :s, "x", "y"</code> overwrites existing symbolic link <code>y</code>.</li>
+<li><code>ln "files*.txt', to: "dir"</code> creates hard links into <code>dir</code>.</li>
+<li><code>ln "files*.txt', "dir"</code> will be error! (use <code>to: "dir"</code> instead.)</li>
+<li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## create hard link
+<strong>ln</strong> "foo1.txt", "dir/foo1.txt"
+
+## create symbolic link
+<strong>ln :s</strong>, "foo1.txt", "dir/foo1.txt"     # error if dir/foo1.txt alreay exists.
+<strong>ln! :s</strong>, "foo1.txt", "dir/foo1.txt"    # overwrites dir/foo1.txt if exists.
+
+## create symbolic link into directory.
+<strong>ln :s</strong>, "foo1.txt", <strong>to:</strong> "dir"
+
+## error! use ``to: "dir"`` instead.
+<strong>ln :s</strong>, "foo1.txt", "dir"
+</pre>
+</section>
+<section class="subsection" id="atomic_symlink">
+<h3><code>atomic_symlink!</code></h3>
+<ul>
+<li><code>atomic_symlink! "x", "y"</code> creates symbolic link atomically.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## create symbolic link atomically
+<strong>atomic_symlink!</strong> "src-20200101", "src"
+
+## the above is same as the following
+tmplink = "src.#{rand().to_s[2..6]}"      # random name
+File.symlink("src-20200101", tmplink)     # create symblink with random name
+File.rename(tmplink, "src")               # rename symlink atomically
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="touch">
+<h3><code>touch</code></h3>
+<ul>
+<li><code>touch "x"</code> updates timestamp of file.</li>
+<li><code>touch :r, "reffile", "x"</code> uses timestamp of <code>reffile</code> instead current timestamp.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## updates timestamp of files to current timestamp.
+<strong>touch</strong> "files*.txt"
+
+## copy timestamp from reffile to other files.
+<strong>touch :r, "reffile"</strong>, "files*.txt"
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>touch :a</code> -- updates only access time.</li>
+<li><code>touch :m</code> -- updates only modification time.</li>
+<li><code>touch :r, "reffile"</code> -- uses timestamp of <code>reffile</code> instead of current timestamp.</li>
+</ul>
+</section>
+<section class="subsection" id="chmod">
+<h3><code>chmod</code></h3>
+<ul>
+<li><code>chmod 0644, "x"</code> changes file permission.</li>
+<li><code>chmod :R, "a+r", "dir"</code> changes permissions recursively.</li>
+<li>Permission can be <code>0644</code> sytle, or <code>u+w</code> style.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## change permissions of files.
+<strong>chmod 0644</strong>, "file*.txt"
+<strong>chmod "a+r"</strong>, "file*.txt"
+
+## change permissions recursively.
+<strong>chmod :R, 0644</strong>, "dir"
+<strong>chmod :R, "a+r"</strong>, "dir"
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>chmod :R</code> -- changes permissions recursively.</li>
+</ul>
+</section>
+<section class="subsection" id="chown">
+<h3><code>chown</code></h3>
+<ul>
+<li><code>chown "user:group", "x", "y"</code> changes owner and group of files.</li>
+<li><code>chown "user", "x", "y"</code> changes owner of files.</li>
+<li><code>chown ":group", "x", "y"</code> changes group of files.</li>
+<li><code>chown :R, "user:group", "dir"</code> changes owner and group recursively.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## change owner and/or group.
+<strong>chown "user1:group1"</strong>, "file*.txt"     # change both owner and group
+<strong>chown "user1"</strong>,        "file*.txt"     # change owner
+<strong>chown ":group1"</strong>,      "file*.txt"     # change group
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>chown :R</code> -- changes owner and/or group recursively.</li>
+</ul>
+</section>
+<section class="subsection" id="pwd">
+<h3><code>pwd</code></h3>
+<ul>
+<li><code>pwd()</code> prints current working directory path.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## prints current working directory
+<strong>pwd()</strong>            #=&gt; /home/yourname (for example)
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="cd">
+<h3><code>cd</code></h3>
+<ul>
+<li><code>cd</code> changes current working directory.</li>
+<li>If block given, <code>cd</code> invokes block just after changing current directory,
+  and back to previous directory automatically.</li>
+<li>Within block argument, echoback indentation is increased.</li>
+<li><code>chdir</code> is an alias to <code>cd</code>.</li>
+</ul>
+<p>File: ex-cd1.rb</p>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## change directory, invoke block, and back to previous directory.
+pwd()           #=&gt; /home/yourname (for example)
+<strong>cd</strong> "/tmp" <strong>do</strong>
+  pwd()         #=&gt; /tmp
+end
+pwd()           #=&gt; /home/yourname (for example)
+
+## just change directory
+<strong>cd</strong> "/tmp"
+pwd()           #=&gt; /tmp
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ ruby ex-cd1.rb
+$ pwd
+/home/yourname
+$ cd /tmp
+$  pwd
+/tmp
+$ cd -
+$ pwd
+/home/yourname
+$ cd /tmp
+$ pwd
+/tmp
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="pushd">
+<h3><code>pushd</code></h3>
+<ul>
+<li><code>pushd</code> changes current directory, invokes block, and back to previous directory.</li>
+<li><code>pushd</code> requires block argument. <code>cd</code> also takes block argument but it is an optional.</li>
+<li>Within block argument, echoback indentation is increased.</li>
+</ul>
+<p>File: ex-pushd1.rb</p>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## change directory, invoke block, and back to previous directory.
+pwd()           #=&gt; /home/yourname (for example)
+<strong>pushd</strong> "/var" <strong>do</strong>
+  pwd()         #=&gt; /var
+  <strong>pushd</strong> "tmp" <strong>do</strong>
+    pwd()       #=&gt; /var/tmp
+  end
+  pwd()         #=&gt; /var
+end
+pwd()           #=&gt; /home/yourname (for example)
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ ruby ex-pushd1.rb
+$ pwd
+/home/yourname
+$ pushd /var
+$  pwd
+/var
+$  pushd tmp
+$   pwd
+/var/tmp
+$  popd    # back to /var
+$  pwd
+/var
+$ popd    # back to /home/yourname
+$ pwd
+/home/yourname
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="store">
+<h3><code>store</code></h3>
+<ul>
+<li><code>store "x", "y", to: "dir", </code> copies files under <code>x</code> and <code>y</code> to <code>dir</code> keeping file path.
+  For example, <code>x/foo/bar.rb</code> will be copied as <code>dir/x/foo/bar.rb</code>.</li>
+<li><code>store!</code> overwrites existing files while <code>store</code> doesn't.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## copies files into builddir, keeping file path
+<strong>store</strong> "lib/**/*.rb", "test/**/*.rb", <strong>to:</strong> "builddir"
+
+## `store()` is similar to unix `tar` command.
+##     $ tar cf - lib/**/*.rb test/**/*.rb | (cd builddir; tar xf -)
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>store :p</code> -- preserves timestamps, permission, file owner and group.</li>
+<li><code>store :l</code> -- creates hard link instead of copying file.</li>
+<li><code>store :f</code> -- ignores non-existing files.</li>
+</ul>
+</section>
+<section class="subsection" id="sys">
+<h3><code>sys</code></h3>
+<ul>
+<li><code>sys "ls -al"</code> runs <code>ls -al</code> command.</li>
+<li><code>sys</code> raises error when command failed.</li>
+<li><code>sys!</code> ignores error even when command failed.</li>
+<li><code>sys</code> and <code>sys!</code> return <code>Process::Status</code> object regardless of command result.</li>
+<li><code>sys</code> and <code>sys!</code> can take a block argument as error handler called only when command failed.
+  If result of block argument is truthy, error will not be raised.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## run ``ls`` command
+<strong>sys</strong> "ls foo.txt"     # may raise error when command failed
+<strong>sys!</strong> "ls foo.txt"    # ignore error even when command filed
+
+## error handling
+<strong>sys</strong> "ls /fooobarr" <strong>do</strong> |stat|  # block called only when command failed
+  p stats.class       #=&gt; Process::Status
+  p stat.exitstatus   #=&gt; 1 (non-zero)
+  true                # suppress raising error
+end
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="ruby">
+<h3><code>ruby</code></h3>
+<ul>
+<li><code>ruby "...."</code> is almost same as <code>sys "ruby ...."</code>.</li>
+<li><code>RbConfig.ruby</code> is used as ruby command path.</li>
+<li><code>ruby</code> raises error when ruby command failed.</li>
+<li><code>ruby!</code> ignores error even when ruby command failed.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## run ruby command
+<strong>ruby</strong> "file1.rb"      # raise error when ruby command failed
+<strong>ruby!</strong> "file1.rb"     # ignore error even when ruby command filed
+</pre>
+<p>Options:</p>
+<ul>
+<li>(no options)</li>
+</ul>
+</section>
+<section class="subsection" id="capture2">
+<h3><code>capture2</code></h3>
+<ul>
+<li><code>capture2 "ls -al"</code> runs <code>ls -al</code> and returns output of the command.</li>
+<li><code>capture2 "cat -n", stdin_data: "A\nB\n"</code> run <code>cat -n</code> command and uses <code>"A\nB\n"</code> as stdin data.</li>
+<li><code>caputre2 "ls foo"</code> will raise error when command failed.</li>
+<li><code>caputre2! "ls foo"</code> ignores error even when command failed, and returns command output and process status object.</li>
+<li><code>capture2()</code> invokes <code>Popen3.capture2()</code> internally. All keyword arguments are available.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## run command and get output of the command.
+output = <strong>capture2</strong> "ls -l foo.txt"                   # error if command failed
+output, process_status = <strong>capture2!</strong> "ls -l foot.xt"  # ignore error even command failed
+puts process_status.exitstatus      #=&gt; 1
+
+## run command with stdin data.
+input = "AA\nBB\nCC\n"
+output = <strong>capture2</strong> "cat -n", <strong>stdin_data: input</strong>
+</pre>
+<p>Options:</p>
+<ul>
+<li>see <a href="https://docs.ruby-lang.org/en/master/Open3.html#method-c-capture2">``Popen3.capture2()`` manual page</a>.</li>
+</ul>
+</section>
+<section class="subsection" id="capture2e">
+<h3><code>capture2e</code></h3>
+<ul>
+<li>almost same as <code>capture2</code>, but output contains both stdout and stderr.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## run command and get output of the command, including stderr.
+output = <strong>capture2e</strong> "time ls -al"
+output, process_status = <strong>capture2e!</strong> "time ls -al"  # ignore error even command failed
+puts process_status.exitstatus
+</pre>
+<p>Options:</p>
+<ul>
+<li>see <a href="https://docs.ruby-lang.org/en/master/Open3.html#method-c-capture2e">``Popen3.capture2e()`` manual page</a>.</li>
+</ul>
+</section>
+<section class="subsection" id="capture3">
+<h3><code>capture3</code></h3>
+<ul>
+<li>almost same as <code>capture2</code>, but returns both stdout output and stderr output.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## run command and get output of both stdout and stderr separately
+output, error = <strong>capture3</strong> "time ls -al"
+output, error, process_status = <strong>capture3!</strong> "time ls -al"  # ignore error even command failed
+puts process_status.exitstatus
+
+## run command with stdin data.
+input = "AA\nBB\nCC\n"
+output, error = <strong>capture3</strong> "cat -n", <strong>stdin_data: input</strong>
+</pre>
+<p>Options:</p>
+<ul>
+<li>see <a href="https://docs.ruby-lang.org/en/master/Open3.html#method-c-capture3">``Popen3.capture3()`` manual page</a>.</li>
+</ul>
+</section>
+<section class="subsection" id="zip">
+<h3><code>zip</code></h3>
+<ul>
+<li><code>zip "foo.zip", "file1", "file2"</code> creates new zip file <code>foo.zip</code>.</li>
+<li><code>zip :r, "foo.zip", "dir1"</code> adds files under <code>dir1</code> into zip file recursively.</li>
+<li><code>zip</code> will be error if zip file already exists.</li>
+<li><code>zip!</code> will overwrite existing zip file.</li>
+<li><code>zip :'0'</code> doesn't compress files.</li>
+<li><code>zip :'1'</code> compress files in best speed.</li>
+<li><code>zip :'9'</code> compress files in best compression level.</li>
+<li><code>zip</code> and <code>zip!</code> loads <code>rubyzip</code> gem automatically. You must install it by yourself.</li>
+<li>(<code>rubyzip</code> gem is necessary ONLY when <code>zip</code> or <code>zip!</code> command is invoked.)</li>
+<li><code>zip</code> and <code>zip!</code> doesn't support absolute path.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## create zip file
+<strong>zip</strong> "foo.zip", "file*.txt"            # requires 'rubyzip' gem
+
+## create zip file, adding files under directory
+<strong>zip :r</strong>, "foo.zip", "dir1"
+
+## create high-compressed zip file
+<strong>zip :r9</strong>, "foo.zip", "dir1"
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>zip :r</code> -- adds files under directory into zip file recursively.</li>
+<li><code>zip :'0'</code> -- not compress files.</li>
+<li><code>zip :'1'</code> -- compress files in best speed.</li>
+<li><code>zip :'9'</code> -- compress files in best compression level.</li>
+</ul>
+</section>
+<section class="subsection" id="unzip">
+<h3><code>unzip</code></h3>
+<ul>
+<li><code>unzip "foo.zip"</code> extracts files in zip file into current directory.</li>
+<li><code>unzip :d, "dir1", "foo.zip"</code> extracts files under <code>dir1</code>.
+  Diretory <code>dir1</code> should not exist or should be empty.</li>
+<li><code>unzip "foo.zip"</code> will be error if extracting file already exists.</li>
+<li><code>unzip! "foo.zip"</code> will overwrite existing files.</li>
+<li><code>unzip "foo.txt", "file1", "file2"</code> extracts only <code>file1</code> and <code>file2</code>.</li>
+<li><code>zunip</code> and <code>unzip!</code> loads <code>rubyzip</code> gem automatically. You must install it by yourself.</li>
+<li>(<code>rubyzip</code> gem is necessary ONLY when <code>unzip</code> or <code>unzip!</code> command is invoked.)</li>
+<li><code>unzip</code> and <code>unzip!</code> doesn't support absolute path.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## extracts zip file
+<strong>unzip</strong> "foo.zip"                # requires 'rubyzip' gem
+
+## extracts files in zip file into the directory.
+<strong>unzip :d</strong>, "dir1", "foo.zip"    # 'dir1' should be empty, or should not exist
+
+## overwrites existing files.
+<strong>unzip!</strong> "foo.zip"
+</pre>
+<p>Options:</p>
+<ul>
+<li><code>unzip :d, "dir1"</code> -- extracts files into the directory.</li>
+</ul>
+</section>
+<section class="subsection" id="time">
+<h3><code>time</code></h3>
+<ul>
+<li><code>time do ... end</code> invokes block and prints elapsed time into stderr.</li>
+</ul>
+<p>File: ex-time1.rb</p>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+<strong>time do</strong>
+  sys "zip -qr9 dir1.zip dir1"
+end
+</pre>
+<p>Result:</p>
+<pre class="language-termianl">
+[localhost]$ ruby ex-time1.rb
+$ zip -qr9 dir1.zip dir1
+
+        1.511s real       1.501s user       0.006s sys
+</pre>
+</section>
+</section>
+<section class="section" id="faq">
+<h2>FAQ</h2>
+<section class="subsection" id="why-mv-or-cp-requires-to-option">
+<h3>Why <code>mv</code> or <code>cp</code> requires <code>to:</code> option?</h3>
+<p>Because UNIX command has bad interface which causes unexpected result.</p>
+<p>For example, <code>mv</code> command of UNIX has two function: <strong>rename</strong> and <strong>move</strong>.</p>
+<ul>
+<li>rename: <code>mv foo bar</code> (if <code>bar</code> is a file or not exist)</li>
+<li>move: <code>mv foo bar</code> (if directory <code>bar</code> already exists)</li>
+</ul>
+<p>Obviously, rename function and move function are same form.
+This causes unexpected result easily due to, for example, typo.</p>
+<pre class="language-terminal">
+### Assume that you want rename 'foo' file to 'bar'.
+### But if 'bar' exists as directory, mv command moves 'foo' into 'bar'.
+### In this case, mv command should be error.
+$ <strong>mv foo bar</strong>
+</pre>
+<p>To avoid this unexpected result, <code>mv()</code> command of Benry::UnixCommand handles two functions in different forms.</p>
+<ul>
+<li>rename: <code>mv "foo", "bar"</code> (error if directory <code>bar</code> exists)</li>
+<li>move: <code>mv "foo", to: "bar"</code> (error if 'bar' is a file or not exist)</li>
+</ul>
+<p>In the same reason, <code>cp()</code> and <code>ln()</code> of Benry::UnixCommand also requires <code>to:</code> option.</p>
+</section>
+<section class="subsection" id="how-to-use-in-rakefile">
+<h3>How to use in Rakefile?</h3>
+<p>File: Rakefile</p>
+<pre class="language-ruby">
+<strong>require 'benry/unixcommand'</strong>     # !!!!!
+<strong>include Benry::UnixCommand</strong>      # !!!!!
+<strong>Rake::DSL.prepend Benry::UnixCommand</strong>  # !!!!!
+
+task :example do
+  ## invoke commands defined in Benry::UnixCommand, not in Rake nor fileutils.rb
+  <strong>mkdir :p</strong>, "foo/bar/baz"
+  here = Dir.pwd()
+  <strong>pushd</strong> "foo/bar/baz" do
+    output = <strong>capture2</strong> "pwd"
+    puts output.sub(here+"/", "")
+  end
+end
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ <strong>rake example</strong>
+$ mkdir -p foo/bar/baz
+$ pushd foo/bar/baz
+$  pwd
+foo/bar/baz
+$ popd    # back to /home/yourname
+</pre>
+</section>
+<section class="subsection" id="how-to-change-prompt-string">
+<h3>How to change prompt string?</h3>
+<p>File: ex-prompt1.rb</p>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+<strong>def prompt()</strong>                  # !!!!!
+  <strong>"myname@localhost&gt;"</strong>         # !!!!!
+<strong>end</strong>                           # !!!!!
+
+sys "date"
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+[localhost]$ ruby ex-prompt1.rb
+myname@localhost&gt; date
+Wed Jan 15 20:23:07 UTC 2021
+</pre>
+</section>
+<section class="subsection" id="how-to-make-prompt-colored">
+<h3>How to make prompt colored?</h3>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+def prompt()
+  s = "myname@localhost&gt;"
+  <strong>"\e[0;31m#{s}\e[0m"</strong>    # red
+  #"\e[0;32m#{s}\e[0m"    # green
+  #"\e[0;33m#{s}\e[0m"    # yellow
+  #"\e[0;34m#{s}\e[0m"    # blue
+  #"\e[0;35m#{s}\e[0m"    # magenta
+  #"\e[0;36m#{s}\e[0m"    # cyan
+  #"\e[0;37m#{s}\e[0m"    # white
+end
+
+sys "date"
+</pre>
+</section>
+<section class="subsection" id="how-to-disable-command-echoback">
+<h3>How to disable command echoback?</h3>
+<p>File: ex-quiet1.rb</p>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+<strong>BENRY_ECHOBACK = false</strong>            # !!!!!
+
+sys "date"
+</pre>
+<p>Result:</p>
+<pre class="language-terminal">
+$ ruby ex-quiet1.rb
+Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
+</pre>
+</section>
+</section>
+<section class="section" id="license-and-copyright">
+<h2>License and Copyright</h2>
+<p>$License: MIT License $</p>
+<p>$Copyright: copyright(c) 2021 kwatch@gmail.com $</p>
+</section>
+</section>
+</main>
+</body>
+</html>
