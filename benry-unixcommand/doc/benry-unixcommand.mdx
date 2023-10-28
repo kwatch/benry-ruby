@@ -623,7 +623,7 @@ end
 
 Options:
 
-* (no options)
+* ``sys :q`` -- quiet mode (suppress echoback of command).
 
 
 
@@ -913,7 +913,7 @@ require 'benry/unixcommand'
 include Benry::UnixCommand
 
 {{*def prompt()*}}                  # !!!!!
-  {{*"myname@localhost>"*}}         # !!!!!
+  {{*"myname@localhost> "*}}        # !!!!!
 {{*end*}}                           # !!!!!
 
 sys "date"
@@ -941,13 +941,15 @@ include Benry::UnixCommand
 
 def prompt()
   s = "myname@localhost>"
-  {{*"\e[0;31m#{s}\e[0m"*}}    # red
-  #"\e[0;32m#{s}\e[0m"    # green
-  #"\e[0;33m#{s}\e[0m"    # yellow
-  #"\e[0;34m#{s}\e[0m"    # blue
-  #"\e[0;35m#{s}\e[0m"    # magenta
-  #"\e[0;36m#{s}\e[0m"    # cyan
-  #"\e[0;37m#{s}\e[0m"    # white
+  {{*"\e[31m#{s}\e[0m "*}}    # red
+  #"\e[32m#{s}\e[0m "    # green
+  #"\e[33m#{s}\e[0m "    # yellow
+  #"\e[34m#{s}\e[0m "    # blue
+  #"\e[35m#{s}\e[0m "    # magenta
+  #"\e[36m#{s}\e[0m "    # cyan
+  #"\e[37m#{s}\e[0m "    # white
+  #"\e[1m#{s}\e[0m "     # bold
+  #"\e[2m#{s}\e[0m "     # gray
 end
 
 sys "date"
