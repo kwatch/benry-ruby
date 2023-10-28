@@ -2635,6 +2635,20 @@ exit app.main()
 ```
 
 
+=== How To Remove Common Help Option from All Actions?
+
+A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.
+
+File: ex52.rb
+
+```ruby
+require 'benry/cmdapp'
+
+arr = {{*Benry::CmdApp::ACTION_SHARED_OPTIONS*}}
+arr.clear()
+```
+
+
 === Q: How to Make Error Messages I18Ned?
 
 A: Currently not supported. May be supported in the future release.

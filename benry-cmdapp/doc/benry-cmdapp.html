@@ -94,6 +94,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-change-order-of-options-in-help-message">Q: How to Change Order of Options in Help Message?</a></li>
 <li><a href="#q-is-it-possible-to-make-action-names-emphasised-or-weaken">Q: Is It Possible to Make Action Names Emphasised or Weaken?</a></li>
 <li><a href="#q-is-it-possible-to-add-metadata-to-action-or-option">Q: Is It Possible to Add Metadata to Action or Option?</a></li>
+<li><a href="#how-to-remove-common-help-option-from-all-actions">How To Remove Common Help Option from All Actions?</a></li>
 <li><a href="#q-how-to-make-error-messages-i18ned">Q: How to Make Error Messages I18Ned?</a></li>
 </ul></li>
 <li><a href="#license-and-copyright">License and Copyright</a></li>
@@ -2451,6 +2452,17 @@ end
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
+</pre>
+</section>
+<section class="subsection" id="how-to-remove-common-help-option-from-all-actions">
+<h3>How To Remove Common Help Option from All Actions?</h3>
+<p>A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.</p>
+<p>File: ex52.rb</p>
+<pre class="language-ruby">
+require 'benry/cmdapp'
+
+arr = <strong>Benry::CmdApp::ACTION_SHARED_OPTIONS</strong>
+arr.clear()
 </pre>
 </section>
 <section class="subsection" id="q-how-to-make-error-messages-i18ned">
