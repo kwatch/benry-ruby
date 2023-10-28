@@ -7,7 +7,7 @@ require 'oktest'
 require 'stringio'
 require 'etc'
 
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 require 'fileutils'
 
 
