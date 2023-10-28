@@ -326,6 +326,7 @@ module Benry::CmdOpt
     end
 
     attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :detail, :value, :tag, :callback
+    attr_writer :desc, :detail, :hidden, :important, :tag    # !!experimental!!
     alias pattern rexp   # for backward compatibility
     alias help desc      # for backward compatibility
 
