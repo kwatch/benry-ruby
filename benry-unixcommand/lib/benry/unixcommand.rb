@@ -80,7 +80,13 @@ module Benry
       #; [!rqe7a] echoback command and arguments when `:p` not specified.
       #; [!ptipz] not echoback command and arguments when `:p` specified.
       echoback(args.join(" ")) if ! quiet_p && __echoback?()
-      result = system(*args)
+      #; [!dccme] accepts one string, one array, or multiple strings.
+      #; [!r9ne3] shell is not invoked if arg is one array or multiple string.
+      if args[0].is_a?(Array)
+        result = system(*args[0])
+      else
+        result = system(*args)
+      end
       #; [!agntr] returns process status if command succeeded.
       #; [!clfig] yields block if command failed.
       #; [!deu3e] not yield block if command succeeded.

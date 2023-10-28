@@ -108,6 +108,30 @@ Oktest.scope do
         end
         ok {sout} == ""
       end
+      spec "[!dccme] accepts one string, one array, or multiple strings." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys :q, "echo", "AA", "BB", "CC"' > #{tmpf}|
+        ok {File.read(tmpf)} == "AA BB CC\n"
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys :q, ["echo", "AA", "BB", "CC"]' > #{tmpf}|
+        ok {File.read(tmpf)} == "AA BB CC\n"
+      end
+      spec "[!r9ne3] shell is not invoked if arg is one array or multiple string." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys :q, "echo", "ABC", "*", ">"' > #{tmpf}|
+        ok {File.read(tmpf)} == "ABC * >\n"
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys :q, ["echo", "ABC", "*", ">"]' > #{tmpf}|
+        ok {File.read(tmpf)} == "ABC * >\n"
+      end
       spec "[!agntr] returns process status if command succeeded." do
         sout, serr = capture_sio do
           ret = sys "echo foo bar >/dev/null"
