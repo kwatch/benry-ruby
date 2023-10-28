@@ -2,6 +2,13 @@ CHANGES
 =======
 
 
+Release 2.2.0 (2023-10-28)
+--------------------------
+
+* [enhance] Define `SchemaItem#add_item()` which adds option item into the schema. This is for Benry-CmdApp framework.
+* [change] (EXPERIMENTAL) Make `desc`, `detail`, `hidden`, `important`, `tag` attrubtes of `SchemaItem` object to be writable. This is for Benry-CmdApp framework.
+
+
 Release 2.1.0 (2023-10-15)
 --------------------------
 
