@@ -96,6 +96,31 @@ Oktest.scope do
     end
 
 
+    topic '#teardown()' do
+
+      before do
+        @scope = MyAction.new(@config, @context)
+        @result = []
+        @scope.at_end { @result << "A" }
+        @scope.at_end { @result << "B" }
+        @scope.at_end { @result << "C" }
+      end
+
+      spec "[!4df2f] invokes end blocks in reverse order of registration." do
+        ok {@result} == []
+        @context.__send__(:teardown)
+        ok {@result} == ["C", "B", "A"]
+      end
+
+      spec "[!vskre] end block list should be cleared." do
+        ok {@context.instance_variable_get(:@end_blocks)}.length(3)
+        @context.__send__(:teardown)
+        ok {@context.instance_variable_get(:@end_blocks)}.length(0)
+      end
+
+    end
+
+
     topic '#start_action()' do
 
       spec "[!2mnh7] looks up action metadata with action or alias name." do
@@ -169,11 +194,11 @@ Oktest.scope do
         @context.instance_eval { @status_dict[:x] = :done }
         ok {@context.instance_eval { @status_dict } }.NOT.empty?
         r = recorder()
-        r.record_method(@context, :__clear)
+        r.record_method(@context, :teardown)
         sout, serr = capture_sio do
           @context.start_action("hello", ["-lit", "Alice"])
         end
-        ok {r[0].name} == :__clear
+        ok {r[0].name} == :teardown
         ok {r[0].args} == []
         ok {@context.instance_eval { @status_dict } }.empty?
       end

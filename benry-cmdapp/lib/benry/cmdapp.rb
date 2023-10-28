@@ -578,6 +578,12 @@ module Benry::CmdApp
       return ctx.invoke_action(action_name, args, kwargs, once: false)
     end
 
+    def at_end(&block)
+      #; [!3mqcz] registers proc object to context object.
+      @__context__._add_end_block(block)
+      nil
+    end
+
   end
 
 
@@ -681,14 +687,29 @@ module Benry::CmdApp
       #@scope_objects = {}     # {action_name => ActionScope}
       @status_dict   = {}      # {action_name => (:done|:doing)}
       @curr_action   = nil     # ActionMetadata
+      @end_blocks    = []      # [Proc]
     end
 
-    def __clear()  # :nodoc:
+    def _add_end_block(block)  # :nodoc:
+      @end_blocks << block
+      nil
+    end
+
+    private
+
+    def teardown()  # :nodoc:
+      #; [!4df2f] invokes end blocks in reverse order of registration.
+      #; [!vskre] end block list should be cleared.
+      while ! @end_blocks.empty?
+        block = @end_blocks.pop()
+        block.call()
+      end
       #@scope_objects.each {|_, scope| scope.__clear_recursive_reference() }
       #@scope_objects.clear()
       @status_dict.clear()
     end
-    private :__clear
+
+    public
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
       #; [!2mnh7] looks up action metadata with action or alias name.
@@ -706,7 +727,7 @@ module Benry::CmdApp
       return nil
     ensure
       #; [!jcguj] clears instance variables.
-      __clear()
+      teardown()
     end
 
     def invoke_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()

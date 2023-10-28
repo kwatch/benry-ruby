@@ -772,6 +772,20 @@ END
     end
 
 
+    topic '#at_end()' do
+
+      spec "[!3mqcz] registers proc object to context object." do
+        context = Benry::CmdApp::ApplicationContext.new(@config)
+        scope = MyAction.new(@config, context)
+        ok {context.instance_variable_get(:@end_blocks)}.length(0)
+        scope.at_end { puts "A" }
+        scope.at_end { puts "B" }
+        ok {context.instance_variable_get(:@end_blocks)}.length(2)
+        ok {context.instance_variable_get(:@end_blocks)}.all? {|x| x.is_a?(Proc) }
+      end
+    end
+
+
   end
 
 
