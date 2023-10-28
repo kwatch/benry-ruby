@@ -67,11 +67,11 @@ module Benry
 
 
     def sys(*args, &b)
-      __sys('sh', args, false, &b)
+      __sys('sys', args, false, &b)
     end
 
     def sys!(*args, &b)
-      __sys('sh!', args, true, &b)
+      __sys('sys!', args, true, &b)
     end
 
     def __sys(cmd, args, ignore_error, &b)
