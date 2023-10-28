@@ -67,16 +67,19 @@ module Benry
 
 
     def sys(*args, &b)
-      __sys('sh', args, false, &b)
+      __sys('sys', args, false, &b)
     end
 
     def sys!(*args, &b)
-      __sys('sh!', args, true, &b)
+      __sys('sys!', args, true, &b)
     end
 
     def __sys(cmd, args, ignore_error, &b)
-      #; [!rqe7a] echoback command and arguments.
-      echoback(args.join(" ")) if __echoback?()
+      optchars = __prepare(cmd, args, "q", nil) { nil }
+      quiet_p  = optchars.include?("q")
+      #; [!rqe7a] echoback command and arguments when `:p` not specified.
+      #; [!ptipz] not echoback command and arguments when `:p` specified.
+      echoback(args.join(" ")) if ! quiet_p && __echoback?()
       result = system(*args)
       #; [!agntr] returns process status if command succeeded.
       #; [!clfig] yields block if command failed.
@@ -232,12 +235,14 @@ module Benry
       #
       if block_given?()
         yield optchars, args, to
-      else
+      elsif __echoback?()
         buf = [cmd]
         buf << "-#{optchars}" unless optchars.empty?
         buf.concat(args)
         buf << to if to
-        echoback(buf.join(" ")) if __echoback?()
+        echoback(buf.join(" "))
+      else
+        nil
       end
       #
       __err errmsg if errmsg
