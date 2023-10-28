@@ -232,12 +232,14 @@ module Benry
       #
       if block_given?()
         yield optchars, args, to
-      else
+      elsif __echoback?()
         buf = [cmd]
         buf << "-#{optchars}" unless optchars.empty?
         buf.concat(args)
         buf << to if to
-        echoback(buf.join(" ")) if __echoback?()
+        echoback(buf.join(" "))
+      else
+        nil
       end
       #
       __err errmsg if errmsg
