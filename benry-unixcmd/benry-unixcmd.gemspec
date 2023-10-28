@@ -7,12 +7,14 @@ Gem::Specification.new do |spec|
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
   spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-unixcmd.html"
-  spec.summary         = "Unix commands implementation like 'fileutils.rb'"
-  spec.description     = <<-"END"
-Unix commnads implementation. Similar to `fileutils.rb`, but better than it.
-
-See #{spec.homepage} for details.
-END
+  #spec.summary         = "Unix commands implementation like 'fileutils.rb'"
+  spec.summary         = "(OBSOLETE; use 'benry-unixcommand' gem instead.)"
+#  spec.description     = <<-"END"
+#Unix commnads implementation. Similar to `fileutils.rb`, but better than it.
+#
+#See #{spec.homepage} for details.
+#END
+  spec.description     = spec.summary
   spec.license         = "MIT"
   spec.files           = Dir[
                            "README.md", "MIT-LICENSE", "CHANGES.md",
