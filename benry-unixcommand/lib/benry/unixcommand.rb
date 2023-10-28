@@ -82,10 +82,15 @@ module Benry
       echoback(args.join(" ")) if ! quiet_p && __echoback?()
       #; [!dccme] accepts one string, one array, or multiple strings.
       #; [!r9ne3] shell is not invoked if arg is one array or multiple string.
+      #; [!w6ol7] globbing is enabled when arg is multiple string.
+      #; [!ifgkd] globbing is disabled when arg is one array.
       if args[0].is_a?(Array)
-        result = system(*args[0])
+        result = system(*args[0])           # shell: no, glob: no
+      elsif args.length == 1
+        result = system(args[0])            # shell: yes (if necessary)
       else
-        result = system(*args)
+        args2 = glob_if_possible(*args)     # glob: yes
+        result = system(*args2)             # shell: no
       end
       #; [!agntr] returns process status if command succeeded.
       #; [!clfig] yields block if command failed.
@@ -102,6 +107,21 @@ module Benry
       end
       return stat if ignore_error
       raise "Command failed with status (#{$?.exitstatus}): #{args.join(' ')}"
+    end
+
+    def glob_if_possible(*strs)
+      #; [!xvr32] expands file pattern matching.
+      #; [!z38re] if pattern not matched to any files, just returns pattern as is.
+      arr = []
+      strs.each do |s|
+        globbed = Dir.glob(s)
+        if globbed.empty?
+          arr << s
+        else
+          arr.concat(globbed)
+        end
+      end
+      return arr
     end
 
 

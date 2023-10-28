@@ -126,11 +126,35 @@ Oktest.scope do
         ruby = "ruby -r ../lib/benry/unixcommand.rb"
         setup = "include Benry::UnixCommand"
         ## multiple string
-        system %Q|#{ruby} -e '#{setup}; sys :q, "echo", "ABC", "*", ">"' > #{tmpf}|
-        ok {File.read(tmpf)} == "ABC * >\n"
+        system %Q|#{ruby} -e '#{setup}; sys :q, "echo", "ABC", "<", ">"' > #{tmpf}|
+        ok {File.read(tmpf)} == "ABC < >\n"
         ## one array
         system %Q|#{ruby} -e '#{setup}; sys :q, ["echo", "ABC", "*", ">"]' > #{tmpf}|
         ok {File.read(tmpf)} == "ABC * >\n"
+      end
+      spec "[!w6ol7] globbing is enabled when arg is multiple string." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys "echo", "**/*.txt"' > #{tmpf}|
+        ok {File.read(tmpf)} == (
+          "$ echo **/*.txt\n"\
+          "d1/bar.txt d1/d2/baz.txt foo1.txt foo2.txt\n"
+        )
+      end
+      spec "[!ifgkd] globbing is disabled when arg is one array." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys ["echo", "**/*.txt"]' > #{tmpf}|
+        ok {File.read(tmpf)} == (
+          "$ echo **/*.txt\n"\
+          "**/*.txt\n"
+        )
       end
       spec "[!agntr] returns process status if command succeeded." do
         sout, serr = capture_sio do
@@ -196,6 +220,17 @@ Oktest.scope do
       end
     end
 
+    topic 'glob_if_possible()' do
+      spec "[!xvr32] expands file pattern matching." do
+        ok {glob_if_possible("*.txt")} == ["foo1.txt", "foo2.txt"]
+        ok {glob_if_possible("**/*.txt")} == ["d1/bar.txt", "d1/d2/baz.txt", "foo1.txt", "foo2.txt"]
+        ok {glob_if_possible("foo?.*", "**/bar.*")} == ["foo1.txt", "foo2.txt", "d1/bar.txt"]
+      end
+      spec "[!z38re] if pattern not matched to any files, just returns pattern as is." do
+        ok {glob_if_possible("blabla*", "*.xhtml")} == ["blabla*", "*.xhtml"]
+        ok {glob_if_possible("*.css", "*.txt")} == ["*.css", "foo1.txt", "foo2.txt"]
+      end
+    end
 
     topic 'ruby()' do
       spec "[!98qro] echoback command and args." do
