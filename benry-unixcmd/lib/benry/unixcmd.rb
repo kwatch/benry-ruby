@@ -29,12 +29,12 @@ module Benry
 
     def prompt()
       #; [!uilyk] returns prompt string.
-      return "$"
+      return "$ "
     end
 
     def prompt!(depth)
       #; [!q992e] adds indentation after prompt.
-      return prompt() + ' ' * (depth+1)
+      return prompt() + ' ' * depth
     end
 
     def echoback(cmd)

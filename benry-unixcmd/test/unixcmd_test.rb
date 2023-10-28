@@ -59,7 +59,7 @@ Oktest.scope do
 
     topic 'prompt()' do
       spec "[!uilyk] returns prompt string." do
-        ok {prompt()}  == "$"
+        ok {prompt()}  == "$ "
       end
     end
 
