@@ -75,8 +75,11 @@ module Benry
     end
 
     def __sys(cmd, args, ignore_error, &b)
-      #; [!rqe7a] echoback command and arguments.
-      echoback(args.join(" ")) if __echoback?()
+      optchars = __prepare(cmd, args, "q", nil) { nil }
+      quiet_p  = optchars.include?("q")
+      #; [!rqe7a] echoback command and arguments when `:p` not specified.
+      #; [!ptipz] not echoback command and arguments when `:p` specified.
+      echoback(args.join(" ")) if ! quiet_p && __echoback?()
       result = system(*args)
       #; [!agntr] returns process status if command succeeded.
       #; [!clfig] yields block if command failed.

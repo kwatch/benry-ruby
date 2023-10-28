@@ -96,11 +96,17 @@ Oktest.scope do
 
 
     topic 'sys()' do
-      spec "[!rqe7a] echoback command and arguments." do
+      spec "[!rqe7a] echoback command and arguments when `:p` not specified." do
         sout, serr = capture_sio do
           sys "echo foo bar >/dev/null"
         end
         ok {sout} == "$ echo foo bar >/dev/null\n"
+      end
+      spec "[!ptipz] not echoback command and arguments when `:p` specified." do
+        sout, serr = capture_sio do
+          sys :q, "echo foo bar >/dev/null"
+        end
+        ok {sout} == ""
       end
       spec "[!agntr] returns process status if command succeeded." do
         sout, serr = capture_sio do
