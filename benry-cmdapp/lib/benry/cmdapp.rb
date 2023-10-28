@@ -185,10 +185,10 @@ module Benry::CmdApp
 
   ACTION_OPTION_SCHEMA_CLASS = ActionOptionSchema
   ACTION_OPTION_PARSER_CLASS = OptionParser
-  ACTION_OPTION_HELP_ITEM    = proc {|dummy_schema|
-    dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)
-    #dummy_schema.get(:help).freeze()
-    dummy_schema.get(:help)
+  ACTION_SHARED_OPTIONS      = proc {|dummy_schema|
+    arr = []
+    arr << dummy_schema.add(:help, "-h, --help", "print help message", hidden: true)#.freeze
+    arr
   }.call(OptionSchema.new)
 
 
@@ -432,8 +432,7 @@ module Benry::CmdApp
       #; [!zuxmj] creates new option schema object.
       schema = ACTION_OPTION_SCHEMA_CLASS.new()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
-      #schema.add(:help, "-h, --help", "print help message", hidden: true)  # dedicaded object
-      schema.add_item(ACTION_OPTION_HELP_ITEM)    # shared object
+      ACTION_SHARED_OPTIONS.each {|item| schema.add_item(item) }
       return schema
     end
 
