@@ -170,7 +170,7 @@ module Benry::CmdApp
 
     def parse(args, all: true)
       #; [!iaawe] raises OptionError if option error found.
-      super(args, all: all)
+      return super
     rescue Benry::CmdOpt::OptionError => exc
       raise OptionError.new(exc.message)
     end
