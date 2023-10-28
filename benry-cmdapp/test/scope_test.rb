@@ -242,6 +242,15 @@ END
         ok {x}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
       end
 
+      spec "[!rruxi] adds '-h, --help' option as hidden automatically." do
+        schema = Benry::CmdApp::ActionScope.new_option_schema()
+        item = schema.get(:help)
+        ok {item} != nil
+        ok {item.key} == :help
+        ok {item.optdef} == "-h, --help"
+        ok {item}.hidden?
+      end
+
     end
 
 

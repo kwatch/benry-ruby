@@ -170,8 +170,6 @@ module Benry::CmdApp
     end
 
     def setup()
-      #; [!rruxi] adds '-h, --help' option as hidden automatically.
-      @items << ACTION_OPTION_HELP_ITEM
     end
 
   end
@@ -436,7 +434,11 @@ module Benry::CmdApp
 
     def self.new_option_schema()
       #; [!zuxmj] creates new option schema object.
-      return ACTION_OPTION_SCHEMA_CLASS.new()
+      schema = ACTION_OPTION_SCHEMA_CLASS.new()
+      #; [!rruxi] adds '-h, --help' option as hidden automatically.
+      #schema.add(:help, "-h, --help", "print help message", hidden: true)  # dedicaded object
+      schema.instance_eval { @items << ACTION_OPTION_HELP_ITEM }            # shared object
+      return schema
     end
 
     def self.method_added(method_symbol)

@@ -159,7 +159,6 @@ END
       spec "[!4z70n] includes hidden options when `all: true` passed." do
         x = @builder.__send__(:build_option_help, @schema, @format, all: true)
         ok {x} == <<"END"
-\e[2m  -h, --help         : print help message\e[0m
   -s, --silent       : silent mode
   -f <file>          : filename
 \e[2m      --debug        : debug mode\e[0m
