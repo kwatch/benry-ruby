@@ -398,7 +398,7 @@ module Benry::CmdApp
           #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
           @__actiondef__ == nil  or
             raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
-          schema = nil
+          schema = new_option_schema()
           #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
           kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
@@ -412,7 +412,7 @@ module Benry::CmdApp
           @__actiondef__ != nil  or
             raise DefinitionError.new("`@option.()` called without `@action.()`.")
           #; [!2p98r] `@option.()` stores arguments into option schema object.
-          schema = (@__actiondef__[1] ||= new_option_schema())
+          schema = @__actiondef__[1]
           schema.add(key, optstr, desc,
                      type: type, rexp: rexp, pattern: pattern, enum: enum,
                      range: range, value: value, detail: detail,
@@ -428,7 +428,7 @@ module Benry::CmdApp
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Called without `@action.()`.")
           #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
           #; [!dezh1] `@copy_options.()` ignores help option automatically.
-          schema = (@__actiondef__[1] ||= new_option_schema())
+          schema = @__actiondef__[1]
           except = except.is_a?(Array) ? except : (exept == nil ? [] : [except])
           schema.copy_from(metadata.schema, except: [:help] + except)
         end

@@ -87,7 +87,10 @@ Oktest.scope do
           def dummy2321()
           end
         end
-        ok {x} == ["test", nil, {:usage=>nil, :detail=>nil, :postamble=>nil, :tag=>nil, :important=>nil, :hidden=>nil}]
+        ok {x}.is_a?(Array).length(3)
+        ok {x[0]} == "test"
+        ok {x[1]}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
+        ok {x[2]} == {:usage=>nil, :detail=>nil, :postamble=>nil, :tag=>nil, :important=>nil, :hidden=>nil}
       end
 
       spec "[!en6n0] sets Proc object ot `@option` in subclass." do
@@ -204,8 +207,8 @@ END
           x2 = @__actiondef__[1]
           @__actiondef__ = nil
         end
-        ok {x1} == nil
-        ok {x2} != nil
+        ok {x1} != nil
+        ok {x2}.same?(x1)
         ok {x2}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
         ok {x2.to_s()} == <<"END"
   -l, --lang=<lang>    : language name (en/fr/it)
