@@ -15,8 +15,8 @@
 </head>
 <body>
 <main>
-<section class="chapter" id="benry-unixcmd">
-<h1>Benry-UnixCmd</h1>
+<section class="chapter" id="benry-unixcommand">
+<h1>Benry-UnixCommand</h1>
 <nav class="nav">
   <ul class="nav">
   </ul>
@@ -24,12 +24,12 @@
 <p>($Release: 0.0.0 $)</p>
 <section class="section" id="whats-this">
 <h2>What's this?</h2>
-<p>Benry-UnixCmd implements popular UNIX commands, like FileUtils,
+<p>Benry-UnixCommand implements popular UNIX commands, like FileUtils,
 but much better than it.</p>
 <ul>
-<li>Document: <a href="https://kwatch.github.io/benry-ruby/benry-unixcmd.html">https://kwatch.github.io/benry-ruby/benry-unixcmd.html</a></li>
-<li>GitHub: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-unixcmd">https://github.com/kwatch/benry-ruby/tree/main/benry-unixcmd</a></li>
-<li>Changes: <a href="https://github.com/kwatch/benry-ruby/blob/main/benry-unixcmd/CHANGES.md">https://github.com/kwatch/benry-ruby/blob/main/benry-unixcmd/CHANGES.md</a></li>
+<li>Document: <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">https://kwatch.github.io/benry-ruby/benry-unixcommand.html</a></li>
+<li>GitHub: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-unixcommand">https://github.com/kwatch/benry-ruby/tree/main/benry-unixcommand</a></li>
+<li>Changes: <a href="https://github.com/kwatch/benry-ruby/blob/main/benry-unixcommand/CHANGES.md">https://github.com/kwatch/benry-ruby/blob/main/benry-unixcommand/CHANGES.md</a></li>
 </ul>
 <p>Features compared to FileUtils:</p>
 <ul>
@@ -45,7 +45,7 @@ but much better than it.</p>
 <li>provides <code>store</code> command which copies files recursively into target directory, keeping file path.</li>
 <li>provides <code>atomic_symlink!</code> command which switches symlink atomically.</li>
 </ul>
-<p>(Benry-UnixCmd requires Ruby &gt;= 2.3)</p>
+<p>(Benry-UnixCommand requires Ruby &gt;= 2.3)</p>
 <section class="subsection" id="table-of-contents">
 <h3>Table of Contents</h3>
 <div class="toc">
@@ -95,12 +95,12 @@ but much better than it.</p>
 <section class="section" id="install">
 <h2>Install</h2>
 <pre>
-$ gem install benry-unixcmd
+$ gem install benry-unixcommand
 </pre>
 <p>File: ex1.rb</p>
 <pre class="language-ruby">
-<strong>require 'benry/unixcmd'</strong>      # !!!!!
-<strong>include Benry::UnixCommand</strong>   # !!!!!
+<strong>require 'benry/unixcommand'</strong>      # !!!!!
+<strong>include Benry::UnixCommand</strong>       # !!!!!
 
 output = <strong>capture2</strong> "uname -srmp"   # run command and return output
 p output
@@ -118,7 +118,7 @@ $ uname -srmp
 <h3><code>echo</code></h3>
 <p>File: ex-echo1.rb</p>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 <strong>echo</strong> "aa", "bb", "cc"
@@ -148,7 +148,7 @@ bb
 </ul>
 <p>File: ex-echoback1.rb</p>
 <pre>
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 <strong>echoback</strong> "command 123"
@@ -183,7 +183,7 @@ $ cd -
 <li>If you want to copy files with keeping directory structure, use <code>store</code> instead of <code>cp</code>.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## copy file to newfile
@@ -216,7 +216,7 @@ include Benry::UnixCommand
 <li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## rename file
@@ -249,7 +249,7 @@ include Benry::UnixCommand
 <li>Glob patten such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## remove files
@@ -276,7 +276,7 @@ include Benry::UnixCommand
 <li><code>mkdir :m, 0775, "x"</code> creates new directory with permission 0775.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## creates new directory
@@ -301,7 +301,7 @@ include Benry::UnixCommand
 <li>Raises error when directory not empty.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## remove empty directory
@@ -323,7 +323,7 @@ include Benry::UnixCommand
 <li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## create hard link
@@ -346,7 +346,7 @@ include Benry::UnixCommand
 <li><code>atomic_symlink! "x", "y"</code> creates symbolic link atomically.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## create symbolic link atomically
@@ -369,7 +369,7 @@ File.rename(tmplink, "src")               # rename symlink atomically
 <li><code>touch :r, "reffile", "x"</code> uses timestamp of <code>reffile</code> instead current timestamp.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## updates timestamp of files to current timestamp.
@@ -393,7 +393,7 @@ include Benry::UnixCommand
 <li>Permission can be <code>0644</code> sytle, or <code>u+w</code> style.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## change permissions of files.
@@ -418,7 +418,7 @@ include Benry::UnixCommand
 <li><code>chown :R, "user:group", "dir"</code> changes owner and group recursively.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## change owner and/or group.
@@ -437,7 +437,7 @@ include Benry::UnixCommand
 <li><code>pwd()</code> prints current working directory path.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## prints current working directory
@@ -459,7 +459,7 @@ include Benry::UnixCommand
 </ul>
 <p>File: ex-cd1.rb</p>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## change directory, invoke block, and back to previous directory.
@@ -502,7 +502,7 @@ $ pwd
 </ul>
 <p>File: ex-pushd1.rb</p>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## change directory, invoke block, and back to previous directory.
@@ -547,7 +547,7 @@ $ pwd
 <li><code>store!</code> overwrites existing files while <code>store</code> doesn't.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## copies files into builddir, keeping file path
@@ -574,7 +574,7 @@ include Benry::UnixCommand
   If result of block argument is truthy, error will not be raised.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## run ``ls`` command
@@ -602,7 +602,7 @@ end
 <li><code>ruby!</code> ignores error even when ruby command failed.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## run ruby command
@@ -624,7 +624,7 @@ include Benry::UnixCommand
 <li><code>capture2()</code> invokes <code>Popen3.capture2()</code> internally. All keyword arguments are available.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## run command and get output of the command.
@@ -647,7 +647,7 @@ output = <strong>capture2</strong> "cat -n", <strong>stdin_data: input</strong>
 <li>almost same as <code>capture2</code>, but output contains both stdout and stderr.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## run command and get output of the command, including stderr.
@@ -666,7 +666,7 @@ puts process_status.exitstatus
 <li>almost same as <code>capture2</code>, but returns both stdout output and stderr output.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## run command and get output of both stdout and stderr separately
@@ -698,7 +698,7 @@ output, error = <strong>capture3</strong> "cat -n", <strong>stdin_data: input</s
 <li><code>zip</code> and <code>zip!</code> doesn't support absolute path.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## create zip file
@@ -732,7 +732,7 @@ include Benry::UnixCommand
 <li><code>unzip</code> and <code>unzip!</code> doesn't support absolute path.</li>
 </ul>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## extracts zip file
@@ -756,7 +756,7 @@ include Benry::UnixCommand
 </ul>
 <p>File: ex-time1.rb</p>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 <strong>time do</strong>
@@ -801,8 +801,8 @@ $ <strong>mv foo bar</strong>
 <h3>How to use in Rakefile?</h3>
 <p>File: Rakefile</p>
 <pre class="language-ruby">
-<strong>require 'benry/unixcmd'</strong>      # !!!!!
-<strong>include Benry::UnixCommand</strong>   # !!!!!
+<strong>require 'benry/unixcommand'</strong>     # !!!!!
+<strong>include Benry::UnixCommand</strong>      # !!!!!
 <strong>Rake::DSL.prepend Benry::UnixCommand</strong>  # !!!!!
 
 task :example do
@@ -829,7 +829,7 @@ $ popd    # back to /home/yourname
 <h3>How to change prompt string?</h3>
 <p>File: ex-prompt1.rb</p>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 <strong>def prompt()</strong>                  # !!!!!
@@ -848,7 +848,7 @@ Wed Jan 15 20:23:07 UTC 2021
 <section class="subsection" id="how-to-make-prompt-colored">
 <h3>How to make prompt colored?</h3>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 def prompt()
@@ -869,7 +869,7 @@ sys "date"
 <h3>How to disable command echoback?</h3>
 <p>File: ex-quiet1.rb</p>
 <pre class="language-ruby">
-require 'benry/unixcmd'
+require 'benry/unixcommand'
 include Benry::UnixCommand
 
 <strong>BENRY_ECHOBACK = false</strong>            # !!!!!
