@@ -256,6 +256,19 @@ Oktest.scope do
     end
 
 
+    topic '#add_item()' do
+
+      spec "[!a693h] adds option item into current schema." do
+        item = Benry::CmdOpt::SchemaItem.new(:quiet, "-q", "quiet", "q", nil, nil, false)
+        sc = Benry::CmdOpt::Schema.new
+        sc.add_item(item)
+        ok {sc.to_s} == <<"END"
+  -q       : quiet
+END
+      end
+
+    end
+
     topic '#option_help()' do
 
       before do

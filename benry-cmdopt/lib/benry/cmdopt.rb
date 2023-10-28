@@ -142,6 +142,12 @@ module Benry::CmdOpt
       item
     end
 
+    def add_item(item)
+      #; [!a693h] adds option item into current schema.
+      @items << item
+      self
+    end
+
     def option_help(width_or_format=nil, all: false)
       #; [!0aq0i] can take integer as width.
       #; [!pcsah] can take format string.
