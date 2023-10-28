@@ -42,20 +42,6 @@ Oktest.scope do
       FileUtils.rm_rf Dir.glob("tmpdir/*")
     end
 
-    def same_content?(file1, file2)
-      ok {File.read(file1)} == File.read(file2)
-    end
-
-    def capture
-      bkup = [$stdout, $stderr]
-      $stdout = sout = StringIO.new
-      $stderr = serr = StringIO.new
-      yield sout, serr
-      return sout.string, serr.string
-    ensure
-      $stdout, $stderr = bkup
-    end
-
 
     topic 'prompt()' do
       spec "[!uilyk] returns prompt string." do
