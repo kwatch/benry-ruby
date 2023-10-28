@@ -513,7 +513,7 @@ module Benry::CmdApp
     def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
       ! (action != nil && alias_of != nil)  or
-        raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias:` are exclusive.")
+        raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias_of:` are exclusive.")
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = self.__validate_prefix(prefix)
       errmsg == nil  or
@@ -531,12 +531,12 @@ module Benry::CmdApp
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
           if action
             @__prefixdef__[1] == nil  or
-              raise DefinitionError.new("prefx(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
+              raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
           end
           #; [!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined.
           if alias_of
             @__prefixdef__[2] == nil  or
-              raise DefinitionError.new("prefx(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
+              raise DefinitionError.new("prefix(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
           end
         ensure
           @__prefixdef__ = prev
@@ -670,7 +670,7 @@ module Benry::CmdApp
     def help(action=nil, all: false)
       #; [!2n99u] raises ActionError if current application is not nil.
       app = Benry::CmdApp.current_app()  or
-        raise ActionError.new("'help' aciton is available only when invoked from application.")
+        raise ActionError.new("'help' action is available only when invoked from application.")
       #; [!g0n06] prints application help message if action name not specified.
       #; [!epj74] prints action help message if action name specified.
       print app.render_help_message(action, all: all)

@@ -582,7 +582,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|prefix("p7549:", action: "s0573", alias_of: s0573): `action:` and `alias:` are exclusive.|)
+                       %q|prefix("p7549:", action: "s0573", alias_of: s0573): `action:` and `alias_of:` are exclusive.|)
       end
 
       spec "[!mp1p5] raises DefinitionError if prefix is invalid." do
@@ -654,7 +654,7 @@ END
             end
           end
           ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                         %q|prefx("p4929:", action: "s7832"): Target action not defined.|)
+                         %q|prefix("p4929:", action: "s7832"): Target action not defined.|)
         end
 
         spec "[!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined." do
@@ -669,7 +669,7 @@ END
             end
           end
           ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                         %q|prefx("p2476:", alias_of: "s6678"): Target action of alias not defined.|)
+                         %q|prefix("p2476:", alias_of: "s6678"): Target action of alias not defined.|)
         end
 
       end
@@ -805,7 +805,7 @@ END
         scope = Benry::CmdApp::BuiltInAction.new(@config)
         pr = proc { scope.help() }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
-                       "'help' aciton is available only when invoked from application.")
+                       "'help' action is available only when invoked from application.")
       end
 
       spec "[!g0n06] prints application help message if action name not specified." do
