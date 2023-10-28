@@ -1279,6 +1279,14 @@ Actions:
   test1              : test action #1
 ```
 
+Command-line option `-l, --list` also prints the same result of the above example.
+This is useful if you specify default action name wit `config.default_action`.
+
+Action name list contains alias names, too. If you want to:
+
+* list only alias names, run `ruby xxx.rb -l | grep -i 'alias of'`.
+* list only action names, run `ruby xxx.rb -l | grep -iv 'alias of'`.
+
 If prefix (such as `xxx:`) is specified instead of action name,
 Benry-CmdApp lists action names which have that prefix.
 
@@ -1471,6 +1479,8 @@ Options:
 In the above example, `-h, --help` option as well as `-D` option is shown.
 In fact, Benry-CmdApp automatically adds `-h, --help` option to each action in hidden mode.
 Therefore all actions accept `-h, --help` option.
+
+For this reason, you should NOT define `-h` or `--help` options for your actions.
 
 
 ## Configuratoin and Customization

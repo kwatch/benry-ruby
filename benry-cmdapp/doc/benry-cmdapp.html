@@ -1206,6 +1206,13 @@ Actions:
   <strong>help</strong>               : print help message (of action if specified)
   <strong>test1</strong>              : test action #1
 </pre>
+<p>Command-line option <code>-l, --list</code> also prints the same result of the above example.
+This is useful if you specify default action name wit <code>config.default_action</code>.</p>
+<p>Action name list contains alias names, too. If you want to:</p>
+<ul>
+<li>list only alias names, run <code>ruby xxx.rb -l | grep -i 'alias of'</code>.</li>
+<li>list only action names, run <code>ruby xxx.rb -l | grep -iv 'alias of'</code>.</li>
+</ul>
 <p>If prefix (such as <code>xxx:</code>) is specified instead of action name,
 Benry-CmdApp lists action names which have that prefix.</p>
 <p>Output:</p>
@@ -1377,6 +1384,7 @@ Options:
 <p>In the above example, <code>-h, --help</code> option as well as <code>-D</code> option is shown.
 In fact, Benry-CmdApp automatically adds <code>-h, --help</code> option to each action in hidden mode.
 Therefore all actions accept <code>-h, --help</code> option.</p>
+<p>For this reason, you should NOT define <code>-h</code> or <code>--help</code> options for your actions.</p>
 </section>
 </section>
 <section class="section" id="configuratoin-and-customization">
