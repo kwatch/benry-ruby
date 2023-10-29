@@ -588,6 +588,36 @@ include Benry::UnixCommand
   true                # suppress raising error
 end
 </pre>
+<ul>
+<li><code>sys "echo *.txt"</code> (a single string) invokes <code>echo</code> command via shell.</li>
+<li><code>sys "echo", "*.txt"</code> (multiple strings) invokes <code>echo</code> command without shell,
+  and <code>*.txt</code> will be globbed by <code>sys</code>.</li>
+<li><code>sys ["echo", "*.txt"]</code> (an array of strings) invokes <code>echo</code> command without shell,
+  and <code>*.txt</code> will NOT be globbed by <code>sys</code>.
+  If you need to run command without shell nor globbing, <code>sys ["command ..."]</code> is the solution.</li>
+<li><code>sys ["echo"], "*.txt"</code> raises error.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## Example: assume that there are two files "A.txt" and "B.txt".
+
+## with shell, with globbing (by shell)      ###  Output:
+sys <strong>"echo *.txt"</strong>                             # $ echo <strong>*.txt</strong>
+                                             # A.txt B.txt
+
+## no shell, with globbing (by `sys`)        ### Output:
+sys <strong>"echo", "*.txt"</strong>                          # $ echo <strong>*.txt</strong>
+                                             # A.txt B.txt
+
+## no shell, no globbing                     ### Output:
+sys <strong>["echo", "*.txt"]</strong>                        # $ echo <strong>*.txt</strong>
+                                             # <strong>*.txt</strong>
+
+## error
+sys <strong>["echo"], "*.txt"</strong>                        #=&gt; ArgumentError
+</pre>
 <p>Options:</p>
 <ul>
 <li><code>sys :q</code> -- quiet mode (suppress echoback of command).</li>

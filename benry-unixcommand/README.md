@@ -658,6 +658,40 @@ sys "ls /fooobarr" do |stat|  # block called only when command failed
 end
 ```
 
+* `sys "echo *.txt"` (a single string) invokes `echo` command via shell.
+* `sys "echo", "*.txt"` (multiple strings) invokes `echo` command without shell,
+  and `*.txt` will be globbed by `sys`.
+* `sys ["echo", "*.txt"]` (an array of strings) invokes `echo` command without shell,
+  and `*.txt` will NOT be globbed by `sys`.
+  If you need to run command without shell nor globbing, `sys ["command ..."]` is the solution.
+* `sys ["echo"], "*.txt"` raises error.
+
+<!--
+File: ex-sys2.rb
+-->
+
+```ruby
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## Example: assume that there are two files "A.txt" and "B.txt".
+
+## with shell, with globbing (by shell)      ###  Output:
+sys "echo *.txt"                             # $ echo *.txt
+                                             # A.txt B.txt
+
+## no shell, with globbing (by `sys`)        ### Output:
+sys "echo", "*.txt"                          # $ echo *.txt
+                                             # A.txt B.txt
+
+## no shell, no globbing                     ### Output:
+sys ["echo", "*.txt"]                        # $ echo *.txt
+                                             # *.txt
+
+## error
+sys ["echo"], "*.txt"                        #=> ArgumentError
+```
+
 Options:
 
 * `sys :q` -- quiet mode (suppress echoback of command).
