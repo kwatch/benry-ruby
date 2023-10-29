@@ -501,13 +501,13 @@ module Benry::CmdApp
     end
 
     def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
-      #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
-      ! (action != nil && alias_of != nil)  or
-        raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias_of:` are exclusive.")
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = self.__validate_prefix(prefix)
       errmsg == nil  or
         raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
+      #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
+      ! (action != nil && alias_of != nil)  or
+        raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias_of:` are exclusive.")
       #; [!kwst6] if block given...
       if block_given?()
         #; [!t8wwm] saves previous prefix data and restore them at end of block.

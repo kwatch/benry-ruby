@@ -593,20 +593,6 @@ END
 
     topic '.prefix()' do
 
-      spec "[!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified." do
-        at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
-        pr = proc do
-          ScopeTestAction.class_eval do
-            prefix "p7549:", action: "s0573", alias_of: "s0573"
-            @action.("test")
-            def s0573()
-            end
-          end
-        end
-        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|prefix("p7549:", action: "s0573", alias_of: s0573): `action:` and `alias_of:` are exclusive.|)
-      end
-
       spec "[!mp1p5] raises DefinitionError if prefix is invalid." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do
@@ -619,6 +605,20 @@ END
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
                        "prefix(\"p2737\"): Prefix name should end with ':'.")
+      end
+
+      spec "[!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified." do
+        at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p7549:", action: "s0573", alias_of: "s0573"
+            @action.("test")
+            def s0573()
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|prefix("p7549:", action: "s0573", alias_of: s0573): `action:` and `alias_of:` are exclusive.|)
       end
 
       case_when "[!kwst6] if block given..." do
