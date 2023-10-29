@@ -96,6 +96,19 @@ Oktest.scope do
 
 
     topic 'sys()' do
+      spec "[!fb1ji] error if both array and string are specified at the same time." do
+        pr = proc { sys ["echo", "AA"], "BB" }
+        ok {pr}.raise?(ArgumentError,
+                       "sys: Invalid argument (if arg is specified as an array, other args should not be specified).")
+        #
+        pr = proc { sys :q, ["echo", "AA"], "BB" }
+        ok {pr}.raise?(ArgumentError,
+                       "sys: Invalid argument (if arg is specified as an array, other args should not be specified).")
+        #
+        pr = proc { sys! ["echo", "AA"], "BB" }
+        ok {pr}.raise?(ArgumentError,
+                       "sys!: Invalid argument (if arg is specified as an array, other args should not be specified).")
+      end
       spec "[!rqe7a] echoback command and arguments when `:p` not specified." do
         sout, serr = capture_sio do
           sys "echo foo bar >/dev/null"
@@ -107,6 +120,84 @@ Oktest.scope do
           sys :q, "echo foo bar >/dev/null"
         end
         ok {sout} == ""
+      end
+      spec "[!4u9lj] arguments in echoback string should be quoted or escaped." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys "echo", "A B C"' > #{tmpf}|
+        ok {File.read(tmpf)} == ("$ echo \"A B C\"\n" \
+                                 "A B C\n")
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys ["echo", "A B C"]' > #{tmpf}|
+        ok {File.read(tmpf)} == ("$ echo \"A B C\"\n" \
+                                 "A B C\n")
+      end
+      spec "[!dccme] accepts one string, one array, or multiple strings." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys :q, "echo", "AA", "BB", "CC"' > #{tmpf}|
+        ok {File.read(tmpf)} == "AA BB CC\n"
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys :q, ["echo", "AA", "BB", "CC"]' > #{tmpf}|
+        ok {File.read(tmpf)} == "AA BB CC\n"
+      end
+      spec "[!r9ne3] shell is not invoked if arg is one array or multiple string." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys :q, "echo", "ABC", "<", ">"' > #{tmpf}|
+        ok {File.read(tmpf)} == "ABC < >\n"
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys :q, ["echo", "ABC", "*", ">"]' > #{tmpf}|
+        ok {File.read(tmpf)} == "ABC * >\n"
+        ## multiple string
+        sout, serr = capture_sio do
+          pr = proc { sys "echo AA BB", " > tmp1.txt" }
+          ok {pr}.raise?(RuntimeError,
+                         "Command failed with status (127): \"echo AA BB\" \" > tmp1.txt\"")
+        end
+        ok {sout} == "$ \"echo AA BB\" \" > tmp1.txt\"\n"
+        ok {serr} == ""
+        ## one array
+        sout, serr = capture_sio do
+          pr = proc { sys ["echo AA BB > tmp1.txt"] }
+          ok {pr}.raise?(RuntimeError,
+                         "Command failed with status (127): \"echo AA BB > tmp1.txt\"")
+        end
+        ok {sout} == "$ \"echo AA BB > tmp1.txt\"\n"
+        ok {serr} == ""
+      end
+      spec "[!w6ol7] globbing is enabled when arg is multiple string." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys "echo", "**/*.txt"' > #{tmpf}|
+        ok {File.read(tmpf)} == (
+          "$ echo **/*.txt\n"\
+          "d1/bar.txt d1/d2/baz.txt foo1.txt foo2.txt\n"
+        )
+      end
+      spec "[!ifgkd] globbing is disabled when arg is one array." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys ["echo", "**/*.txt"]' > #{tmpf}|
+        ok {File.read(tmpf)} == (
+          "$ echo **/*.txt\n"\
+          "**/*.txt\n"
+        )
       end
       spec "[!agntr] returns process status if command succeeded." do
         sout, serr = capture_sio do
@@ -172,6 +263,50 @@ Oktest.scope do
       end
     end
 
+    topic '__system()' do
+      before do
+        @tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(@tmpf) if File.exist?(@tmpf) }
+      end
+      spec "[!9xarc] invokes command without shell when `shell:` is falty." do
+        result = __system("echo A B > #{@tmpf}", shell: false)
+        ok {result} == nil
+        ok {@tmpf}.not_exist?
+      end
+      spec "[!0z33p] invokes command with shell (if necessary) when `shell:` is truthy." do
+        result = __system("echo A B > #{@tmpf}", shell: true)
+        ok {result} == true
+        ok {@tmpf}.file_exist?
+        ok {File.read(@tmpf)} == "A B\n"
+      end
+    end
+
+    topic '__build_echoback_str()' do
+      spec "[!4dcra] if arg is one array, quotes or escapes arguments." do
+        s = __build_echoback_str([["echo", "A B C", "D\"E'F\"'", "*.txt"]])
+        ok {s} == %q`echo "A B C" D\"E\'F\"\' *.txt`
+      end
+      spec "[!ueoov] if arg is multiple string, quotes or escapes arguments." do
+        s = __build_echoback_str(["echo", "A B C", "D\"E'F\"'", "*.txt"])
+        ok {s} == %q`echo "A B C" D\"E\'F\"\' *.txt`
+      end
+      spec "[!hnp41] if arg is one string, not quote nor escape argument." do
+        s = __build_echoback_str(["echo \"A B C\" D\"E'F\"' *.txt"])
+        ok {s} == %q`echo "A B C" D"E'F"' *.txt`
+      end
+    end
+
+    topic 'glob_if_possible()' do
+      spec "[!xvr32] expands file pattern matching." do
+        ok {glob_if_possible("*.txt")} == ["foo1.txt", "foo2.txt"]
+        ok {glob_if_possible("**/*.txt")} == ["d1/bar.txt", "d1/d2/baz.txt", "foo1.txt", "foo2.txt"]
+        ok {glob_if_possible("foo?.*", "**/bar.*")} == ["foo1.txt", "foo2.txt", "d1/bar.txt"]
+      end
+      spec "[!z38re] if pattern not matched to any files, just returns pattern as is." do
+        ok {glob_if_possible("blabla*", "*.xhtml")} == ["blabla*", "*.xhtml"]
+        ok {glob_if_possible("*.css", "*.txt")} == ["*.css", "foo1.txt", "foo2.txt"]
+      end
+    end
 
     topic 'ruby()' do
       spec "[!98qro] echoback command and args." do
@@ -186,7 +321,7 @@ Oktest.scope do
           ruby "-e", "File.write(\"out2\", \"XYZ\")"
         end
         ok {sout} == ("$ #{RbConfig.ruby} -e 'File.write(\"out1\", \"ABC\")'\n"\
-                      "$ #{RbConfig.ruby} -e File.write(\"out2\", \"XYZ\")\n")
+                      "$ #{RbConfig.ruby} -e \"File.write(\\\"out2\\\", \\\"XYZ\\\")\"\n")
         ok {File.read("out1")} == "ABC"
         ok {File.read("out2")} == "XYZ"
       end

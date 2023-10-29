@@ -77,10 +77,28 @@ module Benry
     def __sys(cmd, args, ignore_error, &b)
       optchars = __prepare(cmd, args, "q", nil) { nil }
       quiet_p  = optchars.include?("q")
+      #; [!fb1ji] error if both array and string are specified at the same time.
+      if args[0].is_a?(Array)
+        args.length == 1  or
+          __err "#{cmd}: Invalid argument (if arg is specified as an array, other args should not be specified)."
+      end
       #; [!rqe7a] echoback command and arguments when `:p` not specified.
       #; [!ptipz] not echoback command and arguments when `:p` specified.
-      echoback(args.join(" ")) if ! quiet_p && __echoback?()
-      result = system(*args)
+      #; [!4u9lj] arguments in echoback string should be quoted or escaped.
+      echoback_str = __build_echoback_str(args)
+      echoback(echoback_str) if ! quiet_p && __echoback?()
+      #; [!dccme] accepts one string, one array, or multiple strings.
+      #; [!r9ne3] shell is not invoked if arg is one array or multiple string.
+      #; [!w6ol7] globbing is enabled when arg is multiple string.
+      #; [!ifgkd] globbing is disabled when arg is one array.
+      if args[0].is_a?(Array)
+        result = __system(*args[0], shell: false)  # shell: no, glob: no
+      elsif args.length == 1
+        result = __system(args[0])                 # shell: yes (if necessary)
+      else
+        args2 = glob_if_possible(*args)            # glob: yes
+        result = __system(*args2, shell: false)    # shell: no
+      end
       #; [!agntr] returns process status if command succeeded.
       #; [!clfig] yields block if command failed.
       #; [!deu3e] not yield block if command succeeded.
@@ -95,7 +113,52 @@ module Benry
         return stat if result
       end
       return stat if ignore_error
-      raise "Command failed with status (#{$?.exitstatus}): #{args.join(' ')}"
+      raise "Command failed with status (#{$?.exitstatus}): #{echoback_str}"
+    end
+
+    def __system(*args, shell: true)
+      #; [!9xarc] invokes command without shell when `shell:` is falty.
+      #; [!0z33p] invokes command with shell (if necessary) when `shell:` is truthy.
+      if shell
+        return system(*args)    # with shell (if necessary)
+      else
+        return system([args[0], args[0]], *args[1..-1])   # without shell
+      end
+    end
+
+    def __build_echoback_str(args)
+      #; [!4dcra] if arg is one array, quotes or escapes arguments.
+      #; [!ueoov] if arg is multiple string, quotes or escapes arguments.
+      #; [!hnp41] if arg is one string, not quote nor escape argument.
+      echoback_str = (
+        if    args[0].is_a?(Array) ; args[0].collect {|x| __qq(x) }.join(" ")
+        elsif args.length == 1     ; args[0]
+        else                       ; args.collect {|x| __qq(x) }.join(" ")
+        end
+      )
+    end
+
+    def __qq(str)
+      if str =~ /\s/
+        return "\"#{str.gsub(/"/, '\\"')}\""
+      else
+        return str.gsub(/(['"\\])/, '\\\\\1')
+      end
+    end
+
+    def glob_if_possible(*strs)
+      #; [!xvr32] expands file pattern matching.
+      #; [!z38re] if pattern not matched to any files, just returns pattern as is.
+      arr = []
+      strs.each do |s|
+        globbed = Dir.glob(s)
+        if globbed.empty?
+          arr << s
+        else
+          arr.concat(globbed)
+        end
+      end
+      return arr
     end
 
 
