@@ -607,38 +607,24 @@ END
                        "prefix(\"p2737\"): Prefix name should end with ':'.")
       end
 
-      spec "[!38ji9] raises DefinitionError if action name is not a string." do
+      spec "[!q01ma] raises DefinitionError if action or alias name is invalid." do
         pr = proc do
-          ScopeTestAction.class_eval do
-            prefix "p1871:", action: :foo
-          end
+          ScopeTestAction.class_eval { prefix "p0936:", action: :foo }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p1871:", action: :foo)`: Action name should be a string, but got Symbol object.|)
-      end
-
-      spec "[!qge3m] raises DefinitionError if alias name is not a string." do
+                       %q|`prefix("p0936:", action: :foo)`: Action name should be a string, but got Symbol object.|)
+        #
         pr = proc do
-          ScopeTestAction.class_eval do
-            prefix "p7328:", alias_of: :foo
-          end
+          ScopeTestAction.class_eval { prefix "p0936:", alias_of: :bar }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
-      end
-
-      spec "[!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified." do
-        at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
+                       %q|`prefix("p0936:", alias_of: :bar)`: Alias name should be a string, but got Symbol object.|)
+        #
         pr = proc do
-          ScopeTestAction.class_eval do
-            prefix "p7549:", action: "s0573", alias_of: "s0573"
-            @action.("test")
-            def s0573()
-            end
-          end
+          ScopeTestAction.class_eval { prefix "p0936:", action: "foo", alias_of: "bar" }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|prefix("p7549:", action: "s0573", alias_of: s0573): `action:` and `alias_of:` are exclusive.|)
+                       %q|`prefix("p0936:", action: "foo", alias_of: "bar")`: `action:` and `alias_of:` are exclusive.|)
       end
 
       case_when "[!kwst6] if block given..." do
@@ -772,6 +758,45 @@ END
       spec "[!7rphu] returns nil if prefix is valid." do
         errmsg = ScopeTestAction.__validate_prefix("foo-bar:")
         ok {errmsg} == nil
+      end
+
+    end
+
+
+    topic '.__validate_action_and_alias()' do
+
+      spec "[!38ji9] returns error message if action name is not a string." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p1871:", action: :foo
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`prefix("p1871:", action: :foo)`: Action name should be a string, but got Symbol object.|)
+      end
+
+      spec "[!qge3m] returns error message if alias name is not a string." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p7328:", alias_of: :foo
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`prefix("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
+      end
+
+      spec "[!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified." do
+        at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p7549:", action: "s0573", alias_of: "s0573"
+            @action.("test")
+            def s0573()
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`prefix("p7549:", action: "s0573", alias_of: "s0573")`: `action:` and `alias_of:` are exclusive.|)
       end
 
     end
