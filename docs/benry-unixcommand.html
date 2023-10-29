@@ -588,9 +588,39 @@ include Benry::UnixCommand
   true                # suppress raising error
 end
 </pre>
+<ul>
+<li><code>sys "echo *.txt"</code> (a single string) invokes <code>echo</code> command via shell.</li>
+<li><code>sys "echo", "*.txt"</code> (multiple strings) invokes <code>echo</code> command without shell,
+  and <code>*.txt</code> will be globbed by <code>sys</code>.</li>
+<li><code>sys ["echo", "*.txt"]</code> (an array of strings) invokes <code>echo</code> command without shell,
+  and <code>*.txt</code> will NOT be globbed by <code>sys</code>.
+  If you need to run command without shell nor globbing, <code>sys ["command ..."]</code> is the solution.</li>
+<li><code>sys ["echo"], "*.txt"</code> raises error.</li>
+</ul>
+<pre class="language-ruby">
+require 'benry/unixcommand'
+include Benry::UnixCommand
+
+## Example: assume that there are two files "A.txt" and "B.txt".
+
+## with shell, with globbing (by shell)      ###  Output:
+sys <strong>"echo *.txt"</strong>                             # $ echo <strong>*.txt</strong>
+                                             # A.txt B.txt
+
+## no shell, with globbing (by `sys`)        ### Output:
+sys <strong>"echo", "*.txt"</strong>                          # $ echo <strong>*.txt</strong>
+                                             # A.txt B.txt
+
+## no shell, no globbing                     ### Output:
+sys <strong>["echo", "*.txt"]</strong>                        # $ echo <strong>*.txt</strong>
+                                             # <strong>*.txt</strong>
+
+## error
+sys <strong>["echo"], "*.txt"</strong>                        #=&gt; ArgumentError
+</pre>
 <p>Options:</p>
 <ul>
-<li>(no options)</li>
+<li><code>sys :q</code> -- quiet mode (suppress echoback of command).</li>
 </ul>
 </section>
 <section class="subsection" id="ruby">
@@ -833,7 +863,7 @@ require 'benry/unixcommand'
 include Benry::UnixCommand
 
 <strong>def prompt()</strong>                  # !!!!!
-  <strong>"myname@localhost&gt;"</strong>         # !!!!!
+  <strong>"myname@localhost&gt; "</strong>        # !!!!!
 <strong>end</strong>                           # !!!!!
 
 sys "date"
@@ -853,13 +883,15 @@ include Benry::UnixCommand
 
 def prompt()
   s = "myname@localhost&gt;"
-  <strong>"\e[0;31m#{s}\e[0m"</strong>    # red
-  #"\e[0;32m#{s}\e[0m"    # green
-  #"\e[0;33m#{s}\e[0m"    # yellow
-  #"\e[0;34m#{s}\e[0m"    # blue
-  #"\e[0;35m#{s}\e[0m"    # magenta
-  #"\e[0;36m#{s}\e[0m"    # cyan
-  #"\e[0;37m#{s}\e[0m"    # white
+  <strong>"\e[31m#{s}\e[0m "</strong>    # red
+  #"\e[32m#{s}\e[0m "    # green
+  #"\e[33m#{s}\e[0m "    # yellow
+  #"\e[34m#{s}\e[0m "    # blue
+  #"\e[35m#{s}\e[0m "    # magenta
+  #"\e[36m#{s}\e[0m "    # cyan
+  #"\e[37m#{s}\e[0m "    # white
+  #"\e[1m#{s}\e[0m "     # bold
+  #"\e[2m#{s}\e[0m "     # gray
 end
 
 sys "date"
@@ -872,13 +904,19 @@ sys "date"
 require 'benry/unixcommand'
 include Benry::UnixCommand
 
-<strong>BENRY_ECHOBACK = false</strong>            # !!!!!
+## disable temporarily
+<strong>echoback_off do</strong>
+  sys "date"
+<strong>end</strong>
 
+## disable globally
+<strong>$BENRY_ECHOBACK = false</strong>            # !!!!!
 sys "date"
 </pre>
 <p>Result:</p>
 <pre class="language-terminal">
 $ ruby ex-quiet1.rb
+Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
 Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
 </pre>
 </section>
