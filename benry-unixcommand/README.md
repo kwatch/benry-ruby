@@ -1036,8 +1036,13 @@ File: ex-quiet1.rb
 require 'benry/unixcommand'
 include Benry::UnixCommand
 
-BENRY_ECHOBACK = false            # !!!!!
+## disable temporarily
+echoback_off do
+  sys "date"
+end
 
+## disable globally
+$BENRY_ECHOBACK = false            # !!!!!
 sys "date"
 ```
 
@@ -1045,6 +1050,7 @@ Result:
 
 ```terminal
 $ ruby ex-quiet1.rb
+Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
 Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
 ```
 

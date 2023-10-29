@@ -45,10 +45,34 @@ module Benry
     #private :fu_output_message
 
     def __echoback?()
-      return self.class.const_get(:BENRY_ECHOBACK)
+      #; [!ik00u] returns value of `@__BENRY_ECHOBACK` or `$BENRY_ECHOBACK`.
+      #; [!1hp69] instance var `@__BENRY_ECHOBACK` is prior than `$BENRY_ECHOBACK`.
+      return @__BENRY_ECHOBACK != nil ? @__BENRY_ECHOBACK : $BENRY_ECHOBACK
     end
 
-    BENRY_ECHOBACK = true
+    $BENRY_ECHOBACK = true  unless defined?($BENRY_ECHOBACK) && $BENRY_ECHOBACK != nil
+
+    def echoback_on(&block)
+      #; [!9x2lh] enables echoback temporarily.
+      echoback_switch(true, &block)
+    end
+
+    def echoback_off(&block)
+      #; [!prkfg] disables echoback temporarily.
+      echoback_switch(false, &block)
+    end
+
+    def echoback_switch(val, &block)
+      #; [!aw9b2] switches on/off of echoback temporarily.
+      defined = instance_variable_defined?(:@__BENRY_ECHOBACK)
+      prev = @__BENRY_ECHOBACK
+      @__BENRY_ECHOBACK = val
+      yield
+      nil
+    ensure
+      defined ? (@__BENRY_ECHOBACK = prev) \
+              : remove_instance_variable(:@__BENRY_ECHOBACK)
+    end
 
 
     def echo(*args)

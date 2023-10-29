@@ -69,6 +69,91 @@ Oktest.scope do
       end
     end
 
+    topic '__echoback?()' do
+      spec "[!ik00u] returns value of `@__BENRY_ECHOBACK` or `$BENRY_ECHOBACK`." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        ok {instance_variable_defined?(:@__BENRY_ECHOBACK)} == false
+        $BENRY_ECHOBACK = true
+        ok {__echoback?()} == true
+        $BENRY_ECHOBACK = false
+        ok {__echoback?()} == false
+      end
+      spec "[!1hp69] instance var `@__BENRY_ECHOBACK` is prior than `$BENRY_ECHOBACK`." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = true
+        @__BENRY_ECHOBACK = false
+        ok {__echoback?()} == false
+        $BENRY_ECHOBACK = false
+        @__BENRY_ECHOBACK = true
+        ok {__echoback?()} == true
+      end
+    end
+
+    def _sysout(command)
+      sout, serr = capture_sio { sys command }
+      ok {serr} == ""
+      return sout
+    end
+
+    topic 'echoback_on()' do
+      spec "[!9x2lh] enables echoback temporarily." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = false
+        ok {__echoback?()} == false
+        ok {_sysout "echo ABC >/dev/null"} == ""
+        echoback_on do
+          ok {__echoback?()} == true
+          ok {_sysout "echo ABC >/dev/null"} == "$ echo ABC >/dev/null\n"
+        end
+        ok {__echoback?()} == false
+        ok {_sysout "echo ABC >/dev/null"} == ""
+      end
+    end
+
+    topic 'echoback_off()' do
+      spec "[!prkfg] disables echoback temporarily." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = true
+        ok {__echoback?()} == true
+        ok {_sysout "echo ABC >/dev/null"} == "$ echo ABC >/dev/null\n"
+        echoback_off do
+          ok {__echoback?()} == false
+          ok {_sysout "echo ABC >/dev/null"} == ""
+        end
+        ok {__echoback?()} == true
+        ok {_sysout "echo ABC >/dev/null"} == "$ echo ABC >/dev/null\n"
+      end
+    end
+
+    topic 'echoback_switch()' do
+      spec "[!aw9b2] switches on/off of echoback temporarily." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = true
+        ok {__echoback?()} == true
+        echoback_switch(false) do
+          ok {__echoback?()} == false
+          echoback_switch(true) do
+            ok {__echoback?()} == true
+            echoback_switch(false) do
+              ok {__echoback?()} == false
+            end
+            ok {__echoback?()} == true
+          end
+          ok {__echoback?()} == false
+        end
+        ok {__echoback?()} == true
+      end
+    end
 
     topic 'echo()' do
       spec "[!mzbdj] echoback command arguments." do
