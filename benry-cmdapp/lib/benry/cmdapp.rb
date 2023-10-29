@@ -151,6 +151,14 @@ module Benry::CmdApp
       return false
     end
 
+    def name_should_be_a_string(name, kind, errcls)
+      #; [!9j4d0] do nothing if name is a string.
+      #; [!a2n8y] raises error if name is not a string.
+      name.is_a?(String)  or
+        raise errcls.new("`#{name.inspect}`: #{kind} name should be a string, but got #{name.class.name} object.")
+      nil
+    end
+
   end
 
 

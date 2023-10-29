@@ -208,6 +208,22 @@ Oktest.scope do
     end
 
 
+    topic '.#name_should_be_a_string()' do
+
+      spec "[!9j4d0] do nothing if name is a string." do
+        x = Benry::CmdApp::Util.name_should_be_a_string("hello", "Action", Benry::CmdApp::DefinitionError)
+        ok {x} == nil
+      end
+
+      spec "[!a2n8y] raises error if name is not a string." do
+        pr = proc { Benry::CmdApp::Util.name_should_be_a_string(:hello, "Action", Benry::CmdApp::DefinitionError) }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "`:hello`: Action name should be a string, but got Symbol object.")
+      end
+
+    end
+
+
   end
 
 
