@@ -754,6 +754,8 @@ module Benry::CmdApp
 
     def invoke_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()
       action = action_name
+      #; [!uw6rq] raises ActionError if action name is not a string.
+      Util.name_should_be_a_string(action, 'Action', ActionError)
       #; [!dri6e] if called from other action containing prefix, looks up action with the prefix firstly.
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
