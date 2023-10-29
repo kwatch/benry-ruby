@@ -131,6 +131,22 @@ Oktest.scope do
         ## one array
         system %Q|#{ruby} -e '#{setup}; sys :q, ["echo", "ABC", "*", ">"]' > #{tmpf}|
         ok {File.read(tmpf)} == "ABC * >\n"
+        ## multiple string
+        sout, serr = capture_sio do
+          pr = proc { sys "echo AA BB", " > tmp1.txt" }
+          ok {pr}.raise?(RuntimeError,
+                         "Command failed with status (127): echo AA BB  > tmp1.txt")
+        end
+        ok {sout} == "$ echo AA BB  > tmp1.txt\n"
+        ok {serr} == ""
+        ## one array
+        sout, serr = capture_sio do
+          pr = proc { sys ["echo AA BB > tmp1.txt"] }
+          ok {pr}.raise?(RuntimeError,
+                         "Command failed with status (127): echo AA BB > tmp1.txt")
+        end
+        ok {sout} == "$ echo AA BB > tmp1.txt\n"
+        ok {serr} == ""
       end
       spec "[!w6ol7] globbing is enabled when arg is multiple string." do
         tmpf = "tmp.#{rand().to_s[2..6]}"
@@ -217,6 +233,24 @@ Oktest.scope do
           ok {ret}.is_a?(Process::Status)
           ok {ret.exitstatus} == 1
         end
+      end
+    end
+
+    topic '__system()' do
+      before do
+        @tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(@tmpf) if File.exist?(@tmpf) }
+      end
+      spec "[!9xarc] invokes command without shell when `shell:` is falty." do
+        result = __system("echo A B > #{@tmpf}", shell: false)
+        ok {result} == nil
+        ok {@tmpf}.not_exist?
+      end
+      spec "[!0z33p] invokes command with shell (if necessary) when `shell:` is truthy." do
+        result = __system("echo A B > #{@tmpf}", shell: true)
+        ok {result} == true
+        ok {@tmpf}.file_exist?
+        ok {File.read(@tmpf)} == "A B\n"
       end
     end
 

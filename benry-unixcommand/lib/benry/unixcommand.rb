@@ -85,12 +85,12 @@ module Benry
       #; [!w6ol7] globbing is enabled when arg is multiple string.
       #; [!ifgkd] globbing is disabled when arg is one array.
       if args[0].is_a?(Array)
-        result = system(*args[0])           # shell: no, glob: no
+        result = __system(*args[0], shell: false)  # shell: no, glob: no
       elsif args.length == 1
-        result = system(args[0])            # shell: yes (if necessary)
+        result = __system(args[0])                 # shell: yes (if necessary)
       else
-        args2 = glob_if_possible(*args)     # glob: yes
-        result = system(*args2)             # shell: no
+        args2 = glob_if_possible(*args)            # glob: yes
+        result = __system(*args2, shell: false)    # shell: no
       end
       #; [!agntr] returns process status if command succeeded.
       #; [!clfig] yields block if command failed.
@@ -107,6 +107,16 @@ module Benry
       end
       return stat if ignore_error
       raise "Command failed with status (#{$?.exitstatus}): #{args.join(' ')}"
+    end
+
+    def __system(*args, shell: true)
+      #; [!9xarc] invokes command without shell when `shell:` is falty.
+      #; [!0z33p] invokes command with shell (if necessary) when `shell:` is truthy.
+      if shell
+        return system(*args)    # with shell (if necessary)
+      else
+        return system([args[0], args[0]], *args[1..-1])   # without shell
+      end
     end
 
     def glob_if_possible(*strs)
