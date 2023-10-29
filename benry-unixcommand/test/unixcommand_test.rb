@@ -70,25 +70,25 @@ Oktest.scope do
     end
 
     topic '__echoback?()' do
-      spec "[!ik00u] returns value of `@__benry_echoback` or `$BENRY_ECHOBACK`." do
+      spec "[!ik00u] returns value of `@__BENRY_ECHOBACK` or `$BENRY_ECHOBACK`." do
         bkup = $BENRY_ECHOBACK
         at_end { $BENRY_ECHOBACK = bkup }
         #
-        ok {instance_variable_defined?(:@__benry_echoback)} == false
+        ok {instance_variable_defined?(:@__BENRY_ECHOBACK)} == false
         $BENRY_ECHOBACK = true
         ok {__echoback?()} == true
         $BENRY_ECHOBACK = false
         ok {__echoback?()} == false
       end
-      spec "[!1hp69] instance var `@__benry_echoback` is prior than `$BENRY_ECHOBACK`." do
+      spec "[!1hp69] instance var `@__BENRY_ECHOBACK` is prior than `$BENRY_ECHOBACK`." do
         bkup = $BENRY_ECHOBACK
         at_end { $BENRY_ECHOBACK = bkup }
         #
         $BENRY_ECHOBACK = true
-        @__benry_echoback = false
+        @__BENRY_ECHOBACK = false
         ok {__echoback?()} == false
         $BENRY_ECHOBACK = false
-        @__benry_echoback = true
+        @__BENRY_ECHOBACK = true
         ok {__echoback?()} == true
       end
     end

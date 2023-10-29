@@ -45,9 +45,9 @@ module Benry
     #private :fu_output_message
 
     def __echoback?()
-      #; [!ik00u] returns value of `@__benry_echoback` or `$BENRY_ECHOBACK`.
-      #; [!1hp69] instance var `@__benry_echoback` is prior than `$BENRY_ECHOBACK`.
-      return @__benry_echoback != nil ? @__benry_echoback : $BENRY_ECHOBACK
+      #; [!ik00u] returns value of `@__BENRY_ECHOBACK` or `$BENRY_ECHOBACK`.
+      #; [!1hp69] instance var `@__BENRY_ECHOBACK` is prior than `$BENRY_ECHOBACK`.
+      return @__BENRY_ECHOBACK != nil ? @__BENRY_ECHOBACK : $BENRY_ECHOBACK
     end
 
     $BENRY_ECHOBACK = true  unless defined?($BENRY_ECHOBACK) && $BENRY_ECHOBACK != nil
