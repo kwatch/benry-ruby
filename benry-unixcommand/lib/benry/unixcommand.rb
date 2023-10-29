@@ -666,7 +666,7 @@ module Benry
         pr = proc do |fname|
           parent = File.dirname(fname)
           parent != fname  or
-            raise "internal error: fname=#{fname.inspect}, parent=#{parent.inspect}"
+            raise "** assertion failed: fname=#{fname.inspect}, parent=#{parent.inspect}"
           pr.call(parent) unless File.directory?(parent)
           Dir.mkdir(fname)
           File.chmod(mode, fname) if mode
@@ -713,7 +713,7 @@ module Benry
         elsif File.exist?(dname)
           __err "#{cmd}: #{dname}: Not a directory."
         else
-          raise "** internal error: dname=#{dname.inspect}"
+          raise "** assertion failed: dname=#{dname.inspect}"
         end
       end
       #; [!jgmw7] remove empty directories.
@@ -936,7 +936,7 @@ module Benry
       #; [!ox3le] converts 'u+r' style mode into mask.
       when /\A([ugoa])([-+])([rwxst])\z/
         who = $1; op = $2; perm = $3
-        i = "ugoa".index(who)  or raise "internal error: who=#{who.inspect}"
+        i = "ugoa".index(who)  or raise "** assertion failed: who=#{who.inspect}"
         mask = CHMOD_MODES[perm][i]
       #; [!axqed] error when mode is invalid.
       else
