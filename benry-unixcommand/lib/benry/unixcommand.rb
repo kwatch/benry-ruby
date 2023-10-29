@@ -282,7 +282,7 @@ module Benry
       cmd = 'pushd'
       #; [!xl6lg] raises error when block not given.
       block_given?()  or
-        raise ArgumentError, "pushd: requires block argument."
+        __err "pushd: requires block argument."
       #; [!nvkha] expands file pattern.
       #; [!q3itn] error when pattern not matched to any file.
       #; [!hveaj] error when pattern matched to multiple files.
