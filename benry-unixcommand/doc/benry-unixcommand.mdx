@@ -1,9 +1,9 @@
-# Benry-UnixCommand
+= Benry-UnixCommand
 
 ($Release: 0.0.0 $)
 
 
-## What's this?
+== What's this?
 
 Benry-UnixCommand implements popular UNIX commands, like FileUtils,
 but much better than it.
@@ -30,13 +30,13 @@ Features compared to FileUtils:
 
 
 
-### Table of Contents
+=== Table of Contents
 
 <!-- TOC/ -->
 
 
 
-## Install
+== Install
 
 ```
 $ gem install benry-unixcommand
@@ -62,11 +62,11 @@ $ uname -srmp
 
 
 
-## Command Reference
+== Command Reference
 
 
 
-### ``echo``
+=== ``echo``
 
 File: ex-echo1.rb
 
@@ -97,7 +97,7 @@ Options:
 
 
 
-### ``echoback``
+=== ``echoback``
 
 * ``echoback "command"`` prints ``$ command`` string into stdout.
 * ``echoback "command"`` indents command if in block of ``cd`` or ``pushd``.
@@ -132,7 +132,7 @@ $ cd -
 
 
 
-### ``cp``
+=== ``cp``
 
 * ``cp "x", "y"`` copies ``x`` to new file ``y'. Fails when ``y`` already exists.
 * ``cp! "x", "y"`` is similar to above, but overwrites ``y`` even if it exists.
@@ -171,7 +171,7 @@ Options:
 
 
 
-### ``mv``
+=== ``mv``
 
 * ``mv "x", "y"`` renames ``x`` to ``y``. Fails when ``y`` already exists.
 * ``mv! "x", "y"`` is similar to above, but overwrites ``y`` even if it exists.
@@ -209,7 +209,7 @@ Options:
 
 
 
-### ``rm``
+=== ``rm``
 
 * ``rm "x", "y"`` removes file ``x`` and ``y``.
 * ``rm :r, "dir1"`` removes directory recursively.
@@ -242,7 +242,7 @@ Options:
 
 
 
-### ``mkdir``
+=== ``mkdir``
 
 * ``mkdir "x", "y"`` creates ``x`` and ``y`` directories.
 * ``mkdir :p, "x/y/z"`` creates ``x/y/z`` directory.
@@ -275,7 +275,7 @@ Options:
 
 
 
-### ``rmdir``
+=== ``rmdir``
 
 * ``rmdir "x", "y"`` removed empty directores.
 * Raises error when directory not empty.
@@ -298,7 +298,7 @@ Options:
 
 
 
-### ``ln``
+=== ``ln``
 
 * ``ln "x", "y"`` creates hard link.
 * ``ln :s, "x", "y"`` creates symbolic link. Error if ``y`` already exists.
@@ -331,7 +331,7 @@ include Benry::UnixCommand
 
 
 
-### ``atomic_symlink!``
+=== ``atomic_symlink!``
 
 * ``atomic_symlink! "x", "y"`` creates symbolic link atomically.
 
@@ -358,7 +358,7 @@ Options:
 
 
 
-### ``touch``
+=== ``touch``
 
 * ``touch "x"`` updates timestamp of file.
 * ``touch :r, "reffile", "x"`` uses timestamp of ``reffile`` instead current timestamp.
@@ -386,7 +386,7 @@ Options:
 
 
 
-### ``chmod``
+=== ``chmod``
 
 * ``chmod 0644, "x"`` changes file permission.
 * ``chmod :R, "a+r", "dir"`` changes permissions recursively.
@@ -415,7 +415,7 @@ Options:
 
 
 
-### ``chown``
+=== ``chown``
 
 * ``chown "user:group", "x", "y"`` changes owner and group of files.
 * ``chown "user", "x", "y"`` changes owner of files.
@@ -442,7 +442,7 @@ Options:
 
 
 
-### ``pwd``
+=== ``pwd``
 
 * ``pwd()`` prints current working directory path.
 
@@ -464,7 +464,7 @@ Options:
 
 
 
-### ``cd``
+=== ``cd``
 
 * ``cd`` changes current working directory.
 * If block given, ``cd`` invokes block just after changing current directory,
@@ -513,7 +513,7 @@ Options:
 
 
 
-### ``pushd``
+=== ``pushd``
 
 * ``pushd`` changes current directory, invokes block, and back to previous directory.
 * ``pushd`` requires block argument. ``cd`` also takes block argument but it is an optional.
@@ -563,7 +563,7 @@ Options:
 
 
 
-### ``store``
+=== ``store``
 
 * ``store "x", "y", to: "dir", `` copies files under ``x`` and ``y`` to ``dir`` keeping file path.
   For example, ``x/foo/bar.rb`` will be copied as ``dir/x/foo/bar.rb``.
@@ -592,7 +592,7 @@ Options:
 
 
 
-### ``sys``
+=== ``sys``
 
 * ``sys "ls -al"`` runs ``ls -al`` command.
 * ``sys`` raises error when command failed.
@@ -661,7 +661,7 @@ Options:
 
 
 
-### ``ruby``
+=== ``ruby``
 
 * ``ruby "...."`` is almost same as ``sys "ruby ...."``.
 * ``RbConfig.ruby`` is used as ruby command path.
@@ -687,7 +687,7 @@ Options:
 
 
 
-### ``capture2``
+=== ``capture2``
 
 * ``capture2 "ls -al"`` runs ``ls -al`` and returns output of the command.
 * ``capture2 "cat -n", stdin_data: "A\nB\n"`` run ``cat -n`` command and uses ``"A\nB\n"`` as stdin data.
@@ -719,7 +719,7 @@ Options:
 
 
 
-### ``capture2e``
+=== ``capture2e``
 
 * almost same as ``capture2``, but output contains both stdout and stderr.
 
@@ -743,7 +743,7 @@ Options:
 
 
 
-### ``capture3``
+=== ``capture3``
 
 * almost same as ``capture2``, but returns both stdout output and stderr output.
 
@@ -771,7 +771,7 @@ Options:
 
 
 
-### ``zip``
+=== ``zip``
 
 * ``zip "foo.zip", "file1", "file2"`` creates new zip file ``foo.zip``.
 * ``zip :r, "foo.zip", "dir1"`` adds files under ``dir1`` into zip file recursively.
@@ -811,7 +811,7 @@ Options:
 
 
 
-### ``unzip``
+=== ``unzip``
 
 * ``unzip "foo.zip"`` extracts files in zip file into current directory.
 * ``unzip :d, "dir1", "foo.zip"`` extracts files under ``dir1``.
@@ -847,7 +847,7 @@ Options:
 
 
 
-### ``time``
+=== ``time``
 
 * ``time do ... end`` invokes block and prints elapsed time into stderr.
 
@@ -873,11 +873,11 @@ $ zip -qr9 dir1.zip dir1
 
 
 
-## FAQ
+== FAQ
 
 
 
-### Why ``mv`` or ``cp`` requires ``to:`` option?
+=== Why ``mv`` or ``cp`` requires ``to:`` option?
 
 Because UNIX command has bad interface which causes unexpected result.
 
@@ -905,7 +905,7 @@ In the same reason, ``cp()`` and ``ln()`` of Benry::UnixCommand also requires ``
 
 
 
-### How to use in Rakefile?
+=== How to use in Rakefile?
 
 File: Rakefile
 
@@ -938,7 +938,7 @@ $ popd    # back to /home/yourname
 
 
 
-### How to change prompt string?
+=== How to change prompt string?
 
 File: ex-prompt1.rb
 
@@ -963,7 +963,7 @@ Wed Jan 15 20:23:07 UTC 2021
 
 
 
-### How to make prompt colored?
+=== How to make prompt colored?
 
 <!--
 File: ex-prompt2.rb
@@ -991,7 +991,7 @@ sys "date"
 
 
 
-### How to disable command echoback?
+=== How to disable command echoback?
 
 File: ex-quiet1.rb
 
@@ -1019,7 +1019,7 @@ Wed Jan  1 22:29:55 UTC 2020      # no echoback, only output
 
 
 
-## License and Copyright
+== License and Copyright
 
 $License: MIT License $
 
