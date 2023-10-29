@@ -607,6 +607,26 @@ END
                        "prefix(\"p2737\"): Prefix name should end with ':'.")
       end
 
+      spec "[!38ji9] raises DefinitionError if action name is not a string." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p1871:", action: :foo
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`prefix("p1871:", action: :foo)`: Action name should be a string, but got Symbol object.|)
+      end
+
+      spec "[!qge3m] raises DefinitionError if alias name is not a string." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p7328:", alias_of: :foo
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`prefix("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
+      end
+
       spec "[!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do

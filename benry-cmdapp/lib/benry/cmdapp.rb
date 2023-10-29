@@ -505,6 +505,12 @@ module Benry::CmdApp
       errmsg = self.__validate_prefix(prefix)
       errmsg == nil  or
         raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
+      #; [!38ji9] raises DefinitionError if action name is not a string.
+      action == nil || action.is_a?(String)  or
+        raise DefinitionError.new("`prefix(#{prefix.inspect}, action: #{action.inspect})`: Action name should be a string, but got #{action.class.name} object.")
+      #; [!qge3m] raises DefinitionError if alias name is not a string.
+      alias_of == nil || alias_of.is_a?(String)  or
+        raise DefinitionError.new("`prefix(#{prefix.inspect}, alias_of: #{alias_of.inspect})`: Alias name should be a string, but got #{alias_of.class.name} object.")
       #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
       ! (action != nil && alias_of != nil)  or
         raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias_of:` are exclusive.")
