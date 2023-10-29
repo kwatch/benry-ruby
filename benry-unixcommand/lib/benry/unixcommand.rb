@@ -52,6 +52,28 @@ module Benry
 
     $BENRY_ECHOBACK = true  unless defined?($BENRY_ECHOBACK) && $BENRY_ECHOBACK != nil
 
+    def echoback_on(&block)
+      #; [!9x2lh] enables echoback temporarily.
+      echoback_switch(true, &block)
+    end
+
+    def echoback_off(&block)
+      #; [!prkfg] disables echoback temporarily.
+      echoback_switch(false, &block)
+    end
+
+    def echoback_switch(val, &block)
+      #; [!aw9b2] switches on/off of echoback temporarily.
+      defined = instance_variable_defined?(:@__BENRY_ECHOBACK)
+      prev = @__BENRY_ECHOBACK
+      @__BENRY_ECHOBACK = val
+      yield
+      nil
+    ensure
+      defined ? (@__BENRY_ECHOBACK = prev) \
+              : remove_instance_variable(:@__BENRY_ECHOBACK)
+    end
+
 
     def echo(*args)
       __echo('echo', args)

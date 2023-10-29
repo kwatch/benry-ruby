@@ -93,6 +93,67 @@ Oktest.scope do
       end
     end
 
+    def _sysout(command)
+      sout, serr = capture_sio { sys command }
+      ok {serr} == ""
+      return sout
+    end
+
+    topic 'echoback_on()' do
+      spec "[!9x2lh] enables echoback temporarily." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = false
+        ok {__echoback?()} == false
+        ok {_sysout "echo ABC >/dev/null"} == ""
+        echoback_on do
+          ok {__echoback?()} == true
+          ok {_sysout "echo ABC >/dev/null"} == "$ echo ABC >/dev/null\n"
+        end
+        ok {__echoback?()} == false
+        ok {_sysout "echo ABC >/dev/null"} == ""
+      end
+    end
+
+    topic 'echoback_off()' do
+      spec "[!prkfg] disables echoback temporarily." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = true
+        ok {__echoback?()} == true
+        ok {_sysout "echo ABC >/dev/null"} == "$ echo ABC >/dev/null\n"
+        echoback_off do
+          ok {__echoback?()} == false
+          ok {_sysout "echo ABC >/dev/null"} == ""
+        end
+        ok {__echoback?()} == true
+        ok {_sysout "echo ABC >/dev/null"} == "$ echo ABC >/dev/null\n"
+      end
+    end
+
+    topic 'echoback_switch()' do
+      spec "[!aw9b2] switches on/off of echoback temporarily." do
+        bkup = $BENRY_ECHOBACK
+        at_end { $BENRY_ECHOBACK = bkup }
+        #
+        $BENRY_ECHOBACK = true
+        ok {__echoback?()} == true
+        echoback_switch(false) do
+          ok {__echoback?()} == false
+          echoback_switch(true) do
+            ok {__echoback?()} == true
+            echoback_switch(false) do
+              ok {__echoback?()} == false
+            end
+            ok {__echoback?()} == true
+          end
+          ok {__echoback?()} == false
+        end
+        ok {__echoback?()} == true
+      end
+    end
 
     topic 'echo()' do
       spec "[!mzbdj] echoback command arguments." do
