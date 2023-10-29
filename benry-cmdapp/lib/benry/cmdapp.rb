@@ -300,6 +300,13 @@ module Benry::CmdApp
   end
 
   def self.__validate_alias_and_action(alias_name, action_name)  # :nodoc:
+    #; [!2x1ew] returns error message if alias name is not a string.
+    #; [!galce] returns error message if action name is not a string.
+    if ! alias_name.is_a?(String)
+      return "Alias name should be a string, but got #{alias_name.class.name} object."
+    elsif ! action_name.is_a?(String)
+      return "Action name should be a string, but got #{action_name.class.name} object."
+    end
     #; [!zh0a9] returns error message if other alias already exists.
     #; [!ohow0] returns error message if other action exists with the same name as alias.
     alias_md = INDEX.metadata_get(alias_name)
