@@ -109,6 +109,12 @@ Oktest.scope do
 
     topic '.undef_alias()' do
 
+      spec "[!pk3ya] raises DefinitionError if alias name is not a string." do
+        pr = proc { Benry::CmdApp.undef_alias(:hello) }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`:hello`: Alias name should be a string, but got Symbol object.|)
+      end
+
       spec "[!krdkt] raises DefinitionError if alias not exist." do
         pr = proc { Benry::CmdApp.undef_alias("tmphello8") }
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
@@ -130,6 +136,12 @@ Oktest.scope do
 
 
     topic '.undef_action()' do
+
+      spec "[!bcyn3] raises DefinitionError if action name is not a string." do
+        pr = proc { Benry::CmdApp.undef_action(:hello) }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "`:hello`: Action name should be a string, but got Symbol object.")
+      end
 
       spec "[!bvu95] raises error if action not exist." do
         pr = proc { Benry::CmdApp.undef_action("hello99") }

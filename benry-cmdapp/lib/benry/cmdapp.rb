@@ -334,6 +334,8 @@ module Benry::CmdApp
   end
 
   def self.undef_alias(alias_name)
+    #; [!pk3ya] raises DefinitionError if alias name is not a string.
+    Util.name_should_be_a_string(alias_name, 'Alias', DefinitionError)
     #; [!krdkt] raises DefinitionError if alias not exist.
     #; [!juykx] raises DefinitionError if action specified instead of alias.
     md = INDEX.metadata_get(alias_name)
@@ -351,6 +353,8 @@ module Benry::CmdApp
   end
 
   def self.undef_action(action_name)
+    #; [!bcyn3] raises DefinitionError if action name is not a string.
+    Util.name_should_be_a_string(action_name, 'Action', DefinitionError)
     #; [!bvu95] raises error if action not exist.
     #; [!717fw] raises error if alias specified instead of action.
     md = INDEX.metadata_get(action_name)
