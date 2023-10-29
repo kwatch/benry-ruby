@@ -77,6 +77,11 @@ module Benry
     def __sys(cmd, args, ignore_error, &b)
       optchars = __prepare(cmd, args, "q", nil) { nil }
       quiet_p  = optchars.include?("q")
+      #; [!fb1ji] error if both array and string are specified at the same time.
+      if args[0].is_a?(Array)
+        args.length == 1  or
+          __err "#{cmd}: Invalid argument (if arg is specified as an array, other args should not be specified)."
+      end
       #; [!rqe7a] echoback command and arguments when `:p` not specified.
       #; [!ptipz] not echoback command and arguments when `:p` specified.
       #; [!4u9lj] arguments in echoback string should be quoted or escaped.

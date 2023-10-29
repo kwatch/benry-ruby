@@ -96,6 +96,19 @@ Oktest.scope do
 
 
     topic 'sys()' do
+      spec "[!fb1ji] error if both array and string are specified at the same time." do
+        pr = proc { sys ["echo", "AA"], "BB" }
+        ok {pr}.raise?(ArgumentError,
+                       "sys: Invalid argument (if arg is specified as an array, other args should not be specified).")
+        #
+        pr = proc { sys :q, ["echo", "AA"], "BB" }
+        ok {pr}.raise?(ArgumentError,
+                       "sys: Invalid argument (if arg is specified as an array, other args should not be specified).")
+        #
+        pr = proc { sys! ["echo", "AA"], "BB" }
+        ok {pr}.raise?(ArgumentError,
+                       "sys!: Invalid argument (if arg is specified as an array, other args should not be specified).")
+      end
       spec "[!rqe7a] echoback command and arguments when `:p` not specified." do
         sout, serr = capture_sio do
           sys "echo foo bar >/dev/null"
