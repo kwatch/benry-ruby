@@ -79,7 +79,9 @@ module Benry
       quiet_p  = optchars.include?("q")
       #; [!rqe7a] echoback command and arguments when `:p` not specified.
       #; [!ptipz] not echoback command and arguments when `:p` specified.
-      echoback(args.join(" ")) if ! quiet_p && __echoback?()
+      #; [!4u9lj] arguments in echoback string should be quoted or escaped.
+      echoback_str = __build_echoback_str(args)
+      echoback(echoback_str) if ! quiet_p && __echoback?()
       #; [!dccme] accepts one string, one array, or multiple strings.
       #; [!r9ne3] shell is not invoked if arg is one array or multiple string.
       #; [!w6ol7] globbing is enabled when arg is multiple string.
@@ -106,7 +108,7 @@ module Benry
         return stat if result
       end
       return stat if ignore_error
-      raise "Command failed with status (#{$?.exitstatus}): #{args.join(' ')}"
+      raise "Command failed with status (#{$?.exitstatus}): #{echoback_str}"
     end
 
     def __system(*args, shell: true)
@@ -116,6 +118,26 @@ module Benry
         return system(*args)    # with shell (if necessary)
       else
         return system([args[0], args[0]], *args[1..-1])   # without shell
+      end
+    end
+
+    def __build_echoback_str(args)
+      #; [!4dcra] if arg is one array, quotes or escapes arguments.
+      #; [!ueoov] if arg is multiple string, quotes or escapes arguments.
+      #; [!hnp41] if arg is one string, not quote nor escape argument.
+      echoback_str = (
+        if    args[0].is_a?(Array) ; args[0].collect {|x| __qq(x) }.join(" ")
+        elsif args.length == 1     ; args[0]
+        else                       ; args.collect {|x| __qq(x) }.join(" ")
+        end
+      )
+    end
+
+    def __qq(str)
+      if str =~ /\s/
+        return "\"#{str.gsub(/"/, '\\"')}\""
+      else
+        return str.gsub(/(['"\\])/, '\\\\\1')
       end
     end
 

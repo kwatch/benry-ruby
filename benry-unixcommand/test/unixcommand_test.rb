@@ -108,6 +108,20 @@ Oktest.scope do
         end
         ok {sout} == ""
       end
+      spec "[!4u9lj] arguments in echoback string should be quoted or escaped." do
+        tmpf = "tmp.#{rand().to_s[2..6]}"
+        at_end { File.unlink(tmpf) if File.exist?(tmpf) }
+        ruby = "ruby -r ../lib/benry/unixcommand.rb"
+        setup = "include Benry::UnixCommand"
+        ## multiple string
+        system %Q|#{ruby} -e '#{setup}; sys "echo", "A B C"' > #{tmpf}|
+        ok {File.read(tmpf)} == ("$ echo \"A B C\"\n" \
+                                 "A B C\n")
+        ## one array
+        system %Q|#{ruby} -e '#{setup}; sys ["echo", "A B C"]' > #{tmpf}|
+        ok {File.read(tmpf)} == ("$ echo \"A B C\"\n" \
+                                 "A B C\n")
+      end
       spec "[!dccme] accepts one string, one array, or multiple strings." do
         tmpf = "tmp.#{rand().to_s[2..6]}"
         at_end { File.unlink(tmpf) if File.exist?(tmpf) }
@@ -135,17 +149,17 @@ Oktest.scope do
         sout, serr = capture_sio do
           pr = proc { sys "echo AA BB", " > tmp1.txt" }
           ok {pr}.raise?(RuntimeError,
-                         "Command failed with status (127): echo AA BB  > tmp1.txt")
+                         "Command failed with status (127): \"echo AA BB\" \" > tmp1.txt\"")
         end
-        ok {sout} == "$ echo AA BB  > tmp1.txt\n"
+        ok {sout} == "$ \"echo AA BB\" \" > tmp1.txt\"\n"
         ok {serr} == ""
         ## one array
         sout, serr = capture_sio do
           pr = proc { sys ["echo AA BB > tmp1.txt"] }
           ok {pr}.raise?(RuntimeError,
-                         "Command failed with status (127): echo AA BB > tmp1.txt")
+                         "Command failed with status (127): \"echo AA BB > tmp1.txt\"")
         end
-        ok {sout} == "$ echo AA BB > tmp1.txt\n"
+        ok {sout} == "$ \"echo AA BB > tmp1.txt\"\n"
         ok {serr} == ""
       end
       spec "[!w6ol7] globbing is enabled when arg is multiple string." do
@@ -254,6 +268,21 @@ Oktest.scope do
       end
     end
 
+    topic '__build_echoback_str()' do
+      spec "[!4dcra] if arg is one array, quotes or escapes arguments." do
+        s = __build_echoback_str([["echo", "A B C", "D\"E'F\"'", "*.txt"]])
+        ok {s} == %q`echo "A B C" D\"E\'F\"\' *.txt`
+      end
+      spec "[!ueoov] if arg is multiple string, quotes or escapes arguments." do
+        s = __build_echoback_str(["echo", "A B C", "D\"E'F\"'", "*.txt"])
+        ok {s} == %q`echo "A B C" D\"E\'F\"\' *.txt`
+      end
+      spec "[!hnp41] if arg is one string, not quote nor escape argument." do
+        s = __build_echoback_str(["echo \"A B C\" D\"E'F\"' *.txt"])
+        ok {s} == %q`echo "A B C" D"E'F"' *.txt`
+      end
+    end
+
     topic 'glob_if_possible()' do
       spec "[!xvr32] expands file pattern matching." do
         ok {glob_if_possible("*.txt")} == ["foo1.txt", "foo2.txt"]
@@ -279,7 +308,7 @@ Oktest.scope do
           ruby "-e", "File.write(\"out2\", \"XYZ\")"
         end
         ok {sout} == ("$ #{RbConfig.ruby} -e 'File.write(\"out1\", \"ABC\")'\n"\
-                      "$ #{RbConfig.ruby} -e File.write(\"out2\", \"XYZ\")\n")
+                      "$ #{RbConfig.ruby} -e \"File.write(\\\"out2\\\", \\\"XYZ\\\")\"\n")
         ok {File.read("out1")} == "ABC"
         ok {File.read("out2")} == "XYZ"
       end
