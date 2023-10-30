@@ -90,7 +90,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-define-multiple-option-like--i-option-of-ruby">Q: How to Define Multiple Option, like <code>-I</code> Option of Ruby?</a></li>
 <li><a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a></li>
 <li><a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a></li>
-<li><a href="#q-what-is-the-difference-between-prefixalias-and-prefixaction">Q: What is the Difference Between <code>prefix(alias:)</code> and <code>prefix(action:)</code>?</a></li>
+<li><a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</a></li>
 <li><a href="#q-how-to-change-order-of-options-in-help-message">Q: How to Change Order of Options in Help Message?</a></li>
 <li><a href="#q-is-it-possible-to-make-action-names-emphasised-or-weaken">Q: Is It Possible to Make Action Names Emphasised or Weaken?</a></li>
 <li><a href="#q-is-it-possible-to-add-metadata-to-action-or-option">Q: Is It Possible to Add Metadata to Action or Option?</a></li>
@@ -861,12 +861,12 @@ Actions:
   help               : print help message (of action if specified)
 </pre>
 <ul>
-<li><code>prefix "foo:", alias: "blabla"</code> defines <code>foo</code> as an alias of <code>foo:blabla</code> action.
+<li><code>prefix "foo:", alias_of: "blabla"</code> defines <code>foo</code> as an alias of <code>foo:blabla</code> action.
   See <a href="#alias-of-action">Alias of Action</a> section about alias of action.</li>
 <p></p>
-<li>Keyword arguments <code>action:</code> arg <code>alias:</code> are exclusive.
+<li>Keyword arguments <code>action:</code> arg <code>alias_of:</code> are exclusive.
   It is not allowed to specify both of them at the same time.
-  See <a href="#q-what-is-the-difference-between-prefixalias-and-prefixaction">Q: What is the Difference Between prefix(alias:) and prefix(action:)?</a> section for details.</li>
+  See <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between prefix(alias_of:) and prefix(action:)?</a> section for details.</li>
 <p></p>
 <li>Prefix name and action name should be string. Notice that Symbol is not allowed.</li>
 </ul>
@@ -1135,7 +1135,7 @@ Benry::CmdApp.define_alias(<strong>"hello-it"</strong>   , ["hello", "-l", "it"]
 Benry::CmdApp.define_alias("ciao"       , <strong>"hello-it"</strong>)   # !!!!
 </pre>
 <ul>
-<li><code>prefix "foo:", alias: "bar"</code> defines new alias <code>foo</code> which is an alias of <code>foo:bar</code> action.</li>
+<li><code>prefix "foo:", alias_of: "bar"</code> defines new alias <code>foo</code> which is an alias of <code>foo:bar</code> action.</li>
 </ul>
 <p>File: ex18.rb</p>
 <pre class="language-ruby">
@@ -1143,7 +1143,7 @@ Benry::CmdApp.define_alias("ciao"       , <strong>"hello-it"</strong>)   # !!!!
 require 'benry/cmdapp'
 
 class GitAction &lt Benry::CmdApp::Action
-  <strong>prefix "git:", alias: "status"</strong>
+  <strong>prefix "git:", alias_of: "status"</strong>
 
   @action.("show status in compact format")
   def <strong>status</strong>(path=".")
@@ -2352,15 +2352,15 @@ Options:
   -D, --debug        : debug mode
 </pre>
 </section>
-<section class="subsection" id="q-what-is-the-difference-between-prefixalias-and-prefixaction">
-<h3>Q: What is the Difference Between <code>prefix(alias:)</code> and <code>prefix(action:)</code>?</h3>
+<section class="subsection" id="q-what-is-the-difference-between-prefixalias_of-and-prefixaction">
+<h3>Q: What is the Difference Between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</h3>
 <p>A: The former defines an alias, and the latter doesn't.</p>
 <p>File: ex49.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
 class AaaAction &lt Benry::CmdApp::Action
-  prefix "aaa:", <strong>alias:</strong> "print"
+  prefix "aaa:", <strong>alias_of:</strong> "print"
 
   @action.("test #1")
   def print_()
@@ -2402,7 +2402,7 @@ Actions:
   <strong>bbb                : test #2</strong>                        # !!!!
   help               : print help message (of action if specified)
 </pre>
-<p>In the above example, alias <code>aaa</code> is defined due to <code>prefix(alias:)</code>,
+<p>In the above example, alias <code>aaa</code> is defined due to <code>prefix(alias_of:)</code>,
 and action <code>bbb</code> is not an alias due to <code>prefix(action:)</code>.</p>
 </section>
 <section class="subsection" id="q-how-to-change-order-of-options-in-help-message">
