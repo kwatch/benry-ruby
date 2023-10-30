@@ -82,8 +82,8 @@ $ gem install benry-unixcommand
 File: ex1.rb
 
 ```ruby
-require 'benry/unixcommand'      # !!!!!
-include Benry::UnixCommand       # !!!!!
+require 'benry/unixcommand'       # !!!!!
+include Benry::UnixCommand        # !!!!!
 
 output = capture2 "uname -srmp"   # run command and return output
 p output
@@ -171,13 +171,14 @@ $ cd -
 
 ### `cp`
 
-* `cp "x", "y"` copies `x` to new file `y'. Fails when `y` already exists.
+* `cp "x", "y"` copies `x` to new file `y`. Fails when `y` already exists.
 * `cp! "x", "y"` is similar to above, but overwrites `y` even if it exists.
 * `cp "x", "y", to: "dir"` copies `x` and `y` into `dir`.
 * `cp "x", "y", "dir"` will be error! (use `to: "dir"` instead.)
-* Glob pattern such as `*`, `**`, `?`, and `{}` are available.
+* Glob pattern (`*`, `**`, `?`, `{}`) is available.
 * (See [FAQ](#faq) about `to:` keyword option.)
 * If you want to copy files with keeping directory structure, use `store` instead of `cp`.
+  See [store](#store) section for detail.
 
 <!--
 File: ex-cp1.rb
@@ -214,7 +215,7 @@ Options:
 * `mv! "x", "y"` is similar to above, but overwrites `y` even if it exists.
 * `mv "x", "y", to: "dir"` moves `x` and `y` into `dir`.
 * `mv "x", "y", "dir"` will be error! (use `to: "dir"` instead.)
-* Glob patten such as `*`, `**`, `?`, and `{}` are available.
+* Glob patten (`*`, `**`, `?`, `{}`) is available.
 * (See [FAQ](#faq) about `to:` keyword option.)
 
 <!--
@@ -251,9 +252,9 @@ Options:
 * `rm "x", "y"` removes file `x` and `y`.
 * `rm :r, "dir1"` removes directory recursively.
 * `rm "dir1"` will raise error because `:r` option not specified.
-* `rm "foo*.txt"` will raise error if `foo*.txt` not exists.
-* `rm :f, "foo*.txt"` will not raise error even if `foo*.txt` not exists.
-* Glob patten such as `*`, `**`, `?`, and `{}` are available.
+* `rm "foo*.txt"` will raise error if `foo*.txt` doen't exists.
+* `rm :f, "foo*.txt"` will not raise error even if `foo*.txt` doesn't exists.
+* Glob patten (`*`, `**`, `?`, `{}`) is available.
 
 <!--
 File: ex-rm1.rb
@@ -315,7 +316,7 @@ Options:
 ### `rmdir`
 
 * `rmdir "x", "y"` removed empty directores.
-* Raises error when directory not empty.
+* Raises error if directory is not empty.
 
 <!--
 File: ex-rmdir1.rb
@@ -337,8 +338,8 @@ Options:
 
 ### `ln`
 
-* `ln "x", "y"` creates hard link.
-* `ln :s, "x", "y"` creates symbolic link. Error if `y` already exists.
+* `ln "x", "y"` creates a hard link.
+* `ln :s, "x", "y"` creates a symbolic link. Error if `y` already exists.
 * `ln! :s, "x", "y"` overwrites existing symbolic link `y`.
 * `ln "files*.txt', to: "dir"` creates hard links into `dir`.
 * `ln "files*.txt', "dir"` will be error! (use `to: "dir"` instead.)
@@ -352,14 +353,14 @@ File: ex-ln1.rb
 require 'benry/unixcommand'
 include Benry::UnixCommand
 
-## create hard link
+## create a hard link
 ln "foo1.txt", "dir/foo1.txt"
 
-## create symbolic link
+## create a symbolic link
 ln :s, "foo1.txt", "dir/foo1.txt"     # error if dir/foo1.txt alreay exists.
 ln! :s, "foo1.txt", "dir/foo1.txt"    # overwrites dir/foo1.txt if exists.
 
-## create symbolic link into directory.
+## create a symbolic link into directory.
 ln :s, "foo1.txt", to: "dir"
 
 ## error! use ``to: "dir"`` instead.
@@ -370,7 +371,9 @@ ln :s, "foo1.txt", "dir"
 
 ### `atomic_symlink!`
 
-* `atomic_symlink! "x", "y"` creates symbolic link atomically.
+* `atomic_symlink! "file-or-dir", "sym"` atomically creates a symbolic link whether `sym` exists or not.
+* This is very useful for deploying Rails application or other, because you don't need to remove `sym` symbolick link.
+* This simulates Linux command `ln -s file-or-dir tmpsym; mv -T tmpsym sym`.
 
 <!--
 File: ex-atomic_symlink1.rb
@@ -380,7 +383,7 @@ File: ex-atomic_symlink1.rb
 require 'benry/unixcommand'
 include Benry::UnixCommand
 
-## create symbolic link atomically
+## create a symbolic link atomically
 atomic_symlink! "src-20200101", "src"
 
 ## the above is same as the following
@@ -397,7 +400,7 @@ Options:
 
 ### `touch`
 
-* `touch "x"` updates timestamp of file.
+* `touch "x"` updates timestamps of file.
 * `touch :r, "reffile", "x"` uses timestamp of `reffile` instead current timestamp.
 
 <!--
@@ -901,7 +904,7 @@ end
 
 Result:
 
-```termianl
+```terminal
 [localhost]$ ruby ex-time1.rb
 $ zip -qr9 dir1.zip dir1
 
@@ -947,8 +950,8 @@ In the same reason, `cp()` and `ln()` of Benry::UnixCommand also requires `to:` 
 File: Rakefile
 
 ```ruby
-require 'benry/unixcommand'     # !!!!!
-include Benry::UnixCommand      # !!!!!
+require 'benry/unixcommand'           # !!!!!
+include Benry::UnixCommand            # !!!!!
 Rake::DSL.prepend Benry::UnixCommand  # !!!!!
 
 task :example do
