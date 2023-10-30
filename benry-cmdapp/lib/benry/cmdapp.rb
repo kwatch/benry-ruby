@@ -151,6 +151,14 @@ module Benry::CmdApp
       return false
     end
 
+    def name_should_be_a_string(name, kind, errcls)
+      #; [!9j4d0] do nothing if name is a string.
+      #; [!a2n8y] raises error if name is not a string.
+      name.is_a?(String)  or
+        raise errcls.new("`#{name.inspect}`: #{kind} name should be a string, but got #{name.class.name} object.")
+      nil
+    end
+
   end
 
 
@@ -300,6 +308,13 @@ module Benry::CmdApp
   end
 
   def self.__validate_alias_and_action(alias_name, action_name)  # :nodoc:
+    #; [!2x1ew] returns error message if alias name is not a string.
+    #; [!galce] returns error message if action name is not a string.
+    if ! alias_name.is_a?(String)
+      return "Alias name should be a string, but got #{alias_name.class.name} object."
+    elsif ! action_name.is_a?(String)
+      return "Action name should be a string, but got #{action_name.class.name} object."
+    end
     #; [!zh0a9] returns error message if other alias already exists.
     #; [!ohow0] returns error message if other action exists with the same name as alias.
     alias_md = INDEX.metadata_get(alias_name)
@@ -319,6 +334,8 @@ module Benry::CmdApp
   end
 
   def self.undef_alias(alias_name)
+    #; [!pk3ya] raises DefinitionError if alias name is not a string.
+    Util.name_should_be_a_string(alias_name, 'Alias', DefinitionError)
     #; [!krdkt] raises DefinitionError if alias not exist.
     #; [!juykx] raises DefinitionError if action specified instead of alias.
     md = INDEX.metadata_get(alias_name)
@@ -336,6 +353,8 @@ module Benry::CmdApp
   end
 
   def self.undef_action(action_name)
+    #; [!bcyn3] raises DefinitionError if action name is not a string.
+    Util.name_should_be_a_string(action_name, 'Action', DefinitionError)
     #; [!bvu95] raises error if action not exist.
     #; [!717fw] raises error if alias specified instead of action.
     md = INDEX.metadata_get(action_name)
@@ -501,13 +520,14 @@ module Benry::CmdApp
     end
 
     def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
-      #; [!ermv8] raises DefinitionError if both `action:` and `alias_of:` kwargs are specified.
-      ! (action != nil && alias_of != nil)  or
-        raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}, alias_of: #{alias_of}): `action:` and `alias_of:` are exclusive.")
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = self.__validate_prefix(prefix)
       errmsg == nil  or
         raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
+      #; [!q01ma] raises DefinitionError if action or alias name is invalid.
+      argstr, errmsg = self.__validate_action_and_alias(action, alias_of)
+      errmsg == nil  or
+        raise DefinitionError.new("`prefix(#{prefix.inspect}, #{argstr})`: #{errmsg}")
       #; [!kwst6] if block given...
       if block_given?()
         #; [!t8wwm] saves previous prefix data and restore them at end of block.
@@ -553,6 +573,18 @@ module Benry::CmdApp
       rexp = /\A[a-z][-a-zA-Z0-9]*:([a-z][-a-zA-Z0-9]*:)*\z/
       prefix =~ rexp        or return "Invalid prefix name."
       return nil
+    end
+
+    def self.__validate_action_and_alias(action, alias_of)
+      #; [!38ji9] returns error message if action name is not a string.
+      action == nil || action.is_a?(String)  or
+        return "action: #{action.inspect}", "Action name should be a string, but got #{action.class.name} object."
+      #; [!qge3m] returns error message if alias name is not a string.
+      alias_of == nil || alias_of.is_a?(String)  or
+        return "alias_of: #{alias_of.inspect}", "Alias name should be a string, but got #{alias_of.class.name} object."
+      #; [!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified.
+      ! (action != nil && alias_of != nil)  or
+        return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
     end
 
     def run_once(action_name, *args, **kwargs)
@@ -722,6 +754,8 @@ module Benry::CmdApp
 
     def invoke_action(action_name, args, kwargs, once: false)  ## called from ActionScope#run_action_xxxx()
       action = action_name
+      #; [!uw6rq] raises ActionError if action name is not a string.
+      Util.name_should_be_a_string(action, 'Action', ActionError)
       #; [!dri6e] if called from other action containing prefix, looks up action with the prefix firstly.
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/

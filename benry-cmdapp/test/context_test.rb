@@ -208,6 +208,12 @@ Oktest.scope do
 
     topic '#invoke_action()' do
 
+      spec "[!uw6rq] raises ActionError if action name is not a string." do
+        pr = proc { @context.invoke_action(:hello, [], {}) }
+        ok {pr}.raise?(Benry::CmdApp::ActionError,
+                       "`:hello`: Action name should be a string, but got Symbol object.")
+      end
+
       spec "[!dri6e] if called from other action containing prefix, looks up action with the prefix firstly." do
         sout, serr = capture_sio { @context.invoke_action("foo:ccc", [], {}) }
         ok {sout} == "foo:prep\nfoo:ccc\n"

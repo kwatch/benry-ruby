@@ -58,6 +58,18 @@ Oktest.scope do
 
     topic '.__validate_alias_and_action()' do
 
+      spec "[!2x1ew] returns error message if alias name is not a string." do
+        pr = proc { Benry::CmdApp.define_alias(:a4869, "hello") }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|define_alias(:a4869, "hello"): Alias name should be a string, but got Symbol object.|)
+      end
+
+      spec "[!galce] returns error message if action name is not a string." do
+        pr = proc { Benry::CmdApp.define_alias("a8680", :hello) }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|define_alias("a8680", :hello): Action name should be a string, but got Symbol object.|)
+      end
+
       spec "[!zh0a9] returns error message if other alias already exists." do
         pr = proc { Benry::CmdApp.define_alias("tmphello4", "hello") }
         ok {pr}.NOT.raise?(Exception)
@@ -97,6 +109,12 @@ Oktest.scope do
 
     topic '.undef_alias()' do
 
+      spec "[!pk3ya] raises DefinitionError if alias name is not a string." do
+        pr = proc { Benry::CmdApp.undef_alias(:hello) }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       %q|`:hello`: Alias name should be a string, but got Symbol object.|)
+      end
+
       spec "[!krdkt] raises DefinitionError if alias not exist." do
         pr = proc { Benry::CmdApp.undef_alias("tmphello8") }
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
@@ -118,6 +136,12 @@ Oktest.scope do
 
 
     topic '.undef_action()' do
+
+      spec "[!bcyn3] raises DefinitionError if action name is not a string." do
+        pr = proc { Benry::CmdApp.undef_action(:hello) }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "`:hello`: Action name should be a string, but got Symbol object.")
+      end
 
       spec "[!bvu95] raises error if action not exist." do
         pr = proc { Benry::CmdApp.undef_action("hello99") }
