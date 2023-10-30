@@ -1551,11 +1551,13 @@ module Benry::CmdApp
         s = builder.build_action_list(all: all)  or
           raise CommandError.new("No actions defined.")
         return s
-      #; [!jcq4z] when ':' is specified as prefix...
-      when ":"
+      #; [!jcq4z] when separator is specified...
+      when /\A:+\z/
         #; [!w1j1e] returns top prefix list if ':' specified.
+        #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
-        s = builder.build_top_prefix_list(all: all)  or
+        depth = prefix.length
+        s = builder.build_top_prefix_list(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...
