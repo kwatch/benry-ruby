@@ -469,7 +469,7 @@ module Benry::CmdApp
           action = prefix.chomp(':')
           #; [!cydex] clears `action:` kwarg.
           @__prefixdef__[1] = nil
-        #; [!8xsnw] when action name matched to `alias:` kwarg of `prefix()`...
+        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `prefix()`...
         elsif action == alias_target
           #; [!iguvp] adds prefix name to action name.
           action = prefix + action
@@ -497,7 +497,7 @@ module Benry::CmdApp
         prefix != nil  or raise "** assertion failed: ailas_target=#{alias_target.inspect}"
         alias_metadata = AliasMetadata.new(prefix.chomp(':'), action, nil)
         INDEX.metadata_add(alias_metadata)
-        #; [!4402s] clears `alias:` kwarg.
+        #; [!4402s] clears `alias_of:` kwarg.
         @__prefixdef__[2] = nil
       end
       return true    # for testing purpose
@@ -519,23 +519,13 @@ module Benry::CmdApp
       return @__prefixdef__ ? @__prefixdef__[0] : nil
     end
 
-    def self.prefix(prefix, desc=nil, action: nil, **kwargs, &block)
-      here_lineno = __LINE__
-      #; [!p8r06] raises ArgumentError if unexpected keyword arg specified.
-      alias_ = kwargs.delete(:alias)
-      begin
-        kwargs.empty?  or
-          raise ArgumentError.new("unknown keyword: #{kwargs.keys.first}")
-      rescue ArgumentError => exc
-        exc.backtrace[0] = exc.backtrace[0].sub(/:\d+:/, ":#{here_lineno - 1}:")
-        raise
-      end
+    def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = self.__validate_prefix(prefix)
       errmsg == nil  or
         raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
       #; [!q01ma] raises DefinitionError if action or alias name is invalid.
-      argstr, errmsg = self.__validate_action_and_alias(action, alias_)
+      argstr, errmsg = self.__validate_action_and_alias(action, alias_of)
       errmsg == nil  or
         raise DefinitionError.new("`prefix(#{prefix.inspect}, #{argstr})`: #{errmsg}")
       #; [!kwst6] if block given...
@@ -543,7 +533,7 @@ module Benry::CmdApp
         #; [!t8wwm] saves previous prefix data and restore them at end of block.
         prev = @__prefixdef__
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
-        @__prefixdef__ = [prefix, action, alias_]
+        @__prefixdef__ = [prefix, action, alias_of]
         #; [!j00pk] registers prefix description if specified.
         INDEX.prefix_desc_put(prefix, desc) if desc
         begin
@@ -553,10 +543,10 @@ module Benry::CmdApp
             @__prefixdef__[1] == nil  or
               raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
           end
-          #; [!zs3b5] raises DefinitionError if `alias:` specified but target action not defined.
-          if alias_
+          #; [!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined.
+          if alias_of
             @__prefixdef__[2] == nil  or
-              raise DefinitionError.new("prefix(#{prefix.inspect}, alias: #{alias_.inspect}): Target action of alias not defined.")
+              raise DefinitionError.new("prefix(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
           end
         ensure
           @__prefixdef__ = prev
@@ -564,7 +554,7 @@ module Benry::CmdApp
       #; [!yqhm8] else...
       else
         #; [!tgux9] just stores arguments into class.
-        @__prefixdef__ = [prefix, action, alias_]
+        @__prefixdef__ = [prefix, action, alias_of]
         #; [!ncskq] registers prefix description if specified.
         INDEX.prefix_desc_put(prefix, desc) if desc
       end
@@ -585,16 +575,16 @@ module Benry::CmdApp
       return nil
     end
 
-    def self.__validate_action_and_alias(action, alias_)
+    def self.__validate_action_and_alias(action, alias_of)
       #; [!38ji9] returns error message if action name is not a string.
       action == nil || action.is_a?(String)  or
         return "action: #{action.inspect}", "Action name should be a string, but got #{action.class.name} object."
       #; [!qge3m] returns error message if alias name is not a string.
-      alias_ == nil || alias_.is_a?(String)  or
-        return "alias: #{alias_.inspect}", "Alias name should be a string, but got #{alias_.class.name} object."
-      #; [!ermv8] returns error message if both `action:` and `alias:` kwargs are specified.
-      ! (action != nil && alias_ != nil)  or
-        return "action: #{action.inspect}, alias: #{alias_.inspect}", "`action:` and `alias:` are exclusive."
+      alias_of == nil || alias_of.is_a?(String)  or
+        return "alias_of: #{alias_of.inspect}", "Alias name should be a string, but got #{alias_of.class.name} object."
+      #; [!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified.
+      ! (action != nil && alias_of != nil)  or
+        return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
     end
 
     def run_once(action_name, *args, **kwargs)
