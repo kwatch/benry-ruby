@@ -437,7 +437,7 @@ END
       class FakeActionListBuilder < Benry::CmdApp::ActionListBuilder
         def build_action_list(all: false); return nil; end
         def build_action_list_filtered_by(prefix, all: false); return nil; end
-        def build_top_prefix_list(all: false); return nil; end
+        def build_top_prefix_list(depth=1, all: false); return nil; end
       end
 
       def fake_action_list_builder(&b)

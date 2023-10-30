@@ -1252,9 +1252,10 @@ module Benry::CmdApp
       return [s1, s2].compact().join("\n")
     end
 
-    def build_top_prefix_list(all: false)
+    def build_top_prefix_list(depth=1, all: false)
       #; [!30l2j] includes number of actions per prefix.
-      dict = _count_actions_per_prefix(all: all)
+      #; [!alteh] includes prefix of hidden actions if `all: true` passed.
+      dict = _count_actions_per_prefix(depth, all: all)
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!crbav] returns top prefix list.
@@ -1265,16 +1266,25 @@ module Benry::CmdApp
 
     private
 
-    def _count_actions_per_prefix(all: false)
+    def _count_actions_per_prefix(depth, all: false)
       index = @_index || INDEX
       dict = {}
       index.metadata_each do |metadata|
         #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
         next if metadata.hidden? && ! all
         #
-        if metadata.name =~ /:/
-          prefix = $` + ":"
-          dict[prefix] = (dict[prefix] || 0) + 1
+        name = metadata.name
+        next unless name =~ /:/
+        #; [!5n3qj] counts prefix of specified depth.
+        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
+        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
+        arr = arr.take(depth)           # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
+        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
+        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
+        #; [!r2frb] counts prefix of lesser depth.
+        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
+          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
+          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
         end
       end
       return dict
