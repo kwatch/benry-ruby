@@ -1253,20 +1253,20 @@ module Benry::CmdApp
     end
 
     def build_top_prefix_list(all: false)
-      index = @_index || INDEX
       #; [!30l2j] includes number of actions per prefix.
-      dict = _count_actions_per_prefix(index, all: all)
+      dict = _count_actions_per_prefix(all: all)
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!crbav] returns top prefix list.
-      content = _render_prefix_list(dict, @config, index)
+      content = _render_prefix_list(dict, @config)
       header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
       return build_section(header, content)
     end
 
     private
 
-    def _count_actions_per_prefix(index, all: false)
+    def _count_actions_per_prefix(all: false)
+      index = @_index || INDEX
       dict = {}
       index.metadata_each do |metadata|
         #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
@@ -1280,7 +1280,8 @@ module Benry::CmdApp
       return dict
     end
 
-    def _render_prefix_list(dict, config, index)
+    def _render_prefix_list(dict, config)
+      index = @_index || INDEX
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
       format = (config.format_prefix || config.format_action) + "\n"
       indent = /^( *)/.match(format)[1]
