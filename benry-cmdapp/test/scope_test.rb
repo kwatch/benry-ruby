@@ -352,11 +352,11 @@ END
 
         end
 
-        case_when "[!8xsnw] when action name matched to `alias_of:` kwarg of `prefix()`..." do
+        case_when "[!8xsnw] when action name matched to `alias:` kwarg of `prefix()`..." do
 
           spec "[!iguvp] adds prefix name to action name." do
             ScopeTestAction.class_eval do
-              prefix "p8134:", alias_of: "s6368" do
+              prefix "p8134:", alias: "s6368" do
                 @action.("test")
                 def s6368()
                 end
@@ -376,7 +376,7 @@ END
 
           spec "[!9cyc2] adds prefix name to action name." do
             ScopeTestAction.class_eval do
-              prefix "p9986:", alias_of: "s4711" do
+              prefix "p9986:", alias: "s4711" do
                 @action.("test")
                 def s0629()
                 end
@@ -497,7 +497,7 @@ END
 
       spec "[!lyn0z] registers alias metadata if necessary." do
         ScopeTestAction.class_eval do
-          prefix "p0692:", alias_of: "s8075" do
+          prefix "p0692:", alias: "s8075" do
             @action.("test")
             def s8075()
             end
@@ -512,10 +512,10 @@ END
         ok {md}.NOT.alias?
       end
 
-      spec "[!4402s] clears `alias_of:` kwarg." do
+      spec "[!4402s] clears `alias:` kwarg." do
         x1 = x2 = x3 = nil
         ScopeTestAction.class_eval do
-          prefix "p7506:", alias_of: "s3449" do
+          prefix "p7506:", alias: "s3449" do
             x1 = @__prefixdef__[2]
             #
             @action.("test")
@@ -593,6 +593,19 @@ END
 
     topic '.prefix()' do
 
+      spec "[!p8r06] raises ArgumentError if unexpected keyword arg specified." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            prefix "p9509", alais: "s3213"    # typo of 'alias'
+            @action.("test")
+            def s3213()
+            end
+          end
+        end
+        ok {pr}.raise?(ArgumentError,
+                       "unknown keyword: alais")
+      end
+
       spec "[!mp1p5] raises DefinitionError if prefix is invalid." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do
@@ -615,16 +628,16 @@ END
                        %q|`prefix("p0936:", action: :foo)`: Action name should be a string, but got Symbol object.|)
         #
         pr = proc do
-          ScopeTestAction.class_eval { prefix "p0936:", alias_of: :bar }
+          ScopeTestAction.class_eval { prefix "p0936:", alias: :bar }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p0936:", alias_of: :bar)`: Alias name should be a string, but got Symbol object.|)
+                       %q|`prefix("p0936:", alias: :bar)`: Alias name should be a string, but got Symbol object.|)
         #
         pr = proc do
-          ScopeTestAction.class_eval { prefix "p0936:", action: "foo", alias_of: "bar" }
+          ScopeTestAction.class_eval { prefix "p0936:", action: "foo", alias: "bar" }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p0936:", action: "foo", alias_of: "bar")`: `action:` and `alias_of:` are exclusive.|)
+                       %q|`prefix("p0936:", action: "foo", alias: "bar")`: `action:` and `alias:` are exclusive.|)
       end
 
       case_when "[!kwst6] if block given..." do
@@ -658,7 +671,7 @@ END
           #
           ScopeTestAction.class_eval do
             prefix "p3893:", "guu guu", action: "a1" do
-              prefix "git:", "gii gii", alias_of: "a2" do
+              prefix "git:", "gii gii", alias: "a2" do
                 @action.("x")
                 def a2(); end
               end
@@ -685,11 +698,11 @@ END
                          %q|prefix("p4929:", action: "s7832"): Target action not defined.|)
         end
 
-        spec "[!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined." do
+        spec "[!zs3b5] raises DefinitionError if `alias:` specified but target action not defined." do
           at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
           pr = proc do
             ScopeTestAction.class_eval do
-              prefix "p2476:", alias_of: "s6678" do
+              prefix "p2476:", alias: "s6678" do
                 @action.("test")
                 def s1452()
                 end
@@ -697,7 +710,7 @@ END
             end
           end
           ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                         %q|prefix("p2476:", alias_of: "s6678"): Target action of alias not defined.|)
+                         %q|prefix("p2476:", alias: "s6678"): Target action of alias not defined.|)
         end
 
       end
@@ -721,7 +734,7 @@ END
           #
           ScopeTestAction.class_eval do
             prefix "p9461:", "hoo hoo", action: "homhom"
-            prefix "p0438:", "yaa yaa", alias_of: "homhom"
+            prefix "p0438:", "yaa yaa", alias: "homhom"
             @__prefixdef__ = nil
           end
           ok {Benry::CmdApp::INDEX.prefix_desc_get("p9461:")} == "hoo hoo"
@@ -778,25 +791,25 @@ END
       spec "[!qge3m] returns error message if alias name is not a string." do
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p7328:", alias_of: :foo
+            prefix "p7328:", alias: :foo
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
+                       %q|`prefix("p7328:", alias: :foo)`: Alias name should be a string, but got Symbol object.|)
       end
 
-      spec "[!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified." do
+      spec "[!ermv8] returns error message if both `action:` and `alias:` kwargs are specified." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p7549:", action: "s0573", alias_of: "s0573"
+            prefix "p7549:", action: "s0573", alias: "s0573"
             @action.("test")
             def s0573()
             end
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p7549:", action: "s0573", alias_of: "s0573")`: `action:` and `alias_of:` are exclusive.|)
+                       %q|`prefix("p7549:", action: "s0573", alias: "s0573")`: `action:` and `alias:` are exclusive.|)
       end
 
     end
