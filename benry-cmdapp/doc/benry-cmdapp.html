@@ -91,6 +91,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a></li>
 <li><a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a></li>
 <li><a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</a></li>
+<li><a href="#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">Q: How to list only aliases (or actions) excluding actions (or aliases) ?</a></li>
 <li><a href="#q-how-to-change-order-of-options-in-help-message">Q: How to Change Order of Options in Help Message?</a></li>
 <li><a href="#q-is-it-possible-to-make-action-names-emphasised-or-weaken">Q: Is It Possible to Make Action Names Emphasised or Weaken?</a></li>
 <li><a href="#q-is-it-possible-to-add-metadata-to-action-or-option">Q: Is It Possible to Add Metadata to Action or Option?</a></li>
@@ -864,7 +865,7 @@ Actions:
 <li><code>prefix "foo:", alias_of: "blabla"</code> defines <code>foo</code> as an alias of <code>foo:blabla</code> action.
   See <a href="#alias-of-action">Alias of Action</a> section about alias of action.</li>
 <p></p>
-<li>Keyword arguments <code>action:</code> arg <code>alias_of:</code> are exclusive.
+<li>Keyword arguments <code>action:</code> and <code>alias_of:</code> are exclusive.
   It is not allowed to specify both of them at the same time.
   See <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between prefix(alias_of:) and prefix(action:)?</a> section for details.</li>
 <p></p>
@@ -1273,11 +1274,10 @@ Actions:
 </pre>
 <p>Command-line option <code>-l, --list</code> also prints the same result of the above example.
 This is useful if you specify default action name wit <code>config.default_action</code>.</p>
-<p>Action name list contains alias names, too. If you want to:</p>
-<ul>
-<li>list only alias names, run <code>ruby xxx.rb -l | grep -i 'alias of'</code>.</li>
-<li>list only action names, run <code>ruby xxx.rb -l | grep -iv 'alias of'</code>.</li>
-</ul>
+<p>Action name list contains alias names, too.
+If you want to list only action names (or alias names),
+filter the output of <code>-l, --list</code> option by <code>grep</code> command.
+See <a href="#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">Q: How to list only aliases (or actions) excluding actions (or aliases) ?</a> for details.</p>
 <p>If prefix (such as <code>xxx:</code>) is specified instead of action name,
 Benry-CmdApp lists action names which have that prefix.</p>
 <p>Output:</p>
@@ -2404,6 +2404,37 @@ Actions:
 </pre>
 <p>In the above example, alias <code>aaa</code> is defined due to <code>prefix(alias_of:)</code>,
 and action <code>bbb</code> is not an alias due to <code>prefix(action:)</code>.</p>
+</section>
+<section class="subsection" id="q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">
+<h3>Q: How to list only aliases (or actions) excluding actions (or aliases) ?</h3>
+<p>A: Filter the output of <code>-l, --list</code> option by <code>grep</code> command.</p>
+<pre class="language-console">
+[bash]$ ruby gitexample.rb -l
+Actions:
+  git                : alias of 'git:status'
+  git:stage          : put changes of files into staging area
+  git:staged         : show changes in staging area
+  git:status         : show status in compact format
+  git:unstage        : remove changes from staging area
+  stage              : alias of 'git:stage'
+  staged             : alias of 'git:staged'
+  unstage            : alias of 'git:unstage'
+
+### list only aliases
+[bash]$ ruby gitexample.rb -l <strong>| grep 'alias of'</strong>        # !!!!
+Actions:
+  git                : alias of 'git:status'
+  stage              : alias of 'git:stage'
+  staged             : alias of 'git:staged'
+  unstage            : alias of 'git:unstage'
+
+### list only actions
+[bash]$ ruby gitexample.rb -l <strong>| grep -v 'alias of'</strong>     # !!!!
+  git:stage          : put changes of files into staging area
+  git:staged         : show changes in staging area
+  git:status         : show status in compact format
+  git:unstage        : remove changes from staging area
+</pre>
 </section>
 <section class="subsection" id="q-how-to-change-order-of-options-in-help-message">
 <h3>Q: How to Change Order of Options in Help Message?</h3>

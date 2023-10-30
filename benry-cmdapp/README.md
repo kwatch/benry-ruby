@@ -70,6 +70,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to Specify Detailed Description of Option?](#q-how-to-specify-detailed-description-of-option)
   * [Q: How to Copy All Options from Other Action?](#q-how-to-copy-all-options-from-other-action)
   * [Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction)
+  * [Q: How to list only aliases (or actions) excluding actions (or aliases) ?](#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-)
   * [Q: How to Change Order of Options in Help Message?](#q-how-to-change-order-of-options-in-help-message)
   * [Q: Is It Possible to Make Action Names Emphasised or Weaken?](#q-is-it-possible-to-make-action-names-emphasised-or-weaken)
   * [Q: Is It Possible to Add Metadata to Action or Option?](#q-is-it-possible-to-add-metadata-to-action-or-option)
@@ -909,7 +910,7 @@ Actions:
 * `prefix "foo:", alias_of: "blabla"` defines `foo` as an alias of `foo:blabla` action.
   See [Alias of Action](#alias-of-action) section about alias of action.
 
-* Keyword arguments `action:` arg `alias_of:` are exclusive.
+* Keyword arguments `action:` and `alias_of:` are exclusive.
   It is not allowed to specify both of them at the same time.
   See [Q: What is the Difference Between prefix(alias_of:) and prefix(action:)?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction) section for details.
 
@@ -1350,10 +1351,10 @@ Actions:
 Command-line option `-l, --list` also prints the same result of the above example.
 This is useful if you specify default action name wit `config.default_action`.
 
-Action name list contains alias names, too. If you want to:
-
-* list only alias names, run `ruby xxx.rb -l | grep -i 'alias of'`.
-* list only action names, run `ruby xxx.rb -l | grep -iv 'alias of'`.
+Action name list contains alias names, too.
+If you want to list only action names (or alias names),
+filter the output of `-l, --list` option by `grep` command.
+See [Q: How to list only aliases (or actions) excluding actions (or aliases) ?](#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-) for details.
 
 If prefix (such as `xxx:`) is specified instead of action name,
 Benry-CmdApp lists action names which have that prefix.
@@ -2620,6 +2621,39 @@ Actions:
 
 In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
 and action `bbb` is not an alias due to `prefix(action:)`.
+
+
+### Q: How to list only aliases (or actions) excluding actions (or aliases) ?
+
+A: Filter the output of `-l, --list` option by `grep` command.
+
+```console
+[bash]$ ruby gitexample.rb -l
+Actions:
+  git                : alias of 'git:status'
+  git:stage          : put changes of files into staging area
+  git:staged         : show changes in staging area
+  git:status         : show status in compact format
+  git:unstage        : remove changes from staging area
+  stage              : alias of 'git:stage'
+  staged             : alias of 'git:staged'
+  unstage            : alias of 'git:unstage'
+
+### list only aliases
+[bash]$ ruby gitexample.rb -l | grep 'alias of'        # !!!!
+Actions:
+  git                : alias of 'git:status'
+  stage              : alias of 'git:stage'
+  staged             : alias of 'git:staged'
+  unstage            : alias of 'git:unstage'
+
+### list only actions
+[bash]$ ruby gitexample.rb -l | grep -v 'alias of'     # !!!!
+  git:stage          : put changes of files into staging area
+  git:staged         : show changes in staging area
+  git:status         : show status in compact format
+  git:unstage        : remove changes from staging area
+```
 
 
 ### Q: How to Change Order of Options in Help Message?
