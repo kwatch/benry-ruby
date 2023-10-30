@@ -99,8 +99,8 @@ $ gem install benry-unixcommand
 </pre>
 <p>File: ex1.rb</p>
 <pre class="language-ruby">
-<strong>require 'benry/unixcommand'</strong>      # !!!!!
-<strong>include Benry::UnixCommand</strong>       # !!!!!
+<strong>require 'benry/unixcommand'</strong>       # !!!!!
+<strong>include Benry::UnixCommand</strong>        # !!!!!
 
 output = <strong>capture2</strong> "uname -srmp"   # run command and return output
 p output
@@ -174,13 +174,14 @@ $ cd -
 <section class="subsection" id="cp">
 <h3><code>cp</code></h3>
 <ul>
-<li><code>cp "x", "y"</code> copies <code>x</code> to new file <code>y'. Fails when </code>y`` already exists.</li>
+<li><code>cp "x", "y"</code> copies <code>x</code> to new file <code>y</code>. Fails when <code>y</code> already exists.</li>
 <li><code>cp! "x", "y"</code> is similar to above, but overwrites <code>y</code> even if it exists.</li>
 <li><code>cp "x", "y", to: "dir"</code> copies <code>x</code> and <code>y</code> into <code>dir</code>.</li>
 <li><code>cp "x", "y", "dir"</code> will be error! (use <code>to: "dir"</code> instead.)</li>
-<li>Glob pattern such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
+<li>Glob pattern (<code>*</code>, <code>**</code>, <code>?</code>, <code>{}</code>) is available.</li>
 <li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
-<li>If you want to copy files with keeping directory structure, use <code>store</code> instead of <code>cp</code>.</li>
+<li>If you want to copy files with keeping directory structure, use <code>store</code> instead of <code>cp</code>.
+  See <a href="#store">store</a> section for detail.</li>
 </ul>
 <pre class="language-ruby">
 require 'benry/unixcommand'
@@ -212,7 +213,7 @@ include Benry::UnixCommand
 <li><code>mv! "x", "y"</code> is similar to above, but overwrites <code>y</code> even if it exists.</li>
 <li><code>mv "x", "y", to: "dir"</code> moves <code>x</code> and <code>y</code> into <code>dir</code>.</li>
 <li><code>mv "x", "y", "dir"</code> will be error! (use <code>to: "dir"</code> instead.)</li>
-<li>Glob patten such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
+<li>Glob patten (<code>*</code>, <code>**</code>, <code>?</code>, <code>{}</code>) is available.</li>
 <li>(See <a href="#faq">FAQ</a> about <code>to:</code> keyword option.)</li>
 </ul>
 <pre class="language-ruby">
@@ -244,9 +245,9 @@ include Benry::UnixCommand
 <li><code>rm "x", "y"</code> removes file <code>x</code> and <code>y</code>.</li>
 <li><code>rm :r, "dir1"</code> removes directory recursively.</li>
 <li><code>rm "dir1"</code> will raise error because <code>:r</code> option not specified.</li>
-<li><code>rm "foo*.txt"</code> will raise error if <code>foo*.txt</code> not exists.</li>
-<li><code>rm :f, "foo*.txt"</code> will not raise error even if <code>foo*.txt</code> not exists.</li>
-<li>Glob patten such as <code>*</code>, <code>**</code>, <code>?</code>, and <code>{}</code> are available.</li>
+<li><code>rm "foo*.txt"</code> will raise error if <code>foo*.txt</code> doen't exists.</li>
+<li><code>rm :f, "foo*.txt"</code> will not raise error even if <code>foo*.txt</code> doesn't exists.</li>
+<li>Glob patten (<code>*</code>, <code>**</code>, <code>?</code>, <code>{}</code>) is available.</li>
 </ul>
 <pre class="language-ruby">
 require 'benry/unixcommand'
@@ -298,7 +299,7 @@ include Benry::UnixCommand
 <h3><code>rmdir</code></h3>
 <ul>
 <li><code>rmdir "x", "y"</code> removed empty directores.</li>
-<li>Raises error when directory not empty.</li>
+<li>Raises error if directory is not empty.</li>
 </ul>
 <pre class="language-ruby">
 require 'benry/unixcommand'
@@ -315,8 +316,8 @@ include Benry::UnixCommand
 <section class="subsection" id="ln">
 <h3><code>ln</code></h3>
 <ul>
-<li><code>ln "x", "y"</code> creates hard link.</li>
-<li><code>ln :s, "x", "y"</code> creates symbolic link. Error if <code>y</code> already exists.</li>
+<li><code>ln "x", "y"</code> creates a hard link.</li>
+<li><code>ln :s, "x", "y"</code> creates a symbolic link. Error if <code>y</code> already exists.</li>
 <li><code>ln! :s, "x", "y"</code> overwrites existing symbolic link <code>y</code>.</li>
 <li><code>ln "files*.txt', to: "dir"</code> creates hard links into <code>dir</code>.</li>
 <li><code>ln "files*.txt', "dir"</code> will be error! (use <code>to: "dir"</code> instead.)</li>
@@ -326,14 +327,14 @@ include Benry::UnixCommand
 require 'benry/unixcommand'
 include Benry::UnixCommand
 
-## create hard link
+## create a hard link
 <strong>ln</strong> "foo1.txt", "dir/foo1.txt"
 
-## create symbolic link
+## create a symbolic link
 <strong>ln :s</strong>, "foo1.txt", "dir/foo1.txt"     # error if dir/foo1.txt alreay exists.
 <strong>ln! :s</strong>, "foo1.txt", "dir/foo1.txt"    # overwrites dir/foo1.txt if exists.
 
-## create symbolic link into directory.
+## create a symbolic link into directory.
 <strong>ln :s</strong>, "foo1.txt", <strong>to:</strong> "dir"
 
 ## error! use ``to: "dir"`` instead.
@@ -343,13 +344,15 @@ include Benry::UnixCommand
 <section class="subsection" id="atomic_symlink">
 <h3><code>atomic_symlink!</code></h3>
 <ul>
-<li><code>atomic_symlink! "x", "y"</code> creates symbolic link atomically.</li>
+<li><code>atomic_symlink! "file-or-dir", "sym"</code> atomically creates a symbolic link whether <code>sym</code> exists or not.</li>
+<li>This is very useful for deploying Rails application or other, because you don't need to remove <code>sym</code> symbolick link.</li>
+<li>This simulates Linux command <code>ln -s file-or-dir tmpsym; mv -T tmpsym sym</code>.</li>
 </ul>
 <pre class="language-ruby">
 require 'benry/unixcommand'
 include Benry::UnixCommand
 
-## create symbolic link atomically
+## create a symbolic link atomically
 <strong>atomic_symlink!</strong> "src-20200101", "src"
 
 ## the above is same as the following
@@ -365,7 +368,7 @@ File.rename(tmplink, "src")               # rename symlink atomically
 <section class="subsection" id="touch">
 <h3><code>touch</code></h3>
 <ul>
-<li><code>touch "x"</code> updates timestamp of file.</li>
+<li><code>touch "x"</code> updates timestamps of file.</li>
 <li><code>touch :r, "reffile", "x"</code> uses timestamp of <code>reffile</code> instead current timestamp.</li>
 </ul>
 <pre class="language-ruby">
@@ -794,7 +797,7 @@ include Benry::UnixCommand
 end
 </pre>
 <p>Result:</p>
-<pre class="language-termianl">
+<pre class="language-terminal">
 [localhost]$ ruby ex-time1.rb
 $ zip -qr9 dir1.zip dir1
 
@@ -831,8 +834,8 @@ $ <strong>mv foo bar</strong>
 <h3>How to use in Rakefile?</h3>
 <p>File: Rakefile</p>
 <pre class="language-ruby">
-<strong>require 'benry/unixcommand'</strong>     # !!!!!
-<strong>include Benry::UnixCommand</strong>      # !!!!!
+<strong>require 'benry/unixcommand'</strong>           # !!!!!
+<strong>include Benry::UnixCommand</strong>            # !!!!!
 <strong>Rake::DSL.prepend Benry::UnixCommand</strong>  # !!!!!
 
 task :example do
