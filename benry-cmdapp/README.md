@@ -69,7 +69,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to Define Multiple Option, like `-I` Option of Ruby?](#q-how-to-define-multiple-option-like--i-option-of-ruby)
   * [Q: How to Specify Detailed Description of Option?](#q-how-to-specify-detailed-description-of-option)
   * [Q: How to Copy All Options from Other Action?](#q-how-to-copy-all-options-from-other-action)
-  * [Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction)
+  * [Q: What is the Difference Between `prefix(alias:)` and `prefix(action:)`?](#q-what-is-the-difference-between-prefixalias-and-prefixaction)
   * [Q: How to Change Order of Options in Help Message?](#q-how-to-change-order-of-options-in-help-message)
   * [Q: Is It Possible to Make Action Names Emphasised or Weaken?](#q-is-it-possible-to-make-action-names-emphasised-or-weaken)
   * [Q: Is It Possible to Add Metadata to Action or Option?](#q-is-it-possible-to-add-metadata-to-action-or-option)
@@ -906,12 +906,12 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
-* `prefix "foo:", alias_of: "blabla"` defines `foo` as an alias of `foo:blabla` action.
+* `prefix "foo:", alias: "blabla"` defines `foo` as an alias of `foo:blabla` action.
   See [Alias of Action](#alias-of-action) section about alias of action.
 
-* Keyword arguments `action:` arg `alias_of:` are exclusive.
+* Keyword arguments `action:` arg `alias:` are exclusive.
   It is not allowed to specify both of them at the same time.
-  See [Q: What is the Difference Between prefix(alias_of:) and prefix(action:)?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction) section for details.
+  See [Q: What is the Difference Between prefix(alias:) and prefix(action:)?](#q-what-is-the-difference-between-prefixalias-and-prefixaction) section for details.
 
 * Prefix name and action name should be string. Notice that Symbol is not allowed.
 
@@ -1197,7 +1197,7 @@ Benry::CmdApp.define_alias("hello-it"   , ["hello", "-l", "it"])
 Benry::CmdApp.define_alias("ciao"       , "hello-it")   # !!!!
 ```
 
-* `prefix "foo:", alias_of: "bar"` defines new alias `foo` which is an alias of `foo:bar` action.
+* `prefix "foo:", alias: "bar"` defines new alias `foo` which is an alias of `foo:bar` action.
 
 File: ex18.rb
 
@@ -1206,7 +1206,7 @@ File: ex18.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  prefix "git:", alias_of: "status"
+  prefix "git:", alias: "status"
 
   @action.("show status in compact format")
   def status(path=".")
@@ -2563,7 +2563,7 @@ Options:
 ```
 
 
-### Q: What is the Difference Between `prefix(alias_of:)` and `prefix(action:)`?
+### Q: What is the Difference Between `prefix(alias:)` and `prefix(action:)`?
 
 A: The former defines an alias, and the latter doesn't.
 
@@ -2573,7 +2573,7 @@ File: ex49.rb
 require 'benry/cmdapp'
 
 class AaaAction < Benry::CmdApp::Action
-  prefix "aaa:", alias_of: "print"
+  prefix "aaa:", alias: "print"
 
   @action.("test #1")
   def print_()
@@ -2618,7 +2618,7 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
-In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
+In the above example, alias `aaa` is defined due to `prefix(alias:)`,
 and action `bbb` is not an alias due to `prefix(action:)`.
 
 
