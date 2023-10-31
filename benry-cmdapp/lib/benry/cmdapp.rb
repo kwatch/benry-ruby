@@ -431,7 +431,7 @@ module Benry::CmdApp
           #; [!0qz0q] `@copy_options.()` stores arguments into option schema object.
           #; [!dezh1] `@copy_options.()` ignores help option automatically.
           schema = @__actiondef__[1]
-          except = except.is_a?(Array) ? except : (exept == nil ? [] : [except])
+          except = except.is_a?(Array) ? except : (except == nil ? [] : [except])
           schema.copy_from(metadata.schema, except: [:help] + except)
         end
       end
