@@ -1195,7 +1195,7 @@ module Benry::CmdApp
   class ActionListBuilder < BaseHelpBuilder
 
     HEADER_ALIASES    = "Aliases:"
-    HEADER_PREFIXES   = "Top Prefixes:"
+    HEADER_PREFIXES   = "Prefixes:"
 
     def initialize(config, app_help_builder=nil)
       super(config)
@@ -1217,11 +1217,12 @@ module Benry::CmdApp
       prefix2 = prefix.chomp(':')
       found = false
       s1 = b.__send__(:build_actions_part, all: all) {|metadata|
-        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         md = metadata
         if md.name.start_with?(prefix)
           matched = true
         elsif md.name.start_with?(prefix2)
+          #matched = true
+          #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
           matched = ! (md.alias? && md.action.start_with?(prefix))
         else
           matched = false
@@ -1252,35 +1253,46 @@ module Benry::CmdApp
       return [s1, s2].compact().join("\n")
     end
 
-    def build_top_prefix_list(all: false)
-      index = @_index || INDEX
+    def build_prefix_list(depth=1, all: false)
       #; [!30l2j] includes number of actions per prefix.
-      dict = _count_actions_per_prefix(index, all: all)
+      #; [!alteh] includes prefix of hidden actions if `all: true` passed.
+      dict = _count_actions_per_prefix(depth, all: all)
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!crbav] returns top prefix list.
-      content = _render_prefix_list(dict, @config, index)
-      header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
-      return build_section(header, content)
+      content = _render_prefix_list(dict, @config)
+      header = self.class.const_get(:HEADER_PREFIXES)   # "Prefixes:"
+      return build_section(header, content, " (depth=#{depth})")
     end
 
     private
 
-    def _count_actions_per_prefix(index, all: false)
+    def _count_actions_per_prefix(depth, all: false)
+      index = @_index || INDEX
       dict = {}
       index.metadata_each do |metadata|
         #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
         next if metadata.hidden? && ! all
         #
-        if metadata.name =~ /:/
-          prefix = $` + ":"
-          dict[prefix] = (dict[prefix] || 0) + 1
+        name = metadata.name
+        next unless name =~ /:/
+        #; [!5n3qj] counts prefix of specified depth.
+        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
+        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
+        arr = arr.take(depth)           # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
+        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
+        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
+        #; [!r2frb] counts prefix of lesser depth.
+        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
+          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
+          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
         end
       end
       return dict
     end
 
-    def _render_prefix_list(dict, config, index)
+    def _render_prefix_list(dict, config)
+      index = @_index || INDEX
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
       format = (config.format_prefix || config.format_action) + "\n"
       indent = /^( *)/.match(format)[1]
@@ -1540,11 +1552,13 @@ module Benry::CmdApp
         s = builder.build_action_list(all: all)  or
           raise CommandError.new("No actions defined.")
         return s
-      #; [!jcq4z] when ':' is specified as prefix...
-      when ":"
+      #; [!jcq4z] when separator is specified...
+      when /\A:+\z/
         #; [!w1j1e] returns top prefix list if ':' specified.
+        #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
-        s = builder.build_top_prefix_list(all: all)  or
+        depth = prefix.length
+        s = builder.build_prefix_list(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...

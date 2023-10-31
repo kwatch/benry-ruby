@@ -437,7 +437,7 @@ END
       class FakeActionListBuilder < Benry::CmdApp::ActionListBuilder
         def build_action_list(all: false); return nil; end
         def build_action_list_filtered_by(prefix, all: false); return nil; end
-        def build_top_prefix_list(all: false); return nil; end
+        def build_prefix_list(depth=1, all: false); return nil; end
       end
 
       def fake_action_list_builder(&b)
@@ -472,14 +472,43 @@ END
 
       end
 
-      case_when "[!jcq4z] when ':' is specified as prefix..." do
+      case_when "[!jcq4z] when separator is specified..." do
 
         spec "[!w1j1e] returns top prefix list if ':' specified." do
           s = @app.instance_eval { render_action_list(":") }
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
-          ok {s} =~ /\A\e\[1;34mTop Prefixes:\e\[0m$/
+          ok {s} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)$/
+          #
+          ok {s} !~ /^  hello/
+          ok {s} =~ /^  foo: \(\d+\)$/
+          ok {s} =~ /^  git: \(\d+\)$/
+          ok {s} !~ /^  hello/
+          #
+          ok {s} =~ /^  giit: \(\d\d\)         : gitt commands$/
+          ok {s} !~ /^  giit:branch: \(\d+\)$/
+          ok {s} !~ /^  giit:commit: \(\d+\)$/
+          ok {s} !~ /^  giit:repo: \(\d+\)$/
+          ok {s} !~ /^  giit:staging: \(\d+\)$/
+        end
+
+        spec "[!bgput] returns two depth prefix list if '::' specified." do
+          s = @app.instance_eval { render_action_list("::") }
+          ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
+          ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
+          ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
+          ok {s} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)$/
+          #
+          ok {s} =~ /^  foo: \(\d+\)$/
+          ok {s} =~ /^  git: \(\d+\)$/
+          ok {s} =~ /^  giit: \(\d\)          : gitt commands$/
+          ok {s} !~ /^  hello/
+          #
+          ok {s} =~ /^  giit:branch: \(\d+\)$/
+          ok {s} =~ /^  giit:commit: \(\d+\)$/
+          ok {s} =~ /^  giit:repo: \(\d+\)$/
+          ok {s} =~ /^  giit:staging: \(\d+\)$/
         end
 
         spec "[!tiihg] raises CommandError if no actions found having prefix." do

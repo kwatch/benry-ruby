@@ -55,19 +55,31 @@ end
 Oktest.scope do
 
 
-  def with_dummy_index(index, &b)
+  def with_dummy_index(index=nil, &b)
+    index ||= Benry::CmdApp::MetadataIndex.new()
     bkup = nil
     Benry::CmdApp.module_eval {
       bkup = const_get :INDEX
       remove_const :INDEX
       const_set :INDEX, index
     }
-    yield
+    yield index
+    return index
   ensure
     Benry::CmdApp.module_eval {
       remove_const :INDEX
       const_set :INDEX, bkup
     }
+  end
+
+  def new_index_with_filter(*prefixes)
+    idx = Benry::CmdApp::MetadataIndex.new()
+    Benry::CmdApp::INDEX.metadata_each do |md|
+      if md.name.start_with?(*prefixes)
+        idx.metadata_add(md)
+      end
+    end
+    return idx
   end
 
 
@@ -902,18 +914,18 @@ END
     end
 
 
-    topic '#build_top_prefix_list()' do
+    topic '#build_prefix_list()' do
 
       spec "[!crbav] returns top prefix list." do
-        x = @builder.build_top_prefix_list()
-        ok {x} =~ /\A\e\[1;34mTop Prefixes:\e\[0m\n/
+        x = @builder.build_prefix_list(1)
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 
-      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
-        x = @builder.build_top_prefix_list(all: true)
+      spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
+        x = @builder.build_prefix_list(1, all: true)
         ok {x} =~ /^  secret:/
-        x = @builder.build_top_prefix_list()
+        x = @builder.build_prefix_list(1)
         ok {x} !~ /^  secret:/
       end
 
@@ -924,37 +936,88 @@ END
         end
         #
         with_dummy_index(index) do
-          x = @builder.build_top_prefix_list()
+          x = @builder.build_prefix_list()
           ok {x} == nil
-          x = @builder.build_top_prefix_list(all: true)
+          x = @builder.build_prefix_list(all: true)
           ok {x} != nil
         end
       end
 
       spec "[!30l2j] includes number of actions per prefix." do
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^  git: \(\d+\)\n/
         ok {x} =~ /^  secret: \(\d+\)\n/
       end
 
       spec "[!qxoja] includes prefix description if registered." do
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
       end
 
       spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
         @config.format_prefix = "  %-15s # %s"
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
         #
         @config.format_prefix = nil
         @config.format_prefix = "    %-15s -- %s"
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
       end
 
     end
 
+
+    topic '#_count_actions_per_prefix()' do
+
+      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ActionListBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        ok {b.__send__(:_count_actions_per_prefix, 1, all: true) }.key?("md:")
+        ok {b.__send__(:_count_actions_per_prefix, 1, all: false)}.NOT.key?("md:")
+      end
+
+      spec "[!5n3qj] counts prefix of specified depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ActionListBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        expected1 = {"giit:"=>13}
+        expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:"=>7,
+                     "giit:staging:"=>3}
+        expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
+                     "giit:staging:"=>3}
+        ok {b.__send__(:_count_actions_per_prefix, 1)} == expected1
+        ok {b.__send__(:_count_actions_per_prefix, 2)} == expected2
+        ok {b.__send__(:_count_actions_per_prefix, 3)} == expected3
+        ok {b.__send__(:_count_actions_per_prefix, 4)} == expected3
+        ok {b.__send__(:_count_actions_per_prefix, 5)} == expected3
+      end
+
+      spec "[!r2frb] counts prefix of lesser depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ActionListBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        x = b.__send__(:_count_actions_per_prefix, 1)
+        ok {x}.key?("giit:")
+        ok {x}.NOT.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = b.__send__(:_count_actions_per_prefix, 2)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = b.__send__(:_count_actions_per_prefix, 3)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.key?("giit:repo:config:")
+      end
+
+    end
 
   end
 
