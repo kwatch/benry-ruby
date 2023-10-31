@@ -1217,11 +1217,12 @@ module Benry::CmdApp
       prefix2 = prefix.chomp(':')
       found = false
       s1 = b.__send__(:build_actions_part, all: all) {|metadata|
-        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         md = metadata
         if md.name.start_with?(prefix)
           matched = true
         elsif md.name.start_with?(prefix2)
+          #matched = true
+          #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
           matched = ! (md.alias? && md.action.start_with?(prefix))
         else
           matched = false
