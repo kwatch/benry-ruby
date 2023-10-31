@@ -479,7 +479,7 @@ END
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
-          ok {s} =~ /\A\e\[1;34mTop Prefixes:\e\[0m \(depth=\d+\)$/
+          ok {s} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)$/
           #
           ok {s} !~ /^  hello/
           ok {s} =~ /^  foo: \(\d+\)$/
@@ -498,7 +498,7 @@ END
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
-          ok {s} =~ /\A\e\[1;34mTop Prefixes:\e\[0m \(depth=\d+\)$/
+          ok {s} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)$/
           #
           ok {s} =~ /^  foo: \(\d+\)$/
           ok {s} =~ /^  git: \(\d+\)$/

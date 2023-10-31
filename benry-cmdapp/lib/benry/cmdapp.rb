@@ -1195,7 +1195,7 @@ module Benry::CmdApp
   class ActionListBuilder < BaseHelpBuilder
 
     HEADER_ALIASES    = "Aliases:"
-    HEADER_PREFIXES   = "Top Prefixes:"
+    HEADER_PREFIXES   = "Prefixes:"
 
     def initialize(config, app_help_builder=nil)
       super(config)
@@ -1260,7 +1260,7 @@ module Benry::CmdApp
       return nil if dict.empty?
       #; [!crbav] returns top prefix list.
       content = _render_prefix_list(dict, @config)
-      header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
+      header = self.class.const_get(:HEADER_PREFIXES)   # "Prefixes:"
       return build_section(header, content, " (depth=#{depth})")
     end
 

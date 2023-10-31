@@ -916,7 +916,7 @@ END
 
       spec "[!crbav] returns top prefix list." do
         x = @builder.build_top_prefix_list(1)
-        ok {x} =~ /\A\e\[1;34mTop Prefixes:\e\[0m \(depth=\d+\)\n/
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 
