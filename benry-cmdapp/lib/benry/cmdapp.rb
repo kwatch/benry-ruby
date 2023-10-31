@@ -1261,7 +1261,7 @@ module Benry::CmdApp
       #; [!crbav] returns top prefix list.
       content = _render_prefix_list(dict, @config)
       header = self.class.const_get(:HEADER_PREFIXES)   # "Top Prefixes:"
-      return build_section(header, content)
+      return build_section(header, content, " (depth=#{depth})")
     end
 
     private
