@@ -519,11 +519,11 @@ END
       spec "[!8qz6a] adds default action name after header if it is set." do
         @config.default_action = "help"
         x = @builder.__send__(:build_actions_part)
-        ok {x} =~ /\A\e\[1;34mActions:\e\[0m\e\[2m \(default: help\)\e\[0m$/
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \e\[2m\(default: help\)\e\[0m$/
         #
         @config.default_action = "hello"
         x = @builder.__send__(:build_actions_part)
-        ok {x} =~ /\A\e\[1;34mActions:\e\[0m\e\[2m \(default: hello\)\e\[0m$/
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \e\[2m\(default: hello\)\e\[0m$/
       end
 
     end
@@ -928,7 +928,7 @@ END
 
       spec "[!crbav] returns top prefix list." do
         x = @builder.build_prefix_list(1)
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m\e\[2m \(depth=\d+\)\e\[0m\n/
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 

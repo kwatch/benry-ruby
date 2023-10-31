@@ -950,7 +950,7 @@ module Benry::CmdApp
       #; [!61psk] returns section string with decorating header.
       #; [!0o8w4] appends '\n' to content if it doesn't end with '\n'.
       nl = content.end_with?("\n") ? nil : "\n"
-      extra = decorate_extra(extra) if extra
+      extra = " " + decorate_extra(extra) if extra
       return "#{decorate_header(header)}#{extra}\n#{content}#{nl}"
     end
 
@@ -1111,7 +1111,7 @@ module Benry::CmdApp
       if c.default_action
         metadata = index.metadata_get(c.default_action)
         if metadata && (all || ! metadata.hidden?)
-          extra = " (default: #{c.default_action})"
+          extra = "(default: #{c.default_action})"
         end
       end
       header = self.class.const_get(:HEADER_ACTIONS)    # "Actions:"
@@ -1270,7 +1270,7 @@ module Benry::CmdApp
       #; [!crbav] returns top prefix list.
       content = _render_prefix_list(dict, @config)
       header = self.class.const_get(:HEADER_PREFIXES)   # "Prefixes:"
-      return build_section(header, content, " (depth=#{depth})")
+      return build_section(header, content, "(depth=#{depth})")
     end
 
     private
