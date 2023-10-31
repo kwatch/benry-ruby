@@ -797,16 +797,18 @@ File: ex11.rb
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
-  prefix "foo:bar:"           # !!!!
+  prefix "foo:bar:"                # !!!!
 
   @action.("test action #1")
-  def test1()                 # action name: 'foo:bar:test1'
-    puts __method__
+  def test1()                      # action name: 'foo:bar:test1'
+    puts __method__                #=> test1
+    puts methods().grep(/test1/)   #=> foo__bar__test1
   end
 
   @action.("test action #2")
-  def baz__test2()            # action name: 'foo:bar:baz:test2'
-    puts __method__
+  def baz__test2()                 # action name: 'foo:bar:baz:test2'
+    puts __method__                #=> baz__test2
+    puts methods().grep(/test2/)   #=> foo__bar__baz__test2
   end
 
 end
@@ -820,11 +822,18 @@ Output:
 
 ```console
 [bash]$ ruby ex11.rb foo:bar:test1
-test1
+test1                         # <== puts __method__
+foo__bar__test1               # <== puts methods().grep(/test1/)
 
 [bash]$ ruby ex11.rb foo:bar:baz:test2
-baz__test2
+baz__test2                    # <== puts __method__
+foo__bar__baz__test2          # <== puts methods().grep(/test1/)
 ```
+
+(INTERNAL MECHANISM)
+As shown in the above output, Benry-CmdApp internally renames `test1()` and `baz__test2()` methods within prefix `foo:bar` to `foo__bar__test1()` and `foo__bar__baz__test2()` respectively.
+`__method__` seems to keep original method name, but don't be fooled, methods are renamed indeed.
+Due to this mechanism, it is possible to define the same name methods in different prefixes with no confliction.
 
 Help message:
 

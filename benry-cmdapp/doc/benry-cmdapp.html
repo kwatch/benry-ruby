@@ -761,16 +761,18 @@ If you want to allow <code>--quiet=on</code>, specify option argument and <code>
 require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
-  <strong>prefix "foo:bar:"</strong>           # !!!!
+  <strong>prefix "foo:bar:"</strong>                # !!!!
 
   @action.("test action #1")
-  def <strong>test1</strong>()                 # action name: 'foo:bar:test1'
-    puts __method__
+  def <strong>test1</strong>()                      # action name: 'foo:bar:test1'
+    puts __method__                #=&gt; test1
+    puts methods().grep(/test1/)   #=&gt; foo__bar__test1
   end
 
   @action.("test action #2")
-  def <strong>baz__test2</strong>()            # action name: 'foo:bar:baz:test2'
-    puts __method__
+  def <strong>baz__test2</strong>()                 # action name: 'foo:bar:baz:test2'
+    puts __method__                #=&gt; baz__test2
+    puts methods().grep(/test2/)   #=&gt; foo__bar__baz__test2
   end
 
 end
@@ -782,11 +784,17 @@ exit app.main()
 <p>Output:</p>
 <pre class="language-console">
 [bash]$ ruby ex11.rb <strong>foo:bar:test1</strong>
-test1
+test1                         # &lt== puts __method__
+foo__bar__test1               # &lt== puts methods().grep(/test1/)
 
 [bash]$ ruby ex11.rb <strong>foo:bar:baz:test2</strong>
-baz__test2
+baz__test2                    # &lt== puts __method__
+foo__bar__baz__test2          # &lt== puts methods().grep(/test1/)
 </pre>
+<p>(INTERNAL MECHANISM)
+As shown in the above output, Benry-CmdApp internally renames <code>test1()</code> and <code>baz__test2()</code> methods within prefix <code>foo:bar</code> to <code>foo__bar__test1()</code> and <code>foo__bar__baz__test2()</code> respectively.
+<code>__method__</code> seems to keep original method name, but don't be fooled, methods are renamed indeed.
+Due to this mechanism, it is possible to define the same name methods in different prefixes with no confliction.</p>
 <p>Help message:</p>
 <pre class="language-console">
 [bash]$ ruby ex11.rb -h
