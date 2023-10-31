@@ -249,6 +249,16 @@ END
     end
 
 
+    topic '#decorate_extra()' do
+
+      spec "[!9nch4] decorates extra string." do
+        x = @builder.__send__(:decorate_extra, "(default: 'git')")
+        ok {x} == "\e[2m(default: 'git')\e[0m"
+      end
+
+    end
+
+
     topic '#decorate_str()' do
 
       spec "[!9qesd] decorates string if `hidden` is true." do

@@ -1012,6 +1012,11 @@ module Benry::CmdApp
       return @config.deco_header % s
     end
 
+    def decorate_extra(s)
+      #; [!9nch4] decorates extra string.
+      return @config.deco_extra % s
+    end
+
     def decorate_str(s, hidden, important)
       #; [!9qesd] decorates string if `hidden` is true.
       #; [!uql2d] decorates string if `important` is true.
