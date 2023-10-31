@@ -1009,7 +1009,7 @@ module Benry::CmdApp
     end
 
     def decorate_header(s)
-      #; [!zffx5] decorates header string.
+      #; [!4ufhw] decorates header string.
       return @config.deco_header % s
     end
 

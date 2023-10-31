@@ -241,7 +241,7 @@ END
 
     topic '#decorate_header()' do
 
-      spec "[!zffx5] decorates header string." do
+      spec "[!4ufhw] decorates header string." do
         x = @builder.__send__(:decorate_header, "Header:")
         ok {x} == "\e[1;34mHeader:\e[0m"
       end
