@@ -249,6 +249,16 @@ END
     end
 
 
+    topic '#decorate_extra()' do
+
+      spec "[!9nch4] decorates extra string." do
+        x = @builder.__send__(:decorate_extra, "(default: 'git')")
+        ok {x} == "\e[2m(default: 'git')\e[0m"
+      end
+
+    end
+
+
     topic '#decorate_str()' do
 
       spec "[!9qesd] decorates string if `hidden` is true." do
@@ -509,11 +519,11 @@ END
       spec "[!8qz6a] adds default action name after header if it is set." do
         @config.default_action = "help"
         x = @builder.__send__(:build_actions_part)
-        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \(default: help\)$/
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \e\[2m\(default: help\)\e\[0m$/
         #
         @config.default_action = "hello"
         x = @builder.__send__(:build_actions_part)
-        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \(default: hello\)$/
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m \e\[2m\(default: hello\)\e\[0m$/
       end
 
     end
@@ -918,7 +928,7 @@ END
 
       spec "[!crbav] returns top prefix list." do
         x = @builder.build_prefix_list(1)
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)\n/
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 

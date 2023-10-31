@@ -841,6 +841,7 @@ module Benry::CmdApp
     FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
     DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
+    DECORATION_EXTRA      = "\e[2m%s\e[0m"      # gray color
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
     DECORATION_WEAK       = "\e[2m%s\e[0m"      # gray color
     DECORATION_HIDDEN     = "\e[2m%s\e[0m"      # gray color
@@ -852,7 +853,7 @@ module Benry::CmdApp
                    default_action: nil,
                    help_postamble: nil,
                    format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
-                   deco_command: nil, deco_header: nil,
+                   deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
@@ -872,21 +873,22 @@ module Benry::CmdApp
       @format_action      = format_action || FORMAT_ACTION
       @format_usage       = format_usage  || FORMAT_USAGE
       @format_prefix      = format_prefix   # nil means to use @format_action
-      @deco_command       = deco_command || DECORATION_COMMAND
-      @deco_header        = deco_header  || DECORATION_HEADER
-      @deco_strong        = deco_strong  || DECORATION_STRONG
-      @deco_weak          = deco_weak    || DECORATION_WEAK
-      @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
+      @deco_command       = deco_command || DECORATION_COMMAND  # for command name in help
+      @deco_header        = deco_header  || DECORATION_HEADER   # for "Usage:" or "Actions"
+      @deco_extra         = deco_extra   || DECORATION_EXTRA    # for "(default: )" or "(depth=1)"
+      @deco_strong        = deco_strong  || DECORATION_STRONG   # for `important: true`
+      @deco_weak          = deco_weak    || DECORATION_WEAK     # for `important: false`
+      @deco_hidden        = deco_hidden  || DECORATION_HIDDEN   # for `hidden: true`
       @deco_error         = deco_error   || DECORATION_ERROR
-      @option_help        = option_help
-      @option_version     = option_version
-      @option_list        = option_list
-      @option_all         = option_all
-      @option_verbose     = option_verbose
-      @option_quiet       = option_quiet
-      @option_color       = option_color
-      @option_debug       = option_debug
-      @option_trace       = option_trace
+      @option_help        = option_help         # enable or disable `-h, --help`
+      @option_version     = option_version      # enable or disable `-V, --version`
+      @option_list        = option_list         # enable or disable `-l, --list`
+      @option_all         = option_all          # enable or disable `-a, --all`
+      @option_verbose     = option_verbose      # enable or disable `-v, --verbose`
+      @option_quiet       = option_quiet        # enable or disable `-q, --quiet`
+      @option_color       = option_color        # enable or disable `--color[=<on|off>]`
+      @option_debug       = option_debug        # enable or disable `--debug`
+      @option_trace       = option_trace        # enable or disable `-T, --trace`
       #
       #@verobse_mode       = nil
       #@quiet_mode         = nil
@@ -898,7 +900,7 @@ module Benry::CmdApp
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
     attr_accessor :format_option, :format_action, :format_usage, :format_prefix
-    attr_accessor :deco_command, :deco_header
+    attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
     attr_accessor :option_help, :option_version, :option_list, :option_all
@@ -948,6 +950,7 @@ module Benry::CmdApp
       #; [!61psk] returns section string with decorating header.
       #; [!0o8w4] appends '\n' to content if it doesn't end with '\n'.
       nl = content.end_with?("\n") ? nil : "\n"
+      extra = " " + decorate_extra(extra) if extra
       return "#{decorate_header(header)}#{extra}\n#{content}#{nl}"
     end
 
@@ -1008,6 +1011,11 @@ module Benry::CmdApp
     def decorate_header(s)
       #; [!zffx5] decorates header string.
       return @config.deco_header % s
+    end
+
+    def decorate_extra(s)
+      #; [!9nch4] decorates extra string.
+      return @config.deco_extra % s
     end
 
     def decorate_str(s, hidden, important)
@@ -1103,7 +1111,7 @@ module Benry::CmdApp
       if c.default_action
         metadata = index.metadata_get(c.default_action)
         if metadata && (all || ! metadata.hidden?)
-          extra = " (default: #{c.default_action})"
+          extra = "(default: #{c.default_action})"
         end
       end
       header = self.class.const_get(:HEADER_ACTIONS)    # "Actions:"
@@ -1262,7 +1270,7 @@ module Benry::CmdApp
       #; [!crbav] returns top prefix list.
       content = _render_prefix_list(dict, @config)
       header = self.class.const_get(:HEADER_PREFIXES)   # "Prefixes:"
-      return build_section(header, content, " (depth=#{depth})")
+      return build_section(header, content, "(depth=#{depth})")
     end
 
     private
