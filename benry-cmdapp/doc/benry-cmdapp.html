@@ -27,17 +27,17 @@
 <p>Benry-CmdApp is a framework to create command-line application.
 If you want create command-line application which takes sub-commands
 like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is the solution.</p>
-<p>Base idea:</p>
+<p>Basic idea:</p>
 <ul>
-<li>Sub-command (= action) is defined as a method in Ruby.</li>
+<li>Action (= sub-command) is defined as a method in Ruby.</li>
 <li>Commnad-line arguments are passed to action method as positional arguments.</li>
 <li>Command-line options are passed to action method as keyword arguments.</li>
 </ul>
 <p>For example:</p>
 <ul>
-<li><code>&ltcommand&gt; foo</code> in command-line invokes action method <code>foo()</code> in Ruby.</li>
-<li><code>&ltcommand&gt; foo arg1 arg2</code> invokes <code>foo("arg1", "arg2")</code>.</li>
-<li><code>&ltcommand&gt; foo arg --opt=val</code> invokes <code>foo("arg", opt: "val")</code>.</li>
+<li><code>&ltcommand&gt; hello</code> in command-line invokes action method <code>hello()</code> in Ruby.</li>
+<li><code>&ltcommand&gt; hello arg1 arg2</code> invokes <code>hello("arg1", "arg2")</code>.</li>
+<li><code>&ltcommand&gt; hello arg --opt=val</code> invokes <code>hello("arg", opt: "val")</code>.</li>
 </ul>
 <p>Links:</p>
 <ul>
@@ -82,21 +82,21 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 </ul></li>
 <li><a href="#q--a">Q &amp; A</a>
 <ul>
-<li><a href="#q-how-to-append-some-tasks-to-existing-action">Q: How to Append Some Tasks to Existing Action?</a></li>
-<li><a href="#q-how-to-delete-existing-actionalias">Q: How to Delete Existing Action/Alias?</a></li>
-<li><a href="#q-how-to-re-define-existing-action">Q: How to Re-define Existing Action?</a></li>
-<li><a href="#q-how-to-show-entering-into-or-exitting-from-action">Q: How to Show Entering Into or Exitting From Action?</a></li>
-<li><a href="#q-how-to-enabledisable-color-mode">Q: How to Enable/Disable Color Mode?</a></li>
-<li><a href="#q-how-to-define-multiple-option-like--i-option-of-ruby">Q: How to Define Multiple Option, like <code>-I</code> Option of Ruby?</a></li>
-<li><a href="#q-how-to-specify-detailed-description-of-option">Q: How to Specify Detailed Description of Option?</a></li>
-<li><a href="#q-how-to-copy-all-options-from-other-action">Q: How to Copy All Options from Other Action?</a></li>
-<li><a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</a></li>
+<li><a href="#q-how-to-append-some-tasks-to-an-existing-action">Q: How to append some tasks to an existing action?</a></li>
+<li><a href="#q-how-to-delete-an-existing-actionalias">Q: How to delete an existing action/alias?</a></li>
+<li><a href="#q-how-to-re-define-an-existing-action">Q: How to re-define an existing action?</a></li>
+<li><a href="#q-how-to-show-entering-into-or-exitting-from-actions">Q: How to show entering into or exitting from actions?</a></li>
+<li><a href="#q-how-to-enabledisable-color-mode">Q: How to enable/disable color mode?</a></li>
+<li><a href="#q-how-to-define-a-multiple-option-like--i-option-of-ruby">Q: How to define a multiple option, like <code>-I</code> option of Ruby?</a></li>
+<li><a href="#q-how-to-specify-detailed-description-of-options">Q: How to specify detailed description of options?</a></li>
+<li><a href="#q-how-to-copy-all-options-from-other-action">Q: How to copy all options from other action?</a></li>
+<li><a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the difference between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</a></li>
 <li><a href="#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">Q: How to list only aliases (or actions) excluding actions (or aliases) ?</a></li>
-<li><a href="#q-how-to-change-order-of-options-in-help-message">Q: How to Change Order of Options in Help Message?</a></li>
-<li><a href="#q-is-it-possible-to-make-action-names-emphasised-or-weaken">Q: Is It Possible to Make Action Names Emphasised or Weaken?</a></li>
-<li><a href="#q-is-it-possible-to-add-metadata-to-action-or-option">Q: Is It Possible to Add Metadata to Action or Option?</a></li>
-<li><a href="#how-to-remove-common-help-option-from-all-actions">How To Remove Common Help Option from All Actions?</a></li>
-<li><a href="#q-how-to-make-error-messages-i18ned">Q: How to Make Error Messages I18Ned?</a></li>
+<li><a href="#q-how-to-change-the-order-of-options-in-help-message">Q: How to change the order of options in help message?</a></li>
+<li><a href="#q-is-it-possible-to-make-action-names-emphasized-or-weaken">Q: Is it possible to make action names emphasized or weaken?</a></li>
+<li><a href="#q-is-it-possible-to-add-metadata-to-actions-or-options">Q: Is it possible to add metadata to actions or options?</a></li>
+<li><a href="#how-to-remove-common-help-option-from-all-actions">How to remove common help option from all actions?</a></li>
+<li><a href="#q-how-to-make-error-messages-i18ned">Q: How to make error messages I18Ned?</a></li>
 </ul></li>
 <li><a href="#license-and-copyright">License and Copyright</a></li>
 </ul>
@@ -409,9 +409,9 @@ Options:
   -l, --lang=&lten|fr|it&gt; : language        # !!!!
   <strong>    --repeat=&ltN&gt;   : repeat &ltN&gt; times</strong>   # !!!!
 </pre>
-<p>For usability reason, Benry::CmdApp supports <code>--lang=&ltval&gt;</code> style of long option
+<p>For usability reason, Benry-CmdApp supports <code>--lang=&ltval&gt;</code> style of long option
 but doesn't support <code>--lang &ltval&gt;</code> style.
-Benry::CmdApp regards <code>--lang &ltval&gt;</code> as 'long option without argument'
+Benry-CmdApp regards <code>--lang &ltval&gt;</code> as 'long option without argument'
 and 'argument for command'.</p>
 <pre class="language-console">
 [bash]$ ruby ex05.rb hello <strong>--lang fr</strong>         # ``--lang fr`` != ``--lang=fr``
@@ -645,7 +645,7 @@ Bonjour, world!
 </section>
 <section class="subsection" id="boolean-onoff-option">
 <h3>Boolean (On/Off) Option</h3>
-<p>Benry::CmdApp doesn't support <code>--[no-]foobar</code> style option.
+<p>Benry-CmdApp doesn't support <code>--[no-]foobar</code> style option.
 Instead, define boolean (on/off) option.</p>
 <ul>
 <li>Specify <code>type: TrueClass</code> to <code>@option.()</code>.</li>
@@ -867,7 +867,7 @@ Actions:
 <p></p>
 <li>Keyword arguments <code>action:</code> and <code>alias_of:</code> are exclusive.
   It is not allowed to specify both of them at the same time.
-  See <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the Difference Between prefix(alias_of:) and prefix(action:)?</a> section for details.</li>
+  See <a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the difference between prefix(alias_of:) and prefix(action:)?</a> section for details.</li>
 <p></p>
 <li>Prefix name and action name should be string. Notice that Symbol is not allowed.</li>
 </ul>
@@ -935,7 +935,7 @@ zip -r build.zip build
     run_once(<strong>:prepare</strong>)
 </pre>
 <ul>
-<li>When looped action is detected, Benry::CmdApp aborts action.</li>
+<li>When looped action is detected, Benry-CmdApp aborts action.</li>
 </ul>
 <p>File: ex14.rb</p>
 <pre class="language-ruby">
@@ -1295,13 +1295,81 @@ Actions:
 <p>Outuput:</p>
 <pre class="language-console">
 [bash]$ ruby ex20.rb <strong>:</strong>                 # !!!!
-Prefixes:
+Prefixes: (depth=1)
   <strong>bar: (2)</strong>           # !!! two actions ('bar:test3' and 'bar:baz:test4')
   <strong>foo: (1)</strong>           # !!! one action ('foo:text2')
 </pre>
+<p>In the above example, only top level prefixes are displayed.
+If you specified <code>::</code> instead of <code>:</code>, two-level prefixes are displayed,
+for example <code>foo:xxx:</code> and <code>foo:yyy:</code>.
+Of course, <code>:::</code> displays more level prefixes.</p>
+<p>File: ex21.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/cmdapp'
+
+class GitAction &lt Benry::CmdApp::Action
+  prefix "git:" do
+
+    prefix "staging:" do
+      @action.("...");  def add(); end
+      @action.("...");  def show(); end
+      @action.("...");  def delete(); end
+    end
+
+    prefix "branch:" do
+      @action.("...");  def list(); end
+      @action.("...");  def switch(name); end
+    end
+
+    prefix "repo:" do
+      @action.("...");  def create(); end
+      @action.("...");  def init(); end
+
+      prefix "config:" do
+        @action.("...");  def add(); end
+        @action.("...");  def delete(); end
+        @action.("...");  def list(); end
+      end
+
+      prefix "remote:" do
+        @action.("...");  def list(); end
+        @action.("...");  def set(); end
+      end
+
+    end
+  end
+end
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ruby ex21.rb <strong>:</strong>
+Prefixes: (depth=<strong>1</strong>)
+  git: (12)
+
+[bash]$ ruby ex21.rb <strong>::</strong>             # !!!!
+Prefixes: (depth=<strong>2</strong>)
+  git: (0)
+  <strong>git:branch:</strong> (2)
+  <strong>git:repo:</strong> (7)
+  <strong>git:staging:</strong> (3)
+
+[bash]$ ruby ex21.rb <strong>:::</strong>            # !!!!
+Prefixes: (depth=<strong>3</strong>)
+  git: (0)
+  git:branch: (2)
+  git:repo: (2)
+  <strong>git:repo:config:</strong> (3)
+  <strong>git:repo:remote:</strong> (2)
+  git:staging: (3)
+</pre>
 <p><code>prefix()</code> can take a description of prefix as 2nd argument.
 Descriptions of prefix are displayed in the prefix list.</p>
-<p>File: ex21.rb</p>
+<p>File: ex22.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1334,8 +1402,8 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex21.rb <strong>:</strong>                       # !!!!
-Top Prefixes:
+[bash]$ ruby ex22.rb <strong>:</strong>                       # !!!!
+Prefixes: (depth=1)
   bar: (2)           : <strong>description of Bar</strong>    # !!!!
   foo: (1)           : <strong>description of Foo</strong>    # !!!!
 </pre>
@@ -1344,11 +1412,11 @@ Top Prefixes:
 <h3>Hidden Action</h3>
 <ul>
 <li>If <code>hidden: true</code> keyword argument passed to <code>@action.()</code>,
-  or action method is private, then Benry::CmdApp regards that action as hidden.</li>
+  or action method is private, then Benry-CmdApp regards that action as hidden.</li>
 <li>Hidden actions are not shown in help message nor action list by default.</li>
 <li>Hidden actions are shown when <code>-a</code> or <code>--all</code> option is specified in command-line.</li>
 </ul>
-<p>File: ex22.rb</p>
+<p>File: ex23.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1380,14 +1448,14 @@ exit app.main()
 </pre>
 <p>Action list (without <code>-a</code> nor <code>--all</code>):</p>
 <pre class="language-console">
-[bash]$ ruby ex22.rb
+[bash]$ ruby ex23.rb
 Actions:
   help               : print help message (of action if specified)
   test1              : test action #1
 </pre>
 <p>Action list (with <code>-a</code> or <code>--all</code>):</p>
 <pre class="language-console">
-[bash]$ ruby ex22.rb <strong>--all</strong>      # !!!!
+[bash]$ ruby ex23.rb <strong>--all</strong>      # !!!!
 Actions:
   help               : print help message (of action if specified)
   test1              : test action #1
@@ -1402,7 +1470,7 @@ Actions:
 <li>Hidden options are not shown in help message of action.</li>
 <li>Hidden options are shown when <code>-a</code> or <code>--all</code> option is specified in command-line.</li>
 </ul>
-<p>File: ex23.rb</p>
+<p>File: ex24.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1424,22 +1492,22 @@ exit app.main()
 </pre>
 <p>Help message (without <code>-a</code> nor <code>--all</code>):</p>
 <pre class="language-console">
-[bash]$ ruby ex23.rb -h test1
-ex23.rb test1 --- test action
+[bash]$ ruby ex24.rb -h test1
+ex24.rb test1 --- test action
 
 Usage:
-  $ ex23.rb test1 [&ltoptions&gt;]
+  $ ex24.rb test1 [&ltoptions&gt;]
 
 Options:
   -v                 : verbose mode
 </pre>
 <p>Help message (with <code>-a</code> or <code>--all</code>)</p>
 <pre class="language-console">
-[bash]$ ruby ex23.rb -h <strong>--all</strong> test1           # !!!!
-ex23.rb test1 --- test action
+[bash]$ ruby ex24.rb -h <strong>--all</strong> test1           # !!!!
+ex24.rb test1 --- test action
 
 Usage:
-  $ ex23.rb test1 [&ltoptions&gt;]
+  $ ex24.rb test1 [&ltoptions&gt;]
 
 Options:
   <strong>-h, --help         : print help message</strong>     # !!!!
@@ -1479,7 +1547,7 @@ Therefore all actions accept <code>-h, --help</code> option.</p>
 <li><code>config.format_action = "  %-18s : %s"</code> sets format of actions in help message. (default: <code>"  %-18s : %s"</code>)</li>
 <li><code>config.format_usage = "  $ %s"</code> sets format of usage in help message. (default: <code>"  $ %s"</code>)</li>
 </ul>
-<p>File: ex24.rb</p>
+<p>File: ex25.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1491,11 +1559,11 @@ end
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex24.rb
+[bash]$ ruby ex25.rb
 config.<strong>app_desc</strong>             = "sample app"
 config.<strong>app_version</strong>          = "1.0.0"
 config.<strong>app_name</strong>             = "Sample App"
-config.<strong>app_command</strong>          = "ex24.rb"             # == File.basename($0)
+config.<strong>app_command</strong>          = "ex25.rb"             # == File.basename($0)
 config.<strong>app_usage</strong>            = nil
 config.<strong>app_detail</strong>           = nil
 config.<strong>default_action</strong>       = nil
@@ -1526,11 +1594,11 @@ If value of <code>config.option_xxxx</code> is <code>:hidden</code>, then corres
 Therefore you can see <code>--debug</code> option in help message if you add <code>-h</code> and <code>-a</code> (or <code>--all</code>) option.</p>
 <p>Help message:</p>
 <pre class="language-console">
-$ ruby ex23.rb -h <strong>-a</strong>                          # !!!!
-ex23.rb --- sample app
+$ ruby ex24.rb -h <strong>-a</strong>                          # !!!!
+ex24.rb --- sample app
 
 Usage:
-  $ ex23.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex24.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -1551,7 +1619,7 @@ Actions:
 <li>(2) Add custom options to it.</li>
 <li>(3) Pass it to <code>Application.new()</code>.</li>
 </ul>
-<p>File: ex25.rb</p>
+<p>File: ex26.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1579,11 +1647,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex25.rb -h
-ex25.rb --- sample app
+[bash]$ ruby ex26.rb -h
+ex26.rb --- sample app
 
 Usage:
-  $ ex25.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex26.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -1601,7 +1669,7 @@ Actions:
 <li>(2) Add global options as you want.</li>
 <li>(3) Create and execute Application object with it.</li>
 </ul>
-<p>File: ex26.rb</p>
+<p>File: ex27.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1627,11 +1695,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex26.rb -h
-ex26.rb (1.0.0) --- sample app
+[bash]$ ruby ex27.rb -h
+ex27.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex26.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex27.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   <strong>-h, --help         : print help message</strong>
@@ -1655,7 +1723,7 @@ Actions:
 <li>(2) Override <code>#toggle_global_options()</code> method.</li>
 <li>(3) Create and execute subclass object of <code>Application</code>.</li>
 </ul>
-<p>File: ex27.rb</p>
+<p>File: ex28.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1683,7 +1751,7 @@ app = <strong>MyApplication.new(config)</strong>            # !!!!
 exit app.main()
 </pre>
 <p>Of course, prepending custom module to Application class is also effective way.</p>
-<p>File: ex28.rb</p>
+<p>File: ex29.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1710,7 +1778,7 @@ exit app.main()
 <li>(2) Override <code>#handle_action()</code> method.</li>
 <li>(3) Create and execute custom application object.</li>
 </ul>
-<p>File: ex29.rb</p>
+<p>File: ex30.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1748,7 +1816,7 @@ exit app.main()
 <h3>Customization of Application Help Message</h3>
 <p>If you want to just add more text into application help message,
 set <code>config.app_detail</code> and/or <code>config.help_postamble</code>.</p>
-<p>File: ex31.rb</p>
+<p>File: ex32.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1774,13 +1842,13 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex31.rb -h
-ex31.rb --- sample app
+[bash]$ ruby ex32.rb -h
+ex32.rb --- sample app
 
 <strong>See https://....</strong>
 
 Usage:
-  $ ex31.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex32.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -1802,7 +1870,7 @@ Actions:
 <li>(3) Create an instance object of the class.</li>
 <li>(4) Pass it to Application object.</li>
 </ul>
-<p>File: ex32.rb</p>
+<p>File: ex33.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1856,7 +1924,7 @@ exit app.main()
 <li>(2) Prepend it to <code>Benry::CmdApp::ApplicationHelpBuilder</code> class.</li>
 <li>(3) Create and execute Application object.</li>
 </ul>
-<p>File: ex33.rb</p>
+<p>File: ex34.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1908,7 +1976,7 @@ exit app.main()
 <h3>Customization of Action Help Message</h3>
 <p>If you want to just add more text into action help message,
 pass <code>detail:</code> and/or <code>postamble:</code> keyword arguments to <code>@action.()</code>.</p>
-<p>File: ex34.rb</p>
+<p>File: ex35.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -1930,13 +1998,13 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex34.rb -h hello
-ex34.rb hello --- test action #1
+[bash]$ ruby ex35.rb -h hello
+ex35.rb hello --- test action #1
 
 <strong>See https://....</strong>                  # !!!!
 
 Usage:
-  $ ex34.rb hello [&ltuser&gt;]
+  $ ex35.rb hello [&ltuser&gt;]
 
 <strong>Example:</strong>
   <strong>....</strong>                            # !!!!
@@ -1948,7 +2016,7 @@ Usage:
 <li>(3) Create an instance object of the class.</li>
 <li>(4) Pass it to Application object.</li>
 </ul>
-<p>File: ex35.rb</p>
+<p>File: ex36.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -1996,7 +2064,7 @@ exit app.main()
 <li>(2) Prepend it to <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
 <li>(3) Create and execute Application object.</li>
 </ul>
-<p>File: ex36.rb</p>
+<p>File: ex37.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
@@ -2041,10 +2109,10 @@ exit app.main()
 </section>
 <section class="section" id="q--a">
 <h2>Q &amp; A</h2>
-<section class="subsection" id="q-how-to-append-some-tasks-to-existing-action">
-<h3>Q: How to Append Some Tasks to Existing Action?</h3>
+<section class="subsection" id="q-how-to-append-some-tasks-to-an-existing-action">
+<h3>Q: How to append some tasks to an existing action?</h3>
 <p>A: (a) Use method alias, or (b) use prepend.</p>
-<p>File: ex42.rb</p>
+<p>File: ex43.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2088,25 +2156,25 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex42.rb hello
+[bash]$ ruby ex43.rb hello
 ---- &gt;8 ---- &gt;8 ----
 Hello, world!
 ---- 8&lt ---- 8&lt ----
 
-[bash]$ ruby ex42.rb hi Alice
+[bash]$ ruby ex43.rb hi Alice
 ~~~~ &gt;8 ~~~~ &gt;8 ~~~~
 Hi, Alice!
 ~~~~ 8&lt ~~~~ 8&lt ~~~~
 </pre>
 </section>
-<section class="subsection" id="q-how-to-delete-existing-actionalias">
-<h3>Q: How to Delete Existing Action/Alias?</h3>
+<section class="subsection" id="q-how-to-delete-an-existing-actionalias">
+<h3>Q: How to delete an existing action/alias?</h3>
 <p>A: Call <code>Benry::CmdApp.undef_action("&ltaction&gt;")</code> or <code>Benry::CmdApp.undef_alias("&ltalias&gt;")</code>.</p>
 </section>
-<section class="subsection" id="q-how-to-re-define-existing-action">
-<h3>Q: How to Re-define Existing Action?</h3>
-<p>A: Remove existing action at first, and re-define action.</p>
-<p>File: ex43.rb</p>
+<section class="subsection" id="q-how-to-re-define-an-existing-action">
+<h3>Q: How to re-define an existing action?</h3>
+<p>A: First remove the existing action, then re-define the action.</p>
+<p>File: ex44.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2136,11 +2204,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex43.rb -h
-ex43.rb --- sample app
+[bash]$ ruby ex44.rb -h
+ex44.rb --- sample app
 
 Usage:
-  $ ex43.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex44.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2152,10 +2220,10 @@ Actions:
   help               : print help message (of action if specified)
 </pre>
 </section>
-<section class="subsection" id="q-how-to-show-entering-into-or-exitting-from-action">
-<h3>Q: How to Show Entering Into or Exitting From Action?</h3>
+<section class="subsection" id="q-how-to-show-entering-into-or-exitting-from-actions">
+<h3>Q: How to show entering into or exitting from actions?</h3>
 <p>A: Set <code>config.option_trace = true</code> and pass <code>-T</code> (or <code>--trace</code>) option.</p>
-<p>File: ex44.rb</p>
+<p>File: ex45.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2181,7 +2249,7 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex44.rb <strong>--trace</strong> build              # !!!!
+[bash]$ ruby ex45.rb <strong>--trace</strong> build              # !!!!
 <strong>### enter: build</strong>
 <strong>### enter: prepare</strong>
 ... prepare something ...
@@ -2191,9 +2259,9 @@ exit app.main()
 </pre>
 </section>
 <section class="subsection" id="q-how-to-enabledisable-color-mode">
-<h3>Q: How to Enable/Disable Color Mode?</h3>
+<h3>Q: How to enable/disable color mode?</h3>
 <p>A: Set <code>config.option_color = true</code> and pass <code>--color=on</code> or <code>--color=off</code> option.</p>
-<p>File: ex45.rb</p>
+<p>File: ex46.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2213,11 +2281,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex45.rb -h
-ex45.rb --- sample app
+[bash]$ ruby ex46.rb -h
+ex46.rb --- sample app
 
 Usage:
-  $ ex45.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex46.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2228,16 +2296,16 @@ Options:
 Actions:
   hello              : print greeting message
 
-[bash]$ ruby ex45.rb -h <strong>--color=off</strong>              # !!!!
+[bash]$ ruby ex46.rb -h <strong>--color=off</strong>              # !!!!
 
-[bash]$ ruby ex45.rb -h <strong>--color=on</strong>               # !!!!
-[bash]$ ruby ex45.rb -h <strong>--color</strong>                  # !!!!
+[bash]$ ruby ex46.rb -h <strong>--color=on</strong>               # !!!!
+[bash]$ ruby ex46.rb -h <strong>--color</strong>                  # !!!!
 </pre>
 </section>
-<section class="subsection" id="q-how-to-define-multiple-option-like--i-option-of-ruby">
-<h3>Q: How to Define Multiple Option, like <code>-I</code> Option of Ruby?</h3>
+<section class="subsection" id="q-how-to-define-a-multiple-option-like--i-option-of-ruby">
+<h3>Q: How to define a multiple option, like <code>-I</code> option of Ruby?</h3>
 <p>A: Provide block parameter on <code>@option.()</code>.</p>
-<p>File: ex46.rb</p>
+<p>File: ex47.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2263,14 +2331,14 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex46.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
+[bash]$ ruby ex47.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
 path=["/tmp", "/var/tmp"]                         # !!!!
 </pre>
 </section>
-<section class="subsection" id="q-how-to-specify-detailed-description-of-option">
-<h3>Q: How to Specify Detailed Description of Option?</h3>
+<section class="subsection" id="q-how-to-specify-detailed-description-of-options">
+<h3>Q: How to specify detailed description of options?</h3>
 <p>A: Add <code>detail:</code> keyword argument to <code>@option.()</code>.</p>
-<p>File: ex47.rb</p>
+<p>File: ex48.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2294,11 +2362,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex47.rb -h test
-ex47.rb test --- detailed description test
+[bash]$ ruby ex48.rb -h test
+ex48.rb test --- detailed description test
 
 Usage:
-  $ ex47.rb test [&ltoptions&gt;]
+  $ ex48.rb test [&ltoptions&gt;]
 
 Options:
   -m &ltmode&gt;          : output mode
@@ -2308,9 +2376,9 @@ Options:
 </pre>
 </section>
 <section class="subsection" id="q-how-to-copy-all-options-from-other-action">
-<h3>Q: How to Copy All Options from Other Action?</h3>
+<h3>Q: How to copy all options from other action?</h3>
 <p>A: Use <code>@copy_options.()</code>.</p>
-<p>File: ex48.rb</p>
+<p>File: ex49.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2339,11 +2407,11 @@ exit app.main()
 </pre>
 <p>Help message of <code>test2</code> action:</p>
 <pre class="language-console">
-[bash]$ ruby ex48.rb -h test2
-ex48.rb test2 --- test action #2
+[bash]$ ruby ex49.rb -h test2
+ex49.rb test2 --- test action #2
 
 Usage:
-  $ ex48.rb test2 [&ltoptions&gt;]
+  $ ex49.rb test2 [&ltoptions&gt;]
 
 Options:
   -v, --verbose      : verbose mode     # copied!!
@@ -2353,9 +2421,9 @@ Options:
 </pre>
 </section>
 <section class="subsection" id="q-what-is-the-difference-between-prefixalias_of-and-prefixaction">
-<h3>Q: What is the Difference Between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</h3>
+<h3>Q: What is the difference between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</h3>
 <p>A: The former defines an alias, and the latter doesn't.</p>
-<p>File: ex49.rb</p>
+<p>File: ex50.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2385,11 +2453,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex49.rb -h
-ex49.rb --- sample app
+[bash]$ ruby ex50.rb -h
+ex50.rb --- sample app
 
 Usage:
-  $ ex49.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex50.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2436,10 +2504,10 @@ Actions:
   git:unstage        : remove changes from staging area
 </pre>
 </section>
-<section class="subsection" id="q-how-to-change-order-of-options-in-help-message">
-<h3>Q: How to Change Order of Options in Help Message?</h3>
+<section class="subsection" id="q-how-to-change-the-order-of-options-in-help-message">
+<h3>Q: How to change the order of options in help message?</h3>
 <p>A: Call <code>GlobalOptionSchema#reorder_options!()</code>.</p>
-<p>File: ex50.rb</p>
+<p>File: ex51.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2459,11 +2527,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex50.rb -h
-ex50.rb (1.0.0) --- sample app
+[bash]$ ruby ex51.rb -h
+ex51.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex50.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex51.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -v, --verbose      : verbose mode
@@ -2478,10 +2546,10 @@ Actions:
   help               : print help message (of action if specified)
 </pre>
 </section>
-<section class="subsection" id="q-is-it-possible-to-make-action-names-emphasised-or-weaken">
-<h3>Q: Is It Possible to Make Action Names Emphasised or Weaken?</h3>
+<section class="subsection" id="q-is-it-possible-to-make-action-names-emphasized-or-weaken">
+<h3>Q: Is it possible to make action names emphasized or weaken?</h3>
 <p>A: Yes. When you pass <code>important: true</code> to <code>@action.()</code>, that action will be printed with unerline in help message. When you pass <code>important: false</code>, that action will be printed in gray color.</p>
-<p>File: ex51.rb</p>
+<p>File: ex52.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2503,11 +2571,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex51.rb -h
-ex51.rb --- sample app
+[bash]$ ruby ex52.rb -h
+ex52.rb --- sample app
 
 Usage:
-  $ ex51.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex52.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2520,15 +2588,15 @@ Actions:
   <strong>test2              : weaken</strong>        # !!!! gray color !!!!
 </pre>
 </section>
-<section class="subsection" id="q-is-it-possible-to-add-metadata-to-action-or-option">
-<h3>Q: Is It Possible to Add Metadata to Action or Option?</h3>
+<section class="subsection" id="q-is-it-possible-to-add-metadata-to-actions-or-options">
+<h3>Q: Is it possible to add metadata to actions or options?</h3>
 <p>A: Yes. Pass <code>tag:</code> keyword argument to <code>@action.()</code> or <code>@option.()</code>.</p>
 <ul>
 <li><code>tag:</code> keyword argument accept any type of value such as symbol, string, array, and so on.</li>
-<li>Currenty, Benry::CmdApp doesn't provide the good way to use it effectively.
-  This feature may be used by command-line application or framework based on Benry::CmdApp.</li>
+<li>Currenty, Benry-CmdApp doesn't provide the good way to use it effectively.
+  This feature may be used by command-line application or framework based on Benry-CmdApp.</li>
 </ul>
-<p>File: ex52.rb</p>
+<p>File: ex53.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2550,9 +2618,9 @@ exit app.main()
 </pre>
 </section>
 <section class="subsection" id="how-to-remove-common-help-option-from-all-actions">
-<h3>How To Remove Common Help Option from All Actions?</h3>
+<h3>How to remove common help option from all actions?</h3>
 <p>A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.</p>
-<p>File: ex53.rb</p>
+<p>File: ex54.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2561,8 +2629,8 @@ arr.clear()
 </pre>
 </section>
 <section class="subsection" id="q-how-to-make-error-messages-i18ned">
-<h3>Q: How to Make Error Messages I18Ned?</h3>
-<p>A: Currently not supported. May be supported in the future release.</p>
+<h3>Q: How to make error messages I18Ned?</h3>
+<p>A: Currently not supported. May be supported in a future release.</p>
 </section>
 </section>
 <section class="section" id="license-and-copyright">
