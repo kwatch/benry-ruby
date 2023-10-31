@@ -950,6 +950,7 @@ module Benry::CmdApp
       #; [!61psk] returns section string with decorating header.
       #; [!0o8w4] appends '\n' to content if it doesn't end with '\n'.
       nl = content.end_with?("\n") ? nil : "\n"
+      extra = decorate_extra(extra) if extra
       return "#{decorate_header(header)}#{extra}\n#{content}#{nl}"
     end
 
