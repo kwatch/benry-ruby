@@ -873,22 +873,22 @@ module Benry::CmdApp
       @format_action      = format_action || FORMAT_ACTION
       @format_usage       = format_usage  || FORMAT_USAGE
       @format_prefix      = format_prefix   # nil means to use @format_action
-      @deco_command       = deco_command || DECORATION_COMMAND
-      @deco_header        = deco_header  || DECORATION_HEADER
-      @deco_extra         = deco_extra   || DECORATION_EXTRA
-      @deco_strong        = deco_strong  || DECORATION_STRONG
-      @deco_weak          = deco_weak    || DECORATION_WEAK
-      @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
+      @deco_command       = deco_command || DECORATION_COMMAND  # for command name in help
+      @deco_header        = deco_header  || DECORATION_HEADER   # for "Usage:" or "Actions"
+      @deco_extra         = deco_extra   || DECORATION_EXTRA    # for "(default: )" or "(depth=1)"
+      @deco_strong        = deco_strong  || DECORATION_STRONG   # for `important: true`
+      @deco_weak          = deco_weak    || DECORATION_WEAK     # for `important: false`
+      @deco_hidden        = deco_hidden  || DECORATION_HIDDEN   # for `hidden: true`
       @deco_error         = deco_error   || DECORATION_ERROR
-      @option_help        = option_help
-      @option_version     = option_version
-      @option_list        = option_list
-      @option_all         = option_all
-      @option_verbose     = option_verbose
-      @option_quiet       = option_quiet
-      @option_color       = option_color
-      @option_debug       = option_debug
-      @option_trace       = option_trace
+      @option_help        = option_help         # enable or disable `-h, --help`
+      @option_version     = option_version      # enable or disable `-V, --version`
+      @option_list        = option_list         # enable or disable `-l, --list`
+      @option_all         = option_all          # enable or disable `-a, --all`
+      @option_verbose     = option_verbose      # enable or disable `-v, --verbose`
+      @option_quiet       = option_quiet        # enable or disable `-q, --quiet`
+      @option_color       = option_color        # enable or disable `--color[=<on|off>]`
+      @option_debug       = option_debug        # enable or disable `--debug`
+      @option_trace       = option_trace        # enable or disable `-T, --trace`
       #
       #@verobse_mode       = nil
       #@quiet_mode         = nil
