@@ -55,14 +55,16 @@ end
 Oktest.scope do
 
 
-  def with_dummy_index(index, &b)
+  def with_dummy_index(index=nil, &b)
+    index ||= Benry::CmdApp::MetadataIndex.new()
     bkup = nil
     Benry::CmdApp.module_eval {
       bkup = const_get :INDEX
       remove_const :INDEX
       const_set :INDEX, index
     }
-    yield
+    yield index
+    return index
   ensure
     Benry::CmdApp.module_eval {
       remove_const :INDEX
