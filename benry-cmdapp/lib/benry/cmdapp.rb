@@ -841,6 +841,7 @@ module Benry::CmdApp
     FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
     DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
+    DECORATION_EXTRA      = "\e[2m%s\e[0m"      # gray color
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
     DECORATION_WEAK       = "\e[2m%s\e[0m"      # gray color
     DECORATION_HIDDEN     = "\e[2m%s\e[0m"      # gray color
@@ -852,7 +853,7 @@ module Benry::CmdApp
                    default_action: nil,
                    help_postamble: nil,
                    format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
-                   deco_command: nil, deco_header: nil,
+                   deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
@@ -874,6 +875,7 @@ module Benry::CmdApp
       @format_prefix      = format_prefix   # nil means to use @format_action
       @deco_command       = deco_command || DECORATION_COMMAND
       @deco_header        = deco_header  || DECORATION_HEADER
+      @deco_extra         = deco_extra   || DECORATION_EXTRA
       @deco_strong        = deco_strong  || DECORATION_STRONG
       @deco_weak          = deco_weak    || DECORATION_WEAK
       @deco_hidden        = deco_hidden  || DECORATION_HIDDEN
@@ -898,7 +900,7 @@ module Benry::CmdApp
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
     attr_accessor :format_option, :format_action, :format_usage, :format_prefix
-    attr_accessor :deco_command, :deco_header
+    attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
     attr_accessor :option_help, :option_version, :option_list, :option_all
