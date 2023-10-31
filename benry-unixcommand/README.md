@@ -1040,12 +1040,12 @@ require 'benry/unixcommand'
 include Benry::UnixCommand
 
 ## disable temporarily
-echoback_off do
+echoback_off do                    # !!!!
   sys "date"
 end
 
 ## disable globally
-$BENRY_ECHOBACK = false            # !!!!!
+$BENRY_ECHOBACK = false            # !!!!
 sys "date"
 ```
 
