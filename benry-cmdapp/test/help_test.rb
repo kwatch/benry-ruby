@@ -912,18 +912,18 @@ END
     end
 
 
-    topic '#build_top_prefix_list()' do
+    topic '#build_prefix_list()' do
 
       spec "[!crbav] returns top prefix list." do
-        x = @builder.build_top_prefix_list(1)
+        x = @builder.build_prefix_list(1)
         ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \(depth=\d+\)\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 
       spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
-        x = @builder.build_top_prefix_list(1, all: true)
+        x = @builder.build_prefix_list(1, all: true)
         ok {x} =~ /^  secret:/
-        x = @builder.build_top_prefix_list(1)
+        x = @builder.build_prefix_list(1)
         ok {x} !~ /^  secret:/
       end
 
@@ -934,32 +934,32 @@ END
         end
         #
         with_dummy_index(index) do
-          x = @builder.build_top_prefix_list()
+          x = @builder.build_prefix_list()
           ok {x} == nil
-          x = @builder.build_top_prefix_list(all: true)
+          x = @builder.build_prefix_list(all: true)
           ok {x} != nil
         end
       end
 
       spec "[!30l2j] includes number of actions per prefix." do
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^  git: \(\d+\)\n/
         ok {x} =~ /^  secret: \(\d+\)\n/
       end
 
       spec "[!qxoja] includes prefix description if registered." do
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
       end
 
       spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
         @config.format_prefix = "  %-15s # %s"
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
         #
         @config.format_prefix = nil
         @config.format_prefix = "    %-15s -- %s"
-        x = @builder.build_top_prefix_list(all: true)
+        x = @builder.build_prefix_list(all: true)
         ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
       end
 

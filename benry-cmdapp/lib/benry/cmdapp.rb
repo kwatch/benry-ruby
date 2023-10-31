@@ -1252,7 +1252,7 @@ module Benry::CmdApp
       return [s1, s2].compact().join("\n")
     end
 
-    def build_top_prefix_list(depth=1, all: false)
+    def build_prefix_list(depth=1, all: false)
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
       dict = _count_actions_per_prefix(depth, all: all)
@@ -1557,7 +1557,7 @@ module Benry::CmdApp
         #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
         depth = prefix.length
-        s = builder.build_top_prefix_list(depth, all: all)  or
+        s = builder.build_prefix_list(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...
