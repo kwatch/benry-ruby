@@ -510,7 +510,7 @@ module Benry::CmdApp
       #; [!uxsx3] returns error message if method already defined in parent or ancestor class.
       #; [!3fmpo] method override check is done with new method name (= prefixed name).
       ! Util.method_override?(self, meth)  or
-        return "Please rename it to `#{method_symbol}_()`, because a method with the same name is already defined in the parent or ancestor class."
+        return "Please rename it to `#{method_symbol}_()`, because it overrides existing method in parent or ancestor class."
       return nil
     end
 
