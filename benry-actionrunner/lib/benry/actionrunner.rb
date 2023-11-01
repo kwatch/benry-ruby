@@ -417,23 +417,28 @@ define_alias "unstage"  , "git:unstage"
 ##
 ## More example
 ##
+$project = "example"
+$release = "1.0.0"
+
 class BuildAction < Action
   prefix "build:", action: "all"
   #prefix "build:", alias_of: "all"
 
-  BUILD_DIR = "build"
+  def target_name()
+    return "#{$project}-#{$release}"
+  end
 
   ## hidden action
   @action.("prepare directory", hidden: true)   # hidden action
   def prepare()
-    dir = BUILD_DIR
+    dir = target_name()
     mkdir dir unless File.directory?(dir)
   end
 
   @action.("create zip file")
   def zip_()                        # last '_' char avoids to override existing method
     run_once "prepare"              # run prerequisite action only once
-    dir = BUILD_DIR
+    dir = target_name()
     store "README.md", "Rakefile.rb", "lib/**/*", "test/**/*", to: dir
     sys "zip -r #{dir}.zip #{dir}"
     sys "unzip -l #{dir}.zip"
