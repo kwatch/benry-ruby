@@ -17,19 +17,20 @@ Oktest.scope do
 
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
-  -V, --version      : print version
-  -l, --list         : list actions
-  -a, --all          : list hidden actions/options, too
-  -f, --file=<file>  : actionfile name (default: 'Actionfile.rb')
-  -s, --search       : search for actionfile in parent or upper dir
-  -d, --chdir        : change current dir to where actionfile exists
-\e[2m  -u, --searchdir    : same as '-sd'\e[0m
-  -g, --generate     : generate actionfile ('Actionfile.rb') with example code
-  -v, --verbose      : verbose mode
-  -q, --quiet        : quiet mode
-  --color[=<on|off>] : color mode
-      --debug        : debug mode
-  -T, --trace        : trace mode
+  -V                 : print version
+  -l                 : list actions
+  -a                 : list all actions/options including hidden ones
+  -f <file>          : actionfile name (default: 'Actionfile.rb')
+  -u                 : search for actionfile in parent or upper dir
+  -p                 : change current dir to where action file exists
+\e[2m  -s                 : same as '-up'\e[0m
+  -g                 : generate actionfile ('Actionfile.rb') with example code
+  -v                 : verbose mode
+  -q                 : quiet mode
+  -c                 : enable color mode
+  -C                 : disable color mode
+  -D                 : debug mode
+  -T                 : trace mode
 
 \e[1;34mActions:\e[0m
   build              : create all
