@@ -432,7 +432,7 @@ class BuildAction < Action
 
   @action.("create zip file")
   def zip_()                        # last '_' char avoids to override existing method
-    run_action_once "prepare"       # run prerequisite action only once
+    run_once "prepare"              # run prerequisite action only once
     dir = BUILD_DIR
     store "README.md", "Rakefile.rb", "lib/**/*", "test/**/*", to: dir
     sys "zip -r #{dir}.zip #{dir}"
@@ -441,7 +441,7 @@ class BuildAction < Action
 
   @action.("create all")
   def all()
-    run_action_once "zip"           # run prerequisite action only once
+    run_once "zip"                  # run prerequisite action only once
   end
 
 end
