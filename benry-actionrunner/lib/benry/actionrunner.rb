@@ -80,6 +80,17 @@ END
   end
 
 
+  module ApplicationHelpBuilderModule
+    def build_options_part(*args, **kwargs)
+      arr = ["--<name>=<value>", "set a global variable (value can be in JSON format)"]
+      s = super
+      s += (@config.format_option % arr) + "\n"
+      return s
+    end
+  end
+  Benry::CmdApp::APPLICATION_HELP_BUILDER_CLASS.prepend(ApplicationHelpBuilderModule)
+
+
   def self.main(argv=ARGV)
     envstr = ENV["ACTIONRUNNER_OPTION"]
     if envstr && ! envstr.empty?

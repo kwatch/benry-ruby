@@ -31,6 +31,7 @@ Oktest.scope do
   -C                 : disable color mode
   -D                 : debug mode
   -T                 : trace mode
+  --<name>=<value>   : set a global variable (value can be in JSON format)
 
 \e[1;34mActions:\e[0m
   build              : create all
