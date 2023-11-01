@@ -18,10 +18,9 @@ require 'benry/unixcommand'
 module Benry::ActionRunner
 
 
-  VERSION      = "$Release: 0.0.0 $".split()[1]
-  DOCUMENT_URL = "https://kwatch.github.io/benry-ruby/benry-actionrunner.html"
-
-  DEFAULT_FILENAME = "Actionfile.rb"
+  ACTIONRUNNER_VERSION  = "$Release: 0.0.0 $".split()[1]
+  ACTIONRUNNER_DOCURL   = "https://kwatch.github.io/benry-ruby/benry-actionrunner.html"
+  ACTIONRUNNER_FILENAME = "Actionfile.rb"
 
 
   class Action < Benry::CmdApp::Action
@@ -35,12 +34,11 @@ module Benry::ActionRunner
 
 
   app_desc = "Action runner (or task runner), much better than Rake"
-  CONFIG = Benry::CmdApp::Config.new(app_desc, VERSION).tap do |config|
-    action_file = DEFAULT_FILENAME
+  CONFIG = Benry::CmdApp::Config.new(app_desc, ACTIONRUNNER_VERSION).tap do |config|
+    action_file = ACTIONRUNNER_FILENAME
     command = File.basename($0)
     config.app_command = command
     #config.app_detail = nil
-    doc_url = DOCUMENT_URL
     x = command
     example = <<END
   $ #{x} -h | less		# print help message
@@ -57,7 +55,7 @@ module Benry::ActionRunner
 END
     config.help_postamble = {
       "Example:"  => example,
-      "Document:" => "  #{DOCUMENT_URL}\n",
+      "Document:" => "  #{ACTIONRUNNER_DOCURL}\n",
     }
   end
 
@@ -67,11 +65,11 @@ END
     schema.add(:version  , "-V"        , "print version")
     schema.add(:list     , "-l"        , "list actions")
     schema.add(:all      , "-a"        , "list all actions/options including hidden ones")
-    schema.add(:file     , "-f <file>" , "actionfile name (default: '#{DEFAULT_FILENAME}')")
+    schema.add(:file     , "-f <file>" , "actionfile name (default: '#{ACTIONRUNNER_FILENAME}')")
     schema.add(:search   , "-u"        , "search for actionfile in parent or upper dir")
     schema.add(:chdir    , "-p"        , "change current dir to where action file exists")
     schema.add(:searchdir, "-s"        , "same as '-up'", hidden: true)
-    schema.add(:generate , "-g"        , "generate actionfile ('#{DEFAULT_FILENAME}') with example code")
+    schema.add(:generate , "-g"        , "generate actionfile ('#{ACTIONRUNNER_FILENAME}') with example code")
     schema.add(:verbose  , "-v"        , "verbose mode")
     schema.add(:quiet    , "-q"        , "quiet mode")
     schema.add(:color    , "-c"        , "enable color mode")
@@ -99,7 +97,7 @@ END
       super
       @flag_search = false                 # true when '-s' option specified
       @flag_chdir  = false                 # true when '-w' option specified
-      @action_file = DEFAULT_FILENAME      # ex: 'Actionfile.rb'
+      @action_file = ACTIONRUNNER_FILENAME # ex: 'Actionfile.rb'
       @_loaded     = false                 # true when action file loaded
     end
 
