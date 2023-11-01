@@ -210,7 +210,7 @@ END
           unless File.exist?(@fname)
             #capture_sio { Benry::ActionRunner.main("-g") }
             config = Benry::ActionRunner::CONFIG
-            app = Benry::ActionRunner::Application.new(config)
+            app = Benry::ActionRunner::MainApplication.new(config)
             app.__send__(:generate_action_file, quiet: true)
           end
         end

@@ -85,13 +85,13 @@ END
     if envstr && ! envstr.empty?
       argv = envstr.split() + argv
     end
-    app = Application.new(CONFIG, GLOBAL_OPTION_SCHEMA)
+    app = MainApplication.new(CONFIG, GLOBAL_OPTION_SCHEMA)
     status_code = app.main(argv)
     return status_code
   end
 
 
-  class Application < Benry::CmdApp::Application
+  class MainApplication < Benry::CmdApp::Application
 
     def initialize(*args, **kwargs)
       super
