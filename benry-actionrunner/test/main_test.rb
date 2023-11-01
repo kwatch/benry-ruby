@@ -259,6 +259,30 @@ END
           ok {main("git:")} == ACTION_LIST_WITH_PREFIX
         end
 
+        spec "long options are recognized as global variable values." do
+          BuildAction.class_eval do
+            @action.("show global variables")
+            def gvars1()
+              puts "$project=#{$project.inspect}, $release=#{$release.inspect}"
+            end
+          end
+          at_end { Benry::CmdApp.undef_action("build:gvars1") }
+          expected = "$project=\"mysample1\", $release=\"3.0.0\"\n"
+          ok {main("--project=mysample1", "--release=3.0.0", "build:gvars1")} == expected
+        end
+
+        spec "long option value is parsed as JSON string." do
+          BuildAction.class_eval do
+            @action.("show global variables")
+            def gvars2()
+              puts "$num=#{$num.inspect}, $str=#{$str.inspect}, $arr=#{$arr.inspect}"
+            end
+          end
+          at_end { Benry::CmdApp.undef_action("build:gvars2") }
+          expected = "$num=123, $str=\"foo\", $arr=[123, true, nil]\n"
+          ok {main("--num=123", "--str=foo", "--arr=[123,true,null]", "build:gvars2")} == expected
+        end
+
       end
 
     end
