@@ -451,7 +451,7 @@ END
         end
         at_end { ScopeTestAction.class_eval { @__actiondef__ = nil } }
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       "def print(): Please rename it to `print_()` because same method defined in parent or ancestor class.")
+                       "def print(): Please rename it to `print_()`, because a method with the same name is already defined in the parent or ancestor class.")
       end
 
       spec "[!dj0ql] method override check is done with new method name (= prefixed name)." do
@@ -478,7 +478,7 @@ END
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       "def bar1(): Please rename it to `bar1_()` because same method defined in parent or ancestor class.")
+                       "def bar1(): Please rename it to `bar1_()`, because a method with the same name is already defined in the parent or ancestor class.")
       end
 
       spec "[!7fnh4] registers action metadata." do
@@ -552,7 +552,7 @@ END
         ScopeTestAction.class_eval do
           x = __validate_action_method("print", :print, :print)
         end
-        ok {x} == "Please rename it to `print_()` because same method defined in parent or ancestor class."
+        ok {x} == "Please rename it to `print_()`, because a method with the same name is already defined in the parent or ancestor class."
       end
 
       spec "[!3fmpo] method override check is done with new method name (= prefixed name)." do
@@ -560,7 +560,7 @@ END
         ScopeTestAction.class_eval do
           x = __validate_action_method("p3159:print", :print, :xprint)
         end
-        ok {x} == "Please rename it to `xprint_()` because same method defined in parent or ancestor class."
+        ok {x} == "Please rename it to `xprint_()`, because a method with the same name is already defined in the parent or ancestor class."
       end
 
     end
