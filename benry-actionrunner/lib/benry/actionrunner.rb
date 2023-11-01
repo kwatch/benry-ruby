@@ -39,6 +39,12 @@ module Benry::ActionRunner
     command = File.basename($0)
     config.app_command = command
     #config.app_detail = nil
+    config.option_verbose = true
+    config.option_quiet   = true
+    config.option_color   = true
+    config.option_debug   = true
+    config.option_trace   = true
+    #
     x = command
     example = <<END
   $ #{x} -h | less		# print help message
@@ -60,23 +66,16 @@ END
   end
 
 
-  GLOBAL_OPTION_SCHEMA = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(nil).tap do |schema|
-    schema.add(:help     , "-h, --help", "print help message (of action if specified)")
-    schema.add(:version  , "-V"        , "print version")
-    schema.add(:list     , "-l"        , "list actions")
-    schema.add(:all      , "-a"        , "list all actions/options including hidden ones")
-    schema.add(:file     , "-f <file>" , "actionfile name (default: '#{ACTIONRUNNER_FILENAME}')")
-    schema.add(:search   , "-u"        , "search for actionfile in parent or upper dir")
-    schema.add(:chdir    , "-p"        , "change current dir to where action file exists")
-    schema.add(:searchdir, "-s"        , "same as '-up'", hidden: true)
-    schema.add(:generate , "-g"        , "generate actionfile ('#{ACTIONRUNNER_FILENAME}') with example code")
-    schema.add(:verbose  , "-v"        , "verbose mode")
-    schema.add(:quiet    , "-q"        , "quiet mode")
-    schema.add(:color    , "-c"        , "enable color mode")
-    schema.add(:color    , "-C"        , "disable color mode", value: false)
-   #schema.add(:dryrun   , "-N"        , "dry-run")
-    schema.add(:debug    , "-D"        , "debug mode")
-    schema.add(:trace    , "-T"        , "trace mode")
+  GLOBAL_OPTION_SCHEMA = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(CONFIG).tap do |schema|
+    filename = ACTIONRUNNER_FILENAME
+    schema.add(:file     , "-f, --file=<file>", "actionfile name (default: '#{filename}')")
+    schema.add(:search   , "-s, --search"   , "search for actionfile in parent or upper dir")
+    schema.add(:chdir    , "-d, --chdir"    , "change current dir to where actionfile exists")
+    schema.add(:searchdir, "-u, --searchdir", "same as '-sd'", hidden: true)
+    schema.add(:generate , "-g, --generate" , "generate actionfile ('#{filename}') with example code")
+    schema.reorder_options!(:help, :version, :list, :all,
+                            :file, :search, :chdir, :searchdir, :generate,
+                            :verbose, :quiet, :color, :debug, :trace)
   end
 
 
