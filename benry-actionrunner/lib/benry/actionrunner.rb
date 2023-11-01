@@ -98,10 +98,35 @@ END
       @flag_search = false                 # true when '-s' option specified
       @flag_chdir  = false                 # true when '-w' option specified
       @action_file = ACTIONRUNNER_FILENAME # ex: 'Actionfile.rb'
+      @global_vars = {}                    # names and values of global vars
       @_loaded     = false                 # true when action file loaded
     end
 
+    class GlobalOptionParser < Benry::CmdApp::GLOBAL_OPTION_PARSER_CLASS
+
+      def initialize(schema, &callback)
+        super
+        @callback = callback
+      end
+
+      def handle_unknown_long_option(optstr, name, value)
+        return super if value == nil
+        return super if @callback == nil
+        @callback.call(name, value, optstr)
+      end
+
+    end
+
     protected
+
+    def parse_global_options(args)
+      @global_vars = {}
+      parser = GlobalOptionParser.new(@option_schema) do |name, value, _optstr|
+        @global_vars[name] = value
+      end
+      global_opts = parser.parse(args, all: false)  # raises OptionError
+      return global_opts
+    end
 
     def toggle_global_options(global_opts)  # override
       super
@@ -147,12 +172,17 @@ END
 
     def load_action_file(required: true)
       return false if @_loaded
+      #
       filename = @action_file  or raise "** internal error"
       filepath = _search_and_load_action_file(filename, @flag_search, @flag_chdir)
       filepath != nil || ! required  or
         raise Benry::CmdApp::CommandError,
               "Action file ('#{filename}') not found." \
               " Create it by `#{@config.app_command} -g` command firstly."
+      #
+      _populate_global_variables(@global_vars)
+      @global_vars.clear()
+      #
       @_loaded = true
       return true
     end
@@ -191,6 +221,23 @@ END
     def _chdir(dir)
       Action.new(@config).instance_eval { cd(dir) }
       nil
+    end
+
+    def _populate_global_variables(global_vars)
+      return nil if global_vars.empty?
+      global_vars.each do |name, str|
+        var = name.gsub(/[^\w]/, '_')
+        val = _decode_value(str)
+        eval "$#{var} = #{val.inspect}"
+      end
+      nil
+    end
+
+    def _decode_value(str)
+      require 'json' unless defined?(JSON)
+      return JSON.load(str)
+    rescue JSON::ParserError
+      return str
     end
 
     def generate_action_file(quiet: $QUIET_MODE)
