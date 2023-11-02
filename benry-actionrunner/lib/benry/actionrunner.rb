@@ -285,23 +285,27 @@ END
   end
 
 
-  module_function
+  module Export
 
+    CONFIG = Benry::ActionRunner::CONFIG
+    Action = Benry::ActionRunner::Action
 
-  def define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
-    return Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
-  end
+    def define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+      return Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
+    end
 
-  def undef_alias(alias_name)
-    return Benry::CmdApp.undef_alias(alias_name)
-  end
+    def undef_alias(alias_name)
+      return Benry::CmdApp.undef_alias(alias_name)
+    end
 
-  def undef_action(action_name)
-    return Benry::CmdApp.undef_action(action_name)
-  end
+    def undef_action(action_name)
+      return Benry::CmdApp.undef_action(action_name)
+    end
 
-  def current_app()
-    return Benry::CmdApp.current_app()
+    def current_app()
+      return Benry::CmdApp.current_app()
+    end
+
   end
 
 
@@ -342,7 +346,7 @@ __END__
 
 require 'benry/actionrunner'
 
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 
 ##
