@@ -675,6 +675,17 @@ module Benry::CmdApp
       nil
     end
 
+    def prefix_add_via_action(action)
+      #; [!ztrfj] registers prefix of action.
+      #; [!31pik] do nothing if prefix already registered.
+      #; [!oqq7j] do nothing if action has no prefix.
+      if action =~ /\A(?:[-\w]+:)+/
+        prefix = $&
+        @prefix_dict[prefix] = nil unless @prefix_dict.key?(prefix)
+      end
+      nil
+    end
+
     def prefix_exist?(prefix)
       #; [!79cyx] returns true if prefix is already registered.
       #; [!jx7fk] returns false if prefix is not registered yet.

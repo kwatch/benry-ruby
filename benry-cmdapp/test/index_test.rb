@@ -155,6 +155,35 @@ Oktest.scope do
     end
 
 
+    topic '#prefix_add_via_action()' do
+
+      spec "[!ztrfj] registers prefix of action." do
+        @index.prefix_add_via_action("p5671:hello")
+        ok {@index.prefix_exist?("p5671:")}   == true
+        ok {@index.prefix_get_desc("p5671:")} == nil
+        #
+        @index.prefix_add_via_action("p5671:fo-o:ba_r:baz9:hello2")
+        ok {@index.prefix_exist?("p5671:fo-o:ba_r:baz9:")} == true
+        ok {@index.prefix_exist?("p5671:fo-o:ba_r:")}      == false
+        ok {@index.prefix_exist?("p5671:fo-o:")}          == false
+      end
+
+      spec "[!31pik] do nothing if prefix already registered." do
+        prefix = "p0620:hello"
+        @index.prefix_add(prefix, "some desc")
+        @index.prefix_add_via_action(prefix)
+        ok {@index.prefix_get_desc(prefix)} == "some desc"
+      end
+
+      spec "[!oqq7j] do nothing if action has no prefix." do
+        ok {@index.prefix_each().count()} == 0
+        @index.prefix_add_via_action("a4049")
+        ok {@index.prefix_each().count()} == 0
+      end
+
+    end
+
+
     topic '#prefix_each()' do
 
       spec "[!67r3i] returns Enumerator object if block not given." do
