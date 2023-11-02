@@ -82,7 +82,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction < Action
 
@@ -118,7 +118,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction < Action
 
@@ -155,7 +155,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction < Action
 
@@ -219,7 +219,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction < Action
 
@@ -258,7 +258,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction < Action
 
@@ -301,7 +301,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction < Action
   prefix "git:"     # should be "git:", not "git" !!!
@@ -342,7 +342,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction < Action
 
@@ -389,7 +389,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction < Action
 
@@ -448,7 +448,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction < Action
   prefix "git:", action: "status"
@@ -477,7 +477,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction < Action
   prefix "git:", alias_of: "status"
@@ -511,7 +511,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class BuildAction < Action
 
@@ -554,7 +554,7 @@ File: Actionfile.rb
 ```ruby
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 ## global variables
 $project = "exmaple"
