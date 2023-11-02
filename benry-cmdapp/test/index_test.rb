@@ -132,32 +132,98 @@ Oktest.scope do
     end
 
 
-    topic '#prefix_desc_put()' do
+    topic '#prefix_add()' do
 
-      spec "[!62fxz] returns description registered." do
-        x = Benry::CmdApp::INDEX.prefix_desc_put("p2862", "some description")
-        ok {x} == "some description"
+      spec "[!k27in] registers prefix if not registered yet." do
+        prefix = "p7885:"
+        ok {@index.prefix_exist?(prefix)} == false
+        @index.prefix_add(prefix, nil)
+        ok {@index.prefix_exist?(prefix)} == true
+        ok {@index.prefix_get_desc(prefix)} == nil
       end
 
-      spec "[!3aot4] registers prefix description, whether already registered or not." do
-        x = Benry::CmdApp::INDEX.prefix_desc_put("p2262", "some description")
-        ok {x} == "some description"
-        x = Benry::CmdApp::INDEX.prefix_desc_put("p2262", "other description")
-        ok {x} == "other description"
+      spec "[!xubc8] registers prefix whenever desc is not a nil." do
+        prefix = "p8796:"
+        @index.prefix_add(prefix, "some description")
+        ok {@index.prefix_exist?(prefix)} == true
+        ok {@index.prefix_get_desc(prefix)} == "some description"
+        #
+        @index.prefix_add(prefix, "other description")
+        ok {@index.prefix_get_desc(prefix)} == "other description"
       end
 
     end
 
 
-    topic '#prefix_desc_get()' do
+    topic '#prefix_add_via_action()' do
+
+      spec "[!ztrfj] registers prefix of action." do
+        @index.prefix_add_via_action("p5671:hello")
+        ok {@index.prefix_exist?("p5671:")}   == true
+        ok {@index.prefix_get_desc("p5671:")} == nil
+        #
+        @index.prefix_add_via_action("p5671:fo-o:ba_r:baz9:hello2")
+        ok {@index.prefix_exist?("p5671:fo-o:ba_r:baz9:")} == true
+        ok {@index.prefix_exist?("p5671:fo-o:ba_r:")}      == false
+        ok {@index.prefix_exist?("p5671:fo-o:")}          == false
+      end
+
+      spec "[!31pik] do nothing if prefix already registered." do
+        prefix = "p0620:hello"
+        @index.prefix_add(prefix, "some desc")
+        @index.prefix_add_via_action(prefix)
+        ok {@index.prefix_get_desc(prefix)} == "some desc"
+      end
+
+      spec "[!oqq7j] do nothing if action has no prefix." do
+        ok {@index.prefix_each().count()} == 0
+        @index.prefix_add_via_action("a4049")
+        ok {@index.prefix_each().count()} == 0
+      end
+
+    end
+
+
+    topic '#prefix_each()' do
+
+      spec "[!67r3i] returns Enumerator object if block not given." do
+        ok {@index.prefix_each()}.is_a?(Enumerator)
+      end
+
+      spec "[!g3d1z] yields block with each prefix and desc." do
+        @index.prefix_add("p2358:", nil)
+        @index.prefix_add("p3892:", "some desc")
+        d = {}
+        @index.prefix_each() {|prefix, desc| d[prefix] = desc }
+        ok {d} == {"p2358:" => nil, "p3892:" => "some desc"}
+      end
+
+    end
+
+
+    topic '#prefix_exist?()' do
+
+      spec "[!79cyx] returns true if prefix is already registered." do
+        @index.prefix_add("p0057:", nil)
+        ok {@index.prefix_exist?("p0057:")} == true
+      end
+
+      spec "[!jx7fk] returns false if prefix is not registered yet." do
+        ok {@index.prefix_exist?("p0760:")} == false
+      end
+
+    end
+
+
+    topic '#prefix_get_desc()' do
 
       spec "[!d47kq] returns description if prefix is registered." do
-        Benry::CmdApp::INDEX.prefix_desc_put("p5679", "bla bla")
-        ok {Benry::CmdApp::INDEX.prefix_desc_get("p5679")} == "bla bla"
+        Benry::CmdApp::INDEX.prefix_add("p5679", "bla bla")
+        ok {Benry::CmdApp::INDEX.prefix_get_desc("p5679")} == "bla bla"
       end
 
       spec "[!otp1b] returns nil if prefix is not registered." do
-        ok {Benry::CmdApp::INDEX.prefix_desc_get("p8233")} == nil
+        ok {Benry::CmdApp::INDEX.prefix_get_desc("p8233")} == nil
       end
 
     end

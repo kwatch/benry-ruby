@@ -500,6 +500,9 @@ module Benry::CmdApp
         #; [!4402s] clears `alias_of:` kwarg.
         @__prefixdef__[2] = nil
       end
+      #; [!u0td6] registers prefix of action if not registered yet.
+      INDEX.prefix_add_via_action(action)
+      #
       return true    # for testing purpose
     end
 
@@ -534,8 +537,8 @@ module Benry::CmdApp
         prev = @__prefixdef__
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
-        #; [!j00pk] registers prefix description if specified.
-        INDEX.prefix_desc_put(prefix, desc) if desc
+        #; [!j00pk] registers prefix and description, even if no actions defined.
+        INDEX.prefix_add(prefix, desc)
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
@@ -555,8 +558,8 @@ module Benry::CmdApp
       else
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
-        #; [!ncskq] registers prefix description if specified.
-        INDEX.prefix_desc_put(prefix, desc) if desc
+        #; [!ncskq] registers prefix and description, even if no actions defined.
+        INDEX.prefix_add(prefix, desc)
       end
       nil
     end
@@ -616,7 +619,7 @@ module Benry::CmdApp
 
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
-      @prefix_descs  = {}          # {prefix => description}
+      @prefix_dict   = {}          # {prefix => description}
     end
 
     def metadata_add(metadata)
@@ -666,17 +669,44 @@ module Benry::CmdApp
       return md, alias_args
     end
 
-    def prefix_desc_put(prefix, desc)
-      #; [!3aot4] registers prefix description, whether already registered or not.
-      @prefix_descs[prefix] = desc
-      #; [!62fxz] returns description registered.
-      return desc
+    def prefix_add(prefix, desc=nil)
+      #; [!k27in] registers prefix if not registered yet.
+      #; [!xubc8] registers prefix whenever desc is not a nil.
+      if ! @prefix_dict.key?(prefix) || desc
+        @prefix_dict[prefix] = desc
+      end
+      nil
     end
 
-    def prefix_desc_get(prefix)
+    def prefix_add_via_action(action)
+      #; [!ztrfj] registers prefix of action.
+      #; [!31pik] do nothing if prefix already registered.
+      #; [!oqq7j] do nothing if action has no prefix.
+      if action =~ /\A(?:[-\w]+:)+/
+        prefix = $&
+        @prefix_dict[prefix] = nil unless @prefix_dict.key?(prefix)
+      end
+      nil
+    end
+
+    def prefix_exist?(prefix)
+      #; [!79cyx] returns true if prefix is already registered.
+      #; [!jx7fk] returns false if prefix is not registered yet.
+      return @prefix_dict.key?(prefix)
+    end
+
+    def prefix_each(&block)
+      #; [!67r3i] returns Enumerator object if block not given.
+      return enum_for(:prefix_each) unless block_given?()
+      #; [!g3d1z] yields block with each prefix and desc.
+      @prefix_dict.each(&block)
+      nil
+    end
+
+    def prefix_get_desc(prefix)
       #; [!d47kq] returns description if prefix is registered.
       #; [!otp1b] returns nil if prefix is not registered.
-      return @prefix_descs[prefix]
+      return @prefix_dict[prefix]
     end
 
   end
@@ -1267,6 +1297,8 @@ module Benry::CmdApp
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
       dict = _count_actions_per_prefix(depth, all: all)
+      #index = @_index || INDEX
+      #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!crbav] returns top prefix list.
@@ -1309,7 +1341,7 @@ module Benry::CmdApp
       return dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
-        desc = index.prefix_desc_get(prefix)
+        desc = index.prefix_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
     end
