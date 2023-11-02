@@ -1297,6 +1297,8 @@ module Benry::CmdApp
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
       dict = _count_actions_per_prefix(depth, all: all)
+      #index = @_index || INDEX
+      #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!crbav] returns top prefix list.
