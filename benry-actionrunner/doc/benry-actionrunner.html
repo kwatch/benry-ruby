@@ -53,8 +53,8 @@ For example, <code>arun hello -l fr Alice</code> runs <code>hello</code> action 
 <li><a href="#alias-of-action">Alias of Action</a></li>
 <li><a href="#prefix-action-and-prefix-alias">Prefix Action and Prefix Alias</a></li>
 <li><a href="#prerequisite-action">Prerequisite Action</a></li>
+<li><a href="#global-variable">Global Variable</a></li>
 <li><a href="#other-topics">Other Topics</a></li>
-<li><a href="#available-commands">Available Commands</a></li>
 </ul></li>
 <li><a href="#advanced-features">Advanced Features</a></li>
 <li><a href="#license-and-copyright">License and Copyright</a></li>
@@ -513,11 +513,71 @@ end
 <strong>.... teardown ....</strong>
 </pre>
 </section>
+<section class="subsection" id="global-variable">
+<h3>Global Variable</h3>
+<p>Global long option such as <code>--release=1.2.3</code> is recognized as global variable name and value.</p>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner
+
+## global variables
+<strong>$project = "exmaple"</strong>
+<strong>$release = "1.0.0"</strong>
+
+class MyAction &lt Action
+
+  @action.("show global variables")
+  def gvars()
+    puts "$project=#{<strong>$project</strong>.inspect}, $release=#{<strong>$release</strong>.inspect}"
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun <strong>--project=myapp --release=1.2.3</strong> gvars
+$project=<strong>"myapp"</strong>, $release=<strong>"1.2.3"</strong>
+</pre>
+<p>Debug option <code>-D</code> prints global variables specified in commiand-line.
+This is useful to debug values of global variables.</p>
+<pre class="language-console">
+[bash]$ arun -l <strong>-D</strong> --project=myapp --release=1.2.3
+<strong>[DEBUG] $project = "myapp"</strong>
+<strong>[DEBUG] $release = "1.2.3"</strong>
+Actions:
+  gvars              : show global variables
+  help               : print help message (of action if specified)
+</pre>
+<p>Values of global variables in command-line are parsed as JSON string.
+If failed to parse as JSON string, it is handled as string value.</p>
+<pre class="language-console">
+### parsed as JSON format
+[bash]$ arun -l -D <strong>--data='["abc",123,true]'</strong> | grep DEBUG
+[DEBUG] $data = <strong>["abc", 123, true]</strong>
+
+### 'null' in JSON results in 'nil' in Ruby
+[bash]$ arun -l -D <strong>--data="null"</strong> | grep DEBUG
+[DEBUG] $data = <strong>nil</strong>
+
+### parsed as JSON quoted string
+[bash]$ arun -l -D <strong>--data='"foo"'</strong> | grep DEBUG
+[DEBUG] $data = <strong>"foo"</strong>
+
+### failed to parse, because single quotation is not available in JSON
+[bash]$ arun -l -D <strong>--data="'foo'"</strong> | grep DEBUG
+[DEBUG] $data = <strong>"'foo'"</strong>
+
+### failed to parse as JSON, therefore handled as just a string
+[bash]$ arun -l -D <strong>--data="foo"</strong> | grep DEBUG
+[DEBUG] $data = <strong>"foo"</strong>
+</pre>
+</section>
 <section class="subsection" id="other-topics">
 <h3>Other Topics</h3>
-</section>
-<section class="subsection" id="available-commands">
-<h3>Available Commands</h3>
+<section class="subsubsection" id="available-commands">
+<h4>Available Commands</h4>
 <p>In action methods, UNIX-like commands are available.
 These commands are implemented in <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">Benry-UnixCommand</a> and different from FileUtils.rb.
 For example:</p>
@@ -530,6 +590,7 @@ For example:</p>
 </ul>
 <p>See the document of Benry-UnixCommand for details:
  <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">https://kwatch.github.io/benry-ruby/benry-unixcommand.html</a></p>
+</section>
 <section class="subsubsection" id="search-actionfile-in-parent-or-higher-directory">
 <h4>Search Actionfile in Parent or Higher Directory</h4>
 <p>In contrast to Rake, Benry-ActionRunner doesn't automatically look for action file in the parent or higher directory (this is for security reason).

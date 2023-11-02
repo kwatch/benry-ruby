@@ -524,11 +524,80 @@ Output:
 ```
 
 
+=== Global Variable
+
+Global long option such as ``--release=1.2.3`` is recognized as global variable name and value.
+
+File: Actionfile.rb
+
+```ruby
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner
+
+## global variables
+{{*$project = "exmaple"*}}
+{{*$release = "1.0.0"*}}
+
+class MyAction < Action
+
+  @action.("show global variables")
+  def gvars()
+    puts "$project=#{{{*$project*}}.inspect}, $release=#{{{*$release*}}.inspect}"
+  end
+
+end
+```
+
+Output:
+
+```console
+[bash]$ arun {{*--project=myapp --release=1.2.3*}} gvars
+$project={{*"myapp"*}}, $release={{*"1.2.3"*}}
+```
+
+Debug option ``-D`` prints global variables specified in commiand-line.
+This is useful to debug values of global variables.
+
+```console
+[bash]$ arun -l {{*-D*}} --project=myapp --release=1.2.3
+{{*[DEBUG] $project = "myapp"*}}
+{{*[DEBUG] $release = "1.2.3"*}}
+Actions:
+  gvars              : show global variables
+  help               : print help message (of action if specified)
+```
+
+Values of global variables in command-line are parsed as JSON string.
+If failed to parse as JSON string, it is handled as string value.
+
+```console
+### parsed as JSON format
+[bash]$ arun -l -D {{*--data='["abc",123,true]'*}} | grep DEBUG
+[DEBUG] $data = {{*["abc", 123, true]*}}
+
+### 'null' in JSON results in 'nil' in Ruby
+[bash]$ arun -l -D {{*--data="null"*}} | grep DEBUG
+[DEBUG] $data = {{*nil*}}
+
+### parsed as JSON quoted string
+[bash]$ arun -l -D {{*--data='"foo"'*}} | grep DEBUG
+[DEBUG] $data = {{*"foo"*}}
+
+### failed to parse, because single quotation is not available in JSON
+[bash]$ arun -l -D {{*--data="'foo'"*}} | grep DEBUG
+[DEBUG] $data = {{*"'foo'"*}}
+
+### failed to parse as JSON, therefore handled as just a string
+[bash]$ arun -l -D {{*--data="foo"*}} | grep DEBUG
+[DEBUG] $data = {{*"foo"*}}
+```
+
 
 === Other Topics
 
 
-=== Available Commands
+==== Available Commands
 
 In action methods, UNIX-like commands are available.
 These commands are implemented in [Benry-UnixCommand](https://kwatch.github.io/benry-ruby/benry-unixcommand.html) and different from FileUtils.rb.
