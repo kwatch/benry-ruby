@@ -939,6 +939,15 @@ END
         ok {x} !~ /^  secret:/
       end
 
+      spec "[!yzznv] takes care of prefixes which has no actions." do
+        HelpTestAction.class_eval do
+          prefix "p5894:" do
+          end
+        end
+        x = @builder.build_prefix_list(1)
+        ok {x} =~ /^  p5894:/
+      end
+
       spec "[!p4j1o] returns nil if no prefix found." do
         index = Benry::CmdApp::MetadataIndex.new
         ["hello", "secret:crypt"].each do |action|
