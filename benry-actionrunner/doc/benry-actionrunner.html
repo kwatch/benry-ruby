@@ -54,9 +54,17 @@ For example, <code>arun hello -l fr Alice</code> runs <code>hello</code> action 
 <li><a href="#prefix-action-and-prefix-alias">Prefix Action and Prefix Alias</a></li>
 <li><a href="#prerequisite-action">Prerequisite Action</a></li>
 <li><a href="#global-variable">Global Variable</a></li>
-<li><a href="#other-topics">Other Topics</a></li>
+<li><a href="#available-commands">Available Commands</a></li>
 </ul></li>
-<li><a href="#advanced-features">Advanced Features</a></li>
+<li><a href="#more-features">More Features</a>
+<ul>
+<li><a href="#search-actionfile-in-parent-or-higher-directory">Search Actionfile in Parent or Higher Directory</a></li>
+<li><a href="#hidden-action-alias-or-option">Hidden Action, Alias or Option</a></li>
+<li><a href="#important-action-alias-or-option">Important Action, Alias or Option</a></li>
+<li><a href="#delete-actionalias">Delete Action/Alias</a></li>
+<li><a href="#default-action">Default Action</a></li>
+<li><a href="#more-topics">More Topics</a></li>
+</ul></li>
 <li><a href="#license-and-copyright">License and Copyright</a></li>
 </ul>
 </div>
@@ -325,6 +333,12 @@ Actions:
 [bash]$ arun <strong>git:</strong>status
 $ git status -sb .
 </pre>
+<p>Prefix name should be a string which ends with ":".
+Symbol is not avaiable.</p>
+<pre class="language-ruby">
+class GitAction &lt Action
+  prefix <strong>:git</strong>       #=&gt; error because Symbol is specified
+</pre>
 </section>
 <section class="subsection" id="nested-prefix">
 <h3>Nested Prefix</h3>
@@ -371,6 +385,7 @@ Actions:
 </section>
 <section class="subsection" id="alias-of-action">
 <h3>Alias of Action</h3>
+<p>Alias is a shortcut of action.</p>
 <p>File: Actionfile.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
@@ -402,6 +417,7 @@ class GitAction &lt Action
 
 end
 
+## define aliases
 <strong>define_alias "ci"   , "git:commit:create"</strong>
 <strong>define_alias "fork" , "git:branch:create"</strong>
 <strong>define_alias "sw"   , "git:branch:switch"</strong>
@@ -421,6 +437,8 @@ Actions:
 [bash]$ arun fork topic-foo      # same as `arun git:branch:create topic-foo`
 [bash]$ arun sw topic-foo        # same as `arun git:branch:switch topic-foo`
 </pre>
+<p>Alias definition can include options and arguments.
+For example, <code>define_alias "correct", ["git:commit", "--amend"]</code> defines an alias <code>correct</code> which invokes <code>git:commit</code> action with <code>--amend</code> option.</p>
 </section>
 <section class="subsection" id="prefix-action-and-prefix-alias">
 <h3>Prefix Action and Prefix Alias</h3>
@@ -574,10 +592,8 @@ If failed to parse as JSON string, it is handled as string value.</p>
 [DEBUG] $data = <strong>"foo"</strong>
 </pre>
 </section>
-<section class="subsection" id="other-topics">
-<h3>Other Topics</h3>
-<section class="subsubsection" id="available-commands">
-<h4>Available Commands</h4>
+<section class="subsection" id="available-commands">
+<h3>Available Commands</h3>
 <p>In action methods, UNIX-like commands are available.
 These commands are implemented in <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">Benry-UnixCommand</a> and different from FileUtils.rb.
 For example:</p>
@@ -591,8 +607,11 @@ For example:</p>
 <p>See the document of Benry-UnixCommand for details:
  <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">https://kwatch.github.io/benry-ruby/benry-unixcommand.html</a></p>
 </section>
-<section class="subsubsection" id="search-actionfile-in-parent-or-higher-directory">
-<h4>Search Actionfile in Parent or Higher Directory</h4>
+</section>
+<section class="section" id="more-features">
+<h2>More Features</h2>
+<section class="subsection" id="search-actionfile-in-parent-or-higher-directory">
+<h3>Search Actionfile in Parent or Higher Directory</h3>
 <p>In contrast to Rake, Benry-ActionRunner doesn't automatically look for action file in the parent or higher directory (this is for security reason).
 If you want Benry-ActionRunner to behave like Rake, add <code>-u</code> and ``-p` options.</p>
 <ul>
@@ -623,14 +642,17 @@ Actions:
   setup              : setup something
 </pre>
 </section>
-<section class="subsubsection" id="hidden-action-or-option">
-<h4>Hidden Action or Option</h4>
+<section class="subsection" id="hidden-action-alias-or-option">
+<h3>Hidden Action, Alias or Option</h3>
+<p>It is possible to make visibility of actions/aliases/options as hidden.</p>
 <pre class="language-ruby">
   @action.("preparation", <strong>hidden: true</strong>)
   @option.(:debug, "--debug", "enable debug mode", <strong>hidden: true</strong>)
   def preparation()
     ....
   end
+
+  define_alias "prep", "preparation", <strong>hidden: true</strong>
 </pre>
 <p>Hidden actions and options are not displayed in help message.
 If you want to display hidden actions or options, add <code>-a</code> or <code>--all</code> option.</p>
@@ -639,28 +661,45 @@ If you want to display hidden actions or options, add <code>-a</code> or <code>-
 [bash]$ arun -la hello    # show all options of action including hidden ones
 </pre>
 </section>
-<section class="subsubsection" id="delete-actionalias">
-<h4>Delete Action/Alias</h4>
+<section class="subsection" id="important-action-alias-or-option">
+<h3>Important Action, Alias or Option</h3>
+<p>It is possible to mark actions/aliases/options as important or not.</p>
+<ul>
+<li>Actions/aliases/options marked as important are displayed in bold font in help message.</li>
+<li>Actions/aliases/options marked as not important are displayed in gray color in help message.</li>
+</ul>
+<pre class="language-ruby">
+  @action.("print greeting message", <strong>important: true</strong>)
+  @option.(:lang, "-l, --lang=&ltlang&gt;", "language", <strong>important: true</strong>)
+  @option.(:repeat, "--repeat=&ltN&gt;", "repeat N times", <strong>important: false</strong>)
+  def hello(name="world", lang: "en", repeat: 1)
+    # ....
+  end
+
+  define_alias "hi", "hello", <strong>important: false</strong>
+</pre>
+</section>
+<section class="subsection" id="delete-actionalias">
+<h3>Delete Action/Alias</h3>
 <pre class="language-ruby">
 undef_alias("fork")                    ## delete an alias
 undef_action("git:branch:create")      ## delete an action
 </pre>
 </section>
-<section class="subsubsection" id="default-action">
-<h4>Default Action</h4>
+<section class="subsection" id="default-action">
+<h3>Default Action</h3>
 <pre class="language-ruby">
 CONFIG.default_action = "xxxx"
 </pre>
 </section>
-</section>
-</section>
-<section class="section" id="advanced-features">
-<h2>Advanced Features</h2>
+<section class="subsection" id="more-topics">
+<h3>More Topics</h3>
 <p>Benry-ActionRunner is empowerd by Benry-CmdApp.
 Many features of Benry-ActionRunner is derived from Benry-CmdApp.</p>
 <p>If you are looking for any features not written in this document,
 see the document of Benry-CmdApp framework:
  <a href="https://kwatch.github.io/benry-ruby/benry-cmdapp.html">https://kwatch.github.io/benry-ruby/benry-cmdapp.html</a></p>
+</section>
 </section>
 <section class="section" id="license-and-copyright">
 <h2>License and Copyright</h2>

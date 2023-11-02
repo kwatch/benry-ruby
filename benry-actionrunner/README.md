@@ -38,8 +38,14 @@ For example, `arun hello -l fr Alice` runs `hello` action with an option `-l fr`
   * [Prefix Action and Prefix Alias](#prefix-action-and-prefix-alias)
   * [Prerequisite Action](#prerequisite-action)
   * [Global Variable](#global-variable)
-  * [Other Topics](#other-topics)
-* [Advanced Features](#advanced-features)
+  * [Available Commands](#available-commands)
+* [More Features](#more-features)
+  * [Search Actionfile in Parent or Higher Directory](#search-actionfile-in-parent-or-higher-directory)
+  * [Hidden Action, Alias or Option](#hidden-action-alias-or-option)
+  * [Important Action, Alias or Option](#important-action-alias-or-option)
+  * [Delete Action/Alias](#delete-actionalias)
+  * [Default Action](#default-action)
+  * [More Topics](#more-topics)
 * [License and Copyright](#license-and-copyright)
 
 <!-- /TOC -->
@@ -334,6 +340,14 @@ Actions:
 $ git status -sb .
 ```
 
+Prefix name should be a string which ends with ":".
+Symbol is not avaiable.
+
+```ruby
+class GitAction < Action
+  prefix :git       #=> error because Symbol is specified
+```
+
 
 ### Nested Prefix
 
@@ -384,6 +398,8 @@ Actions:
 
 ### Alias of Action
 
+Alias is a shortcut of action.
+
 File: Actionfile.rb
 
 ```ruby
@@ -416,6 +432,7 @@ class GitAction < Action
 
 end
 
+## define aliases
 define_alias "ci"   , "git:commit:create"
 define_alias "fork" , "git:branch:create"
 define_alias "sw"   , "git:branch:switch"
@@ -437,6 +454,9 @@ Actions:
 [bash]$ arun fork topic-foo      # same as `arun git:branch:create topic-foo`
 [bash]$ arun sw topic-foo        # same as `arun git:branch:switch topic-foo`
 ```
+
+Alias definition can include options and arguments.
+For example, `define_alias "correct", ["git:commit", "--amend"]` defines an alias `correct` which invokes `git:commit` action with `--amend` option.
 
 
 ### Prefix Action and Prefix Alias
@@ -615,10 +635,7 @@ If failed to parse as JSON string, it is handled as string value.
 ```
 
 
-### Other Topics
-
-
-#### Available Commands
+### Available Commands
 
 In action methods, UNIX-like commands are available.
 These commands are implemented in [Benry-UnixCommand](https://kwatch.github.io/benry-ruby/benry-unixcommand.html) and different from FileUtils.rb.
@@ -634,7 +651,11 @@ See the document of Benry-UnixCommand for details:
  <https://kwatch.github.io/benry-ruby/benry-unixcommand.html>
 
 
-#### Search Actionfile in Parent or Higher Directory
+
+## More Features
+
+
+### Search Actionfile in Parent or Higher Directory
 
 In contrast to Rake, Benry-ActionRunner doesn't automatically look for action file in the parent or higher directory (this is for security reason).
 If you want Benry-ActionRunner to behave like Rake, add `-u` and `-p` options.
@@ -668,7 +689,9 @@ Actions:
 ```
 
 
-#### Hidden Action or Option
+### Hidden Action, Alias or Option
+
+It is possible to make visibility of actions/aliases/options as hidden.
 
 ```ruby
   @action.("preparation", hidden: true)
@@ -676,6 +699,8 @@ Actions:
   def preparation()
     ....
   end
+
+  define_alias "prep", "preparation", hidden: true
 ```
 
 Hidden actions and options are not displayed in help message.
@@ -687,7 +712,26 @@ If you want to display hidden actions or options, add `-a` or `--all` option.
 ```
 
 
-#### Delete Action/Alias
+### Important Action, Alias or Option
+
+It is possible to mark actions/aliases/options as important or not.
+
+* Actions/aliases/options marked as important are displayed in bold font in help message.
+* Actions/aliases/options marked as not important are displayed in gray color in help message.
+
+```ruby
+  @action.("print greeting message", important: true)
+  @option.(:lang, "-l, --lang=<lang>", "language", important: true)
+  @option.(:repeat, "--repeat=<N>", "repeat N times", important: false)
+  def hello(name="world", lang: "en", repeat: 1)
+    # ....
+  end
+
+  define_alias "hi", "hello", important: false
+```
+
+
+### Delete Action/Alias
 
 ```ruby
 undef_alias("fork")                    ## delete an alias
@@ -695,15 +739,14 @@ undef_action("git:branch:create")      ## delete an action
 ```
 
 
-#### Default Action
+### Default Action
 
 ```ruby
 CONFIG.default_action = "xxxx"
 ```
 
 
-
-## Advanced Features
+### More Topics
 
 Benry-ActionRunner is empowerd by Benry-CmdApp.
 Many features of Benry-ActionRunner is derived from Benry-CmdApp.
