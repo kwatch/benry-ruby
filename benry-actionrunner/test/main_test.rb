@@ -283,6 +283,14 @@ END
           ok {main("--num=123", "--str=foo", "--arr=[123,true,null]", "build:gvars2")} == expected
         end
 
+        spec "long options are displayed in debug mode." do
+          sout = main("-lD", "--num=123", "--str=foo", "--arr=[123,true,null]")
+          ok {sout}.start_with?(<<"END")
+\e[2m[DEBUG] $num = 123\e[0m
+\e[2m[DEBUG] $str = \"foo\"\e[0m
+END
+        end
+
       end
 
     end

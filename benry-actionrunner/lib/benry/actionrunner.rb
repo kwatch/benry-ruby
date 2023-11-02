@@ -240,6 +240,7 @@ END
         var = name.gsub(/[^\w]/, '_')
         val = _decode_value(str)
         eval "$#{var} = #{val.inspect}"
+        _debug_global_var(var, val) if $DEBUG_MODE
       end
       nil
     end
@@ -249,6 +250,13 @@ END
       return JSON.load(str)
     rescue JSON::ParserError
       return str
+    end
+
+    def _debug_global_var(var, val)
+      msg = "[DEBUG] $#{var} = #{val.inspect}"
+      msg = "\e[2m#{msg}\e[0m" if Benry::CmdApp::Util.color_mode?
+      puts msg
+      $stdout.flush()
     end
 
     def generate_action_file(quiet: $QUIET_MODE)
