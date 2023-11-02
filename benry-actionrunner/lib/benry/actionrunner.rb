@@ -186,20 +186,47 @@ END
       return false if @_loaded
       #
       filename = @action_file  or raise "** internal error"
-      filepath = _search_and_load_action_file(filename, @flag_search, @flag_chdir)
+      brownie  = Brownie.new(@config)
+      filepath = brownie.search_and_load_action_file(filename, @flag_search, @flag_chdir)
       filepath != nil || ! required  or
         raise Benry::CmdApp::CommandError,
               "Action file ('#{filename}') not found." \
               " Create it by `#{@config.app_command} -g` command firstly."
       #
-      _populate_global_variables(@global_vars)
+      brownie.populate_global_variables(@global_vars)
       @global_vars.clear()
       #
       @_loaded = true
       return true
     end
 
-    def _search_and_load_action_file(filename, flag_search, flag_chdir, _pwd: Dir.pwd())
+    def generate_action_file(quiet: $QUIET_MODE)
+      filename = @action_file  or raise "** internal error"
+      brownie  = Brownie.new(@config)
+      content  = brownie.render_action_file_content(filename)
+      if filename == "-" || ! $stdout.tty?
+        print content
+        return nil
+      end
+      ! File.exist?(filename)  or
+        raise Benry::CmdApp::CommandError,
+              "Action file ('#{filename}') already exists." \
+              " If you want to generate a new one, delete it first."
+      File.write(filename, content, encoding: 'utf-8')
+      puts "[OK] Action file '#{filename}' generated." unless quiet
+      return filename
+    end
+
+  end
+
+
+  class Brownie
+
+    def initialize(config)
+      @config = config
+    end
+
+    def search_and_load_action_file(filename, flag_search, flag_chdir, _pwd: Dir.pwd())
       if File.exist?(filename) ; dir = "."
       elsif flag_search        ; dir = _search_dir_where_file_exist(filename, _pwd)
       else                     ; dir = nil
@@ -215,6 +242,8 @@ END
       require abspath
       return abspath
     end
+
+    private
 
     def _search_dir_where_file_exist(filename, dir=Dir.pwd(), max=20)
       n = -1
@@ -235,7 +264,9 @@ END
       nil
     end
 
-    def _populate_global_variables(global_vars)
+    public
+
+    def populate_global_variables(global_vars)
       return nil if global_vars.empty?
       global_vars.each do |name, str|
         var = name.gsub(/[^\w]/, '_')
@@ -246,6 +277,8 @@ END
       nil
     end
 
+    private
+
     def _decode_value(str)
       require 'json' unless defined?(JSON)
       return JSON.load(str)
@@ -255,28 +288,14 @@ END
 
     def _debug_global_var(var, val)
       msg = "[DEBUG] $#{var} = #{val.inspect}"
-      msg = "\e[2m#{msg}\e[0m" if Benry::CmdApp::Util.color_mode?
+      msg = @config.deco_debug % msg if Benry::CmdApp::Util.color_mode?
       puts msg
       $stdout.flush()
     end
 
-    def generate_action_file(quiet: $QUIET_MODE)
-      filename = @action_file  or raise "** internal error"
-      content = _build_action_file_content(filename)
-      if filename == "-" || ! $stdout.tty?
-        print content
-        return nil
-      end
-      ! File.exist?(filename)  or
-        raise Benry::CmdApp::CommandError,
-              "Action file ('#{filename}') already exists." \
-              " If you want to generate a new one, delete it first."
-      File.write(filename, content, encoding: 'utf-8')
-      puts "[OK] Action file '#{filename}' generated." unless quiet
-      return filename
-    end
+    public
 
-    def _build_action_file_content(filename)
+    def render_action_file_content(filename)
       #content = DATA.read()
       content = File.read(__FILE__, encoding: 'utf-8').split(/\n__END__\n/)[-1]
       content = content.gsub('%COMMAND%', @config.app_command)
