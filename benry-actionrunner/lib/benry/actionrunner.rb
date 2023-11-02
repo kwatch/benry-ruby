@@ -291,6 +291,8 @@ END
     CONFIG = Benry::ActionRunner::CONFIG
     Action = Benry::ActionRunner::Action
 
+    module_function
+
     def define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
       return Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
     end
