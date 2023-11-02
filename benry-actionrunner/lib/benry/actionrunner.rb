@@ -91,6 +91,22 @@ END
   Benry::CmdApp::APPLICATION_HELP_BUILDER_CLASS.prepend(ApplicationHelpBuilderModule)
 
 
+  class GlobalOptionParser < Benry::CmdApp::GLOBAL_OPTION_PARSER_CLASS
+
+    def initialize(schema, &callback)
+      super
+      @callback = callback
+    end
+
+    def handle_unknown_long_option(optstr, name, value)
+      return super if value == nil
+      return super if @callback == nil
+      @callback.call(name, value, optstr)
+    end
+
+  end
+
+
   def self.main(argv=ARGV)
     envstr = ENV["ACTIONRUNNER_OPTION"]
     if envstr && ! envstr.empty?
@@ -111,21 +127,6 @@ END
       @action_file = DEFAULT_FILENAME      # ex: 'Actionfile.rb'
       @global_vars = {}                    # names and values of global vars
       @_loaded     = false                 # true when action file loaded
-    end
-
-    class GlobalOptionParser < Benry::CmdApp::GLOBAL_OPTION_PARSER_CLASS
-
-      def initialize(schema, &callback)
-        super
-        @callback = callback
-      end
-
-      def handle_unknown_long_option(optstr, name, value)
-        return super if value == nil
-        return super if @callback == nil
-        @callback.call(name, value, optstr)
-      end
-
     end
 
     protected
