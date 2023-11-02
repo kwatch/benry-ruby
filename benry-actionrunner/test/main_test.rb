@@ -60,8 +60,8 @@ Oktest.scope do
   Hello, Alice!
   $ arun hello Alice -l fr	# run 'hello' action with args and options
   Bonjour, Alice!
+  $ arun :			# list prefixes of actions (or '::', ':::')
   $ arun xxxx:			# list actions starting with 'xxxx:'
-  $ arun :			# list prefixes of actions (or '::')
 
 \e[1;34mDocument:\e[0m
   https://kwatch.github.io/benry-ruby/benry-actionrunner.html

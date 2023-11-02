@@ -50,8 +50,8 @@ module Benry::ActionRunner
   Hello, Alice!
   $ #{x} hello Alice -l fr	# run 'hello' action with args and options
   Bonjour, Alice!
+  $ #{x} :			# list prefixes of actions (or '::', ':::')
   $ #{x} xxxx:			# list actions starting with 'xxxx:'
-  $ #{x} :			# list prefixes of actions (or '::')
 END
     config.help_postamble = {
       "Example:"  => example,

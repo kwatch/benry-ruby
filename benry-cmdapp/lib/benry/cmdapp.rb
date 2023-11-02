@@ -845,6 +845,7 @@ module Benry::CmdApp
     DECORATION_STRONG     = "\e[1m%s\e[0m"      # bold
     DECORATION_WEAK       = "\e[2m%s\e[0m"      # gray color
     DECORATION_HIDDEN     = "\e[2m%s\e[0m"      # gray color
+    DECORATION_DEBUG      = "\e[2m%s\e[0m"      # gray color
     DECORATION_ERROR      = "\e[31m%s\e[0m"     # red color
     APP_USAGE             = "<action> [<arguments>...]"
 
@@ -854,7 +855,7 @@ module Benry::CmdApp
                    help_postamble: nil,
                    format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
-                   deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_error: nil,
+                   deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: :hidden, option_trace: false)
@@ -879,6 +880,7 @@ module Benry::CmdApp
       @deco_strong        = deco_strong  || DECORATION_STRONG   # for `important: true`
       @deco_weak          = deco_weak    || DECORATION_WEAK     # for `important: false`
       @deco_hidden        = deco_hidden  || DECORATION_HIDDEN   # for `hidden: true`
+      @deco_debug         = deco_error   || DECORATION_DEBUG
       @deco_error         = deco_error   || DECORATION_ERROR
       @option_help        = option_help         # enable or disable `-h, --help`
       @option_version     = option_version      # enable or disable `-V, --version`
@@ -902,7 +904,7 @@ module Benry::CmdApp
     attr_accessor :format_option, :format_action, :format_usage, :format_prefix
     attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
-    attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_error
+    attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
     attr_accessor :option_help, :option_version, :option_list, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
