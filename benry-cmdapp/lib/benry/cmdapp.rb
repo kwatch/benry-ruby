@@ -689,13 +689,6 @@ module Benry::CmdApp
       nil
     end
 
-    def prefix_desc_put(prefix, desc)
-      #; [!3aot4] registers prefix description, whether already registered or not.
-      @prefix_dict[prefix] = desc
-      #; [!62fxz] returns description registered.
-      return desc
-    end
-
     def prefix_desc_get(prefix)
       #; [!d47kq] returns description if prefix is registered.
       #; [!otp1b] returns nil if prefix is not registered.
