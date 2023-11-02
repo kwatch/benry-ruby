@@ -18,9 +18,9 @@ require 'benry/unixcommand'
 module Benry::ActionRunner
 
 
-  ACTIONRUNNER_VERSION  = "$Release: 0.0.0 $".split()[1]
-  ACTIONRUNNER_DOCURL   = "https://kwatch.github.io/benry-ruby/benry-actionrunner.html"
-  ACTIONRUNNER_FILENAME = "Actionfile.rb"
+  VERSION          = "$Release: 0.0.0 $".split()[1]
+  DOCUMENT_URL     = "https://kwatch.github.io/benry-ruby/benry-actionrunner.html"
+  DEFAULT_FILENAME = "Actionfile.rb"
 
 
   class Action < Benry::CmdApp::Action
@@ -34,8 +34,8 @@ module Benry::ActionRunner
 
 
   app_desc = "Action runner (or task runner), much better than Rake"
-  CONFIG = Benry::CmdApp::Config.new(app_desc, ACTIONRUNNER_VERSION).tap do |config|
-    action_file = ACTIONRUNNER_FILENAME
+  CONFIG = Benry::CmdApp::Config.new(app_desc, VERSION).tap do |config|
+    action_file = DEFAULT_FILENAME
     command = File.basename($0)
     config.app_command = command
     #config.app_detail = nil
@@ -55,7 +55,7 @@ module Benry::ActionRunner
 END
     config.help_postamble = {
       "Example:"  => example,
-      "Document:" => "  #{ACTIONRUNNER_DOCURL}\n",
+      "Document:" => "  #{DOCUMENT_URL}\n",
     }
   end
 
@@ -65,11 +65,11 @@ END
     schema.add(:version  , "-V"        , "print version")
     schema.add(:list     , "-l"        , "list actions")
     schema.add(:all      , "-a"        , "list all actions/options including hidden ones")
-    schema.add(:file     , "-f <file>" , "actionfile name (default: '#{ACTIONRUNNER_FILENAME}')")
+    schema.add(:file     , "-f <file>" , "actionfile name (default: '#{DEFAULT_FILENAME}')")
     schema.add(:search   , "-u"        , "search for actionfile in parent or upper dir")
     schema.add(:chdir    , "-p"        , "change current dir to where action file exists")
     schema.add(:searchdir, "-s"        , "same as '-up'", hidden: true)
-    schema.add(:generate , "-g"        , "generate actionfile ('#{ACTIONRUNNER_FILENAME}') with example code")
+    schema.add(:generate , "-g"        , "generate actionfile ('#{DEFAULT_FILENAME}') with example code")
     schema.add(:verbose  , "-v"        , "verbose mode")
     schema.add(:quiet    , "-q"        , "quiet mode")
     schema.add(:color    , "-c"        , "enable color mode")
@@ -91,6 +91,22 @@ END
   Benry::CmdApp::APPLICATION_HELP_BUILDER_CLASS.prepend(ApplicationHelpBuilderModule)
 
 
+  class GlobalOptionParser < Benry::CmdApp::GLOBAL_OPTION_PARSER_CLASS
+
+    def initialize(schema, &callback)
+      super
+      @callback = callback
+    end
+
+    def handle_unknown_long_option(optstr, name, value)
+      return super if value == nil
+      return super if @callback == nil
+      @callback.call(name, value, optstr)
+    end
+
+  end
+
+
   def self.main(argv=ARGV)
     envstr = ENV["ACTIONRUNNER_OPTION"]
     if envstr && ! envstr.empty?
@@ -108,24 +124,9 @@ END
       super
       @flag_search = false                 # true when '-s' option specified
       @flag_chdir  = false                 # true when '-w' option specified
-      @action_file = ACTIONRUNNER_FILENAME # ex: 'Actionfile.rb'
+      @action_file = DEFAULT_FILENAME      # ex: 'Actionfile.rb'
       @global_vars = {}                    # names and values of global vars
       @_loaded     = false                 # true when action file loaded
-    end
-
-    class GlobalOptionParser < Benry::CmdApp::GLOBAL_OPTION_PARSER_CLASS
-
-      def initialize(schema, &callback)
-        super
-        @callback = callback
-      end
-
-      def handle_unknown_long_option(optstr, name, value)
-        return super if value == nil
-        return super if @callback == nil
-        @callback.call(name, value, optstr)
-      end
-
     end
 
     protected
@@ -185,20 +186,47 @@ END
       return false if @_loaded
       #
       filename = @action_file  or raise "** internal error"
-      filepath = _search_and_load_action_file(filename, @flag_search, @flag_chdir)
+      brownie  = Brownie.new(@config)
+      filepath = brownie.search_and_load_action_file(filename, @flag_search, @flag_chdir)
       filepath != nil || ! required  or
         raise Benry::CmdApp::CommandError,
               "Action file ('#{filename}') not found." \
               " Create it by `#{@config.app_command} -g` command firstly."
       #
-      _populate_global_variables(@global_vars)
+      brownie.populate_global_variables(@global_vars)
       @global_vars.clear()
       #
       @_loaded = true
       return true
     end
 
-    def _search_and_load_action_file(filename, flag_search, flag_chdir, _pwd: Dir.pwd())
+    def generate_action_file(quiet: $QUIET_MODE)
+      filename = @action_file  or raise "** internal error"
+      brownie  = Brownie.new(@config)
+      content  = brownie.render_action_file_content(filename)
+      if filename == "-" || ! $stdout.tty?
+        print content
+        return nil
+      end
+      ! File.exist?(filename)  or
+        raise Benry::CmdApp::CommandError,
+              "Action file ('#{filename}') already exists." \
+              " If you want to generate a new one, delete it first."
+      File.write(filename, content, encoding: 'utf-8')
+      puts "[OK] Action file '#{filename}' generated." unless quiet
+      return filename
+    end
+
+  end
+
+
+  class Brownie
+
+    def initialize(config)
+      @config = config
+    end
+
+    def search_and_load_action_file(filename, flag_search, flag_chdir, _pwd: Dir.pwd())
       if File.exist?(filename) ; dir = "."
       elsif flag_search        ; dir = _search_dir_where_file_exist(filename, _pwd)
       else                     ; dir = nil
@@ -214,6 +242,8 @@ END
       require abspath
       return abspath
     end
+
+    private
 
     def _search_dir_where_file_exist(filename, dir=Dir.pwd(), max=20)
       n = -1
@@ -234,7 +264,9 @@ END
       nil
     end
 
-    def _populate_global_variables(global_vars)
+    public
+
+    def populate_global_variables(global_vars)
       return nil if global_vars.empty?
       global_vars.each do |name, str|
         var = name.gsub(/[^\w]/, '_')
@@ -245,6 +277,8 @@ END
       nil
     end
 
+    private
+
     def _decode_value(str)
       require 'json' unless defined?(JSON)
       return JSON.load(str)
@@ -254,28 +288,14 @@ END
 
     def _debug_global_var(var, val)
       msg = "[DEBUG] $#{var} = #{val.inspect}"
-      msg = "\e[2m#{msg}\e[0m" if Benry::CmdApp::Util.color_mode?
+      msg = @config.deco_debug % msg if Benry::CmdApp::Util.color_mode?
       puts msg
       $stdout.flush()
     end
 
-    def generate_action_file(quiet: $QUIET_MODE)
-      filename = @action_file  or raise "** internal error"
-      content = _build_action_file_content(filename)
-      if filename == "-" || ! $stdout.tty?
-        print content
-        return nil
-      end
-      ! File.exist?(filename)  or
-        raise Benry::CmdApp::CommandError,
-              "Action file ('#{filename}') already exists." \
-              " If you want to generate a new one, delete it first."
-      File.write(filename, content, encoding: 'utf-8')
-      puts "[OK] Action file '#{filename}' generated." unless quiet
-      return filename
-    end
+    public
 
-    def _build_action_file_content(filename)
+    def render_action_file_content(filename)
       #content = DATA.read()
       content = File.read(__FILE__, encoding: 'utf-8').split(/\n__END__\n/)[-1]
       content = content.gsub('%COMMAND%', @config.app_command)
@@ -285,23 +305,29 @@ END
   end
 
 
-  module_function
+  module Export
 
+    CONFIG = Benry::ActionRunner::CONFIG
+    Action = Benry::ActionRunner::Action
 
-  def define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
-    return Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
-  end
+    module_function
 
-  def undef_alias(alias_name)
-    return Benry::CmdApp.undef_alias(alias_name)
-  end
+    def define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+      return Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
+    end
 
-  def undef_action(action_name)
-    return Benry::CmdApp.undef_action(action_name)
-  end
+    def undef_alias(alias_name)
+      return Benry::CmdApp.undef_alias(alias_name)
+    end
 
-  def current_app()
-    return Benry::CmdApp.current_app()
+    def undef_action(action_name)
+      return Benry::CmdApp.undef_action(action_name)
+    end
+
+    def current_app()
+      return Benry::CmdApp.current_app()
+    end
+
   end
 
 
@@ -342,7 +368,7 @@ __END__
 
 require 'benry/actionrunner'
 
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 
 ##

@@ -94,7 +94,7 @@ Bonjour, Alice!
 <pre class="language-ruby">
 # coding: utf-8
 <strong>require 'benry/actionrunner'</strong>
-<strong>include Benry::ActionRunner</strong>
+<strong>include Benry::ActionRunner::Export</strong>
 
 <strong>class MyAction &lt Action</strong>
 
@@ -125,7 +125,7 @@ These action methods are treated as action name <code>print</code> or <code>test
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction &lt Action
 
@@ -156,7 +156,7 @@ Usage:
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction &lt Action
 
@@ -221,7 +221,7 @@ Use <code>--lang=it</code> style instead.</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction &lt Action
 
@@ -256,7 +256,7 @@ end
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class MyAction &lt Action
 
@@ -295,7 +295,7 @@ Hello, Alice!                          # displayed with color
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction &lt Action
   <strong>prefix "git:"</strong>     # should be "git:", not "git" !!!
@@ -332,7 +332,7 @@ $ git status -sb .
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction &lt Action
 
@@ -375,7 +375,7 @@ Actions:
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction &lt Action
 
@@ -429,7 +429,7 @@ Actions:
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction &lt Action
   prefix "git:", <strong>action: "status"</strong>
@@ -453,7 +453,7 @@ Actions:
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class GitAction &lt Action
   prefix "git:", <strong>alias_of: "status"</strong>
@@ -482,7 +482,7 @@ Instead, use <code>run_once()</code> which invokes other action only once.</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 class BuildAction &lt Action
 
@@ -520,7 +520,7 @@ end
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/actionrunner'
-include Benry::ActionRunner
+include Benry::ActionRunner::Export
 
 ## global variables
 <strong>$project = "exmaple"</strong>

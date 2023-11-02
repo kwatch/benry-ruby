@@ -117,7 +117,7 @@ END
   topic Benry::ActionRunner do
 
     fixture :fname do
-      Benry::ActionRunner::ACTIONRUNNER_FILENAME
+      Benry::ActionRunner::DEFAULT_FILENAME
     end
 
     fixture :actionfile do |fname|
@@ -156,7 +156,7 @@ END
       case_when "when action file not exist..." do
 
         before do
-          @fname = Benry::ActionRunner::ACTIONRUNNER_FILENAME
+          @fname = Benry::ActionRunner::DEFAULT_FILENAME
           File.unlink(@fname) if File.exist?(@fname)
         end
 
@@ -171,7 +171,7 @@ END
         end
 
         spec "option '-v' prints version number." do
-          ok {main("-V")} == Benry::ActionRunner::ACTIONRUNNER_VERSION + "\n"
+          ok {main("-V")} == Benry::ActionRunner::VERSION + "\n"
         end
 
         spec "option '-l' cannot list action names." do
@@ -207,7 +207,7 @@ END
       case_else "else..." do
 
         before do
-          @fname = Benry::ActionRunner::ACTIONRUNNER_FILENAME
+          @fname = Benry::ActionRunner::DEFAULT_FILENAME
           unless File.exist?(@fname)
             #capture_sio { Benry::ActionRunner.main("-g") }
             config = Benry::ActionRunner::CONFIG
@@ -227,7 +227,7 @@ END
         end
 
         spec "option '-V' prints version." do
-          ok {main("-V")} == Benry::ActionRunner::ACTIONRUNNER_VERSION + "\n"
+          ok {main("-V")} == Benry::ActionRunner::VERSION + "\n"
         end
 
         spec "option '-l' lists action names." do
