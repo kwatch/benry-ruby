@@ -653,8 +653,8 @@ END
               end
             end
           end
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p0516:")} == "bla bla"
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p0516:git:")} == "boom boom"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p0516:")} == "bla bla"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p0516:git:")} == "boom boom"
           #
           ScopeTestAction.class_eval do
             prefix "p3893:", "guu guu", action: "a1" do
@@ -666,8 +666,8 @@ END
               def a1(); end
             end
           end
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p3893:")} == "guu guu"
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p3893:git:")} == "gii gii"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p3893:")} == "guu guu"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p3893:git:")} == "gii gii"
           #
           ScopeTestAction.class_eval do
             prefix "p2358:" do
@@ -723,15 +723,15 @@ END
           ScopeTestAction.class_eval do
             prefix "p6712:", "bowow"
           end
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p6712:")} == "bowow"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p6712:")} == "bowow"
           #
           ScopeTestAction.class_eval do
             prefix "p9461:", "hoo hoo", action: "homhom"
             prefix "p0438:", "yaa yaa", alias_of: "homhom"
             @__prefixdef__ = nil
           end
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p9461:")} == "hoo hoo"
-          ok {Benry::CmdApp::INDEX.prefix_desc_get("p0438:")} == "yaa yaa"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p9461:")} == "hoo hoo"
+          ok {Benry::CmdApp::INDEX.prefix_get_desc("p0438:")} == "yaa yaa"
           #
           ScopeTestAction.class_eval do
             prefix "p7217:"

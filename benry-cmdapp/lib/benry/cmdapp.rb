@@ -689,7 +689,7 @@ module Benry::CmdApp
       nil
     end
 
-    def prefix_desc_get(prefix)
+    def prefix_get_desc(prefix)
       #; [!d47kq] returns description if prefix is registered.
       #; [!otp1b] returns nil if prefix is not registered.
       return @prefix_dict[prefix]
@@ -1325,7 +1325,7 @@ module Benry::CmdApp
       return dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
-        desc = index.prefix_desc_get(prefix)
+        desc = index.prefix_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
     end

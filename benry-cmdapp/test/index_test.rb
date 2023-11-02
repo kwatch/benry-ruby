@@ -139,17 +139,17 @@ Oktest.scope do
         ok {@index.prefix_exist?(prefix)} == false
         @index.prefix_add(prefix, nil)
         ok {@index.prefix_exist?(prefix)} == true
-        ok {@index.prefix_desc_get(prefix)} == nil
+        ok {@index.prefix_get_desc(prefix)} == nil
       end
 
       spec "[!xubc8] registers prefix whenever desc is not a nil." do
         prefix = "p8796:"
         @index.prefix_add(prefix, "some description")
         ok {@index.prefix_exist?(prefix)} == true
-        ok {@index.prefix_desc_get(prefix)} == "some description"
+        ok {@index.prefix_get_desc(prefix)} == "some description"
         #
         @index.prefix_add(prefix, "other description")
-        ok {@index.prefix_desc_get(prefix)} == "other description"
+        ok {@index.prefix_get_desc(prefix)} == "other description"
       end
 
     end
@@ -186,15 +186,15 @@ Oktest.scope do
     end
 
 
-    topic '#prefix_desc_get()' do
+    topic '#prefix_get_desc()' do
 
       spec "[!d47kq] returns description if prefix is registered." do
         Benry::CmdApp::INDEX.prefix_add("p5679", "bla bla")
-        ok {Benry::CmdApp::INDEX.prefix_desc_get("p5679")} == "bla bla"
+        ok {Benry::CmdApp::INDEX.prefix_get_desc("p5679")} == "bla bla"
       end
 
       spec "[!otp1b] returns nil if prefix is not registered." do
-        ok {Benry::CmdApp::INDEX.prefix_desc_get("p8233")} == nil
+        ok {Benry::CmdApp::INDEX.prefix_get_desc("p8233")} == nil
       end
 
     end
