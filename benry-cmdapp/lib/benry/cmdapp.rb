@@ -666,6 +666,29 @@ module Benry::CmdApp
       return md, alias_args
     end
 
+    def prefix_add(prefix, desc=nil)
+      #; [!k27in] registers prefix if not registered yet.
+      #; [!xubc8] registers prefix whenever desc is not a nil.
+      if ! @prefix_dict.key?(prefix) || desc
+        @prefix_dict[prefix] = desc
+      end
+      nil
+    end
+
+    def prefix_exist?(prefix)
+      #; [!79cyx] returns true if prefix is already registered.
+      #; [!jx7fk] returns false if prefix is not registered yet.
+      return @prefix_dict.key?(prefix)
+    end
+
+    def prefix_each(&block)
+      #; [!67r3i] returns Enumerator object if block not given.
+      return enum_for(:prefix_each) unless block_given?()
+      #; [!g3d1z] yields block with each prefix and desc.
+      @prefix_dict.each(&block)
+      nil
+    end
+
     def prefix_desc_put(prefix, desc)
       #; [!3aot4] registers prefix description, whether already registered or not.
       @prefix_dict[prefix] = desc

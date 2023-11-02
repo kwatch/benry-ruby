@@ -132,6 +132,60 @@ Oktest.scope do
     end
 
 
+    topic '#prefix_add()' do
+
+      spec "[!k27in] registers prefix if not registered yet." do
+        prefix = "p7885:"
+        ok {@index.prefix_exist?(prefix)} == false
+        @index.prefix_add(prefix, nil)
+        ok {@index.prefix_exist?(prefix)} == true
+        ok {@index.prefix_desc_get(prefix)} == nil
+      end
+
+      spec "[!xubc8] registers prefix whenever desc is not a nil." do
+        prefix = "p8796:"
+        @index.prefix_add(prefix, "some description")
+        ok {@index.prefix_exist?(prefix)} == true
+        ok {@index.prefix_desc_get(prefix)} == "some description"
+        #
+        @index.prefix_add(prefix, "other description")
+        ok {@index.prefix_desc_get(prefix)} == "other description"
+      end
+
+    end
+
+
+    topic '#prefix_each()' do
+
+      spec "[!67r3i] returns Enumerator object if block not given." do
+        ok {@index.prefix_each()}.is_a?(Enumerator)
+      end
+
+      spec "[!g3d1z] yields block with each prefix and desc." do
+        @index.prefix_add("p2358:", nil)
+        @index.prefix_add("p3892:", "some desc")
+        d = {}
+        @index.prefix_each() {|prefix, desc| d[prefix] = desc }
+        ok {d} == {"p2358:" => nil, "p3892:" => "some desc"}
+      end
+
+    end
+
+
+    topic '#prefix_exist?()' do
+
+      spec "[!79cyx] returns true if prefix is already registered." do
+        @index.prefix_add("p0057:", nil)
+        ok {@index.prefix_exist?("p0057:")} == true
+      end
+
+      spec "[!jx7fk] returns false if prefix is not registered yet." do
+        ok {@index.prefix_exist?("p0760:")} == false
+      end
+
+    end
+
+
     topic '#prefix_desc_put()' do
 
       spec "[!62fxz] returns description registered." do
