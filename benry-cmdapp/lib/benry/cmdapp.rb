@@ -534,8 +534,8 @@ module Benry::CmdApp
         prev = @__prefixdef__
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
-        #; [!j00pk] registers prefix description if specified.
-        INDEX.prefix_desc_put(prefix, desc) if desc
+        #; [!j00pk] registers prefix and description, even if no actions defined.
+        INDEX.prefix_add(prefix, desc)
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
@@ -555,8 +555,8 @@ module Benry::CmdApp
       else
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
-        #; [!ncskq] registers prefix description if specified.
-        INDEX.prefix_desc_put(prefix, desc) if desc
+        #; [!ncskq] registers prefix and description, even if no actions defined.
+        INDEX.prefix_add(prefix, desc)
       end
       nil
     end
