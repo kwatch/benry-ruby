@@ -534,6 +534,17 @@ END
         x3 == nil
       end
 
+      spec "[!u0td6] registers prefix of action if not registered yet." do
+        prefix = "p1777:foo:bar:"
+        ok {Benry::CmdApp::INDEX.prefix_exist?(prefix)} == false
+        ScopeTestAction.class_eval do
+          @action.("example")
+          def p1777__foo__bar__hello()
+          end
+        end
+        ok {Benry::CmdApp::INDEX.prefix_exist?(prefix)} == true
+      end
+
     end
 
 

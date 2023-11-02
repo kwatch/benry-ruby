@@ -500,6 +500,9 @@ module Benry::CmdApp
         #; [!4402s] clears `alias_of:` kwarg.
         @__prefixdef__[2] = nil
       end
+      #; [!u0td6] registers prefix of action if not registered yet.
+      INDEX.prefix_add_via_action(action)
+      #
       return true    # for testing purpose
     end
 
