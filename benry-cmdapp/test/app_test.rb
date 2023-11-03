@@ -556,6 +556,59 @@ END
     end
 
 
+    topic '#render_target_list()' do
+
+      spec "[!uzmml] renders target list." do
+        x = @app.__send__(:render_target_list, "action")
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
+        ok {x} =~ /^  hello              : greeting message$/
+        #
+        Benry::CmdApp.define_alias("chiaou", ["hello", "-l", "it"])
+        x = @app.__send__(:render_target_list, "alias")
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m$/
+        ok {x} =~ /^  chiaou             : alias of 'hello -l it'$/
+        #
+        x = @app.__send__(:render_target_list, "prefix")
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
+        ok {x} =~ /^  git: \(3\)$/
+        ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
+        #
+        Benry::CmdApp.define_abbrev("g31:", "git:")
+        x = @app.__send__(:render_target_list, "abbrev")
+        ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m$/
+        ok {x} =~ /^  g31: +=>  git:$/
+      end
+
+      spec "[!vrzu0] target 'prefix1' or 'prefix2' is acceptable." do
+        x = @app.__send__(:render_target_list, "prefix1")
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
+        ok {x} =~ /^  git: \(3\)$/
+        ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
+        ok {x} !~ /^  giit:branch:/
+        ok {x} !~ /^  giit:repo:/
+        #
+        x = @app.__send__(:render_target_list, "prefix2")
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=2\)\e\[0m$/
+        ok {x} =~ /^  git: \(3\)$/
+        ok {x} =~ /^  giit: \(0\) +: gitt commands$/
+        ok {x} =~ /^  giit:branch: \(2\)$/
+        ok {x} =~ /^  giit:repo: \(7\)$/
+        ok {x} !~ /^  giit:repo:config:/
+        ok {x} !~ /^  giit:repo:remote:/
+        #
+        x = @app.__send__(:render_target_list, "prefix3")
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=3\)\e\[0m$/
+        ok {x} =~ /^  git: \(3\)$/
+        ok {x} =~ /^  giit: \(0\) +: gitt commands$/
+        ok {x} =~ /^  giit:branch: \(2\)$/
+        ok {x} =~ /^  giit:repo: \(2\)$/
+        ok {x} =~ /^  giit:repo:config: \(3\)$/
+        ok {x} =~ /^  giit:repo:remote: \(2\)$/
+      end
+
+    end
+
+
     topic '#handle_blank_action()' do
 
       spec "[!seba7] prints action list and returns `0`." do

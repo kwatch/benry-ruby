@@ -1722,6 +1722,21 @@ module Benry::CmdApp
       end
     end
 
+    def render_target_list(target, all: false)
+      #; [!uzmml] renders target list.
+      #; [!vrzu0] target 'prefix1' or 'prefix2' is acceptable.
+      builder = get_action_list_builder()
+      return (
+        case target
+        when "action"           ; builder.build_action_list(all: all)
+        when "alias"            ; builder.build_alias_list(all: all)
+        when "abbrev"           ; builder.build_abbrev_list(all: all)
+        when /\Aprefix(\d+)?\z/ ; builder.build_prefix_list(($1||1).to_i, all: all)
+        else raise "** assertion failed: target=#{target.inspect}"
+        end
+      )
+    end
+
     def handle_blank_action(all: false)
       #; [!seba7] prints action list and returns `0`.
       print_str render_action_list(nil, all: all)
