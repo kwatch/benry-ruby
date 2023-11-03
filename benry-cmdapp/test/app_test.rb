@@ -709,6 +709,14 @@ END
 
     topic '#print_str()' do
 
+      spec "[!yiabh] do nothing if str is nil." do
+        sout, serr = capture_sio do
+          @app.instance_eval { print_str nil }
+        end
+        ok {sout} == ""
+        ok {serr} == ""
+      end
+
       spec "[!6kyv9] prints string as is if color mode is enabled." do
         bkup = $COLOR_MODE; at_end { $COLOR_MODE = bkup }
         $COLOR_MODE = true

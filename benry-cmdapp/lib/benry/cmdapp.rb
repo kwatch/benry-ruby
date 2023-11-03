@@ -1792,6 +1792,8 @@ module Benry::CmdApp
     end
 
     def print_str(str)
+      #; [!yiabh] do nothing if str is nil.
+      return nil unless str
       #; [!6kyv9] prints string as is if color mode is enabled.
       #; [!lxhvq] deletes escape characters from string and prints it if color mode is disabled.
       str = Util.delete_escape_chars(str) unless Util.color_mode?
