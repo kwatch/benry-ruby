@@ -261,6 +261,21 @@ Oktest.scope do
     end
 
 
+    topic '#abbrev_each()' do
+
+      spec "[!2oo4o] yields each abbrev name and prefix." do
+        @index.abbrev_add("g1:", "git:")
+        @index.abbrev_add("g2:", "git:")
+        arr = []
+        @index.abbrev_each do |*args|
+          arr << args
+        end
+        ok {arr} == [["g1:", "git:"], ["g2:", "git:"]]
+      end
+
+    end
+
+
     topic '#abbrev_resolve()' do
 
       spec "[!n7zsy] replaces abbrev in action name with prefix." do

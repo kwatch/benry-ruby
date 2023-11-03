@@ -757,6 +757,15 @@ module Benry::CmdApp
       return @abbrev_dict.key?(abbrev)
     end
 
+    def abbrev_each()
+      #; [!2oo4o] yields each abbrev name and prefix.
+      @abbrev_dict.keys.sort.each do |abbrev|
+        prefix = @abbrev_dict[abbrev]
+        yield abbrev, prefix
+      end
+      nil
+    end
+
     def abbrev_resolve(action)
       #; [!n7zsy] replaces abbrev in action name with prefix.
       if action =~ /\A[-\w]+:/
