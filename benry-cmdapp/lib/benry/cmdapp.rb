@@ -955,7 +955,7 @@ module Benry::CmdApp
                    format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
-                   option_help: true, option_version: nil, option_list: true, option_all: true,
+                   option_help: true, option_version: nil, option_list: true, option_target: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: :hidden, option_trace: false)
       #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.
@@ -985,6 +985,7 @@ module Benry::CmdApp
       @option_help        = option_help         # enable or disable `-h, --help`
       @option_version     = option_version      # enable or disable `-V, --version`
       @option_list        = option_list         # enable or disable `-l, --list`
+      @option_target      = option_target       # enable or disable `-L <target>`
       @option_all         = option_all          # enable or disable `-a, --all`
       @option_verbose     = option_verbose      # enable or disable `-v, --verbose`
       @option_quiet       = option_quiet        # enable or disable `-q, --quiet`
@@ -1005,7 +1006,7 @@ module Benry::CmdApp
     attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
-    attr_accessor :option_help, :option_version, :option_list, :option_all
+    attr_accessor :option_help, :option_version, :option_list, :option_target, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
@@ -1471,18 +1472,21 @@ module Benry::CmdApp
       return if ! config
       #; [!ppcvp] adds options according to config object.
       c = config
+      targets = ["action", "alias", "prefix", "abbrev",
+                 "prefix1", "prefix2", "prefix3", "prefix4"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
+      _add(c, :target , "-L <target>"  , "list target (action|alias|prefix|abbrev)", enum: targets)
       _add(c, :all    , "-a, --all"    , "list hidden actions/options, too")
       _add(c, :verbose, "-v, --verbose", "verbose mode")
       _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
-      _add(c, :color  , "--color[=<on|off>]", "color mode", TrueClass)
+      _add(c, :color  , "--color[=<on|off>]", "color mode", type: TrueClass)
       _add(c, :debug  , "    --debug"  , "debug mode")
       _add(c, :trace  , "-T, --trace"  , "trace mode")
     end
 
-    def _add(c, key, optstr, desc, type=nil)
+    def _add(c, key, optstr, desc, type: nil, enum: nil)
       flag = c.__send__("option_#{key}")
       return unless flag
       #; [!doj0k] if config option is `:hidden`, makes option as hidden.
@@ -1492,7 +1496,7 @@ module Benry::CmdApp
       else
         hidden = nil
       end
-      add(key, optstr, desc, hidden: hidden, type: type)
+      add(key, optstr, desc, hidden: hidden, type: type, enum: enum)
     end
     private :_add
 
@@ -1662,6 +1666,12 @@ module Benry::CmdApp
       #; [!tyxwo] includes hidden actions into action list if `-a, --all` specified.
       if global_opts[:list]
         print_str render_action_list(nil, all: all)
+        return 0
+      end
+      #; [!ooiaf] prints target list if global option '-L <target>' specified.
+      #; [!ymifi] includes hidden actions into target list if `-a, --all` specified.
+      if global_opts[:target]
+        print_str render_target_list(global_opts[:target], all: all)
         return 0
       end
       #; [!k31ry] returns `0` if help or version or actions printed.

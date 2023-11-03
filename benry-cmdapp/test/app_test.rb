@@ -354,6 +354,29 @@ END
         ok {sout} =~ rexp
       end
 
+      spec "[!ooiaf] prints target list if global option '-L <target>' specified." do
+        g_opts = {target: "action"}
+        sout, serr = capture_sio do
+          @app.instance_eval { handle_global_options(g_opts, []) }
+        end
+        ok {sout} =~ /\AActions:$/
+        #
+        g_opts = {target: "prefix"}
+        sout, serr = capture_sio do
+          @app.instance_eval { handle_global_options(g_opts, []) }
+        end
+        ok {sout} =~ /\APrefixes: \(depth=1\)$/
+      end
+
+      spec "[!ymifi] includes hidden actions into target list if `-a, --all` specified." do
+        g_opts = {target: "action", all: true}
+        sout, serr = capture_sio do
+          @app.instance_eval { handle_global_options(g_opts, []) }
+        end
+        ok {sout} =~ /\AActions:$/
+        ok {sout} =~ /^  debuginfo          : hidden action$/
+      end
+
       spec "[!k31ry] returns `0` if help or version or actions printed." do
         keys = [:help, :version, :list]
         keys.each do |key|
@@ -410,6 +433,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 \e[1;34mActions:\e[0m
@@ -863,6 +887,7 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
+  -L <target>    : list target (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
 END
         ok {schema.get(:trace)}   == nil
@@ -894,6 +919,7 @@ END
         config.option_help    = :hidden
         config.option_version = :hidden
         config.option_list    = :hidden
+        config.option_target  = :hidden
         config.option_all     = :hidden
         config.option_verbose = :hidden
         config.option_quiet   = :hidden
@@ -905,6 +931,7 @@ END
         ok {schema.get(:help   ).hidden?} == true
         ok {schema.get(:version).hidden?} == true
         ok {schema.get(:list   ).hidden?} == true
+        ok {schema.get(:target ).hidden?} == true
         ok {schema.get(:all    ).hidden?} == true
         ok {schema.get(:verbose).hidden?} == true
         ok {schema.get(:quiet  ).hidden?} == true
@@ -917,6 +944,7 @@ END
       --help           : print help message (of action if specified)
       --version        : print version
       --list           : list actions
+  -L <target>          : list target (action|alias|prefix|abbrev)
       --all            : list hidden actions/options, too
       --verbose        : verbose mode
       --quiet          : quiet mode
@@ -943,13 +971,15 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
+  -L <target>    : list target (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
         #
-        schema.reorder_options!(:list, :help, :all, :debug, :version)
+        schema.reorder_options!(:list, :target, :help, :all, :debug, :version)
         ok {schema.to_s} == <<'END'
   -l, --list     : list actions
+  -L <target>    : list target (action|alias|prefix|abbrev)
   -h, --help     : print help message (of action if specified)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
@@ -965,6 +995,7 @@ END
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
+  -L <target>    : list target (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
