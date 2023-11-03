@@ -1319,7 +1319,8 @@ module Benry::CmdApp
         md = metadata
         if md.name.start_with?(prefix)
           matched = true
-        elsif md.name.start_with?(prefix2)
+        #; [!duhyd] includes actions which name is same as prefix.
+        elsif md.name == prefix2
           #matched = true
           #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
           matched = ! (md.alias? && md.action.start_with?(prefix))

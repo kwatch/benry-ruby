@@ -855,6 +855,28 @@ END
 END
       end
 
+      spec "[!duhyd] includes actions which name is same as prefix." do
+        HelpTestAction.class_eval do
+          prefix "p8571:", action: "aaa" do
+            @action.("AAA")
+            def aaa()
+            end
+            @action.("BBB")
+            def bbb()
+            end
+          end
+          @action.("sample")
+          def p8571x()
+          end
+        end
+        x = @builder.build_action_list_filtered_by("p8571:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  p8571              : AAA
+  p8571:bbb          : BBB
+END
+      end
+
       spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
         Benry::CmdApp.define_alias("git", "git:stage")
         at_end { Benry::CmdApp.undef_alias("git") }
