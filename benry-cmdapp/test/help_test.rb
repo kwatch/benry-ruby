@@ -946,6 +946,47 @@ END
     end
 
 
+    topic '#build_alias_list()' do
+
+      spec "[!496qq] renders alias list." do
+        Benry::CmdApp.define_alias("a9209", "hello")
+        x = @builder.build_alias_list()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^  a9209 +: alias of 'hello'$/
+      end
+
+      spec "[!fj1c7] returns nil if no aliases found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        x = @builder.build_alias_list()
+        ok {x} == nil
+        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
+        index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
+        x = @builder.build_alias_list()
+        ok {x} != nil
+        ok {x} == <<"END"
+\e[1;34mAliases:\e[0m
+  h1                 : alias of 'hello'
+END
+      end
+
+      spec "[!d7vee] ignores hidden aliases in default." do
+        Benry::CmdApp.define_alias("a4903", "hello", hidden: true)
+        x = @builder.build_alias_list()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} !~ /a4903/
+      end
+
+      spec "[!4vvrs] include hidden aliases if `all: true` specifieid." do
+        Benry::CmdApp.define_alias("a4613", "hello", hidden: true)
+        x = @builder.build_alias_list(all: true)
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^\e\[2m  a4613 +: alias of 'hello'\e\[0m$/
+      end
+
+    end
+
+
     topic '#build_prefix_list()' do
 
       spec "[!crbav] returns top prefix list." do
