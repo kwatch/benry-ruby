@@ -373,6 +373,37 @@ module Benry::CmdApp
     nil
   end
 
+  def self.define_abbrev(abbrev, prefix)
+    #; [!e1fob] raises DefinitionError if error found.
+    errmsg = __validate_abbrev(abbrev, prefix)
+    errmsg == nil  or
+      raise DefinitionError.new(errmsg)
+    #; [!ed6hr] registers abbrev with prefix.
+    INDEX.abbrev_add(abbrev, prefix)
+    nil
+  end
+
+  def self.__validate_abbrev(abbrev, prefix, _index: INDEX)  # :nodoc:
+    #; [!qfzbp] abbrev should be a string.
+    abbrev.is_a?(String)            or return "#{abbrev.inspect}: Abbreviation should be a string, but got #{abbrev.class.name} object."
+    #; [!f5isx] abbrev should end with ':'.
+    abbrev.end_with?(":")           or return "'#{abbrev}': Abbreviation should end with ':'."
+    #; [!r673p] abbrev should not contain unexpected symbol.
+    abbrev =~ /\A\w[-\w]*:/         or return "'#{abbrev}': Invalid abbreviation."
+    #; [!dckvt] abbrev should not exist.
+    ! _index.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
+    #; [!5djjt] abbrev should not be the same name with existing prefix.
+    ! _index.prefix_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
+    #; [!mq4ki] prefix should be a string.
+    prefix.is_a?(String)            or return "#{prefix.inspect}: Prefix should be a string, but got #{prefix.class.name} object."
+    #; [!a82z3] prefix should end with ':'.
+    prefix.end_with?(":")           or return "'#{prefix}': Prefix should end with ':'."
+    #; [!eq5iu] prefix should exist.
+    _index.prefix_exist?(prefix)    or return "'#{prefix}': No such prefix."
+    #; [!jzkhc] returns nil if no error found.
+    return nil
+  end
+
 
   class ActionScope
 
