@@ -620,6 +620,7 @@ module Benry::CmdApp
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
       @prefix_dict   = {}          # {prefix => description}
+      @abbrev_dict   = {}
     end
 
     def metadata_add(metadata)
@@ -707,6 +708,22 @@ module Benry::CmdApp
       #; [!d47kq] returns description if prefix is registered.
       #; [!otp1b] returns nil if prefix is not registered.
       return @prefix_dict[prefix]
+    end
+
+    def abbrev_add(abbrev, prefix)
+      #; [!n475k] registers abbrev with prefix.
+      @abbrev_dict[abbrev] = prefix
+      nil
+    end
+
+    def abbrev_get_prefix(abbrev)
+      #; [!h1dvb] returns prefix bound to abbrev.
+      return @abbrev_dict[abbrev]
+    end
+
+    def abbrev_exist?(abbrev)
+      #; [!tjbdy] returns true/false if abbrev registered or not.
+      return @abbrev_dict.key?(abbrev)
     end
 
   end
