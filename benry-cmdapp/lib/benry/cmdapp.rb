@@ -1689,6 +1689,11 @@ module Benry::CmdApp
     end
 
     def start_action(action_name, args)
+      #; [!6htva] supports abbreviation of prefix.
+      if ! INDEX.metadata_exist?(action_name)
+        resolved = INDEX.abbrev_resolve(action_name)
+        action_name = resolved if resolved
+      end
       #; [!vbymd] runs action with args and returns `0`.
       INDEX.metadata_get(action_name)  or
         raise CommandError.new("#{action_name}: Action not found.")

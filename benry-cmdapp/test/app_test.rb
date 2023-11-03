@@ -602,6 +602,20 @@ END
         ok {sout} == "Chao, Alice!\n"
       end
 
+      spec "[!6htva] supports abbreviation of prefix." do
+        Benry::CmdApp.define_abbrev("g1:", "git:")
+        sout, serr = capture_sio do
+          @app.instance_eval do
+            start_action("g1:stage", ["."])
+            start_action("g1:unstage", [])
+          end
+        end
+        ok {sout} == <<'END'
+git add -p .
+git reset HEAD
+END
+      end
+
     end
 
 
