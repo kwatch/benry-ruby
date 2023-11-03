@@ -726,6 +726,17 @@ module Benry::CmdApp
       return @abbrev_dict.key?(abbrev)
     end
 
+    def abbrev_resolve(action)
+      #; [!n7zsy] replaces abbrev in action name with prefix.
+      if action =~ /\A[-\w]+:/
+        abbrev = $&; rest = $'
+        prefix = @abbrev_dict[abbrev]
+        return prefix + rest if prefix
+      end
+      #; [!kdi3o] returns nil if abbrev not found in action name.
+      return nil
+    end
+
   end
 
 
