@@ -66,6 +66,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#invoke-other-action">Invoke Other Action</a></li>
 <li><a href="#cleaning-up-block">Cleaning Up Block</a></li>
 <li><a href="#alias-of-action">Alias of Action</a></li>
+<li><a href="#abbreviation-of-prefix">Abbreviation of Prefix</a></li>
 <li><a href="#default-action">Default Action</a></li>
 <li><a href="#action-list-and-prefix-list">Action List and Prefix List</a></li>
 <li><a href="#hidden-action">Hidden Action</a></li>
@@ -1174,6 +1175,45 @@ Actions:
   help               : print help message (of action if specified)
 </pre>
 </section>
+<section class="subsection" id="abbreviation-of-prefix">
+<h3>Abbreviation of Prefix</h3>
+<p>Abbreviation of prefix is a shortcut of prefix.
+For example, when <code>b:</code> is an abbreviation of a prefix <code>git:branch:</code>, you can invoke <code>git:branch:create</code> action by <code>b:create</code>.</p>
+<p>File: ex18.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/cmdapp'
+
+class GitAction &lt Benry::CmdApp::Action
+
+  prefix "git:" do
+
+    prefix "branch:" do
+
+      @action.("create a new branch")
+      def create(branch)
+        puts "git checkout -b #{branch}"
+      end
+
+    end
+
+  end
+
+end
+
+## define abbreviation 'b:' of prefix 'git:branch:'
+Benry::CmdApp.<strong>define_abbrev("b:", "git:branch:")</strong>     # !!!!
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ruby ex18.rb <strong>b:create</strong> topic1    # invokes 'git:branch:create' !!!!
+git checkout -b topic1
+</pre>
+</section>
 <section class="subsection" id="default-action">
 <h3>Default Action</h3>
 <ul>
@@ -2120,7 +2160,7 @@ exit app.main()
 <section class="subsection" id="q-how-to-append-some-tasks-to-an-existing-action">
 <h3>Q: How to append some tasks to an existing action?</h3>
 <p>A: (a) Use method alias, or (b) use prepend.</p>
-<p>File: ex43.rb</p>
+<p>File: ex41.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2164,12 +2204,12 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex43.rb hello
+[bash]$ ruby ex41.rb hello
 ---- &gt;8 ---- &gt;8 ----
 Hello, world!
 ---- 8&lt ---- 8&lt ----
 
-[bash]$ ruby ex43.rb hi Alice
+[bash]$ ruby ex41.rb hi Alice
 ~~~~ &gt;8 ~~~~ &gt;8 ~~~~
 Hi, Alice!
 ~~~~ 8&lt ~~~~ 8&lt ~~~~
@@ -2182,7 +2222,7 @@ Hi, Alice!
 <section class="subsection" id="q-how-to-re-define-an-existing-action">
 <h3>Q: How to re-define an existing action?</h3>
 <p>A: First remove the existing action, then re-define the action.</p>
-<p>File: ex44.rb</p>
+<p>File: ex42.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2212,11 +2252,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex44.rb -h
-ex44.rb --- sample app
+[bash]$ ruby ex42.rb -h
+ex42.rb --- sample app
 
 Usage:
-  $ ex44.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex42.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2231,7 +2271,7 @@ Actions:
 <section class="subsection" id="q-how-to-show-entering-into-or-exitting-from-actions">
 <h3>Q: How to show entering into or exitting from actions?</h3>
 <p>A: Set <code>config.option_trace = true</code> and pass <code>-T</code> (or <code>--trace</code>) option.</p>
-<p>File: ex45.rb</p>
+<p>File: ex43.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2257,7 +2297,7 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex45.rb <strong>--trace</strong> build              # !!!!
+[bash]$ ruby ex43.rb <strong>--trace</strong> build              # !!!!
 <strong>### enter: build</strong>
 <strong>### enter: prepare</strong>
 ... prepare something ...
@@ -2269,7 +2309,7 @@ exit app.main()
 <section class="subsection" id="q-how-to-enabledisable-color-mode">
 <h3>Q: How to enable/disable color mode?</h3>
 <p>A: Set <code>config.option_color = true</code> and pass <code>--color=on</code> or <code>--color=off</code> option.</p>
-<p>File: ex46.rb</p>
+<p>File: ex44.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2289,11 +2329,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex46.rb -h
-ex46.rb --- sample app
+[bash]$ ruby ex44.rb -h
+ex44.rb --- sample app
 
 Usage:
-  $ ex46.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex44.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2304,16 +2344,16 @@ Options:
 Actions:
   hello              : print greeting message
 
-[bash]$ ruby ex46.rb -h <strong>--color=off</strong>              # !!!!
+[bash]$ ruby ex44.rb -h <strong>--color=off</strong>              # !!!!
 
-[bash]$ ruby ex46.rb -h <strong>--color=on</strong>               # !!!!
-[bash]$ ruby ex46.rb -h <strong>--color</strong>                  # !!!!
+[bash]$ ruby ex44.rb -h <strong>--color=on</strong>               # !!!!
+[bash]$ ruby ex44.rb -h <strong>--color</strong>                  # !!!!
 </pre>
 </section>
 <section class="subsection" id="q-how-to-define-a-multiple-option-like--i-option-of-ruby">
 <h3>Q: How to define a multiple option, like <code>-I</code> option of Ruby?</h3>
 <p>A: Provide block parameter on <code>@option.()</code>.</p>
-<p>File: ex47.rb</p>
+<p>File: ex45.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2339,14 +2379,14 @@ exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex47.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
+[bash]$ ruby ex45.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
 path=["/tmp", "/var/tmp"]                         # !!!!
 </pre>
 </section>
 <section class="subsection" id="q-how-to-specify-detailed-description-of-options">
 <h3>Q: How to specify detailed description of options?</h3>
 <p>A: Add <code>detail:</code> keyword argument to <code>@option.()</code>.</p>
-<p>File: ex48.rb</p>
+<p>File: ex46.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2370,11 +2410,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex48.rb -h test
-ex48.rb test --- detailed description test
+[bash]$ ruby ex46.rb -h test
+ex46.rb test --- detailed description test
 
 Usage:
-  $ ex48.rb test [&ltoptions&gt;]
+  $ ex46.rb test [&ltoptions&gt;]
 
 Options:
   -m &ltmode&gt;          : output mode
@@ -2386,7 +2426,7 @@ Options:
 <section class="subsection" id="q-how-to-copy-all-options-from-other-action">
 <h3>Q: How to copy all options from other action?</h3>
 <p>A: Use <code>@copy_options.()</code>.</p>
-<p>File: ex49.rb</p>
+<p>File: ex47.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2415,11 +2455,11 @@ exit app.main()
 </pre>
 <p>Help message of <code>test2</code> action:</p>
 <pre class="language-console">
-[bash]$ ruby ex49.rb -h test2
-ex49.rb test2 --- test action #2
+[bash]$ ruby ex47.rb -h test2
+ex47.rb test2 --- test action #2
 
 Usage:
-  $ ex49.rb test2 [&ltoptions&gt;]
+  $ ex47.rb test2 [&ltoptions&gt;]
 
 Options:
   -v, --verbose      : verbose mode     # copied!!
@@ -2431,7 +2471,7 @@ Options:
 <section class="subsection" id="q-what-is-the-difference-between-prefixalias_of-and-prefixaction">
 <h3>Q: What is the difference between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</h3>
 <p>A: The former defines an alias, and the latter doesn't.</p>
-<p>File: ex50.rb</p>
+<p>File: ex48.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2461,11 +2501,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex50.rb -h
-ex50.rb --- sample app
+[bash]$ ruby ex48.rb -h
+ex48.rb --- sample app
 
 Usage:
-  $ ex50.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex48.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2515,7 +2555,7 @@ Actions:
 <section class="subsection" id="q-how-to-change-the-order-of-options-in-help-message">
 <h3>Q: How to change the order of options in help message?</h3>
 <p>A: Call <code>GlobalOptionSchema#reorder_options!()</code>.</p>
-<p>File: ex51.rb</p>
+<p>File: ex49.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2535,11 +2575,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex51.rb -h
-ex51.rb (1.0.0) --- sample app
+[bash]$ ruby ex49.rb -h
+ex49.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex51.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex49.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -v, --verbose      : verbose mode
@@ -2557,7 +2597,7 @@ Actions:
 <section class="subsection" id="q-is-it-possible-to-make-action-names-emphasized-or-weaken">
 <h3>Q: Is it possible to make action names emphasized or weaken?</h3>
 <p>A: Yes. When you pass <code>important: true</code> to <code>@action.()</code>, that action will be printed with unerline in help message. When you pass <code>important: false</code>, that action will be printed in gray color.</p>
-<p>File: ex52.rb</p>
+<p>File: ex50.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2579,11 +2619,11 @@ exit app.main()
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
-[bash]$ ruby ex52.rb -h
-ex52.rb --- sample app
+[bash]$ ruby ex50.rb -h
+ex50.rb --- sample app
 
 Usage:
-  $ ex52.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+  $ ex50.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2604,7 +2644,7 @@ Actions:
 <li>Currenty, Benry-CmdApp doesn't provide the good way to use it effectively.
   This feature may be used by command-line application or framework based on Benry-CmdApp.</li>
 </ul>
-<p>File: ex53.rb</p>
+<p>File: ex51.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 
@@ -2628,7 +2668,7 @@ exit app.main()
 <section class="subsection" id="how-to-remove-common-help-option-from-all-actions">
 <h3>How to remove common help option from all actions?</h3>
 <p>A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.</p>
-<p>File: ex54.rb</p>
+<p>File: ex52.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
 

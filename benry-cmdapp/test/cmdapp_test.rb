@@ -193,6 +193,70 @@ Oktest.scope do
     end
 
 
+    topic '.define_abbrev()' do
+
+      spec "[!e1fob] raises DefinitionError if error found." do
+        pr = proc { Benry::CmdApp.define_abbrev(:foo, "git:") }
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                      ":foo: Abbreviation should be a string, but got Symbol object.")
+      end
+
+      spec "[!ed6hr] registers abbrev with prefix." do
+        ok { Benry::CmdApp::INDEX.abbrev_exist?("g99:") } == false
+        Benry::CmdApp.define_abbrev("g99:", "git:")
+        ok { Benry::CmdApp::INDEX.abbrev_exist?("g99:") } == true
+        ok { Benry::CmdApp::INDEX.abbrev_get_prefix("g99:") } == "git:"
+      end
+
+      def _perform(abbrev, prefix)
+        pr = proc { Benry::CmdApp.define_abbrev(abbrev, prefix) }
+        errmsg = nil
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError) do |exc|
+          errmsg = exc.message
+        end
+        return errmsg
+      end
+
+      spec "[!qfzbp] abbrev should be a string." do
+        ok {_perform(:g11, "git:")} == ":g11: Abbreviation should be a string, but got Symbol object."
+      end
+
+      spec "[!f5isx] abbrev should end with ':'." do
+        ok {_perform("g12", "git:")} == "'g12': Abbreviation should end with ':'."
+      end
+
+      spec "[!r673p] abbrev should not contain unexpected symbol." do
+        ok {_perform("g13@:", "git:")} == "'g13@:': Invalid abbreviation."
+      end
+
+      spec "[!dckvt] abbrev should not exist." do
+        Benry::CmdApp.define_abbrev("g14:", "git:")
+        ok {_perform("g14:", "git:")} == "'g14:': Abbreviation is already defined."
+      end
+
+      spec "[!5djjt] abbrev should not be the same name with existing prefix." do
+        ok {_perform("git:", "git:")} == "'git:': Abbreviation is not available because a prefix with the same name already exists."
+      end
+
+      spec "[!mq4ki] prefix should be a string." do
+        ok {_perform("g15:", :"git:")} == ":\"git:\": Prefix should be a string, but got Symbol object."
+      end
+
+      spec "[!a82z3] prefix should end with ':'." do
+        ok {_perform("g16:", "git")} == "'git': Prefix should end with ':'."
+      end
+
+      spec "[!eq5iu] prefix should exist." do
+        ok {_perform("g17:", "gittt:")} == "'gittt:': No such prefix."
+      end
+
+      spec "[!jzkhc] returns nil if no error found." do
+        ok {Benry::CmdApp.define_abbrev("g18:", "git:")} == nil
+      end
+
+    end
+
+
     topic '.current_app()' do
 
       spec "[!xdjce] returns current application." do

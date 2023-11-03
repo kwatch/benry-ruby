@@ -229,6 +229,55 @@ Oktest.scope do
     end
 
 
+    topic '#abbrev_add()' do
+
+      spec "[!n475k] registers abbrev with prefix." do
+        @index.abbrev_add("g:", "git:")
+        ok {@index.abbrev_exist?("g:")} == true
+        ok {@index.abbrev_get_prefix("g:")} == "git:"
+      end
+
+    end
+
+
+    topic '#abbrev_get_prefix()' do
+
+      spec "[!h1dvb] returns prefix bound to abbrev." do
+        @index.abbrev_add("g:", "git:")
+        ok {@index.abbrev_get_prefix("g:")} == "git:"
+      end
+
+    end
+
+
+    topic '#abbrev_exist?()' do
+
+      spec "[!tjbdy] returns true/false if abbrev registered or not." do
+        ok {@index.abbrev_exist?("g:")} == false
+        @index.abbrev_add("g:", "git:")
+        ok {@index.abbrev_exist?("g:")} == true
+      end
+
+    end
+
+
+    topic '#abbrev_resolve()' do
+
+      spec "[!n7zsy] replaces abbrev in action name with prefix." do
+        @index.abbrev_add("g:", "git:")
+        ok {@index.abbrev_resolve("g:stage")} == "git:stage"
+      end
+
+      spec "[!kdi3o] returns nil if abbrev not found in action name." do
+        @index.abbrev_add("g:", "git:")
+        ok {@index.abbrev_resolve("gi:stage")} == nil
+        ok {@index.abbrev_resolve("h:stage")}  == nil
+        ok {@index.abbrev_resolve("gitstage")} == nil
+      end
+
+    end
+
+
   end
 
 
