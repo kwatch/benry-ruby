@@ -935,6 +935,7 @@ module Benry::CmdApp
 
     FORMAT_OPTION         = "  %-18s : %s"
     FORMAT_ACTION         = "  %-18s : %s"
+    FORMAT_ABBREV         = "  %-10s =>  %s"
     FORMAT_USAGE          = "  $ %s"
     FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
@@ -951,7 +952,7 @@ module Benry::CmdApp
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
                    help_postamble: nil,
-                   format_option: nil, format_action: nil, format_usage: nil, format_prefix: nil,
+                   format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_all: true,
@@ -970,6 +971,7 @@ module Benry::CmdApp
       @help_postamble     = help_postamble
       @format_option      = format_option || FORMAT_OPTION
       @format_action      = format_action || FORMAT_ACTION
+      @format_abbrev      = format_abbrev || FORMAT_ABBREV
       @format_usage       = format_usage  || FORMAT_USAGE
       @format_prefix      = format_prefix   # nil means to use @format_action
       @deco_command       = deco_command || DECORATION_COMMAND  # for command name in help
@@ -999,7 +1001,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
-    attr_accessor :format_option, :format_action, :format_usage, :format_prefix
+    attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_prefix
     attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
@@ -1304,6 +1306,7 @@ module Benry::CmdApp
 
     HEADER_ALIASES    = "Aliases:"
     HEADER_PREFIXES   = "Prefixes:"
+    HEADER_ABBREVS    = "Abbreviations:"
 
     def initialize(config, app_help_builder=nil)
       super(config)
@@ -1378,6 +1381,20 @@ module Benry::CmdApp
       return nil if sb.empty?
       #; [!496qq] renders alias list.
       header = self.class.const_get(:HEADER_ALIASES)    # "Aliases:"
+      return build_section(header, sb.join())
+    end
+
+    def build_abbrev_list(all: false)
+      index = @_index || INDEX
+      format = @config.format_abbrev
+      sb = []
+      index.abbrev_each do |abbrev, prefix|
+        sb << format % [abbrev, prefix] << "\n"
+      end
+      #; [!dnt12] returns nil if no abbrevs found.
+      return nil if sb.empty?
+      #; [!00ice] returns abbrev list string.
+      header = self.class.const_get(:HEADER_ABBREVS)    # "Abbreviations:"
       return build_section(header, sb.join())
     end
 

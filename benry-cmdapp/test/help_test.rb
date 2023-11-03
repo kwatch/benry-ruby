@@ -987,6 +987,29 @@ END
     end
 
 
+    topic '#build_abbrev_list()' do
+
+      spec "[!00ice] returns abbrev list string." do
+        Benry::CmdApp.define_abbrev("g23:", "git:")
+        x = @builder.build_abbrev_list()
+        ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m\n/
+        ok {x} =~ /^  g23: +=> +git:\n/
+      end
+
+      spec "[!dnt12] returns nil if no abbrevs found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        ok {@builder.build_abbrev_list()} == nil
+        index.abbrev_add("g24:", "git:")
+        ok {@builder.build_abbrev_list()} == <<END
+\e[1;34mAbbreviations:\e[0m
+  g24:       =>  git:
+END
+      end
+
+    end
+
+
     topic '#build_prefix_list()' do
 
       spec "[!crbav] returns top prefix list." do
