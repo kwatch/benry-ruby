@@ -49,6 +49,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Invoke Other Action](#invoke-other-action)
   * [Cleaning Up Block](#cleaning-up-block)
   * [Alias of Action](#alias-of-action)
+  * [Abbreviation of Prefix](#abbreviation-of-prefix)
   * [Default Action](#default-action)
   * [Action List and Prefix List](#action-list-and-prefix-list)
   * [Hidden Action](#hidden-action)
@@ -1241,6 +1242,50 @@ Actions:
 ```
 
 
+### Abbreviation of Prefix
+
+Abbreviation of prefix is a shortcut of prefix.
+For example, when `b:` is an abbreviation of a prefix `git:branch:`, you can invoke `git:branch:create` action by `b:create`.
+
+File: ex18.rb
+
+```ruby
+# coding: utf-8
+require 'benry/cmdapp'
+
+class GitAction < Benry::CmdApp::Action
+
+  prefix "git:" do
+
+    prefix "branch:" do
+
+      @action.("create a new branch")
+      def create(branch)
+        puts "git checkout -b #{branch}"
+      end
+
+    end
+
+  end
+
+end
+
+## define abbreviation 'b:' of prefix 'git:branch:'
+Benry::CmdApp.define_abbrev("b:", "git:branch:")     # !!!!
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Output:
+
+```console
+[bash]$ ruby ex18.rb b:create topic1    # invokes 'git:branch:create' !!!!
+git checkout -b topic1
+```
+
+
 ### Default Action
 
 * `config.default_action = "test1"` defines default action.
@@ -2303,7 +2348,7 @@ exit app.main()
 
 A: (a) Use method alias, or (b) use prepend.
 
-File: ex43.rb
+File: ex41.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2350,12 +2395,12 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex43.rb hello
+[bash]$ ruby ex41.rb hello
 ---- >8 ---- >8 ----
 Hello, world!
 ---- 8< ---- 8< ----
 
-[bash]$ ruby ex43.rb hi Alice
+[bash]$ ruby ex41.rb hi Alice
 ~~~~ >8 ~~~~ >8 ~~~~
 Hi, Alice!
 ~~~~ 8< ~~~~ 8< ~~~~
@@ -2371,7 +2416,7 @@ A: Call `Benry::CmdApp.undef_action("<action>")` or `Benry::CmdApp.undef_alias("
 
 A: First remove the existing action, then re-define the action.
 
-File: ex44.rb
+File: ex42.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2404,11 +2449,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex44.rb -h
-ex44.rb --- sample app
+[bash]$ ruby ex42.rb -h
+ex42.rb --- sample app
 
 Usage:
-  $ ex44.rb [<options>] <action> [<arguments>...]
+  $ ex42.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2425,7 +2470,7 @@ Actions:
 
 A: Set `config.option_trace = true` and pass `-T` (or `--trace`) option.
 
-File: ex45.rb
+File: ex43.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2454,7 +2499,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex45.rb --trace build              # !!!!
+[bash]$ ruby ex43.rb --trace build              # !!!!
 ### enter: build
 ### enter: prepare
 ... prepare something ...
@@ -2468,7 +2513,7 @@ Output:
 
 A: Set `config.option_color = true` and pass `--color=on` or `--color=off` option.
 
-File: ex46.rb
+File: ex44.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2491,11 +2536,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex46.rb -h
-ex46.rb --- sample app
+[bash]$ ruby ex44.rb -h
+ex44.rb --- sample app
 
 Usage:
-  $ ex46.rb [<options>] <action> [<arguments>...]
+  $ ex44.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2506,10 +2551,10 @@ Options:
 Actions:
   hello              : print greeting message
 
-[bash]$ ruby ex46.rb -h --color=off              # !!!!
+[bash]$ ruby ex44.rb -h --color=off              # !!!!
 
-[bash]$ ruby ex46.rb -h --color=on               # !!!!
-[bash]$ ruby ex46.rb -h --color                  # !!!!
+[bash]$ ruby ex44.rb -h --color=on               # !!!!
+[bash]$ ruby ex44.rb -h --color                  # !!!!
 ```
 
 
@@ -2517,7 +2562,7 @@ Actions:
 
 A: Provide block parameter on `@option.()`.
 
-File: ex47.rb
+File: ex45.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2546,7 +2591,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex47.rb test -I /tmp -I /var/tmp     # !!!!
+[bash]$ ruby ex45.rb test -I /tmp -I /var/tmp     # !!!!
 path=["/tmp", "/var/tmp"]                         # !!!!
 ```
 
@@ -2555,7 +2600,7 @@ path=["/tmp", "/var/tmp"]                         # !!!!
 
 A: Add `detail:` keyword argument to `@option.()`.
 
-File: ex48.rb
+File: ex46.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2582,11 +2627,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex48.rb -h test
-ex48.rb test --- detailed description test
+[bash]$ ruby ex46.rb -h test
+ex46.rb test --- detailed description test
 
 Usage:
-  $ ex48.rb test [<options>]
+  $ ex46.rb test [<options>]
 
 Options:
   -m <mode>          : output mode
@@ -2600,7 +2645,7 @@ Options:
 
 A: Use `@copy_options.()`.
 
-File: ex49.rb
+File: ex47.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2632,11 +2677,11 @@ exit app.main()
 Help message of `test2` action:
 
 ```console
-[bash]$ ruby ex49.rb -h test2
-ex49.rb test2 --- test action #2
+[bash]$ ruby ex47.rb -h test2
+ex47.rb test2 --- test action #2
 
 Usage:
-  $ ex49.rb test2 [<options>]
+  $ ex47.rb test2 [<options>]
 
 Options:
   -v, --verbose      : verbose mode     # copied!!
@@ -2650,7 +2695,7 @@ Options:
 
 A: The former defines an alias, and the latter doesn't.
 
-File: ex50.rb
+File: ex48.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2683,11 +2728,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex50.rb -h
-ex50.rb --- sample app
+[bash]$ ruby ex48.rb -h
+ex48.rb --- sample app
 
 Usage:
-  $ ex50.rb [<options>] <action> [<arguments>...]
+  $ ex48.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2742,7 +2787,7 @@ Actions:
 
 A: Call `GlobalOptionSchema#reorder_options!()`.
 
-File: ex51.rb
+File: ex49.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2765,11 +2810,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex51.rb -h
-ex51.rb (1.0.0) --- sample app
+[bash]$ ruby ex49.rb -h
+ex49.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex51.rb [<options>] <action> [<arguments>...]
+  $ ex49.rb [<options>] <action> [<arguments>...]
 
 Options:
   -v, --verbose      : verbose mode
@@ -2789,7 +2834,7 @@ Actions:
 
 A: Yes. When you pass `important: true` to `@action.()`, that action will be printed with unerline in help message. When you pass `important: false`, that action will be printed in gray color.
 
-File: ex52.rb
+File: ex50.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2814,11 +2859,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex52.rb -h
-ex52.rb --- sample app
+[bash]$ ruby ex50.rb -h
+ex50.rb --- sample app
 
 Usage:
-  $ ex52.rb [<options>] <action> [<arguments>...]
+  $ ex50.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2840,7 +2885,7 @@ A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 * Currenty, Benry-CmdApp doesn't provide the good way to use it effectively.
   This feature may be used by command-line application or framework based on Benry-CmdApp.
 
-File: ex53.rb
+File: ex51.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2867,7 +2912,7 @@ exit app.main()
 
 A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.
 
-File: ex54.rb
+File: ex52.rb
 
 ```ruby
 require 'benry/cmdapp'
