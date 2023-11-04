@@ -1511,7 +1511,7 @@ module Benry::CmdApp
     end
     private :_add
 
-    def reorder_options!(*keys)
+    def reorder_options(*keys)
       #; [!2cp9s] sorts options in order of keys specified.
       #; [!xe7e1] moves options which are not included in specified keys to end of option list.
       n = @items.length
