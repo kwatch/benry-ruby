@@ -149,6 +149,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -231,6 +232,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -848,6 +850,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -909,6 +912,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1131,6 +1135,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1241,13 +1246,20 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
+Global option `-L alias` lists all aliases.
+
+```console
+[bash]$ ruby ex18.rb -L alias
+
+```
+
 
 ### Abbreviation of Prefix
 
 Abbreviation of prefix is a shortcut of prefix.
 For example, when `b:` is an abbreviation of a prefix `git:branch:`, you can invoke `git:branch:create` action by `b:create`.
 
-File: ex18.rb
+File: ex19.rb
 
 ```ruby
 # coding: utf-8
@@ -1281,8 +1293,16 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex18.rb b:create topic1    # invokes 'git:branch:create' !!!!
+[bash]$ ruby ex19.rb b:create topic1    # invokes 'git:branch:create' !!!!
 git checkout -b topic1
+```
+
+Global option `-L abbrev` lists all abbreviations.
+
+```console
+[bash]$ ruby ex19.rb -L abbrev
+Abbreviations:
+  b:         =>  git:branch:
 ```
 
 
@@ -1292,7 +1312,7 @@ git checkout -b topic1
   In this case, action `test1` will be invoked if action name not specified in command-line.
 * Default action name is shown in help message.
 
-File: ex19.rb
+File: ex20.rb
 
 ```ruby
 # coding: utf-8
@@ -1316,25 +1336,26 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex19.rb test1
+[bash]$ ruby ex20.rb test1
 test1
 
-[bash]$ ruby ex19.rb               # no action name!!!!
+[bash]$ ruby ex20.rb               # no action name!!!!
 test1
 ```
 
 Help message:
 
 ```console
-[bash]$ ruby ex19.rb -h
-ex19.rb --- sample app
+[bash]$ ruby ex20.rb -h
+ex20.rb --- sample app
 
 Usage:
-  $ ex19.rb [<options>] <action> [<arguments>...]
+  $ ex20.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions: (default: test1)                   # !!!!
@@ -1347,7 +1368,7 @@ Actions: (default: test1)                   # !!!!
 
 When `config.default_action` is not specified, Benry-CmdAction lists action names if action name is not specified in command-line.
 
-File: ex20.rb
+File: ex21.rb
 
 ```ruby
 # coding: utf-8
@@ -1393,7 +1414,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex20.rb            # no action name!!!!
+[bash]$ ruby ex21.rb            # no action name!!!!
 Actions:
   bar:baz:test4      : test action #4
   bar:test3          : test action #3
@@ -1416,11 +1437,11 @@ Benry-CmdApp lists action names which have that prefix.
 Output:
 
 ```console
-[bash]$ ruby ex20.rb foo:              # !!!!
+[bash]$ ruby ex21.rb foo:              # !!!!
 Actions:
   foo:test2          : test action #2
 
-[bash]$ ruby ex20.rb bar:              # !!!!
+[bash]$ ruby ex21.rb bar:              # !!!!
 Actions:
   bar:baz:test4      : test action #4
   bar:test3          : test action #3
@@ -1431,7 +1452,7 @@ If `:` is specified instead of action name, Benry-CmdApp lists top prefixes of a
 Outuput:
 
 ```console
-[bash]$ ruby ex20.rb :                 # !!!!
+[bash]$ ruby ex21.rb :                 # !!!!
 Prefixes: (depth=1)
   bar: (2)           # !!! two actions ('bar:test3' and 'bar:baz:test4')
   foo: (1)           # !!! one action ('foo:text2')
@@ -1442,7 +1463,7 @@ If you specified `::` instead of `:`, two-level prefixes are displayed,
 for example `foo:xxx:` and `foo:yyy:`.
 Of course, `:::` displays more level prefixes.
 
-File: ex21.rb
+File: ex22.rb
 
 ```ruby
 # coding: utf-8
@@ -1489,18 +1510,18 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex21.rb :
+[bash]$ ruby ex22.rb :
 Prefixes: (depth=1)
   git: (12)
 
-[bash]$ ruby ex21.rb ::             # !!!!
+[bash]$ ruby ex22.rb ::             # !!!!
 Prefixes: (depth=2)
   git: (0)
   git:branch: (2)
   git:repo: (7)
   git:staging: (3)
 
-[bash]$ ruby ex21.rb :::            # !!!!
+[bash]$ ruby ex22.rb :::            # !!!!
 Prefixes: (depth=3)
   git: (0)
   git:branch: (2)
@@ -1513,7 +1534,7 @@ Prefixes: (depth=3)
 `prefix()` can take a description of prefix as 2nd argument.
 Descriptions of prefix are displayed in the prefix list.
 
-File: ex22.rb
+File: ex23.rb
 
 ```ruby
 # coding: utf-8
@@ -1549,7 +1570,7 @@ exit app.main()
 Output:
 
 ```console
-[bash]$ ruby ex22.rb :                       # !!!!
+[bash]$ ruby ex23.rb :                       # !!!!
 Prefixes: (depth=1)
   bar: (2)           : description of Bar    # !!!!
   foo: (1)           : description of Foo    # !!!!
@@ -1563,7 +1584,7 @@ Prefixes: (depth=1)
 * Hidden actions are not shown in help message nor action list by default.
 * Hidden actions are shown when `-a` or `--all` option is specified in command-line.
 
-File: ex23.rb
+File: ex24.rb
 
 ```ruby
 # coding: utf-8
@@ -1598,7 +1619,7 @@ exit app.main()
 Action list (without `-a` nor `--all`):
 
 ```console
-[bash]$ ruby ex23.rb
+[bash]$ ruby ex24.rb
 Actions:
   help               : print help message (of action if specified)
   test1              : test action #1
@@ -1607,7 +1628,7 @@ Actions:
 Action list (with `-a` or `--all`):
 
 ```console
-[bash]$ ruby ex23.rb --all      # !!!!
+[bash]$ ruby ex24.rb --all      # !!!!
 Actions:
   help               : print help message (of action if specified)
   test1              : test action #1
@@ -1622,7 +1643,7 @@ Actions:
 * Hidden options are not shown in help message of action.
 * Hidden options are shown when `-a` or `--all` option is specified in command-line.
 
-File: ex24.rb
+File: ex25.rb
 
 ```ruby
 # coding: utf-8
@@ -1647,11 +1668,11 @@ exit app.main()
 Help message (without `-a` nor `--all`):
 
 ```console
-[bash]$ ruby ex24.rb -h test1
-ex24.rb test1 --- test action
+[bash]$ ruby ex25.rb -h test1
+ex25.rb test1 --- test action
 
 Usage:
-  $ ex24.rb test1 [<options>]
+  $ ex25.rb test1 [<options>]
 
 Options:
   -v                 : verbose mode
@@ -1660,11 +1681,11 @@ Options:
 Help message (with `-a` or `--all`)
 
 ```console
-[bash]$ ruby ex24.rb -h --all test1           # !!!!
-ex24.rb test1 --- test action
+[bash]$ ruby ex25.rb -h --all test1           # !!!!
+ex25.rb test1 --- test action
 
 Usage:
-  $ ex24.rb test1 [<options>]
+  $ ex25.rb test1 [<options>]
 
 Options:
   -h, --help         : print help message     # !!!!
@@ -1697,6 +1718,7 @@ For this reason, you should NOT define `-h` or `--help` options for your actions
 * `config.option_help = true` enables `-h` and `--help` options. (default: `true`)
 * `config.option_version = true` enables `-V` and `--version` options. (default: `true` if `app_version` provided, `false` if else)
 * `config.option_list = true` enables `-l` and `--list` options. (default: `true`)
+* `config.option_target = true` enables `-L <target>` option. (default: `true`)
 * `config.option_all = true` enables `-a` and `--all` options which shows private (hidden) actions and options into help message. (default: `true`)
 * `config.option_verbose = true` enables `-v` and `--verbose` options which sets `$QUIET_MODE = false`. (default: `false`)
 * `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$QUIET_MODE = true`. (default: `false`)
@@ -1707,7 +1729,7 @@ For this reason, you should NOT define `-h` or `--help` options for your actions
 * `config.format_action = "  %-18s : %s"` sets format of actions in help message. (default: `"  %-18s : %s"`)
 * `config.format_usage = "  $ %s"` sets format of usage in help message. (default: `"  $ %s"`)
 
-File: ex25.rb
+File: ex26.rb
 
 ```ruby
 # coding: utf-8
@@ -1722,11 +1744,11 @@ end
 Output:
 
 ```console
-[bash]$ ruby ex25.rb
+[bash]$ ruby ex26.rb
 config.app_desc             = "sample app"
 config.app_version          = "1.0.0"
 config.app_name             = "Sample App"
-config.app_command          = "ex25.rb"             # == File.basename($0)
+config.app_command          = "ex26.rb"             # == File.basename($0)
 config.app_usage            = nil
 config.app_detail           = nil
 config.default_action       = nil
@@ -1760,15 +1782,16 @@ Therefore you can see `--debug` option in help message if you add `-h` and `-a` 
 Help message:
 
 ```console
-$ ruby ex24.rb -h -a                          # !!!!
-ex24.rb --- sample app
+$ ruby ex25.rb -h -a                          # !!!!
+ex25.rb --- sample app
 
 Usage:
-  $ ex24.rb [<options>] <action> [<arguments>...]
+  $ ex25.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
       --debug        : debug mode             # !!!!
 
@@ -1786,7 +1809,7 @@ To add custom global options:
 * (2) Add custom options to it.
 * (3) Pass it to `Application.new()`.
 
-File: ex26.rb
+File: ex27.rb
 
 ```ruby
 # coding: utf-8
@@ -1817,15 +1840,16 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex26.rb -h
-ex26.rb --- sample app
+[bash]$ ruby ex27.rb -h
+ex27.rb --- sample app
 
 Usage:
-  $ ex26.rb [<options>] <action> [<arguments>...]
+  $ ex27.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   --logging          : enable logging          # !!!!
 
@@ -1840,7 +1864,7 @@ To customize global options entirely:
 * (2) Add global options as you want.
 * (3) Create and execute Application object with it.
 
-File: ex27.rb
+File: ex28.rb
 
 ```ruby
 # coding: utf-8
@@ -1869,11 +1893,11 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex27.rb -h
-ex27.rb (1.0.0) --- sample app
+[bash]$ ruby ex28.rb -h
+ex28.rb (1.0.0) --- sample app
 
 Usage:
-  $ ex27.rb [<options>] <action> [<arguments>...]
+  $ ex28.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message
@@ -1898,7 +1922,7 @@ Actions:
 * (2) Override `#toggle_global_options()` method.
 * (3) Create and execute subclass object of `Application`.
 
-File: ex28.rb
+File: ex29.rb
 
 ```ruby
 # coding: utf-8
@@ -1929,7 +1953,7 @@ exit app.main()
 
 Of course, prepending custom module to Application class is also effective way.
 
-File: ex29.rb
+File: ex30.rb
 
 ```ruby
 # coding: utf-8
@@ -1957,7 +1981,7 @@ exit app.main()
 * (2) Override `#handle_action()` method.
 * (3) Create and execute custom application object.
 
-File: ex30.rb
+File: ex31.rb
 
 ```ruby
 # coding: utf-8
@@ -1996,7 +2020,7 @@ exit app.main()
 
 * [EXPERIMENTAL] Instead of defining subclass of Application, you can pass callback block to Application object.
 
-File: ex31.rb
+File: ex32.rb
 
 ```ruby
 # coding: utf-8
@@ -2033,7 +2057,7 @@ exit app.main()
 If you want to just add more text into application help message,
 set `config.app_detail` and/or `config.help_postamble`.
 
-File: ex32.rb
+File: ex33.rb
 
 ```ruby
 # coding: utf-8
@@ -2062,17 +2086,18 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex32.rb -h
-ex32.rb --- sample app
+[bash]$ ruby ex33.rb -h
+ex33.rb --- sample app
 
 See https://....
 
 Usage:
-  $ ex32.rb [<options>] <action> [<arguments>...]
+  $ ex33.rb [<options>] <action> [<arguments>...]
 
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2091,7 +2116,7 @@ If you want to change behaviour of building command help message:
 * (3) Create an instance object of the class.
 * (4) Pass it to Application object.
 
-File: ex33.rb
+File: ex34.rb
 
 ```ruby
 # coding: utf-8
@@ -2147,7 +2172,7 @@ More simple way:
 * (2) Prepend it to `Benry::CmdApp::ApplicationHelpBuilder` class.
 * (3) Create and execute Application object.
 
-File: ex34.rb
+File: ex35.rb
 
 ```ruby
 # coding: utf-8
@@ -2202,7 +2227,7 @@ exit app.main()
 If you want to just add more text into action help message,
 pass `detail:` and/or `postamble:` keyword arguments to `@action.()`.
 
-File: ex35.rb
+File: ex36.rb
 
 ```ruby
 # coding: utf-8
@@ -2227,13 +2252,13 @@ exit app.main()
 Help message:
 
 ```console
-[bash]$ ruby ex35.rb -h hello
-ex35.rb hello --- test action #1
+[bash]$ ruby ex36.rb -h hello
+ex36.rb hello --- test action #1
 
 See https://....                  # !!!!
 
 Usage:
-  $ ex35.rb hello [<user>]
+  $ ex36.rb hello [<user>]
 
 Example:
   ....                            # !!!!
@@ -2246,7 +2271,7 @@ If you want to change behaviour of building action help message:
 * (3) Create an instance object of the class.
 * (4) Pass it to Application object.
 
-File: ex36.rb
+File: ex37.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -2296,7 +2321,7 @@ Another way:
 * (2) Prepend it to `Benry::CmdApp::ActionHelpBuilder` class.
 * (3) Create and execute Application object.
 
-File: ex37.rb
+File: ex38.rb
 
 ```ruby
 # coding: utf-8
@@ -2458,6 +2483,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2545,6 +2571,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   --color[=<on|off>] : enable/disable color      # !!!!
 
@@ -2737,6 +2764,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2752,7 +2780,7 @@ and action `bbb` is not an alias due to `prefix(action:)`.
 
 ### Q: How to list only aliases (or actions) excluding actions (or aliases) ?
 
-A: Filter the output of `-l, --list` option by `grep` command.
+A: Specify global option `-L alias` or `-L action`.
 
 ```console
 [bash]$ ruby gitexample.rb -l
@@ -2767,15 +2795,16 @@ Actions:
   unstage            : alias of 'git:unstage'
 
 ### list only aliases
-[bash]$ ruby gitexample.rb -l | grep 'alias of'        # !!!!
-Actions:
+[bash]$ ruby gitexample.rb -L alias     # !!!!
+Aliases:
   git                : alias of 'git:status'
   stage              : alias of 'git:stage'
   staged             : alias of 'git:staged'
   unstage            : alias of 'git:unstage'
 
 ### list only actions
-[bash]$ ruby gitexample.rb -l | grep -v 'alias of'     # !!!!
+[bash]$ ruby gitexample.rb -L action     # !!!!
+Actions:
   git:stage          : put changes of files into staging area
   git:staged         : show changes in staging area
   git:status         : show status in compact format
@@ -2798,7 +2827,7 @@ config = Benry::CmdApp::Config.new("sample app", "1.0.0",
   option_color:     true,
 )
 schema = Benry::CmdApp::GlobalOptionSchema.new(config)
-keys = [:verbose, :quiet, :color, :help, :version, :all, :list]  # !!!!
+keys = [:verbose, :quiet, :color, :help, :version, :all, :target, :list]  # !!!!
 schema.reorder_options!(*keys)               # !!!!
 app = Benry::CmdApp::Application.new(config, schema)
 ## or:
@@ -2823,6 +2852,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -a, --all          : list hidden actions/options, too
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -l, --list         : list actions
 
 Actions:
@@ -2868,6 +2898,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:

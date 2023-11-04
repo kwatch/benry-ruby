@@ -316,6 +316,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -342,6 +343,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -431,6 +433,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -448,6 +451,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
+  -L <target>        : list target (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -941,6 +945,70 @@ END
       spec "[!rqx7w] returns nil if both no actions nor aliases found with names starting with prefix." do
         x = @builder.build_action_list_filtered_by("blabla:")
         ok {x} == nil
+      end
+
+    end
+
+
+    topic '#build_alias_list()' do
+
+      spec "[!496qq] renders alias list." do
+        Benry::CmdApp.define_alias("a9209", "hello")
+        x = @builder.build_alias_list()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^  a9209 +: alias of 'hello'$/
+      end
+
+      spec "[!fj1c7] returns nil if no aliases found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        x = @builder.build_alias_list()
+        ok {x} == nil
+        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
+        index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
+        x = @builder.build_alias_list()
+        ok {x} != nil
+        ok {x} == <<"END"
+\e[1;34mAliases:\e[0m
+  h1                 : alias of 'hello'
+END
+      end
+
+      spec "[!d7vee] ignores hidden aliases in default." do
+        Benry::CmdApp.define_alias("a4903", "hello", hidden: true)
+        x = @builder.build_alias_list()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} !~ /a4903/
+      end
+
+      spec "[!4vvrs] include hidden aliases if `all: true` specifieid." do
+        Benry::CmdApp.define_alias("a4613", "hello", hidden: true)
+        x = @builder.build_alias_list(all: true)
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^\e\[2m  a4613 +: alias of 'hello'\e\[0m$/
+      end
+
+    end
+
+
+    topic '#build_abbrev_list()' do
+
+      spec "[!00ice] returns abbrev list string." do
+        Benry::CmdApp.define_abbrev("g23:", "git:")
+        x = @builder.build_abbrev_list()
+        ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m\n/
+        ok {x} =~ /^  g23: +=> +git:\n/
+      end
+
+      spec "[!dnt12] returns nil if no abbrevs found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        ok {@builder.build_abbrev_list()} == nil
+        index.abbrev_add("g24:", "git:")
+        ok {@builder.build_abbrev_list()} == <<END
+\e[1;34mAbbreviations:\e[0m
+  g24:       =>  git:
+END
       end
 
     end
