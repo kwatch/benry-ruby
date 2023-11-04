@@ -1343,32 +1343,34 @@ module Benry::CmdApp
       #; [!q12ju] returns list of actions and aliases.
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
       #; [!k2tts] returns nil if no actions found.
-      b = @app_help_builder
-      return b.__send__(:build_actions_part, all: all)
+      content = _build_available_list(all: all) {|md| ! md.alias? }
+      return nil if content == nil
+      header = self.class.const_get(:HEADER_ACTIONS)
+      return build_section(header, content)
     end
 
     def build_action_list_filtered_by(prefix, all: false)
       index = @_index || INDEX
-      b = @app_help_builder
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
-      found = false
-      s1 = b.__send__(:build_actions_part, all: all) {|metadata|
+      content = _build_available_list(all: all) {|metadata|
         md = metadata
-        if md.name.start_with?(prefix)
-          matched = true
         #; [!duhyd] includes actions which name is same as prefix.
+        if md.name.start_with?(prefix)
+          true
+        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         elsif md.name == prefix2
-          #matched = true
-          #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
-          matched = ! (md.alias? && md.action.start_with?(prefix))
+          ! (md.alias? && md.action.start_with?(prefix))
         else
-          matched = false
+          false
         end
-        found = true if matched
-        matched
       }
-      s1 = nil unless found
+      if content
+        header = self.class.const_get(:HEADER_ACTIONS)
+        s1 = build_section(header, content)
+      else
+        s1 = nil
+      end
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       sb = []
