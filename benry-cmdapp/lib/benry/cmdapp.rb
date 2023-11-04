@@ -1210,13 +1210,7 @@ module Benry::CmdApp
       #; [!24by5] returns nil if no actions defined.
       return nil if sb.empty?
       #; [!8qz6a] adds default action name after header if it is set.
-      extra = nil
-      if c.default_action
-        metadata = index.metadata_get(c.default_action)
-        if metadata && (all || ! metadata.hidden?)
-          extra = "(default: #{c.default_action})"
-        end
-      end
+      extra = c.default_action ? "(default: #{c.default_action})" : nil
       header = self.class.const_get(:HEADER_ACTIONS)    # "Actions:"
       return build_section(header, sb.join(), extra)
     end
@@ -1340,8 +1334,10 @@ module Benry::CmdApp
       #; [!k2tts] returns nil if no actions found.
       content = _build_available_list(all: all) {|md| ! md.alias? }
       return nil if content == nil
+      c = @config
+      extra = c.default_action ? "(default: #{c.default_action})" : nil
       header = self.class.const_get(:HEADER_ACTIONS)
-      return build_section(header, content)
+      return build_section(header, content, extra)
     end
 
     def build_candidate_list(prefix, all: false)
