@@ -1550,12 +1550,13 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _index: INDEX)
+    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, target_list_builder=nil, _index: INDEX)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
       @index         = _index
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
+      @target_list_builder = target_list_builder
     end
 
     attr_reader :config, :option_schema
@@ -1722,7 +1723,7 @@ module Benry::CmdApp
     end
 
     def render_action_list(prefix=nil, all: false)
-      builder = get_action_list_builder()
+      builder = get_target_list_builder()
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
@@ -1757,7 +1758,7 @@ module Benry::CmdApp
     def render_target_list(target, all: false)
       #; [!uzmml] renders target list.
       #; [!vrzu0] target 'prefix1' or 'prefix2' is acceptable.
-      builder = get_action_list_builder()
+      builder = get_target_list_builder()
       return (
         case target
         when "action"           ; builder.build_action_list(all: all)
@@ -1804,8 +1805,8 @@ module Benry::CmdApp
       return @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
     end
 
-    def get_action_list_builder()
-      return TARGET_LIST_BUILDER_CLASS.new(@config)
+    def get_target_list_builder()
+      return @target_list_builder || TARGET_LIST_BUILDER_CLASS.new(@config)
     end
 
     def new_context()
