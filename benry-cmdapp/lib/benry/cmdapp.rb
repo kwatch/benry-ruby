@@ -1195,7 +1195,7 @@ module Benry::CmdApp
       return build_section(header, s)
     end
 
-    def build_actions_part(all: false, &filter)
+    def build_actions_part(all: false)
       index = INDEX
       #; [!typ67] returns 'Actions:' section of help message.
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
@@ -1203,7 +1203,6 @@ module Benry::CmdApp
       sb = []
       index.metadata_each do |metadata|
         md = metadata
-        next if block_given?() && ! yield(md)
         next if md.hidden? && ! all
         sb << build_action_line(md)
       end
