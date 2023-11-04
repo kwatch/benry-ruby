@@ -456,31 +456,31 @@ END
     end
 
 
-    topic '#render_action_list()' do
+    topic '#render_item_list()' do
 
-      class FakeActionListBuilder < Benry::CmdApp::ActionListBuilder
-        def build_action_list(all: false); return nil; end
-        def build_action_list_filtered_by(prefix, all: false); return nil; end
+      class FakeTargetListBuilder < Benry::CmdApp::TargetListBuilder
+        def build_available_list(all: false); return nil; end
+        def build_candidate_list(prefix, all: false); return nil; end
         def build_prefix_list(depth=1, all: false); return nil; end
       end
 
       def fake_action_list_builder(&b)
         Benry::CmdApp.module_eval do
-          remove_const :ACTION_LIST_BUILDER_CLASS
-          const_set    :ACTION_LIST_BUILDER_CLASS, FakeActionListBuilder
+          remove_const :TARGET_LIST_BUILDER_CLASS
+          const_set    :TARGET_LIST_BUILDER_CLASS, FakeTargetListBuilder
         end
         yield
       ensure
         Benry::CmdApp.module_eval do
-          remove_const :ACTION_LIST_BUILDER_CLASS
-          const_set    :ACTION_LIST_BUILDER_CLASS, Benry::CmdApp::ActionListBuilder
+          remove_const :TARGET_LIST_BUILDER_CLASS
+          const_set    :TARGET_LIST_BUILDER_CLASS, Benry::CmdApp::TargetListBuilder
         end
       end
 
       case_when "[!tftl5] when prefix is not specified..." do
 
         spec "[!36vz6] returns action list string if any actions defined." do
-          s = @app.instance_eval { render_action_list(nil) }
+          s = @app.instance_eval { render_item_list(nil) }
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} =~ /\A\e\[1;34mActions:\e\[0m$/
@@ -488,7 +488,7 @@ END
 
         spec "[!znuy4] raises CommandError if no actions defined." do
           fake_action_list_builder() do
-            pr = proc { @app.instance_eval { render_action_list(nil) } }
+            pr = proc { @app.instance_eval { render_item_list(nil) } }
             ok {pr}.raise?(Benry::CmdApp::CommandError,
                            "No actions defined.")
           end
@@ -499,7 +499,7 @@ END
       case_when "[!jcq4z] when separator is specified..." do
 
         spec "[!w1j1e] returns top prefix list if ':' specified." do
-          s = @app.instance_eval { render_action_list(":") }
+          s = @app.instance_eval { render_item_list(":") }
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
@@ -518,7 +518,7 @@ END
         end
 
         spec "[!bgput] returns two depth prefix list if '::' specified." do
-          s = @app.instance_eval { render_action_list("::") }
+          s = @app.instance_eval { render_item_list("::") }
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
@@ -537,7 +537,7 @@ END
 
         spec "[!tiihg] raises CommandError if no actions found having prefix." do
           fake_action_list_builder() do
-            pr = proc { @app.instance_eval { render_action_list(":") } }
+            pr = proc { @app.instance_eval { render_item_list(":") } }
             ok {pr}.raise?(Benry::CmdApp::CommandError,
                            "Prefix of actions not found.")
           end
@@ -548,7 +548,7 @@ END
       case_when "[!xut9o] when prefix is specified..." do
 
         spec "[!z4dqn] filters action list by prefix if specified." do
-          s = @app.instance_eval { render_action_list("git:") }
+          s = @app.instance_eval { render_item_list("git:") }
           ok {s} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -559,7 +559,7 @@ END
 
         spec "[!1834c] raises CommandError if no actions found with names starting with that prefix." do
           fake_action_list_builder() do
-            pr = proc { @app.instance_eval { render_action_list("git:") } }
+            pr = proc { @app.instance_eval { render_item_list("git:") } }
             ok {pr}.raise?(Benry::CmdApp::CommandError,
                            "No actions found with names starting with 'git:'.")
           end
@@ -570,7 +570,7 @@ END
       case_else "[!xjdrm] else..." do
 
         spec "[!9r4w9] raises ArgumentError." do
-          pr = proc { @app.instance_eval { render_action_list("git") } }
+          pr = proc { @app.instance_eval { render_item_list("git") } }
           ok {pr}.raise?(ArgumentError,
                          "\"git\": Invalid value as a prefix.")
         end

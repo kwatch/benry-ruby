@@ -681,11 +681,15 @@ module Benry::CmdApp
       return @metadata_dict.key?(name)
     end
 
-    def metadata_each(&b)
+    def metadata_each(all: true, &b)
       #; [!3l6r7] returns Enumerator object if block not given.
-      return enum_for(:metadata_each) unless block_given?()
+      return enum_for(:metadata_each, all: all) unless block_given?()
       #; [!r8mb3] yields each metadata object if block given.
-      @metadata_dict.keys.sort.each {|name| yield @metadata_dict[name] }
+      #; [!qvc77] ignores hidden metadata if `all: false` passed.
+      @metadata_dict.keys.sort.each do |name|
+        metadata = @metadata_dict[name]
+        yield metadata if all || ! metadata.hidden?
+      end
       nil
     end
 
@@ -1195,28 +1199,19 @@ module Benry::CmdApp
       return build_section(header, s)
     end
 
-    def build_actions_part(all: false, &filter)
+    def build_actions_part(all: false)
       index = INDEX
       #; [!typ67] returns 'Actions:' section of help message.
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
       c = @config
       sb = []
-      index.metadata_each do |metadata|
-        md = metadata
-        next if block_given?() && ! yield(md)
-        next if md.hidden? && ! all
-        sb << build_action_line(md)
+      index.metadata_each(all: all) do |metadata|
+        sb << build_action_line(metadata)
       end
       #; [!24by5] returns nil if no actions defined.
       return nil if sb.empty?
       #; [!8qz6a] adds default action name after header if it is set.
-      extra = nil
-      if c.default_action
-        metadata = index.metadata_get(c.default_action)
-        if metadata && (all || ! metadata.hidden?)
-          extra = "(default: #{c.default_action})"
-        end
-      end
+      extra = c.default_action ? "(default: #{c.default_action})" : nil
       header = self.class.const_get(:HEADER_ACTIONS)    # "Actions:"
       return build_section(header, sb.join(), extra)
     end
@@ -1303,53 +1298,76 @@ module Benry::CmdApp
   end
 
 
-  class ActionListBuilder < BaseHelpBuilder
+  class TargetListBuilder < BaseHelpBuilder
 
     HEADER_ALIASES    = "Aliases:"
     HEADER_PREFIXES   = "Prefixes:"
     HEADER_ABBREVS    = "Abbreviations:"
 
-    def initialize(config, app_help_builder=nil)
-      super(config)
-      @app_help_builder = app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
+    def build_available_list(all: false)
+      #; [!gawd3] returns mixed list of actions and aliases.
+      #; [!yoe9b] returns nil if nothing found.
+      content = _build_available_list(all: all)
+      return nil if content == nil
+      header = self.class.const_get(:HEADER_ACTIONS)
+      return build_section(header, content)
     end
+
+    def _build_available_list(all: false, &filter)
+      index = @_index || INDEX
+      format = @config.format_action
+      sb = []
+      #; [!ry3gz] includes hidden actions and aliases if `all: true` passed.
+      index.metadata_each(all: all) do |metadata|
+        md = metadata
+        next if block_given?() && ! yield(md)
+        s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+      end
+      return sb.empty? ? nil : sb.join()
+    end
+    private :_build_available_list
 
     def build_action_list(all: false)
       #; [!q12ju] returns list of actions and aliases.
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
       #; [!k2tts] returns nil if no actions found.
-      b = @app_help_builder
-      return b.__send__(:build_actions_part, all: all)
+      content = _build_available_list(all: all) {|md| ! md.alias? }
+      return nil if content == nil
+      c = @config
+      extra = c.default_action ? "(default: #{c.default_action})" : nil
+      header = self.class.const_get(:HEADER_ACTIONS)
+      return build_section(header, content, extra)
     end
 
-    def build_action_list_filtered_by(prefix, all: false)
+    def build_candidate_list(prefix, all: false)
       index = @_index || INDEX
-      b = @app_help_builder
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
-      found = false
-      s1 = b.__send__(:build_actions_part, all: all) {|metadata|
+      content = _build_available_list(all: all) {|metadata|
         md = metadata
-        if md.name.start_with?(prefix)
-          matched = true
         #; [!duhyd] includes actions which name is same as prefix.
+        if md.name.start_with?(prefix)
+          true
+        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         elsif md.name == prefix2
-          #matched = true
-          #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
-          matched = ! (md.alias? && md.action.start_with?(prefix))
+          ! (md.alias? && md.action.start_with?(prefix))
         else
-          matched = false
+          false
         end
-        found = true if matched
-        matched
       }
-      s1 = nil unless found
+      if content
+        header = self.class.const_get(:HEADER_ACTIONS)
+        s1 = build_section(header, content)
+      else
+        s1 = nil
+      end
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       sb = []
-      index.metadata_each do |metadata|
+      index.metadata_each(all: all) do |metadata|
         md = metadata
-        if md.alias? && md.action.start_with?(prefix) && (all || ! md.hidden?)
+        if md.alias? && md.action.start_with?(prefix)
           sb << build_action_line(md)
         end
       end
@@ -1370,11 +1388,10 @@ module Benry::CmdApp
       index = @_index || INDEX
       sb = []
       format = @config.format_action
-      index.metadata_each do |md|
+      #; [!d7vee] ignores hidden aliases in default.
+      #; [!4vvrs] include hidden aliases if `all: true` specifieid.
+      index.metadata_each(all: all) do |md|
         next if ! md.alias?
-        #; [!d7vee] ignores hidden aliases in default.
-        #; [!4vvrs] include hidden aliases if `all: true` specifieid.
-        next if md.hidden? && ! all
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
@@ -1418,10 +1435,8 @@ module Benry::CmdApp
     def _count_actions_per_prefix(depth, all: false)
       index = @_index || INDEX
       dict = {}
-      index.metadata_each do |metadata|
-        #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
-        next if metadata.hidden? && ! all
-        #
+      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
+      index.metadata_each(all: all) do |metadata|
         name = metadata.name
         next unless name =~ /:/
         #; [!5n3qj] counts prefix of specified depth.
@@ -1457,7 +1472,7 @@ module Benry::CmdApp
 
   APPLICATION_HELP_BUILDER_CLASS = ApplicationHelpBuilder
   ACTION_HELP_BUILDER_CLASS      = ActionHelpBuilder
-  ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
+  TARGET_LIST_BUILDER_CLASS      = TargetListBuilder
 
 
   class GlobalOptionSchema < OptionSchema
@@ -1528,12 +1543,13 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _index: INDEX)
+    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, target_list_builder=nil, _index: INDEX)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
       @index         = _index
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
+      @target_list_builder = target_list_builder
     end
 
     attr_reader :config, :option_schema
@@ -1665,7 +1681,7 @@ module Benry::CmdApp
       #; [!hj4hf] prints action list if global option `-l, --list` specified.
       #; [!tyxwo] includes hidden actions into action list if `-a, --all` specified.
       if global_opts[:list]
-        print_str render_action_list(nil, all: all)
+        print_str render_item_list(nil, all: all)
         return 0
       end
       #; [!ooiaf] prints target list if global option '-L <target>' specified.
@@ -1699,14 +1715,14 @@ module Benry::CmdApp
       return (@config.app_version || "?.?.?") + "\n"
     end
 
-    def render_action_list(prefix=nil, all: false)
-      builder = get_action_list_builder()
+    def render_item_list(prefix=nil, all: false)
+      builder = get_target_list_builder()
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
         #; [!36vz6] returns action list string if any actions defined.
         #; [!znuy4] raises CommandError if no actions defined.
-        s = builder.build_action_list(all: all)  or
+        s = builder.build_available_list(all: all)  or
           raise CommandError.new("No actions defined.")
         return s
       #; [!jcq4z] when separator is specified...
@@ -1722,7 +1738,7 @@ module Benry::CmdApp
       when /:\z/
         #; [!z4dqn] filters action list by prefix if specified.
         #; [!1834c] raises CommandError if no actions found with names starting with that prefix.
-        s = builder.build_action_list_filtered_by(prefix, all: all)  or
+        s = builder.build_candidate_list(prefix, all: all)  or
           raise CommandError.new("No actions found with names starting with '#{prefix}'.")
         return s
       #; [!xjdrm] else...
@@ -1735,7 +1751,7 @@ module Benry::CmdApp
     def render_target_list(target, all: false)
       #; [!uzmml] renders target list.
       #; [!vrzu0] target 'prefix1' or 'prefix2' is acceptable.
-      builder = get_action_list_builder()
+      builder = get_target_list_builder()
       return (
         case target
         when "action"           ; builder.build_action_list(all: all)
@@ -1749,13 +1765,13 @@ module Benry::CmdApp
 
     def handle_blank_action(all: false)
       #; [!seba7] prints action list and returns `0`.
-      print_str render_action_list(nil, all: all)
+      print_str render_item_list(nil, all: all)
       return 0
     end
 
     def handle_prefix(prefix, all: false)
       #; [!8w301] prints action list starting with prefix and returns `0`.
-      print_str render_action_list(prefix, all: all)
+      print_str render_item_list(prefix, all: all)
       return 0
     end
 
@@ -1782,8 +1798,8 @@ module Benry::CmdApp
       return @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
     end
 
-    def get_action_list_builder()
-      return ACTION_LIST_BUILDER_CLASS.new(@config, @app_help_builder)
+    def get_target_list_builder()
+      return @target_list_builder || TARGET_LIST_BUILDER_CLASS.new(@config)
     end
 
     def new_context()

@@ -97,6 +97,16 @@ Oktest.scope do
         ok {n} > 0
       end
 
+      spec "[!qvc77] ignores hidden metadata if `all: false` passed." do
+        found = false
+        Benry::CmdApp::INDEX.metadata_each(all: false) {|md| found = true if md.hidden? }
+        ok {found} == false
+        #
+        found = false
+        Benry::CmdApp::INDEX.metadata_each {|md| found = true if md.hidden? }
+        ok {found} == true
+      end
+
     end
 
 
