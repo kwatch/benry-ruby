@@ -56,6 +56,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Action List and Prefix List](#action-list-and-prefix-list)
   * [Hidden Action](#hidden-action)
   * [Hidden Option](#hidden-option)
+  * [Important Actions or Options](#important-actions-or-options)
 * [Configuratoin and Customization](#configuratoin-and-customization)
   * [Application Configuration](#application-configuration)
   * [Customization of Global Options](#customization-of-global-options)
@@ -69,13 +70,13 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to re-define an existing action?](#q-how-to-re-define-an-existing-action)
   * [Q: How to show entering into or exitting from actions?](#q-how-to-show-entering-into-or-exitting-from-actions)
   * [Q: How to enable/disable color mode?](#q-how-to-enabledisable-color-mode)
+  * [Q: How to remove global option `-L <topic>`?](#q-how-to-remove-global-option--l-topic)
   * [Q: How to define a multiple option, like `-I` option of Ruby?](#q-how-to-define-a-multiple-option-like--i-option-of-ruby)
   * [Q: How to specify detailed description of options?](#q-how-to-specify-detailed-description-of-options)
   * [Q: How to copy all options from other action?](#q-how-to-copy-all-options-from-other-action)
   * [Q: What is the difference between `prefix(alias_of:)` and `prefix(action:)`?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction)
   * [Q: How to list only aliases (or actions) excluding actions (or aliases) ?](#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-)
   * [Q: How to change the order of options in help message?](#q-how-to-change-the-order-of-options-in-help-message)
-  * [Q: Is it possible to make action names emphasized or weaken?](#q-is-it-possible-to-make-action-names-emphasized-or-weaken)
   * [Q: Is it possible to add metadata to actions or options?](#q-is-it-possible-to-add-metadata-to-actions-or-options)
   * [How to remove common help option from all actions?](#how-to-remove-common-help-option-from-all-actions)
   * [Q: How to make error messages I18Ned?](#q-how-to-make-error-messages-i18ned)
@@ -151,7 +152,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -234,7 +235,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1220,7 +1221,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1440,7 +1441,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions: (default: test1)                   # !!!!
@@ -1784,6 +1785,63 @@ Therefore all actions accept `-h, --help` option.
 For this reason, you should NOT define `-h` or `--help` options for your actions.
 
 
+### Important Actions or Options
+
+It is possible to mark actions or options as important or not.
+
+* Actions or options marked as important are emphasized in help message.
+* Actions or options marked as not important are weaken in help message.
+
+File: ex28.rb
+
+```ruby
+require 'benry/cmdapp'
+
+class SampleAction < Benry::CmdApp::Action
+
+  @action.("important action", important: true)   # !!!!
+  def test1()
+  end
+
+  @action.("not important action", important: false)   # !!!!
+  def test2()
+  end
+
+  @action.("sample")
+  @option.(:foo, "--foo", "important option", important: true)
+  @option.(:bar, "--bar", "not important option", important: false)
+  def test3(foo: nil, bar: nil)
+  end
+
+end
+
+config = Benry::CmdApp::Config.new("sample app")
+app = Benry::CmdApp::Application.new(config)
+exit app.main()
+```
+
+Output:
+
+```console
+[bash]$ ruby ex28.rb -l
+Actions:
+  help               : print help message (of action if specified)
+  test1              : important action      # !!!! bold font !!!!
+  test2              : not important action  # !!!! gray color !!!!
+  test3              : sample
+
+[bash]$ ruby ex28.rb -h test3
+ex28.rb test3 --- sample
+
+Usage:
+  $ ex28.rb test3 [<options>]
+
+Options:
+  --foo              : important option      # !!!! bold font !!!!
+  --bar              : not important option  # !!!! gray color !!!!
+```
+
+
 ## Configuratoin and Customization
 
 
@@ -1875,7 +1933,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
       --debug        : debug mode             # !!!!
 
@@ -1933,7 +1991,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   --logging          : enable logging          # !!!!
 
@@ -2181,7 +2239,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2567,7 +2625,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2655,7 +2713,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   --color[=<on|off>] : enable/disable color      # !!!!
 
@@ -2667,6 +2725,11 @@ Actions:
 [bash]$ ruby ex54.rb -h --color=on               # !!!!
 [bash]$ ruby ex54.rb -h --color                  # !!!!
 ```
+
+
+### Q: How to remove global option `-L <topic>`?
+
+A: Set `config.option_topic = false` or `config.option_topic = :hidden`.
 
 
 ### Q: How to define a multiple option, like `-I` option of Ruby?
@@ -2801,6 +2864,9 @@ Options:
   -D, --debug        : debug mode
 ```
 
+If you want to exclude some options from copying, specify `exlude:` keyword argument.
+For example, `@copy_options.("hello", exclude: [:help, :lang])` copies all options of `hello` action excluding `:help` and `:lang` options.
+
 
 ### Q: What is the difference between `prefix(alias_of:)` and `prefix(action:)`?
 
@@ -2848,7 +2914,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2936,59 +3002,11 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -a, --all          : list hidden actions/options, too
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -l, --list         : list actions
 
 Actions:
   help               : print help message (of action if specified)
-```
-
-
-### Q: Is it possible to make action names emphasized or weaken?
-
-A: Yes. When you pass `important: true` to `@action.()`, that action will be printed with unerline in help message. When you pass `important: false`, that action will be printed in gray color.
-
-File: ex60.rb
-
-```ruby
-require 'benry/cmdapp'
-
-class SampleAction < Benry::CmdApp::Action
-
-  @action.("empasized", important: true)   # !!!!
-  def test1()
-  end
-
-  @action.("weaken", important: false)   # !!!!
-  def test2()
-  end
-
-end
-
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
-```
-
-Help message:
-
-```console
-[bash]$ ruby ex60.rb -h
-ex60.rb --- sample app
-
-Usage:
-  $ ex60.rb [<options>] <action> [<arguments>...]
-
-Options:
-  -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
-  -a, --all          : list hidden actions/options, too
-
-Actions:
-  help               : print help message (of action if specified)
-  test1              : empasized     # !!!! bold font !!!!
-  test2              : weaken        # !!!! gray color !!!!
 ```
 
 
@@ -3000,7 +3018,7 @@ A: Yes. Pass `tag:` keyword argument to `@action.()` or `@option.()`.
 * Currenty, Benry-CmdApp doesn't provide the good way to use it effectively.
   This feature may be used by command-line application or framework based on Benry-CmdApp.
 
-File: ex61.rb
+File: ex60.rb
 
 ```ruby
 require 'benry/cmdapp'
@@ -3027,7 +3045,7 @@ exit app.main()
 
 A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.
 
-File: ex62.rb
+File: ex61.rb
 
 ```ruby
 require 'benry/cmdapp'
