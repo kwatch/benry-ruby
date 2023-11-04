@@ -781,6 +781,32 @@ END
     end
 
 
+    topic '#build_available_list()' do
+
+      spec "[!gawd3] returns mixed list of actions and aliases." do
+        x = @builder.build_available_list()
+        ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
+        ok {x} !~ /Aliases/
+      end
+
+      spec "[!yoe9b] returns nil if nothing found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        x = @builder.build_available_list()
+        ok {x} == nil
+      end
+
+      spec "[!ry3gz] includes hidden actions and aliases if `all: true` passed." do
+        x = @builder.build_available_list(all: true)
+        ok {x} =~ /debuginfo/
+        ok {x} =~ /^\e\[2m  debuginfo          : hidden action\e\[0m$/
+        x = @builder.build_available_list()
+        ok {x} !~ /debuginfo/
+      end
+
+    end
+
+
     topic '#build_action_list()' do
 
       spec "[!q12ju] returns list of actions and aliases." do

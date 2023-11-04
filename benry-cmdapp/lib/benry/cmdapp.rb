@@ -1314,6 +1314,31 @@ module Benry::CmdApp
       @app_help_builder = app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
     end
 
+    def build_available_list(all: false)
+      #; [!gawd3] returns mixed list of actions and aliases.
+      #; [!yoe9b] returns nil if nothing found.
+      content = _build_available_list(all: all)
+      return nil if content == nil
+      header = self.class.const_get(:HEADER_ACTIONS)
+      return build_section(header, content)
+    end
+
+    def _build_available_list(all: false, &filter)
+      index = @_index || INDEX
+      format = @config.format_action
+      sb = []
+      index.metadata_each do |metadata|
+        md = metadata
+        #; [!ry3gz] includes hidden actions and aliases if `all: true` passed.
+        next if md.hidden? && ! all
+        next if block_given?() && ! yield(md)
+        s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+      end
+      return sb.empty? ? nil : sb.join()
+    end
+    private :_build_available_list
+
     def build_action_list(all: false)
       #; [!q12ju] returns list of actions and aliases.
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
