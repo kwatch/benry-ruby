@@ -768,7 +768,7 @@ END
   end
 
 
-  topic Benry::CmdApp::ActionListBuilder do
+  topic Benry::CmdApp::TargetListBuilder do
 
     before do
       @config = Benry::CmdApp::Config.new("test app", "1.2.3",
@@ -776,7 +776,7 @@ END
                                           option_verbose: true, option_quiet: true,
                                           option_color: true, #option_debug: true,
                                           option_trace: true)
-      @builder = Benry::CmdApp::ActionListBuilder.new(@config)
+      @builder = Benry::CmdApp::TargetListBuilder.new(@config)
       @index = Benry::CmdApp::INDEX
     end
 
@@ -1098,7 +1098,7 @@ END
 
       spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
         idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::ActionListBuilder.new(@config)
+        b = Benry::CmdApp::TargetListBuilder.new(@config)
         b.instance_variable_set(:@_index, idx)
         #
         ok {b.__send__(:_count_actions_per_prefix, 1, all: true) }.key?("md:")
@@ -1107,7 +1107,7 @@ END
 
       spec "[!5n3qj] counts prefix of specified depth." do
         idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::ActionListBuilder.new(@config)
+        b = Benry::CmdApp::TargetListBuilder.new(@config)
         b.instance_variable_set(:@_index, idx)
         #
         expected1 = {"giit:"=>13}
@@ -1126,7 +1126,7 @@ END
 
       spec "[!r2frb] counts prefix of lesser depth." do
         idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::ActionListBuilder.new(@config)
+        b = Benry::CmdApp::TargetListBuilder.new(@config)
         b.instance_variable_set(:@_index, idx)
         #
         x = b.__send__(:_count_actions_per_prefix, 1)

@@ -458,7 +458,7 @@ END
 
     topic '#render_action_list()' do
 
-      class FakeActionListBuilder < Benry::CmdApp::ActionListBuilder
+      class FakeTargetListBuilder < Benry::CmdApp::TargetListBuilder
         def build_action_list(all: false); return nil; end
         def build_candidate_list(prefix, all: false); return nil; end
         def build_prefix_list(depth=1, all: false); return nil; end
@@ -466,14 +466,14 @@ END
 
       def fake_action_list_builder(&b)
         Benry::CmdApp.module_eval do
-          remove_const :ACTION_LIST_BUILDER_CLASS
-          const_set    :ACTION_LIST_BUILDER_CLASS, FakeActionListBuilder
+          remove_const :TARGET_LIST_BUILDER_CLASS
+          const_set    :TARGET_LIST_BUILDER_CLASS, FakeTargetListBuilder
         end
         yield
       ensure
         Benry::CmdApp.module_eval do
-          remove_const :ACTION_LIST_BUILDER_CLASS
-          const_set    :ACTION_LIST_BUILDER_CLASS, Benry::CmdApp::ActionListBuilder
+          remove_const :TARGET_LIST_BUILDER_CLASS
+          const_set    :TARGET_LIST_BUILDER_CLASS, Benry::CmdApp::TargetListBuilder
         end
       end
 

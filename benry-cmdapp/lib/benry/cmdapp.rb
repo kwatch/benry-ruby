@@ -1303,7 +1303,7 @@ module Benry::CmdApp
   end
 
 
-  class ActionListBuilder < BaseHelpBuilder
+  class TargetListBuilder < BaseHelpBuilder
 
     HEADER_ALIASES    = "Aliases:"
     HEADER_PREFIXES   = "Prefixes:"
@@ -1479,7 +1479,7 @@ module Benry::CmdApp
 
   APPLICATION_HELP_BUILDER_CLASS = ApplicationHelpBuilder
   ACTION_HELP_BUILDER_CLASS      = ActionHelpBuilder
-  ACTION_LIST_BUILDER_CLASS      = ActionListBuilder
+  TARGET_LIST_BUILDER_CLASS      = TargetListBuilder
 
 
   class GlobalOptionSchema < OptionSchema
@@ -1805,7 +1805,7 @@ module Benry::CmdApp
     end
 
     def get_action_list_builder()
-      return ACTION_LIST_BUILDER_CLASS.new(@config)
+      return TARGET_LIST_BUILDER_CLASS.new(@config)
     end
 
     def new_context()
