@@ -681,11 +681,15 @@ module Benry::CmdApp
       return @metadata_dict.key?(name)
     end
 
-    def metadata_each(&b)
+    def metadata_each(all: true, &b)
       #; [!3l6r7] returns Enumerator object if block not given.
-      return enum_for(:metadata_each) unless block_given?()
+      return enum_for(:metadata_each, all: all) unless block_given?()
       #; [!r8mb3] yields each metadata object if block given.
-      @metadata_dict.keys.sort.each {|name| yield @metadata_dict[name] }
+      #; [!qvc77] ignores hidden metadata if `all: false` passed.
+      @metadata_dict.keys.sort.each do |name|
+        metadata = @metadata_dict[name]
+        yield metadata if all || ! metadata.hidden?
+      end
       nil
     end
 
