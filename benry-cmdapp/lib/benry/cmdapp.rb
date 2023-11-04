@@ -1688,7 +1688,7 @@ module Benry::CmdApp
       #; [!hj4hf] prints action list if global option `-l, --list` specified.
       #; [!tyxwo] includes hidden actions into action list if `-a, --all` specified.
       if global_opts[:list]
-        print_str render_action_list(nil, all: all)
+        print_str render_item_list(nil, all: all)
         return 0
       end
       #; [!ooiaf] prints target list if global option '-L <target>' specified.
@@ -1722,14 +1722,14 @@ module Benry::CmdApp
       return (@config.app_version || "?.?.?") + "\n"
     end
 
-    def render_action_list(prefix=nil, all: false)
+    def render_item_list(prefix=nil, all: false)
       builder = get_target_list_builder()
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
         #; [!36vz6] returns action list string if any actions defined.
         #; [!znuy4] raises CommandError if no actions defined.
-        s = builder.build_action_list(all: all)  or
+        s = builder.build_available_list(all: all)  or
           raise CommandError.new("No actions defined.")
         return s
       #; [!jcq4z] when separator is specified...
@@ -1772,13 +1772,13 @@ module Benry::CmdApp
 
     def handle_blank_action(all: false)
       #; [!seba7] prints action list and returns `0`.
-      print_str render_action_list(nil, all: all)
+      print_str render_item_list(nil, all: all)
       return 0
     end
 
     def handle_prefix(prefix, all: false)
       #; [!8w301] prints action list starting with prefix and returns `0`.
-      print_str render_action_list(prefix, all: all)
+      print_str render_item_list(prefix, all: all)
       return 0
     end
 
