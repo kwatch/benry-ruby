@@ -1309,11 +1309,6 @@ module Benry::CmdApp
     HEADER_PREFIXES   = "Prefixes:"
     HEADER_ABBREVS    = "Abbreviations:"
 
-    def initialize(config, app_help_builder=nil)
-      super(config)
-      @app_help_builder = app_help_builder || APPLICATION_HELP_BUILDER_CLASS.new(@config)
-    end
-
     def build_available_list(all: false)
       #; [!gawd3] returns mixed list of actions and aliases.
       #; [!yoe9b] returns nil if nothing found.
@@ -1810,7 +1805,7 @@ module Benry::CmdApp
     end
 
     def get_action_list_builder()
-      return ACTION_LIST_BUILDER_CLASS.new(@config, @app_help_builder)
+      return ACTION_LIST_BUILDER_CLASS.new(@config)
     end
 
     def new_context()
