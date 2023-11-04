@@ -1165,11 +1165,8 @@ module Benry::CmdApp
       c = @config
       s = c.deco_command % (c.app_name || c.app_command)
       sb = []
-      if c.app_version
-        sb << "#{s} (#{c.app_version}) --- #{c.app_desc}\n"
-      else
-        sb << "#{s} --- #{c.app_desc}\n"
-      end
+      v = c.app_version ? (" " + c.deco_weak % "(#{c.app_version})") : ""
+      sb << "#{s}#{v} --- #{c.app_desc}\n"
       if c.app_detail
         sb << "\n"
         sb << build_sections(c.app_detail, 'config.app_detail')
