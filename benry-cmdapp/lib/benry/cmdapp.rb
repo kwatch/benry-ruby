@@ -1306,7 +1306,7 @@ module Benry::CmdApp
 
     def build_available_list(all: false)
       #; [!gawd3] returns mixed list of actions and aliases.
-      #; [!yoe9b] returns nil if nothing found.
+      #; [!yoe9b] returns header string if nothing found.
       content = _build_available_list(all: all)
       return nil if content == nil
       header = self.class.const_get(:HEADER_ACTIONS)
@@ -1324,16 +1324,15 @@ module Benry::CmdApp
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
-      return sb.empty? ? nil : sb.join()
+      return sb.join()   # may be empty string
     end
     private :_build_available_list
 
     def build_action_list(all: false)
       #; [!q12ju] returns list of actions and aliases.
       #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
-      #; [!k2tts] returns nil if no actions found.
+      #; [!k2tts] returns header string if no actions found.
       content = _build_available_list(all: all) {|md| ! md.alias? }
-      return nil if content == nil
       c = @config
       extra = c.default_action ? "(default: #{c.default_action})" : nil
       header = self.class.const_get(:HEADER_ACTIONS)
@@ -1378,8 +1377,7 @@ module Benry::CmdApp
         header = self.class.const_get(:HEADER_ALIASES)    # "Aliases:"
         s2 = build_section(header, sb.join())
       end
-      #; [!rqx7w] returns nil if both no actions nor aliases found with names starting with prefix.
-      return nil if s1 == nil && s2 == nil
+      #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
       #; [!3c3f1] returns list of actions which name starts with prefix specified.
       return [s1, s2].compact().join("\n")
     end
@@ -1395,8 +1393,7 @@ module Benry::CmdApp
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
-      #; [!fj1c7] returns nil if no aliases found.
-      return nil if sb.empty?
+      #; [!fj1c7] returns header string if no aliases found.
       #; [!496qq] renders alias list.
       header = self.class.const_get(:HEADER_ALIASES)    # "Aliases:"
       return build_section(header, sb.join())
@@ -1409,8 +1406,7 @@ module Benry::CmdApp
       index.abbrev_each do |abbrev, prefix|
         sb << format % [abbrev, prefix] << "\n"
       end
-      #; [!dnt12] returns nil if no abbrevs found.
-      return nil if sb.empty?
+      #; [!dnt12] returns header string if no abbrevs found.
       #; [!00ice] returns abbrev list string.
       header = self.class.const_get(:HEADER_ABBREVS)    # "Abbreviations:"
       return build_section(header, sb.join())

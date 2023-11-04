@@ -789,11 +789,11 @@ END
         ok {x} !~ /Aliases/
       end
 
-      spec "[!yoe9b] returns nil if nothing found." do
+      spec "[!yoe9b] returns header string if nothing found." do
         index = Benry::CmdApp::MetadataIndex.new()
         @builder.instance_variable_set(:@_index, index)
         x = @builder.build_available_list()
-        ok {x} == nil
+        ok {x} == "\e[1;34mActions:\e[0m\n\n"
       end
 
       spec "[!ry3gz] includes hidden actions and aliases if `all: true` passed." do
@@ -826,18 +826,18 @@ END
         ok {x} =~ /^\e\[2m  debuginfo/
       end
 
-      spec "[!k2tts] returns nil if no actions found." do
+      spec "[!k2tts] returns header string if no actions found." do
         debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
         hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
-        index = Benry::CmdApp::MetadataIndex.new()
+        index        = Benry::CmdApp::MetadataIndex.new()
         with_dummy_index(index) do
           #
           x = @builder.build_action_list()
-          ok {x} == nil
+          ok {x} == "\e[1;34mActions:\e[0m\n\n"
           #
           index.metadata_add(debuginfo_md)
           x = @builder.build_action_list()
-          ok {x} == nil
+          ok {x} == "\e[1;34mActions:\e[0m\n\n"
           x = @builder.build_action_list(all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
@@ -968,9 +968,9 @@ END
         ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
       end
 
-      spec "[!rqx7w] returns nil if both no actions nor aliases found with names starting with prefix." do
+      spec "[!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix." do
         x = @builder.build_candidate_list("blabla:")
-        ok {x} == nil
+        ok {x} == "\e[1;34mActions:\e[0m\n\n"
       end
 
     end
@@ -985,11 +985,11 @@ END
         ok {x} =~ /^  a9209 +: alias of 'hello'$/
       end
 
-      spec "[!fj1c7] returns nil if no aliases found." do
+      spec "[!fj1c7] returns header string if no aliases found." do
         index = Benry::CmdApp::MetadataIndex.new()
         @builder.instance_variable_set(:@_index, index)
         x = @builder.build_alias_list()
-        ok {x} == nil
+        ok {x} == "\e[1;34mAliases:\e[0m\n\n"
         index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
         index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
         x = @builder.build_alias_list()
@@ -1029,7 +1029,7 @@ END
       spec "[!dnt12] returns nil if no abbrevs found." do
         index = Benry::CmdApp::MetadataIndex.new()
         @builder.instance_variable_set(:@_index, index)
-        ok {@builder.build_abbrev_list()} == nil
+        ok {@builder.build_abbrev_list()} == "\e[1;34mAbbreviations:\e[0m\n\n"
         index.abbrev_add("g24:", "git:")
         ok {@builder.build_abbrev_list()} == <<END
 \e[1;34mAbbreviations:\e[0m
