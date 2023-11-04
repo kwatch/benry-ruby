@@ -1205,10 +1205,8 @@ module Benry::CmdApp
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
       c = @config
       sb = []
-      index.metadata_each do |metadata|
-        md = metadata
-        next if md.hidden? && ! all
-        sb << build_action_line(md)
+      index.metadata_each(all: all) do |metadata|
+        sb << build_action_line(metadata)
       end
       #; [!24by5] returns nil if no actions defined.
       return nil if sb.empty?
@@ -1319,10 +1317,9 @@ module Benry::CmdApp
       index = @_index || INDEX
       format = @config.format_action
       sb = []
-      index.metadata_each do |metadata|
+      #; [!ry3gz] includes hidden actions and aliases if `all: true` passed.
+      index.metadata_each(all: all) do |metadata|
         md = metadata
-        #; [!ry3gz] includes hidden actions and aliases if `all: true` passed.
-        next if md.hidden? && ! all
         next if block_given?() && ! yield(md)
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
@@ -1368,9 +1365,9 @@ module Benry::CmdApp
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       sb = []
-      index.metadata_each do |metadata|
+      index.metadata_each(all: all) do |metadata|
         md = metadata
-        if md.alias? && md.action.start_with?(prefix) && (all || ! md.hidden?)
+        if md.alias? && md.action.start_with?(prefix)
           sb << build_action_line(md)
         end
       end
@@ -1391,11 +1388,10 @@ module Benry::CmdApp
       index = @_index || INDEX
       sb = []
       format = @config.format_action
-      index.metadata_each do |md|
+      #; [!d7vee] ignores hidden aliases in default.
+      #; [!4vvrs] include hidden aliases if `all: true` specifieid.
+      index.metadata_each(all: all) do |md|
         next if ! md.alias?
-        #; [!d7vee] ignores hidden aliases in default.
-        #; [!4vvrs] include hidden aliases if `all: true` specifieid.
-        next if md.hidden? && ! all
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
@@ -1439,10 +1435,8 @@ module Benry::CmdApp
     def _count_actions_per_prefix(depth, all: false)
       index = @_index || INDEX
       dict = {}
-      index.metadata_each do |metadata|
-        #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
-        next if metadata.hidden? && ! all
-        #
+      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
+      index.metadata_each(all: all) do |metadata|
         name = metadata.name
         next unless name =~ /:/
         #; [!5n3qj] counts prefix of specified depth.
