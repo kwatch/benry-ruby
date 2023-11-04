@@ -1344,7 +1344,7 @@ module Benry::CmdApp
       return build_section(header, content)
     end
 
-    def build_action_list_filtered_by(prefix, all: false)
+    def build_candidate_list(prefix, all: false)
       index = @_index || INDEX
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
@@ -1744,7 +1744,7 @@ module Benry::CmdApp
       when /:\z/
         #; [!z4dqn] filters action list by prefix if specified.
         #; [!1834c] raises CommandError if no actions found with names starting with that prefix.
-        s = builder.build_action_list_filtered_by(prefix, all: all)  or
+        s = builder.build_candidate_list(prefix, all: all)  or
           raise CommandError.new("No actions found with names starting with '#{prefix}'.")
         return s
       #; [!xjdrm] else...

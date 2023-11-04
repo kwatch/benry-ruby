@@ -862,10 +862,10 @@ END
     end
 
 
-    topic '#build_action_list_filtered_by()' do
+    topic '#build_candidate_list()' do
 
       spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
-        x = @builder.build_action_list_filtered_by("git:")
+        x = @builder.build_candidate_list("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -875,7 +875,7 @@ END
       end
 
       spec "[!idm2h] includes hidden actions when `all: true` passed." do
-        x = @builder.build_action_list_filtered_by("git:", all: true)
+        x = @builder.build_candidate_list("git:", all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  git:correct        : same as `git commit --amend`\e[0m
@@ -899,7 +899,7 @@ END
           def p8571x()
           end
         end
-        x = @builder.build_action_list_filtered_by("p8571:")
+        x = @builder.build_candidate_list("p8571:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   p8571              : AAA
@@ -910,7 +910,7 @@ END
       spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
         Benry::CmdApp.define_alias("git", "git:stage")
         at_end { Benry::CmdApp.undef_alias("git") }
-        x = @builder.build_action_list_filtered_by("git:")
+        x = @builder.build_candidate_list("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -925,7 +925,7 @@ END
       spec "[!otvbt] includes name of alias which corresponds to action starting with prefix." do
         Benry::CmdApp.define_alias("add", "git:stage")
         at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.build_action_list_filtered_by("git:")
+        x = @builder.build_candidate_list("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -940,7 +940,7 @@ END
       spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
         Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
         at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.build_action_list_filtered_by("git:", all: true)
+        x = @builder.build_candidate_list("git:", all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  git:correct        : same as `git commit --amend`\e[0m
@@ -952,7 +952,7 @@ END
 \e[2m  add                : alias of 'git:stage'\e[0m
 END
         #
-        x = @builder.build_action_list_filtered_by("git:")
+        x = @builder.build_candidate_list("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -964,12 +964,12 @@ END
       spec "[!80t51] alias names are displayed in separated section from actions." do
         Benry::CmdApp.define_alias("add", "git:stage")
         at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.build_action_list_filtered_by("git:")
+        x = @builder.build_candidate_list("git:")
         ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
       end
 
       spec "[!rqx7w] returns nil if both no actions nor aliases found with names starting with prefix." do
-        x = @builder.build_action_list_filtered_by("blabla:")
+        x = @builder.build_candidate_list("blabla:")
         ok {x} == nil
       end
 
