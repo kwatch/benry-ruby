@@ -959,7 +959,7 @@ module Benry::CmdApp
                    format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
-                   option_help: true, option_version: nil, option_list: true, option_target: true, option_all: true,
+                   option_help: true, option_version: nil, option_list: true, option_topic: true, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: :hidden, option_trace: false)
       #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.
@@ -989,7 +989,7 @@ module Benry::CmdApp
       @option_help        = option_help         # enable or disable `-h, --help`
       @option_version     = option_version      # enable or disable `-V, --version`
       @option_list        = option_list         # enable or disable `-l, --list`
-      @option_target      = option_target       # enable or disable `-L <target>`
+      @option_topic       = option_topic        # enable or disable `-L <topic>`
       @option_all         = option_all          # enable or disable `-a, --all`
       @option_verbose     = option_verbose      # enable or disable `-v, --verbose`
       @option_quiet       = option_quiet        # enable or disable `-q, --quiet`
@@ -1010,7 +1010,7 @@ module Benry::CmdApp
     attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
-    attr_accessor :option_help, :option_version, :option_list, :option_target, :option_all
+    attr_accessor :option_help, :option_version, :option_list, :option_topic, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
@@ -1295,7 +1295,7 @@ module Benry::CmdApp
   end
 
 
-  class TargetListBuilder < BaseHelpBuilder
+  class TopicListBuilder < BaseHelpBuilder
 
     HEADER_ALIASES    = "Aliases:"
     HEADER_PREFIXES   = "Prefixes:"
@@ -1465,7 +1465,7 @@ module Benry::CmdApp
 
   APPLICATION_HELP_BUILDER_CLASS = ApplicationHelpBuilder
   ACTION_HELP_BUILDER_CLASS      = ActionHelpBuilder
-  TARGET_LIST_BUILDER_CLASS      = TargetListBuilder
+  TOPIC_LIST_BUILDER_CLASS       = TopicListBuilder
 
 
   class GlobalOptionSchema < OptionSchema
@@ -1480,12 +1480,12 @@ module Benry::CmdApp
       return if ! config
       #; [!ppcvp] adds options according to config object.
       c = config
-      targets = ["action", "alias", "prefix", "abbrev",
-                 "prefix1", "prefix2", "prefix3", "prefix4"]
+      topics = ["action", "alias", "prefix", "abbrev",
+                "prefix1", "prefix2", "prefix3", "prefix4"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
-      _add(c, :target , "-L <target>"  , "list target (action|alias|prefix|abbrev)", enum: targets)
+      _add(c, :topic  , "-L <topic>"   , "list of a topic (action|alias|prefix|abbrev)", enum: topics)
       _add(c, :all    , "-a, --all"    , "list hidden actions/options, too")
       _add(c, :verbose, "-v, --verbose", "verbose mode")
       _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
@@ -1536,13 +1536,13 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, target_list_builder=nil, _index: INDEX)
+    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, topic_list_builder=nil, _index: INDEX)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
       @index         = _index
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
-      @target_list_builder = target_list_builder
+      @topic_list_builder  = topic_list_builder
     end
 
     attr_reader :config, :option_schema
@@ -1677,10 +1677,10 @@ module Benry::CmdApp
         print_str render_item_list(nil, all: all)
         return 0
       end
-      #; [!ooiaf] prints target list if global option '-L <target>' specified.
-      #; [!ymifi] includes hidden actions into target list if `-a, --all` specified.
-      if global_opts[:target]
-        print_str render_target_list(global_opts[:target], all: all)
+      #; [!ooiaf] prints topic list if global option '-L <topic>' specified.
+      #; [!ymifi] includes hidden actions into topic list if `-a, --all` specified.
+      if global_opts[:topic]
+        print_str render_topic_list(global_opts[:topic], all: all)
         return 0
       end
       #; [!k31ry] returns `0` if help or version or actions printed.
@@ -1709,7 +1709,7 @@ module Benry::CmdApp
     end
 
     def render_item_list(prefix=nil, all: false)
-      builder = get_target_list_builder()
+      builder = get_topic_list_builder()
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
@@ -1741,17 +1741,17 @@ module Benry::CmdApp
       end
     end
 
-    def render_target_list(target, all: false)
-      #; [!uzmml] renders target list.
-      #; [!vrzu0] target 'prefix1' or 'prefix2' is acceptable.
-      builder = get_target_list_builder()
+    def render_topic_list(topic, all: false)
+      #; [!uzmml] renders topic list.
+      #; [!vrzu0] topic 'prefix1' or 'prefix2' is acceptable.
+      builder = get_topic_list_builder()
       return (
-        case target
+        case topic
         when "action"           ; builder.build_action_list(all: all)
         when "alias"            ; builder.build_alias_list(all: all)
         when "abbrev"           ; builder.build_abbrev_list(all: all)
         when /\Aprefix(\d+)?\z/ ; builder.build_prefix_list(($1||1).to_i, all: all)
-        else raise "** assertion failed: target=#{target.inspect}"
+        else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )
     end
@@ -1791,8 +1791,8 @@ module Benry::CmdApp
       return @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
     end
 
-    def get_target_list_builder()
-      return @target_list_builder || TARGET_LIST_BUILDER_CLASS.new(@config)
+    def get_topic_list_builder()
+      return @topic_list_builder || TOPIC_LIST_BUILDER_CLASS.new(@config)
     end
 
     def new_context()
