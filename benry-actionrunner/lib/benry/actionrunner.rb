@@ -61,9 +61,12 @@ END
 
 
   GLOBAL_OPTION_SCHEMA = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(nil).tap do |schema|
+    topics = ["action", "alias", "prefix", "abbrev",
+              "prefix1", "prefix2", "prefix3", "prefix4"]
     schema.add(:help     , "-h, --help", "print help message (of action if specified)")
     schema.add(:version  , "-V"        , "print version")
     schema.add(:list     , "-l"        , "list actions")
+    schema.add(:topic    , "-L <topic>", "list of a topic (action|alias|prefix|abbrev)", enum: topics)
     schema.add(:all      , "-a"        , "list all actions/options including hidden ones")
     schema.add(:file     , "-f <file>" , "actionfile name (default: '#{DEFAULT_FILENAME}')")
     schema.add(:search   , "-u"        , "search for actionfile in parent or upper dir")
@@ -157,7 +160,7 @@ END
         load_action_file(required: false)
         return super
       end
-      if global_opts[:list]
+      if global_opts[:list] || global_opts[:topic]
         load_action_file()
         return super
       end
