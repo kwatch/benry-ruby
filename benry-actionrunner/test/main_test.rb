@@ -10,7 +10,7 @@ require 'benry/actionrunner'
 Oktest.scope do
 
   HELP_MESSAGE_FULL = <<"END"
-\e[1marun\e[0m (0.0.0) --- Action runner (or task runner), much better than Rake
+\e[1marun\e[0m \e[2m(0.0.0)\e[0m --- Action runner (or task runner), much better than Rake
 
 \e[1;34mUsage:\e[0m
   $ \e[1marun\e[0m [<options>] <action> [<arguments>...]
@@ -19,6 +19,7 @@ Oktest.scope do
   -h, --help         : print help message (of action if specified)
   -V                 : print version
   -l                 : list actions
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a                 : list all actions/options including hidden ones
   -f <file>          : actionfile name (default: 'Actionfile.rb')
   -u                 : search for actionfile in parent or upper dir
