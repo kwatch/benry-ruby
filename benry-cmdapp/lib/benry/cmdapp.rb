@@ -959,7 +959,7 @@ module Benry::CmdApp
                    format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_prefix: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
-                   option_help: true, option_version: nil, option_list: true, option_topic: true, option_all: true,
+                   option_help: true, option_version: nil, option_list: true, option_topic: :hidden, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
                    option_debug: :hidden, option_trace: false)
       #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.

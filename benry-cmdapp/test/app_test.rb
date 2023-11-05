@@ -433,7 +433,6 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 \e[1;34mActions:\e[0m
@@ -895,7 +894,6 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
-  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
 END
         ok {schema.get(:trace)}   == nil
@@ -979,7 +977,6 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
-  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
@@ -987,7 +984,6 @@ END
         schema.reorder_options(:list, :topic, :help, :all, :debug, :version)
         ok {schema.to_s} == <<'END'
   -l, --list     : list actions
-  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -h, --help     : print help message (of action if specified)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
@@ -1003,7 +999,6 @@ END
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
-  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END

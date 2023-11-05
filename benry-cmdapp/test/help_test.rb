@@ -316,7 +316,6 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -343,7 +342,6 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -433,7 +431,6 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -451,7 +448,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
+\e[2m  -L <topic>         : list of a topic (action|alias|prefix|abbrev)\e[0m
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
