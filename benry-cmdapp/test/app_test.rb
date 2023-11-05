@@ -354,22 +354,22 @@ END
         ok {sout} =~ rexp
       end
 
-      spec "[!ooiaf] prints target list if global option '-L <target>' specified." do
-        g_opts = {target: "action"}
+      spec "[!ooiaf] prints topic list if global option '-L <topic>' specified." do
+        g_opts = {topic: "action"}
         sout, serr = capture_sio do
           @app.instance_eval { handle_global_options(g_opts, []) }
         end
         ok {sout} =~ /\AActions:$/
         #
-        g_opts = {target: "prefix"}
+        g_opts = {topic: "prefix"}
         sout, serr = capture_sio do
           @app.instance_eval { handle_global_options(g_opts, []) }
         end
         ok {sout} =~ /\APrefixes: \(depth=1\)$/
       end
 
-      spec "[!ymifi] includes hidden actions into target list if `-a, --all` specified." do
-        g_opts = {target: "action", all: true}
+      spec "[!ymifi] includes hidden actions into topic list if `-a, --all` specified." do
+        g_opts = {topic: "action", all: true}
         sout, serr = capture_sio do
           @app.instance_eval { handle_global_options(g_opts, []) }
         end
@@ -433,7 +433,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <target>        : list target (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 \e[1;34mActions:\e[0m
@@ -458,7 +458,7 @@ END
 
     topic '#render_item_list()' do
 
-      class FakeTargetListBuilder < Benry::CmdApp::TargetListBuilder
+      class FakeTopicListBuilder < Benry::CmdApp::TopicListBuilder
         def build_available_list(all: false); return nil; end
         def build_candidate_list(prefix, all: false); return nil; end
         def build_prefix_list(depth=1, all: false); return nil; end
@@ -466,14 +466,14 @@ END
 
       def fake_action_list_builder(&b)
         Benry::CmdApp.module_eval do
-          remove_const :TARGET_LIST_BUILDER_CLASS
-          const_set    :TARGET_LIST_BUILDER_CLASS, FakeTargetListBuilder
+          remove_const :TOPIC_LIST_BUILDER_CLASS
+          const_set    :TOPIC_LIST_BUILDER_CLASS, FakeTopicListBuilder
         end
         yield
       ensure
         Benry::CmdApp.module_eval do
-          remove_const :TARGET_LIST_BUILDER_CLASS
-          const_set    :TARGET_LIST_BUILDER_CLASS, Benry::CmdApp::TargetListBuilder
+          remove_const :TOPIC_LIST_BUILDER_CLASS
+          const_set    :TOPIC_LIST_BUILDER_CLASS, Benry::CmdApp::TopicListBuilder
         end
       end
 
@@ -580,38 +580,38 @@ END
     end
 
 
-    topic '#render_target_list()' do
+    topic '#render_topic_list()' do
 
-      spec "[!uzmml] renders target list." do
-        x = @app.__send__(:render_target_list, "action")
+      spec "[!uzmml] renders topic list." do
+        x = @app.__send__(:render_topic_list, "action")
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
         ok {x} =~ /^  hello              : greeting message$/
         #
         Benry::CmdApp.define_alias("chiaou", ["hello", "-l", "it"])
-        x = @app.__send__(:render_target_list, "alias")
+        x = @app.__send__(:render_topic_list, "alias")
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m$/
         ok {x} =~ /^  chiaou             : alias of 'hello -l it'$/
         #
-        x = @app.__send__(:render_target_list, "prefix")
+        x = @app.__send__(:render_topic_list, "prefix")
         ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
         #
         Benry::CmdApp.define_abbrev("g31:", "git:")
-        x = @app.__send__(:render_target_list, "abbrev")
+        x = @app.__send__(:render_topic_list, "abbrev")
         ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m$/
         ok {x} =~ /^  g31: +=>  git:$/
       end
 
-      spec "[!vrzu0] target 'prefix1' or 'prefix2' is acceptable." do
-        x = @app.__send__(:render_target_list, "prefix1")
+      spec "[!vrzu0] topic 'prefix1' or 'prefix2' is acceptable." do
+        x = @app.__send__(:render_topic_list, "prefix1")
         ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
         ok {x} !~ /^  giit:branch:/
         ok {x} !~ /^  giit:repo:/
         #
-        x = @app.__send__(:render_target_list, "prefix2")
+        x = @app.__send__(:render_topic_list, "prefix2")
         ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=2\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(0\) +: gitt commands$/
@@ -620,7 +620,7 @@ END
         ok {x} !~ /^  giit:repo:config:/
         ok {x} !~ /^  giit:repo:remote:/
         #
-        x = @app.__send__(:render_target_list, "prefix3")
+        x = @app.__send__(:render_topic_list, "prefix3")
         ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=3\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(0\) +: gitt commands$/
@@ -895,7 +895,7 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
-  -L <target>    : list target (action|alias|prefix|abbrev)
+  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
 END
         ok {schema.get(:trace)}   == nil
@@ -927,7 +927,7 @@ END
         config.option_help    = :hidden
         config.option_version = :hidden
         config.option_list    = :hidden
-        config.option_target  = :hidden
+        config.option_topic   = :hidden
         config.option_all     = :hidden
         config.option_verbose = :hidden
         config.option_quiet   = :hidden
@@ -939,7 +939,7 @@ END
         ok {schema.get(:help   ).hidden?} == true
         ok {schema.get(:version).hidden?} == true
         ok {schema.get(:list   ).hidden?} == true
-        ok {schema.get(:target ).hidden?} == true
+        ok {schema.get(:topic  ).hidden?} == true
         ok {schema.get(:all    ).hidden?} == true
         ok {schema.get(:verbose).hidden?} == true
         ok {schema.get(:quiet  ).hidden?} == true
@@ -952,7 +952,7 @@ END
       --help           : print help message (of action if specified)
       --version        : print version
       --list           : list actions
-  -L <target>          : list target (action|alias|prefix|abbrev)
+  -L <topic>           : list of a topic (action|alias|prefix|abbrev)
       --all            : list hidden actions/options, too
       --verbose        : verbose mode
       --quiet          : quiet mode
@@ -979,15 +979,15 @@ END
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -l, --list     : list actions
-  -L <target>    : list target (action|alias|prefix|abbrev)
+  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
         #
-        schema.reorder_options(:list, :target, :help, :all, :debug, :version)
+        schema.reorder_options(:list, :topic, :help, :all, :debug, :version)
         ok {schema.to_s} == <<'END'
   -l, --list     : list actions
-  -L <target>    : list target (action|alias|prefix|abbrev)
+  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -h, --help     : print help message (of action if specified)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
@@ -1003,7 +1003,7 @@ END
   -l, --list     : list actions
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
-  -L <target>    : list target (action|alias|prefix|abbrev)
+  -L <topic>     : list of a topic (action|alias|prefix|abbrev)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
