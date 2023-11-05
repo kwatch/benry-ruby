@@ -70,8 +70,8 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to re-define an existing action?](#q-how-to-re-define-an-existing-action)
   * [Q: How to show entering into or exitting from actions?](#q-how-to-show-entering-into-or-exitting-from-actions)
   * [Q: How to enable/disable color mode?](#q-how-to-enabledisable-color-mode)
-  * [Q: How to remove global option `-L <topic>`?](#q-how-to-remove-global-option--l-topic)
   * [Q: How to define a multiple option, like `-I` option of Ruby?](#q-how-to-define-a-multiple-option-like--i-option-of-ruby)
+  * [Q: How to show global option `-L <topic>` in help message?](#q-how-to-show-global-option--l-topic-in-help-message)
   * [Q: How to specify detailed description of options?](#q-how-to-specify-detailed-description-of-options)
   * [Q: How to copy all options from other action?](#q-how-to-copy-all-options-from-other-action)
   * [Q: What is the difference between `prefix(alias_of:)` and `prefix(action:)`?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction)
@@ -152,7 +152,6 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -235,7 +234,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1221,7 +1219,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1333,10 +1330,12 @@ Actions:
 ```
 
 Global option `-L alias` lists all aliases.
+This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).
 
 ```console
 [bash]$ ruby ex20.rb -L alias
-
+Aliases:
+  git                : alias of 'git:status'
 ```
 
 
@@ -1384,6 +1383,7 @@ git checkout -b topic1
 ```
 
 Global option `-L abbrev` lists all abbreviations.
+This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).
 
 ```console
 [bash]$ ruby ex21.rb -L abbrev
@@ -1441,7 +1441,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions: (default: test1)                   # !!!!
@@ -1842,6 +1841,7 @@ Options:
 ```
 
 
+
 ## Configuratoin and Customization
 
 
@@ -1860,7 +1860,7 @@ Options:
 * `config.option_help = true` enables `-h` and `--help` options. (default: `true`)
 * `config.option_version = true` enables `-V` and `--version` options. (default: `true` if `app_version` provided, `false` if else)
 * `config.option_list = true` enables `-l` and `--list` options. (default: `true`)
-* `config.option_target = true` enables `-L <target>` option. (default: `true`)
+* `config.option_target = true` enables `-L <target>` option. (default: `:hidden`)
 * `config.option_all = true` enables `-a` and `--all` options which shows private (hidden) actions and options into help message. (default: `true`)
 * `config.option_verbose = true` enables `-v` and `--verbose` options which sets `$QUIET_MODE = false`. (default: `false`)
 * `config.option_quiet = true` enables `-q` and `--quiet` options which sets `$QUIET_MODE = true`. (default: `false`)
@@ -1933,7 +1933,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
       --debug        : debug mode             # !!!!
 
@@ -1991,7 +1990,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   --logging          : enable logging          # !!!!
 
@@ -2239,7 +2237,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2625,7 +2622,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2713,7 +2709,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   --color[=<on|off>] : enable/disable color      # !!!!
 
@@ -2725,11 +2720,6 @@ Actions:
 [bash]$ ruby ex54.rb -h --color=on               # !!!!
 [bash]$ ruby ex54.rb -h --color                  # !!!!
 ```
-
-
-### Q: How to remove global option `-L <topic>`?
-
-A: Set `config.option_topic = false` or `config.option_topic = :hidden`.
 
 
 ### Q: How to define a multiple option, like `-I` option of Ruby?
@@ -2768,6 +2758,11 @@ Output:
 [bash]$ ruby ex55.rb test -I /tmp -I /var/tmp     # !!!!
 path=["/tmp", "/var/tmp"]                         # !!!!
 ```
+
+
+### Q: How to show global option `-L <topic>` in help message?
+
+A: Set `config.option_topic = true` (default: `:hidden`).
 
 
 ### Q: How to specify detailed description of options?

@@ -91,8 +91,8 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-re-define-an-existing-action">Q: How to re-define an existing action?</a></li>
 <li><a href="#q-how-to-show-entering-into-or-exitting-from-actions">Q: How to show entering into or exitting from actions?</a></li>
 <li><a href="#q-how-to-enabledisable-color-mode">Q: How to enable/disable color mode?</a></li>
-<li><a href="#q-how-to-remove-global-option--l-topic">Q: How to remove global option <code>-L &lttopic&gt;</code>?</a></li>
 <li><a href="#q-how-to-define-a-multiple-option-like--i-option-of-ruby">Q: How to define a multiple option, like <code>-I</code> option of Ruby?</a></li>
+<li><a href="#q-how-to-show-global-option--l-topic-in-help-message">Q: How to show global option <code>-L &lttopic&gt;</code> in help message?</a></li>
 <li><a href="#q-how-to-specify-detailed-description-of-options">Q: How to specify detailed description of options?</a></li>
 <li><a href="#q-how-to-copy-all-options-from-other-action">Q: How to copy all options from other action?</a></li>
 <li><a href="#q-what-is-the-difference-between-prefixalias_of-and-prefixaction">Q: What is the difference between <code>prefix(alias_of:)</code> and <code>prefix(action:)</code>?</a></li>
@@ -166,7 +166,6 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -244,7 +243,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1156,7 +1154,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1260,10 +1257,12 @@ Actions:
   git:status         : show status in compact format
   help               : print help message (of action if specified)
 </pre>
-<p>Global option <code>-L alias</code> lists all aliases.</p>
+<p>Global option <code>-L alias</code> lists all aliases.
+This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).</p>
 <pre class="language-console">
 [bash]$ ruby ex20.rb -L alias
-
+Aliases:
+  git                : alias of 'git:status'
 </pre>
 </section>
 <section class="subsection" id="abbreviation-of-prefix">
@@ -1304,7 +1303,8 @@ exit app.main()
 [bash]$ ruby ex21.rb <strong>b:create</strong> topic1    # invokes 'git:branch:create' !!!!
 git checkout -b topic1
 </pre>
-<p>Global option <code>-L abbrev</code> lists all abbreviations.</p>
+<p>Global option <code>-L abbrev</code> lists all abbreviations.
+This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).</p>
 <pre class="language-console">
 [bash]$ ruby ex21.rb <strong>-L abbrev</strong>
 Abbreviations:
@@ -1356,7 +1356,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions: <strong>(default: test1)</strong>                   # !!!!
@@ -1735,7 +1734,7 @@ Options:
 <li><code>config.option_help = true</code> enables <code>-h</code> and <code>--help</code> options. (default: <code>true</code>)</li>
 <li><code>config.option_version = true</code> enables <code>-V</code> and <code>--version</code> options. (default: <code>true</code> if <code>app_version</code> provided, <code>false</code> if else)</li>
 <li><code>config.option_list = true</code> enables <code>-l</code> and <code>--list</code> options. (default: <code>true</code>)</li>
-<li><code>config.option_target = true</code> enables <code>-L &lttarget&gt;</code> option. (default: <code>true</code>)</li>
+<li><code>config.option_target = true</code> enables <code>-L &lttarget&gt;</code> option. (default: <code>:hidden</code>)</li>
 <li><code>config.option_all = true</code> enables <code>-a</code> and <code>--all</code> options which shows private (hidden) actions and options into help message. (default: <code>true</code>)</li>
 <li><code>config.option_verbose = true</code> enables <code>-v</code> and <code>--verbose</code> options which sets <code>$QUIET_MODE = false</code>. (default: <code>false</code>)</li>
 <li><code>config.option_quiet = true</code> enables <code>-q</code> and <code>--quiet</code> options which sets <code>$QUIET_MODE = true</code>. (default: <code>false</code>)</li>
@@ -1802,7 +1801,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
       <strong>--debug        : debug mode</strong>             # !!!!
 
@@ -1856,7 +1854,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   <strong>--logging          : enable logging</strong>          # !!!!
 
@@ -2054,7 +2051,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2415,7 +2411,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2493,7 +2488,6 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|prefix|abbrev)
   -a, --all          : list hidden actions/options, too
   <strong>--color[=&lton|off&gt;] : enable/disable color</strong>      # !!!!
 
@@ -2505,10 +2499,6 @@ Actions:
 [bash]$ ruby ex54.rb -h <strong>--color=on</strong>               # !!!!
 [bash]$ ruby ex54.rb -h <strong>--color</strong>                  # !!!!
 </pre>
-</section>
-<section class="subsection" id="q-how-to-remove-global-option--l-topic">
-<h3>Q: How to remove global option <code>-L &lttopic&gt;</code>?</h3>
-<p>A: Set <code>config.option_topic = false</code> or <code>config.option_topic = :hidden</code>.</p>
 </section>
 <section class="subsection" id="q-how-to-define-a-multiple-option-like--i-option-of-ruby">
 <h3>Q: How to define a multiple option, like <code>-I</code> option of Ruby?</h3>
@@ -2542,6 +2532,10 @@ exit app.main()
 [bash]$ ruby ex55.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
 path=["/tmp", "/var/tmp"]                         # !!!!
 </pre>
+</section>
+<section class="subsection" id="q-how-to-show-global-option--l-topic-in-help-message">
+<h3>Q: How to show global option <code>-L &lttopic&gt;</code> in help message?</h3>
+<p>A: Set <code>config.option_topic = true</code> (default: <code>:hidden</code>).</p>
 </section>
 <section class="subsection" id="q-how-to-specify-detailed-description-of-options">
 <h3>Q: How to specify detailed description of options?</h3>
