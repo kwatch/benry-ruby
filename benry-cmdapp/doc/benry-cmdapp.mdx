@@ -2909,7 +2909,7 @@ Actions:
 
 === Q: How to change the order of options in help message?
 
-A: Call ``GlobalOptionSchema#reorder_options!()``.
+A: Call ``GlobalOptionSchema#reorder_options()``.
 
 File: ex59.rb
 
@@ -2923,11 +2923,11 @@ config = Benry::CmdApp::Config.new("sample app", "1.0.0",
 )
 schema = Benry::CmdApp::GlobalOptionSchema.new(config)
 {{*keys = [:verbose, :quiet, :color, :help, :version, :all, :target, :list]*}}  # !!!!
-{{*schema.reorder_options!(*keys)*}}               # !!!!
+{{*schema.reorder_options(*keys)*}}               # !!!!
 app = Benry::CmdApp::Application.new(config, schema)
 ## or:
 #app = Benry::CmdApp::Application.new(config)
-#{{*app.schema.reorder_options!(*keys)*}}          # !!!!
+#{{*app.schema.reorder_options(*keys)*}}          # !!!!
 exit app.main()
 ```
 
