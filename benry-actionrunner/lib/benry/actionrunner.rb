@@ -327,6 +327,14 @@ END
       return Benry::CmdApp.undef_action(action_name)
     end
 
+    def define_abbrev(abbrev, prefix)
+      return Benry::CmdApp.define_abbrev(abbrev, prefix)
+    end
+
+    def undef_abbrev(abbrev)
+      return Benry::CmdApp.undef_abbrev(abbrev)
+    end
+
     def current_app()
       return Benry::CmdApp.current_app()
     end
