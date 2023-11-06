@@ -2889,12 +2889,12 @@ Actions:
   staged             : alias of 'git:staged'
   unstage            : alias of 'git:unstage'
 
-### list only aliases
+### list only aliases (ordered by action name automatically)
 [bash]$ ruby gitexample.rb {{*-L alias*}}     # !!!!
 Aliases:
-  git                : alias of 'git:status'
   stage              : alias of 'git:stage'
   staged             : alias of 'git:staged'
+  git                : alias of 'git:status'
   unstage            : alias of 'git:unstage'
 
 ### list only actions
@@ -2905,6 +2905,9 @@ Actions:
   git:status         : show status in compact format
   git:unstage        : remove changes from staging area
 ```
+
+Notice that ``-L alias`` sorts aliases by action names.
+This is the intended behaviour.
 
 
 === Q: How to change the order of options in help message?
