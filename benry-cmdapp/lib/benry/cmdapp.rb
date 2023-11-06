@@ -1385,8 +1385,8 @@ module Benry::CmdApp
       format = @config.format_action
       #; [!d7vee] ignores hidden aliases in default.
       #; [!4vvrs] include hidden aliases if `all: true` specifieid.
-      index.metadata_each(all: all) do |md|
-        next if ! md.alias?
+      #; [!v211d] sorts aliases by action names.
+      index.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
