@@ -718,6 +718,72 @@ END
     end
 
 
+    topic '#build_aliases_part()' do
+
+      spec "[!496qq] renders alias list." do
+        Benry::CmdApp.define_alias("a9208", "hello")
+        x = @builder.build_aliases_part()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^  a9208 +: alias of 'hello'$/
+      end
+
+      spec "[!fj1c7] returns header string if no aliases found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        x = @builder.build_aliases_part()
+        ok {x} == "\e[1;34mAliases:\e[0m\n\n"
+        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
+        index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
+        x = @builder.build_aliases_part()
+        ok {x} != nil
+        ok {x} == <<"END"
+\e[1;34mAliases:\e[0m
+  h1                 : alias of 'hello'
+END
+      end
+
+      spec "[!d7vee] ignores hidden aliases in default." do
+        Benry::CmdApp.define_alias("a4904", "hello", hidden: true)
+        x = @builder.build_aliases_part()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} !~ /a4904/
+      end
+
+      spec "[!4vvrs] include hidden aliases if `all: true` specifieid." do
+        Benry::CmdApp.define_alias("a4612", "hello", hidden: true)
+        x = @builder.build_aliases_part(all: true)
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^\e\[2m  a4612 +: alias of 'hello'\e\[0m$/
+      end
+
+      spec "[!v211d] sorts aliases by action names." do
+        old_index = Benry::CmdApp::INDEX
+        names = ["hello", "debuginfo", "testerr1", "git:stage", "git:staged", "git:unstage"]
+        output = nil
+        with_dummy_index do |new_index|
+          names.each {|name| new_index.metadata_add(old_index.metadata_get(name)) }
+          Benry::CmdApp.define_alias("a1", "git:unstage")
+          Benry::CmdApp.define_alias("a2", "git:stage")
+          Benry::CmdApp.define_alias("a3", "git:staged")
+          Benry::CmdApp.define_alias("a4", "testerr1")
+          Benry::CmdApp.define_alias("a5", "debuginfo")
+          Benry::CmdApp.define_alias("a6", "hello")
+          output = @builder.build_aliases_part()
+        end
+        ok {output} == <<"END"
+\e[1;34mAliases:\e[0m
+  a5                 : alias of 'debuginfo'
+  a2                 : alias of 'git:stage'
+  a3                 : alias of 'git:staged'
+  a1                 : alias of 'git:unstage'
+  a6                 : alias of 'hello'
+  a4                 : alias of 'testerr1'
+END
+      end
+
+    end
+
+
   end
 
 

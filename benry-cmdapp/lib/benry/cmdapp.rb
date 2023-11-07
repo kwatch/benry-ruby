@@ -1275,6 +1275,22 @@ module Benry::CmdApp
     end
     private :_prefix_action?
 
+    def build_aliases_part(all: false)
+      index = @_index || INDEX
+      sb = []
+      format = @config.format_action
+      #; [!d7vee] ignores hidden aliases in default.
+      #; [!4vvrs] include hidden aliases if `all: true` specifieid.
+      #; [!v211d] sorts aliases by action names.
+      index.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
+        s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+      end
+      #; [!fj1c7] returns header string if no aliases found.
+      #; [!496qq] renders alias list.
+      return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
+    end
+
   end
 
 
