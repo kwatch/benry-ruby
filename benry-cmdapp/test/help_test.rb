@@ -52,6 +52,11 @@ class HelpTestAction < Benry::CmdApp::Action
 end
 
 
+class HelpTestBuilder < Benry::CmdApp::BaseHelpBuilder
+  HEADER_ACTIONS = "<ACTIONS>"
+end
+
+
 Oktest.scope do
 
 
@@ -281,6 +286,21 @@ END
       spec "[!6uzbi] not decorates string if `hidden` is falthy and `important` is nil." do
         b = @builder
         ok {b.__send__(:decorate_str, "FOOBAR", nil, nil)} == "FOOBAR"
+      end
+
+    end
+
+
+    topic '#_header()' do
+
+      spec "[!ep064] returns constant value defined in the class." do
+        b = Benry::CmdApp::BaseHelpBuilder.new(nil)
+        ok {b.__send__(:_header, :HEADER_ACTIONS)} == "Actions:"
+      end
+
+      spec "[!viwtn] constant value defined in child class is prior to one defined in parent class." do
+        b = HelpTestBuilder.new(nil)
+        ok {b.__send__(:_header, :HEADER_ACTIONS)} == "<ACTIONS>"
       end
 
     end

@@ -1138,6 +1138,12 @@ module Benry::CmdApp
       end
     end
 
+    def _header(symbol)
+      #; [!ep064] returns constant value defined in the class.
+      #; [!viwtn] constant value defined in child class is prior to one defined in parent class.
+      return self.class.const_get(symbol)
+    end
+
   end
 
 
