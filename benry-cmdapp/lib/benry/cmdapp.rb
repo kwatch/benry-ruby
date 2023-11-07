@@ -1039,8 +1039,6 @@ module Benry::CmdApp
       @config = config
     end
 
-    attr_reader :config
-
     HEADER_USAGE    = "Usage:"
     HEADER_OPTIONS  = "Options:"
     HEADER_ACTIONS  = "Actions:"
