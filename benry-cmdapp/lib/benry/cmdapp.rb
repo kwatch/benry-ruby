@@ -1244,22 +1244,12 @@ module Benry::CmdApp
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       str = _build_metadata_list(c.format_action, all: all) {|metadata|
-        md = metadata
-        if md.name.start_with?(prefix)
-          true
         #; [!duhyd] includes actions which name is same as prefix.
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
-        elsif md.name == prefix2
-          ! (md.alias? && md.action.start_with?(prefix))
-        else
-          false
-        end
+        _prefix_action?(metadata, prefix)
       }
-      if str
-        s1 = build_section(_header(:HEADER_ACTIONS), str)
-      else
-        s1 = nil
-      end
+      #s1 = str.empty? ? nil : build_section(_header(:HEADER_ACTIONS), str)
+      s1 = build_section(_header(:HEADER_ACTIONS), str)
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       sb = []
@@ -1270,15 +1260,20 @@ module Benry::CmdApp
         end
       end
       #; [!80t51] alias names are displayed in separated section from actions.
-      if sb.empty?
-        s2 = nil
-      else
-        s2 = build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
-      end
+      s2 = sb.empty? ? nil : build_section(_header(:HEADER_ALIASES), sb.join())
       #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
       #; [!3c3f1] returns list of actions which name starts with prefix specified.
       return [s1, s2].compact().join("\n")
     end
+
+    def _prefix_action?(md, prefix)
+      return true  if md.name.start_with?(prefix)
+      return false if md.name != prefix.chomp(':')
+      return true  if ! md.alias?
+      return false if md.action.start_with?(prefix)
+      return true
+    end
+    private :_prefix_action?
 
   end
 
