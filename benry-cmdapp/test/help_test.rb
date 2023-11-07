@@ -419,6 +419,31 @@ END
     end
 
 
+    topic '#build_postamble_part()' do
+
+      spec "[!64hj1] returns postamble of application help message." do
+        @config.help_postamble = [
+          {"Examples:" => "  $ echo yes\n  yes\n"},
+          "(Tips: blablabla)",
+        ]
+        x = @builder.__send__(:build_postamble_part)
+        ok {x} == <<"END"
+\e[1;34mExamples:\e[0m
+  $ echo yes
+  yes
+
+(Tips: blablabla)
+END
+      end
+
+      spec "[!z5k2w] returns nil if postamble not set." do
+        x = @builder.__send__(:build_postamble_part)
+        ok {x} == nil
+      end
+
+    end
+
+
     topic '#build_usage_part()' do
 
       spec "[!h98me] returns 'Usage:' section of application help message." do
@@ -574,31 +599,6 @@ END
         output = @builder.__send__(:_build_metadata_list, format) {|md| ! md.alias? }
         ok {output} =~ /^hello : greeting message$/
         ok {output} !~ /alias of/
-      end
-
-    end
-
-
-    topic '#build_postamble_part()' do
-
-      spec "[!64hj1] returns postamble of application help message." do
-        @config.help_postamble = [
-          {"Examples:" => "  $ echo yes\n  yes\n"},
-          "(Tips: blablabla)",
-        ]
-        x = @builder.__send__(:build_postamble_part)
-        ok {x} == <<"END"
-\e[1;34mExamples:\e[0m
-  $ echo yes
-  yes
-
-(Tips: blablabla)
-END
-      end
-
-      spec "[!z5k2w] returns nil if postamble not set." do
-        x = @builder.__send__(:build_postamble_part)
-        ok {x} == nil
       end
 
     end

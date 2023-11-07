@@ -1041,11 +1041,11 @@ module Benry::CmdApp
 
     attr_reader :config
 
-    HEADER_USAGE   = "Usage:"
-    HEADER_OPTIONS = "Options:"
-    HEADER_ACTIONS = "Actions:"
-    HEADER_ALIASES = "Aliases:"
-    HEADER_ABBREVS = "Abbreviations:"
+    HEADER_USAGE    = "Usage:"
+    HEADER_OPTIONS  = "Options:"
+    HEADER_ACTIONS  = "Actions:"
+    HEADER_ALIASES  = "Aliases:"
+    HEADER_ABBREVS  = "Abbreviations:"
     HEADER_PREFIXES = "Prefixes:"
 
     def build_help_message(x, all: false)
@@ -1159,6 +1159,9 @@ module Benry::CmdApp
       sb << build_usage_part()
       sb << build_options_part(gschema, all: all)
       sb << build_actions_part(true, all: all)
+      #sb << build_aliases_part(all: all)
+      #sb << build_abbrevs_part(all: all)
+      #sb << build_prefixes_part(0, all: all)
       sb << build_postamble_part()
       return sb.compact().join("\n")
     end
@@ -1180,6 +1183,12 @@ module Benry::CmdApp
         sb << build_sections(c.app_detail, 'config.app_detail')
       end
       return sb.join()
+    end
+
+    def build_postamble_part()
+      #; [!64hj1] returns postamble of application help message.
+      #; [!z5k2w] returns nil if postamble not set.
+      return build_sections(@config.help_postamble, 'config.help_postamble')
     end
 
     def build_usage_part()
@@ -1233,16 +1242,6 @@ module Benry::CmdApp
       return sb.join()
     end
     private :_build_metadata_list
-
-    protected
-
-    def build_postamble_part()
-      #; [!64hj1] returns postamble of application help message.
-      #; [!z5k2w] returns nil if postamble not set.
-      return build_sections(@config.help_postamble, 'config.help_postamble')
-    end
-
-    public
 
     def build_candidates_part(prefix, all: false)
       c = @config
@@ -1300,6 +1299,7 @@ module Benry::CmdApp
     def build_abbrevs_part(all: false)
       index = @_index || INDEX
       format = @config.format_abbrev
+      _ = all   # not used
       sb = []
       index.abbrev_each do |abbrev, prefix|
         sb << format % [abbrev, prefix] << "\n"
