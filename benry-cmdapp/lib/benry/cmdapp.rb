@@ -1156,7 +1156,7 @@ module Benry::CmdApp
       sb << build_preamble_part()
       sb << build_usage_part()
       sb << build_options_part(gschema, all: all)
-      sb << build_actions_part(all: all)
+      sb << build_actions_part(true, all: all)
       sb << build_postamble_part()
       return sb.compact().join("\n")
     end
@@ -1200,10 +1200,13 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
-    def build_actions_part(all: false)
+    def build_actions_part(include_aliases=false, all: false)
       c = @config
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
-      str = _build_metadata_list(c.format_action, all: all) {|md| true }
+      str = _build_metadata_list(c.format_action, all: all) {|md|
+        #; [!10qp0] includes aliases if the 1st argument is true.
+        include_aliases || ! md.alias?
+      }
       #; [!24by5] returns nil if no actions defined.
       return nil if str.empty?
       #; [!8qz6a] adds default action name after header if it is set.

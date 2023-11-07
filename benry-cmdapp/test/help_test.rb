@@ -504,6 +504,14 @@ END
         ok {x} !~ /debuginfo/
       end
 
+      spec "[!10qp0] includes aliases if the 1st argument is true." do
+        x = @builder.__send__(:build_actions_part, true, all: true)
+        ok {x} =~ /alias of/
+        #
+        x = @builder.__send__(:build_actions_part, false, all: true)
+        ok {x} !~ /alias of/
+      end
+
       spec "[!24by5] returns nil if no actions defined." do
         debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
         hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
