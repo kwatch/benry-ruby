@@ -550,6 +550,27 @@ END
     end
 
 
+    topic '#_build_metadata_list()' do
+
+      spec "[!iokkp] builds list of actions or aliases." do
+        format = "%s : %s"
+        output = @builder.__send__(:_build_metadata_list, format) { true }
+        ok {output} =~ /^hello : greeting message$/
+      end
+
+      spec "[!grwkj] filters by block." do
+        format = "%s : %s"
+        output = @builder.__send__(:_build_metadata_list, format) {|md| md.alias? }
+        ok {output} !~ /^hello : greeting message$/
+        ok {output} =~ /alias of/
+        output = @builder.__send__(:_build_metadata_list, format) {|md| ! md.alias? }
+        ok {output} =~ /^hello : greeting message$/
+        ok {output} !~ /alias of/
+      end
+
+    end
+
+
     topic '#build_postamble_part()' do
 
       spec "[!64hj1] returns postamble of application help message." do

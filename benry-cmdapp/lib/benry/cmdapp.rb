@@ -1201,20 +1201,31 @@ module Benry::CmdApp
     end
 
     def build_actions_part(all: false)
-      index = INDEX
-      #; [!typ67] returns 'Actions:' section of help message.
-      #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
       c = @config
-      sb = []
-      index.metadata_each(all: all) do |metadata|
-        sb << build_action_line(metadata)
-      end
+      #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
+      str = _build_metadata_list(c.format_action, all: all) {|md| true }
       #; [!24by5] returns nil if no actions defined.
-      return nil if sb.empty?
+      return nil if str.empty?
       #; [!8qz6a] adds default action name after header if it is set.
       extra = c.default_action ? "(default: #{c.default_action})" : nil
-      return build_section(_header(:HEADER_ACTIONS), sb.join(), extra)  # "Actions:"
+      #; [!typ67] returns 'Actions:' section of help message.
+      return build_section(_header(:HEADER_ACTIONS), str, extra)  # "Actions:"
     end
+
+    def _build_metadata_list(format, all: false, &filter)
+      index = @_index || INDEX
+      #; [!iokkp] builds list of actions or aliases.
+      sb = []
+      index.metadata_each(all: all) do |metadata|
+        md = metadata
+        #; [!grwkj] filters by block.
+        next unless yield(md)
+        s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+      end
+      return sb.join()
+    end
+    private :_build_metadata_list
 
     def build_postamble_part()
       #; [!64hj1] returns postamble of application help message.
