@@ -1433,170 +1433,8 @@ module Benry::CmdApp
   end
 
 
-  class TopicListBuilder < BaseHelpBuilder
-
-    HEADER_ALIASES    = "Aliases:"
-    HEADER_PREFIXES   = "Prefixes:"
-    HEADER_ABBREVS    = "Abbreviations:"
-
-    def build_available_list(all: false)
-      #; [!gawd3] returns mixed list of actions and aliases.
-      #; [!yoe9b] returns header string if nothing found.
-      content = _build_available_list(all: all)
-      return nil if content == nil
-      return build_section(_header(:HEADER_ACTIONS), content)
-    end
-
-    def _build_available_list(all: false, &filter)
-      index = @_index || INDEX
-      format = @config.format_action
-      sb = []
-      #; [!ry3gz] includes hidden actions and aliases if `all: true` passed.
-      index.metadata_each(all: all) do |metadata|
-        md = metadata
-        next if block_given?() && ! yield(md)
-        s = format % [md.name, md.desc]
-        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
-      end
-      return sb.join()   # may be empty string
-    end
-    private :_build_available_list
-
-    def build_action_list(all: false)
-      #; [!q12ju] returns list of actions and aliases.
-      #; [!90rjk] includes hidden actions and aliases if `all: true` passed.
-      #; [!k2tts] returns header string if no actions found.
-      content = _build_available_list(all: all) {|md| ! md.alias? }
-      c = @config
-      extra = c.default_action ? "(default: #{c.default_action})" : nil
-      return build_section(_header(:HEADER_ACTIONS), content, extra)
-    end
-
-    def build_candidate_list(prefix, all: false)
-      index = @_index || INDEX
-      #; [!idm2h] includes hidden actions when `all: true` passed.
-      prefix2 = prefix.chomp(':')
-      content = _build_available_list(all: all) {|metadata|
-        md = metadata
-        #; [!duhyd] includes actions which name is same as prefix.
-        if md.name.start_with?(prefix)
-          true
-        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
-        elsif md.name == prefix2
-          ! (md.alias? && md.action.start_with?(prefix))
-        else
-          false
-        end
-      }
-      if content
-        s1 = build_section(_header(:HEADER_ACTIONS), content)
-      else
-        s1 = nil
-      end
-      #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
-      #; [!h5ek7] includes hidden aliases when `all: true` passed.
-      sb = []
-      index.metadata_each(all: all) do |metadata|
-        md = metadata
-        if md.alias? && md.action.start_with?(prefix)
-          sb << build_action_line(md)
-        end
-      end
-      #; [!80t51] alias names are displayed in separated section from actions.
-      if sb.empty?
-        s2 = nil
-      else
-        s2 = build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
-      end
-      #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
-      #; [!3c3f1] returns list of actions which name starts with prefix specified.
-      return [s1, s2].compact().join("\n")
-    end
-
-    def build_alias_list(all: false)
-      index = @_index || INDEX
-      sb = []
-      format = @config.format_action
-      #; [!d7vee] ignores hidden aliases in default.
-      #; [!4vvrs] include hidden aliases if `all: true` specifieid.
-      #; [!v211d] sorts aliases by action names.
-      index.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
-        s = format % [md.name, md.desc]
-        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
-      end
-      #; [!fj1c7] returns header string if no aliases found.
-      #; [!496qq] renders alias list.
-      return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
-    end
-
-    def build_abbrev_list(all: false)
-      index = @_index || INDEX
-      format = @config.format_abbrev
-      sb = []
-      index.abbrev_each do |abbrev, prefix|
-        sb << format % [abbrev, prefix] << "\n"
-      end
-      #; [!dnt12] returns header string if no abbrevs found.
-      #; [!00ice] returns abbrev list string.
-      return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
-    end
-
-    def build_prefix_list(depth=1, all: false)
-      #; [!30l2j] includes number of actions per prefix.
-      #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = _count_actions_per_prefix(depth, all: all)
-      #index = @_index || INDEX
-      #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
-      #; [!p4j1o] returns nil if no prefix found.
-      return nil if dict.empty?
-      #; [!crbav] returns top prefix list.
-      content = _render_prefix_list(dict, @config)
-      return build_section(_header(:HEADER_PREFIXES), content, "(depth=#{depth})")  # "Prefixes:"
-    end
-
-    private
-
-    def _count_actions_per_prefix(depth, all: false)
-      index = @_index || INDEX
-      dict = {}
-      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
-      index.metadata_each(all: all) do |metadata|
-        name = metadata.name
-        next unless name =~ /:/
-        #; [!5n3qj] counts prefix of specified depth.
-        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
-        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
-        arr = arr.take(depth)           # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
-        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
-        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
-        #; [!r2frb] counts prefix of lesser depth.
-        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
-          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
-          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
-        end
-      end
-      return dict
-    end
-
-    def _render_prefix_list(dict, config)
-      index = @_index || INDEX
-      #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
-      format = (config.format_prefix || config.format_action) + "\n"
-      indent = /^( *)/.match(format)[1]
-      return dict.keys.sort.collect {|prefix|
-        s = "#{prefix} (#{dict[prefix]})"
-        #; [!qxoja] includes prefix description if registered.
-        desc = index.prefix_get_desc(prefix)
-        desc ? (format % [s, desc]) : "#{indent}#{s}\n"
-      }.join()
-    end
-
-  end
-
-
   APPLICATION_HELP_BUILDER_CLASS = ApplicationHelpBuilder
   ACTION_HELP_BUILDER_CLASS      = ActionHelpBuilder
-  TOPIC_LIST_BUILDER_CLASS       = TopicListBuilder
 
 
   class GlobalOptionSchema < OptionSchema
@@ -1667,13 +1505,12 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, topic_list_builder=nil, _index: INDEX)
+    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _index: INDEX)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
       @index         = _index
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
-      @topic_list_builder  = topic_list_builder
     end
 
     attr_reader :config, :option_schema
@@ -1920,10 +1757,6 @@ module Benry::CmdApp
 
     def get_action_help_builder()
       return @action_help_builder || ACTION_HELP_BUILDER_CLASS.new(@config)
-    end
-
-    def get_topic_list_builder()
-      return @topic_list_builder || TOPIC_LIST_BUILDER_CLASS.new(@config)
     end
 
     def new_context()
