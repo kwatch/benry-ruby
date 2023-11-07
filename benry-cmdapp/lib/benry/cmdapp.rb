@@ -1046,6 +1046,7 @@ module Benry::CmdApp
     HEADER_ACTIONS = "Actions:"
     HEADER_ALIASES = "Aliases:"
     HEADER_ABBREVS = "Abbreviations:"
+    HEADER_PREFIXES = "Prefixes:"
 
     def build_help_message(x, all: false)
       #; [!0hy81] this is an abstract method.
@@ -1302,6 +1303,56 @@ module Benry::CmdApp
       #; [!dnt12] returns header string if no abbrevs found.
       #; [!00ice] returns abbrev list string.
       return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
+    end
+
+    def build_prefixes_part(depth=1, all: false)
+      #; [!30l2j] includes number of actions per prefix.
+      #; [!alteh] includes prefix of hidden actions if `all: true` passed.
+      dict = _count_actions_per_prefix(depth, all: all)
+      #index = @_index || INDEX
+      #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
+      #; [!p4j1o] returns nil if no prefix found.
+      return nil if dict.empty?
+      #; [!crbav] returns top prefix list.
+      content = _render_prefix_list(dict, @config)
+      return build_section(_header(:HEADER_PREFIXES), content, "(depth=#{depth})")  # "Prefixes:"
+    end
+
+    private
+
+    def _count_actions_per_prefix(depth, all: false)
+      index = @_index || INDEX
+      dict = {}
+      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
+      index.metadata_each(all: all) do |metadata|
+        name = metadata.name
+        next unless name =~ /:/
+        #; [!5n3qj] counts prefix of specified depth.
+        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
+        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
+        arr = arr.take(depth)           # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
+        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
+        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
+        #; [!r2frb] counts prefix of lesser depth.
+        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
+          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
+          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
+        end
+      end
+      return dict
+    end
+
+    def _render_prefix_list(dict, config)
+      index = @_index || INDEX
+      #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
+      format = (config.format_prefix || config.format_action) + "\n"
+      indent = /^( *)/.match(format)[1]
+      return dict.keys.sort.collect {|prefix|
+        s = "#{prefix} (#{dict[prefix]})"
+        #; [!qxoja] includes prefix description if registered.
+        desc = index.prefix_get_desc(prefix)
+        desc ? (format % [s, desc]) : "#{indent}#{s}\n"
+      }.join()
     end
 
   end

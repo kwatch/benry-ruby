@@ -807,6 +807,112 @@ END
     end
 
 
+    topic '#build_prefixes_part()' do
+
+      spec "[!crbav] returns top prefix list." do
+        x = @builder.build_prefixes_part(1)
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
+        ok {x} =~ /^  git: \(\d+\)\n/
+      end
+
+      spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
+        x = @builder.build_prefixes_part(1, all: true)
+        ok {x} =~ /^  secret:/
+        x = @builder.build_prefixes_part(1)
+        ok {x} !~ /^  secret:/
+      end
+
+      spec "[!p4j1o] returns nil if no prefix found." do
+        index = Benry::CmdApp::MetadataIndex.new
+        ["hello", "secret:crypt"].each do |action|
+          index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
+        end
+        #
+        with_dummy_index(index) do
+          x = @builder.build_prefixes_part()
+          ok {x} == nil
+          x = @builder.build_prefixes_part(all: true)
+          ok {x} != nil
+        end
+      end
+
+      spec "[!30l2j] includes number of actions per prefix." do
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^  git: \(\d+\)\n/
+        ok {x} =~ /^  secret: \(\d+\)\n/
+      end
+
+      spec "[!qxoja] includes prefix description if registered." do
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
+      end
+
+      spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
+        @config.format_prefix = "  %-15s # %s"
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
+        #
+        @config.format_prefix = nil
+        @config.format_prefix = "    %-15s -- %s"
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
+      end
+
+    end
+
+
+    topic '#_count_actions_per_prefix()' do
+
+      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        ok {b.__send__(:_count_actions_per_prefix, 1, all: true) }.key?("md:")
+        ok {b.__send__(:_count_actions_per_prefix, 1, all: false)}.NOT.key?("md:")
+      end
+
+      spec "[!5n3qj] counts prefix of specified depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        expected1 = {"giit:"=>13}
+        expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:"=>7,
+                     "giit:staging:"=>3}
+        expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
+                     "giit:staging:"=>3}
+        ok {b.__send__(:_count_actions_per_prefix, 1)} == expected1
+        ok {b.__send__(:_count_actions_per_prefix, 2)} == expected2
+        ok {b.__send__(:_count_actions_per_prefix, 3)} == expected3
+        ok {b.__send__(:_count_actions_per_prefix, 4)} == expected3
+        ok {b.__send__(:_count_actions_per_prefix, 5)} == expected3
+      end
+
+      spec "[!r2frb] counts prefix of lesser depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        x = b.__send__(:_count_actions_per_prefix, 1)
+        ok {x}.key?("giit:")
+        ok {x}.NOT.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = b.__send__(:_count_actions_per_prefix, 2)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = b.__send__(:_count_actions_per_prefix, 3)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.key?("giit:repo:config:")
+      end
+
+    end
+
+
   end
 
 
