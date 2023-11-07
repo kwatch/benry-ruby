@@ -604,6 +604,120 @@ END
     end
 
 
+    topic '#build_candidates_part()' do
+
+      spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+END
+      end
+
+      spec "[!idm2h] includes hidden actions when `all: true` passed." do
+        x = @builder.build_candidates_part("git:", all: true)
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+END
+      end
+
+      spec "[!duhyd] includes actions which name is same as prefix." do
+        HelpTestAction.class_eval do
+          prefix "p8572:", action: "aaa" do
+            @action.("AAA")
+            def aaa()
+            end
+            @action.("BBB")
+            def bbb()
+            end
+          end
+          @action.("sample")
+          def p8572x()
+          end
+        end
+        x = @builder.build_candidates_part("p8572:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  p8572              : AAA
+  p8572:bbb          : BBB
+END
+      end
+
+      spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
+        Benry::CmdApp.define_alias("git", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("git") }
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+  git                : alias of 'git:stage'
+END
+      end
+
+      spec "[!otvbt] includes name of alias which corresponds to action starting with prefix." do
+        Benry::CmdApp.define_alias("add", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+  add                : alias of 'git:stage'
+END
+      end
+
+      spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
+        Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_candidates_part("git:", all: true)
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+\e[2m  add                : alias of 'git:stage'\e[0m
+END
+        #
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+END
+      end
+
+      spec "[!80t51] alias names are displayed in separated section from actions." do
+        Benry::CmdApp.define_alias("add", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_candidates_part("git:")
+        ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
+      end
+
+      spec "[!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix." do
+        x = @builder.build_candidates_part("blabla:")
+        ok {x} == "\e[1;34mActions:\e[0m\n\n"
+      end
+
+    end
+
+
   end
 
 

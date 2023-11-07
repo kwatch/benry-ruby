@@ -1236,6 +1236,50 @@ module Benry::CmdApp
       return build_sections(@config.help_postamble, 'config.help_postamble')
     end
 
+    public
+
+    def build_candidates_part(prefix, all: false)
+      c = @config
+      index = @_index || INDEX
+      #; [!idm2h] includes hidden actions when `all: true` passed.
+      prefix2 = prefix.chomp(':')
+      str = _build_metadata_list(c.format_action, all: all) {|metadata|
+        md = metadata
+        if md.name.start_with?(prefix)
+          true
+        #; [!duhyd] includes actions which name is same as prefix.
+        #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
+        elsif md.name == prefix2
+          ! (md.alias? && md.action.start_with?(prefix))
+        else
+          false
+        end
+      }
+      if str
+        s1 = build_section(_header(:HEADER_ACTIONS), str)
+      else
+        s1 = nil
+      end
+      #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
+      #; [!h5ek7] includes hidden aliases when `all: true` passed.
+      sb = []
+      index.metadata_each(all: all) do |metadata|
+        md = metadata
+        if md.alias? && md.action.start_with?(prefix)
+          sb << build_action_line(md)
+        end
+      end
+      #; [!80t51] alias names are displayed in separated section from actions.
+      if sb.empty?
+        s2 = nil
+      else
+        s2 = build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
+      end
+      #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
+      #; [!3c3f1] returns list of actions which name starts with prefix specified.
+      return [s1, s2].compact().join("\n")
+    end
+
   end
 
 
