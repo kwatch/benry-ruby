@@ -1045,6 +1045,7 @@ module Benry::CmdApp
     HEADER_OPTIONS = "Options:"
     HEADER_ACTIONS = "Actions:"
     HEADER_ALIASES = "Aliases:"
+    HEADER_ABBREVS = "Abbreviations:"
 
     def build_help_message(x, all: false)
       #; [!0hy81] this is an abstract method.
@@ -1289,6 +1290,18 @@ module Benry::CmdApp
       #; [!fj1c7] returns header string if no aliases found.
       #; [!496qq] renders alias list.
       return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
+    end
+
+    def build_abbrevs_part(all: false)
+      index = @_index || INDEX
+      format = @config.format_abbrev
+      sb = []
+      index.abbrev_each do |abbrev, prefix|
+        sb << format % [abbrev, prefix] << "\n"
+      end
+      #; [!dnt12] returns header string if no abbrevs found.
+      #; [!00ice] returns abbrev list string.
+      return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
 
   end
