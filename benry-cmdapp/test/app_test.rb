@@ -457,22 +457,22 @@ END
 
     topic '#render_item_list()' do
 
-      class FakeTopicListBuilder < Benry::CmdApp::TopicListBuilder
-        def build_available_list(all: false); return nil; end
-        def build_candidate_list(prefix, all: false); return nil; end
-        def build_prefix_list(depth=1, all: false); return nil; end
+      class FakeAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
+        def build_actions_part(include=false, all: false); return nil; end
+        def build_candidates_part(prefix, all: false); return nil; end
+        def build_prefixes_part(depth=1, all: false); return nil; end
       end
 
-      def fake_action_list_builder(&b)
+      def fake_app_help_builder(&b)
         Benry::CmdApp.module_eval do
-          remove_const :TOPIC_LIST_BUILDER_CLASS
-          const_set    :TOPIC_LIST_BUILDER_CLASS, FakeTopicListBuilder
+          remove_const :APPLICATION_HELP_BUILDER_CLASS
+          const_set    :APPLICATION_HELP_BUILDER_CLASS, FakeAppHelpBuilder
         end
         yield
       ensure
         Benry::CmdApp.module_eval do
-          remove_const :TOPIC_LIST_BUILDER_CLASS
-          const_set    :TOPIC_LIST_BUILDER_CLASS, Benry::CmdApp::TopicListBuilder
+          remove_const :APPLICATION_HELP_BUILDER_CLASS
+          const_set    :APPLICATION_HELP_BUILDER_CLASS, Benry::CmdApp::ApplicationHelpBuilder
         end
       end
 
@@ -486,7 +486,7 @@ END
         end
 
         spec "[!znuy4] raises CommandError if no actions defined." do
-          fake_action_list_builder() do
+          fake_app_help_builder() do
             pr = proc { @app.instance_eval { render_item_list(nil) } }
             ok {pr}.raise?(Benry::CmdApp::CommandError,
                            "No actions defined.")
@@ -535,7 +535,7 @@ END
         end
 
         spec "[!tiihg] raises CommandError if no actions found having prefix." do
-          fake_action_list_builder() do
+          fake_app_help_builder() do
             pr = proc { @app.instance_eval { render_item_list(":") } }
             ok {pr}.raise?(Benry::CmdApp::CommandError,
                            "Prefix of actions not found.")
@@ -557,7 +557,7 @@ END
         end
 
         spec "[!1834c] raises CommandError if no actions found with names starting with that prefix." do
-          fake_action_list_builder() do
+          fake_app_help_builder() do
             pr = proc { @app.instance_eval { render_item_list("git:") } }
             ok {pr}.raise?(Benry::CmdApp::CommandError,
                            "No actions found with names starting with 'git:'.")

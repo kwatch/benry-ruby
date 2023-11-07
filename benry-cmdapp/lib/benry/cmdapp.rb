@@ -1202,6 +1202,8 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
+    public
+
     def build_actions_part(include_aliases=false, all: false)
       c = @config
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
@@ -1231,6 +1233,8 @@ module Benry::CmdApp
       return sb.join()
     end
     private :_build_metadata_list
+
+    protected
 
     def build_postamble_part()
       #; [!64hj1] returns postamble of application help message.
@@ -1836,13 +1840,13 @@ module Benry::CmdApp
     end
 
     def render_item_list(prefix=nil, all: false)
-      builder = get_topic_list_builder()
+      builder = get_app_help_builder()
       case prefix
       #; [!tftl5] when prefix is not specified...
       when nil
         #; [!36vz6] returns action list string if any actions defined.
         #; [!znuy4] raises CommandError if no actions defined.
-        s = builder.build_available_list(all: all)  or
+        s = builder.build_actions_part(true, all: all)  or
           raise CommandError.new("No actions defined.")
         return s
       #; [!jcq4z] when separator is specified...
@@ -1851,14 +1855,14 @@ module Benry::CmdApp
         #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
         depth = prefix.length
-        s = builder.build_prefix_list(depth, all: all)  or
+        s = builder.build_prefixes_part(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...
       when /:\z/
         #; [!z4dqn] filters action list by prefix if specified.
         #; [!1834c] raises CommandError if no actions found with names starting with that prefix.
-        s = builder.build_candidate_list(prefix, all: all)  or
+        s = builder.build_candidates_part(prefix, all: all)  or
           raise CommandError.new("No actions found with names starting with '#{prefix}'.")
         return s
       #; [!xjdrm] else...
@@ -1871,13 +1875,13 @@ module Benry::CmdApp
     def render_topic_list(topic, all: false)
       #; [!uzmml] renders topic list.
       #; [!vrzu0] topic 'prefix1' or 'prefix2' is acceptable.
-      builder = get_topic_list_builder()
+      builder = get_app_help_builder()
       return (
         case topic
-        when "action"           ; builder.build_action_list(all: all)
-        when "alias"            ; builder.build_alias_list(all: all)
-        when "abbrev"           ; builder.build_abbrev_list(all: all)
-        when /\Aprefix(\d+)?\z/ ; builder.build_prefix_list(($1||1).to_i, all: all)
+        when "action"           ; builder.build_actions_part(false, all: all)
+        when "alias"            ; builder.build_aliases_part(all: all)
+        when "abbrev"           ; builder.build_abbrevs_part(all: all)
+        when /\Aprefix(\d+)?\z/ ; builder.build_prefixes_part(($1||1).to_i, all: all)
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )
