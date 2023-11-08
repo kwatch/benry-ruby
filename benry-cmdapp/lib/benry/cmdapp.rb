@@ -745,6 +745,27 @@ module Benry::CmdApp
       return @prefix_dict[prefix]
     end
 
+    def prefix_count_actions(depth, all: false)
+      dict = {}
+      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
+      metadata_each(all: all) do |metadata|
+        name = metadata.name
+        next unless name =~ /:/
+        #; [!5n3qj] counts prefix of specified depth.
+        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
+        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
+        arr = arr.take(depth) if depth > 0  # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
+        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
+        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
+        #; [!r2frb] counts prefix of lesser depth.
+        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
+          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
+          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
+        end
+      end
+      return dict
+    end
+
     def abbrev_add(abbrev, prefix)
       #; [!n475k] registers abbrev with prefix.
       @abbrev_dict[abbrev] = prefix
@@ -1308,53 +1329,25 @@ module Benry::CmdApp
     end
 
     def build_prefixes_part(depth=0, all: false)
+      index = @_index || INDEX
+      c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = _count_actions_per_prefix(depth, all: all)
-      #index = @_index || INDEX
+      dict = index.prefix_count_actions(depth, all: all)
       #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
-      #; [!crbav] returns top prefix list.
-      content = _render_prefix_list(dict, @config)
-      return build_section(_header(:HEADER_PREFIXES), content, "(depth=#{depth})")  # "Prefixes:"
-    end
-
-    private
-
-    def _count_actions_per_prefix(depth, all: false)
-      index = @_index || INDEX
-      dict = {}
-      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
-      index.metadata_each(all: all) do |metadata|
-        name = metadata.name
-        next unless name =~ /:/
-        #; [!5n3qj] counts prefix of specified depth.
-        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
-        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
-        arr = arr.take(depth) if depth > 0  # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
-        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
-        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
-        #; [!r2frb] counts prefix of lesser depth.
-        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
-          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
-          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
-        end
-      end
-      return dict
-    end
-
-    def _render_prefix_list(dict, config)
-      index = @_index || INDEX
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
-      format = (config.format_prefix || config.format_action) + "\n"
+      format = (c.format_prefix || c.format_action) + "\n"
       indent = /^( *)/.match(format)[1]
-      return dict.keys.sort.collect {|prefix|
+      str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
         desc = index.prefix_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
+      #; [!crbav] returns top prefix list.
+      return build_section(_header(:HEADER_PREFIXES), str, "(depth=#{depth})")  # "Prefixes:"
     end
 
   end

@@ -861,58 +861,6 @@ END
     end
 
 
-    topic '#_count_actions_per_prefix()' do
-
-      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
-        idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
-        b.instance_variable_set(:@_index, idx)
-        #
-        ok {b.__send__(:_count_actions_per_prefix, 1, all: true) }.key?("md:")
-        ok {b.__send__(:_count_actions_per_prefix, 1, all: false)}.NOT.key?("md:")
-      end
-
-      spec "[!5n3qj] counts prefix of specified depth." do
-        idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
-        b.instance_variable_set(:@_index, idx)
-        #
-        expected1 = {"giit:"=>13}
-        expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
-                     "giit:repo:"=>7,
-                     "giit:staging:"=>3}
-        expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
-                     "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
-                     "giit:staging:"=>3}
-        ok {b.__send__(:_count_actions_per_prefix, 1)} == expected1
-        ok {b.__send__(:_count_actions_per_prefix, 2)} == expected2
-        ok {b.__send__(:_count_actions_per_prefix, 3)} == expected3
-        ok {b.__send__(:_count_actions_per_prefix, 4)} == expected3
-        ok {b.__send__(:_count_actions_per_prefix, 5)} == expected3
-      end
-
-      spec "[!r2frb] counts prefix of lesser depth." do
-        idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
-        b.instance_variable_set(:@_index, idx)
-        #
-        x = b.__send__(:_count_actions_per_prefix, 1)
-        ok {x}.key?("giit:")
-        ok {x}.NOT.key?("giit:branch:")
-        ok {x}.NOT.key?("giit:repo:config:")
-        x = b.__send__(:_count_actions_per_prefix, 2)
-        ok {x}.key?("giit:")
-        ok {x}.key?("giit:branch:")
-        ok {x}.NOT.key?("giit:repo:config:")
-        x = b.__send__(:_count_actions_per_prefix, 3)
-        ok {x}.key?("giit:")
-        ok {x}.key?("giit:branch:")
-        ok {x}.key?("giit:repo:config:")
-      end
-
-    end
-
-
   end
 
 
