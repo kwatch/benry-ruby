@@ -1307,7 +1307,7 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
 
-    def build_prefixes_part(depth=1, all: false)
+    def build_prefixes_part(depth=0, all: false)
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
       dict = _count_actions_per_prefix(depth, all: all)
@@ -1332,7 +1332,7 @@ module Benry::CmdApp
         #; [!5n3qj] counts prefix of specified depth.
         arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
         arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
-        arr = arr.take(depth)           # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
+        arr = arr.take(depth) if depth > 0  # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
         prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
         dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
         #; [!r2frb] counts prefix of lesser depth.
@@ -1716,7 +1716,7 @@ module Benry::CmdApp
         when "action"           ; builder.build_actions_part(false, all: all)
         when "alias"            ; builder.build_aliases_part(all: all)
         when "abbrev"           ; builder.build_abbrevs_part(all: all)
-        when /\Aprefix(\d+)?\z/ ; builder.build_prefixes_part(($1||1).to_i, all: all)
+        when /\Aprefix(\d+)?\z/ ; builder.build_prefixes_part(($1 || 0).to_i, all: all)
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )

@@ -365,7 +365,7 @@ END
         sout, serr = capture_sio do
           @app.instance_eval { handle_global_options(g_opts, []) }
         end
-        ok {sout} =~ /\APrefixes: \(depth=1\)$/
+        ok {sout} =~ /\APrefixes: \(depth=0\)$/
       end
 
       spec "[!ymifi] includes hidden actions into topic list if `-a, --all` specified." do
@@ -592,7 +592,7 @@ END
         ok {x} =~ /^  chiaou             : alias of 'hello -l it'$/
         #
         x = @app.__send__(:render_topic_list, "prefix")
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=0\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
         #
