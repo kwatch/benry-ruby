@@ -1366,7 +1366,10 @@ rm -rf build    # !!!! clean-up block invoked at the end of process !!!!
 
 ### Alias of Action
 
-* Alias of action provides alternative short name of action.
+Alias of action provides alternative short name of action.
+
+* `define_alias()` in action class defines an alias with taking action name prefix into account.
+* `Benry::CmdApp.define_alias()` defines an alias, without taking action name prefix into account.
 
 File: ex21.rb
 
@@ -1374,31 +1377,38 @@ File: ex21.rb
 # coding: utf-8
 require 'benry/cmdapp'
 
-class SampleAction < Benry::CmdApp::Action
-  prefix "foo:bar:"
+class GitAction < Benry::CmdApp::Action
+  prefix "git:"                                   # !!!!
 
-  @action.("test action #1")
-  def test1()                 # action name: 'foo:bar:test1'
-    puts __method__
+  @action.("show current status in compact mode")
+  def status()
+    puts "git status -sb"
+  end
+
+  define_alias "st", "status"                     # !!!!
+  ## or:
+  #Benry::CmdApp.define_alias "st", "git:status"  # !!!!
+
+  prefix "staging:" do                            # !!!!
+
+    @action.("show changes in staging area")
+    def show()
+      puts "git diff --cached"
+    end
+
+    define_alias "staged" , "show"                # !!!!
+    ## or:
+    #Benry::CmdApp.define_alias "staged", "git:staging:show" # !!!!
+
   end
 
 end
 
-Benry::CmdApp.define_alias "test", "foo:bar:test1"   # !!!!
+Benry::CmdApp.define_alias "git", "git:status"    # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
-```
-
-Output:
-
-```console
-[bash]$ ruby ex21.rb test             # alias name
-test1
-
-[bash]$ ruby ex21.rb foo:bar:test1    # original action name
-test1
 ```
 
 Help message:
@@ -1416,9 +1426,31 @@ Options:
   -a, --all          : list hidden actions/options, too
 
 Actions:
-  foo:bar:test1      : test action #1
+  git                : alias of 'git:status'           # !!!!
+  git:staging:show   : show changes in staging area
+  git:status         : show current status in compact mode
   help               : print help message (of action if specified)
-  test               : alias of 'foo:bar:test1'
+  st                 : alias of 'git:status'           # !!!!
+  staged             : alias of 'git:staging:show'     # !!!!
+```
+
+Output:
+
+```console
+[bash]$ ruby ex21.rb st                # alias name
+git status -sb
+
+[bash]$ ruby ex21.rb git:status        # original action name
+git status -sb
+
+[bash]$ ruby ex21.rb staged            # alias name
+git diff --cached
+
+[bash]$ ruby ex21.rb git:staging:show  # original action name
+git diff --cached
+
+[bash]$ ruby ex21.rb git               # alias name
+git status -sb
 ```
 
 * Both alias and action names should be string. Symbol is not allowed.
