@@ -644,6 +644,20 @@ module Benry::CmdApp
         return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
     end
 
+    def self.new_optionset(&block)
+      #; [!us0g4] yields block with dummy action.
+      #; [!1idwv] clears default option items.
+      @action.("dummy action by new_optionset()")
+      schema = @__actiondef__[1]
+      schema.each.collect(&:key).each {|key| schema.delete(key) }
+      yield
+      #; [!sp3hk] clears `@__actiondef__` to make `@action.()` available.
+      schema = @__actiondef__[1]
+      @__actiondef__ = nil
+      #; [!mwbyc] returns new OptionSet object which contains option items.
+      return OptionSet.new.copy_from(schema)
+    end
+
     def run_once(action_name, *args, **kwargs)
       #; [!nqjxk] runs action and returns true if not runned ever.
       #; [!wcyut] not run action and returns false if already runned.

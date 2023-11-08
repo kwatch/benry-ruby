@@ -824,6 +824,59 @@ END
     end
 
 
+    topic '.new_optionset()' do
+
+      spec "[!us0g4] yields block with dummy action." do
+        _ = self
+        called = false
+        ScopeTestAction.class_eval do
+          optset1 = new_optionset() do
+            called = true
+            _.ok {@__actiondef__} != nil
+            _.ok {@__actiondef__[0]} == "dummy action by new_optionset()"
+          end
+        end
+        ok {called} == true
+      end
+
+      spec "[!1idwv] clears default option items." do
+        _ = self
+        ScopeTestAction.class_eval do
+          optset1 = new_optionset() do
+            schema = @__actiondef__[1]
+            _.ok {schema.each.to_a}.length(0)
+          end
+        end
+      end
+
+      spec "[!sp3hk] clears `@__actiondef__` to make `@action.()` available." do
+        _ = self
+        ScopeTestAction.class_eval do
+          _.ok {@__actiondef__} == nil
+          optset1 = new_optionset() do
+            _.ok {@__actiondef__} != nil
+          end
+          _.ok {@__actiondef__} == nil
+        end
+      end
+
+      spec "[!mwbyc] returns new OptionSet object which contains option items." do
+        optset1 = nil
+        ScopeTestAction.class_eval do
+          optset1 = new_optionset() do
+            @option.(:user, "-u, --user=<user>", "user name")
+            @option.(:email, "-e, --email=<email>", "email address")
+          end
+        end
+        ok {optset1}.is_a?(Benry::CmdApp::OptionSet)
+        items = optset1.instance_variable_get(:@items)
+        ok {items[0].key} == :user
+        ok {items[1].key} == :email
+      end
+
+    end
+
+
     topic '#run_once()' do
 
       spec "[!nqjxk] runs action and returns true if not runned ever." do
