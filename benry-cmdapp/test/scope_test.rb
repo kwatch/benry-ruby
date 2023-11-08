@@ -971,6 +971,32 @@ END
     end
 
 
+    topic '#option_error()' do
+
+      spec "[!engp2] returns OptionError object." do
+        x = ScopeTestAction.new(nil).instance_eval {
+          option_error("error message e2038")
+        }
+        ok {x}.is_a?(Benry::CmdApp::OptionError)
+        ok {x.message} == "error message e2038"
+      end
+
+    end
+
+
+    topic '#action_error()' do
+
+      spec "[!2m7d6] returns ActionError object." do
+        x = ScopeTestAction.new(nil).instance_eval {
+          action_error("error message e4417")
+        }
+        ok {x}.is_a?(Benry::CmdApp::ActionError)
+        ok {x.message} == "error message e4417"
+      end
+
+    end
+
+
   end
 
 
