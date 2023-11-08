@@ -745,6 +745,27 @@ module Benry::CmdApp
       return @prefix_dict[prefix]
     end
 
+    def prefix_count_actions(depth, all: false)
+      dict = {}
+      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
+      metadata_each(all: all) do |metadata|
+        name = metadata.name
+        next unless name =~ /:/
+        #; [!5n3qj] counts prefix of specified depth.
+        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
+        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
+        arr = arr.take(depth) if depth > 0  # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
+        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
+        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
+        #; [!r2frb] counts prefix of lesser depth.
+        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
+          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
+          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
+        end
+      end
+      return dict
+    end
+
     def abbrev_add(abbrev, prefix)
       #; [!n475k] registers abbrev with prefix.
       @abbrev_dict[abbrev] = prefix
@@ -1308,10 +1329,10 @@ module Benry::CmdApp
     end
 
     def build_prefixes_part(depth=0, all: false)
+      index = @_index || INDEX
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = _count_actions_per_prefix(depth, all: all)
-      #index = @_index || INDEX
+      dict = index.prefix_count_actions(depth, all: all)
       #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
@@ -1321,28 +1342,6 @@ module Benry::CmdApp
     end
 
     private
-
-    def _count_actions_per_prefix(depth, all: false)
-      index = @_index || INDEX
-      dict = {}
-      #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
-      index.metadata_each(all: all) do |metadata|
-        name = metadata.name
-        next unless name =~ /:/
-        #; [!5n3qj] counts prefix of specified depth.
-        arr = name.split(':')           # ex: "a:b:c:xx" -> ["a", "b", "c", "xx"]
-        arr.pop()                       # ex: ["a", "b", "c", "xx"] -> ["a", "b", "c"]
-        arr = arr.take(depth) if depth > 0  # ex: ["a", "b", "c"] -> ["a", "b"]  (if depth==2)
-        prefix = arr.join(':') + ':'    # ex: ["a", "b"] -> "aa:bb:"
-        dict[prefix] = (dict[prefix] || 0) + 1  # ex: dict["aa:bb:"] = (dict["aa:bb:"] || 0) + 1
-        #; [!r2frb] counts prefix of lesser depth.
-        while (arr.pop(); ! arr.empty?) # ex: ["a", "b"] -> ["a"]
-          prefix = arr.join(':') + ':'  # ex: ["a"] -> "a:"
-          dict[prefix] ||= 0            # ex: dict["a:"] ||= 0
-        end
-      end
-      return dict
-    end
 
     def _render_prefix_list(dict, config)
       index = @_index || INDEX

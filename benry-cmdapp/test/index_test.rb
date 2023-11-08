@@ -10,6 +10,14 @@ Oktest.scope do
 
   topic Benry::CmdApp::Index do
 
+    def new_index_with_filter(*prefixes)
+      idx = Benry::CmdApp::Index.new()
+      Benry::CmdApp::INDEX.metadata_each do |md|
+        idx.metadata_add(md) if md.name.start_with?(*prefixes)
+      end
+      return idx
+    end
+
     before do
       @index = Benry::CmdApp::Index.new
     end
@@ -234,6 +242,49 @@ Oktest.scope do
 
       spec "[!otp1b] returns nil if prefix is not registered." do
         ok {Benry::CmdApp::INDEX.prefix_get_desc("p8233")} == nil
+      end
+
+    end
+
+
+    topic '#prefix_count_actions()' do
+
+      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
+        idx = new_index_with_filter("giit:", "md:")
+        ok {idx.prefix_count_actions(1, all: true) }.key?("md:")
+        ok {idx.prefix_count_actions(1, all: false)}.NOT.key?("md:")
+      end
+
+      spec "[!5n3qj] counts prefix of specified depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        expected1 = {"giit:"=>13}
+        expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:"=>7,
+                     "giit:staging:"=>3}
+        expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
+                     "giit:staging:"=>3}
+        ok {idx.prefix_count_actions(1)} == expected1
+        ok {idx.prefix_count_actions(2)} == expected2
+        ok {idx.prefix_count_actions(3)} == expected3
+        ok {idx.prefix_count_actions(4)} == expected3
+        ok {idx.prefix_count_actions(5)} == expected3
+      end
+
+      spec "[!r2frb] counts prefix of lesser depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        x = idx.prefix_count_actions(1)
+        ok {x}.key?("giit:")
+        ok {x}.NOT.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = idx.prefix_count_actions(2)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = idx.prefix_count_actions(3)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.key?("giit:repo:config:")
       end
 
     end
