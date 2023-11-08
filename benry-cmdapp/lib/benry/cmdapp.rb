@@ -191,6 +191,29 @@ module Benry::CmdApp
   }.call(OptionSchema.new)
 
 
+  class OptionSet
+
+    def initialize()
+      @items = []
+    end
+
+    def copy_from(schema)
+      #; [!d9udc] copy option items from schema.
+      schema.each {|item| @items << item }
+      #; [!v1ok3] returns self.
+      self
+    end
+
+    def copy_into(schema)
+      #; [!n00r1] copy option items into schema.
+      @items.each {|item| schema.add_item(item) }
+      #; [!ynn1m] returns self.
+      self
+    end
+
+  end
+
+
   class BaseMetadata
 
     def initialize(name, desc, tag: nil, important: nil, hidden: nil)

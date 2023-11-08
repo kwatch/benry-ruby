@@ -85,4 +85,60 @@ Oktest.scope do
   end
 
 
+  topic Benry::CmdApp::OptionSet do
+
+    before do
+      @optset = Benry::CmdApp::OptionSet.new
+      @schema = Benry::CmdApp::OptionSchema.new
+      @schema.add(:user, "-u, --user=<user>", "user name")
+      @schema.add(:email, "-e, --email=<email>", "email address")
+    end
+
+
+    topic '#copy_from()' do
+
+      spec "[!d9udc] copy option items from schema." do
+        items = []
+        @schema.each {|item| items << item }
+        #
+        @optset.copy_from(@schema)
+        new_items = @optset.instance_variable_get(:@items)
+        ok {new_items}.length(2)
+        ok {new_items[0]} == items[0]
+        ok {new_items[1]} == items[1]
+      end
+
+      spec "[!v1ok3] returns self." do
+        ok {@optset.copy_from(@schema)}.same?(@optset)
+      end
+
+    end
+
+
+    topic '#copy_into()' do
+
+      spec "[!n00r1] copy option items into schema." do
+        @optset.copy_from(@schema)
+        new_schema = Benry::CmdApp::OptionSchema.new
+        @optset.copy_into(new_schema)
+        new_items = []
+        new_schema.each {|item| new_items << item }
+        items = @optset.instance_variable_get(:@items)
+        ok {new_items}.length(2)
+        ok {new_items[0]} == items[0]
+        ok {new_items[1]} == items[1]
+      end
+
+      spec "[!ynn1m] returns self." do
+        @optset.copy_from(@schema)
+        new_schema = Benry::CmdApp::OptionSchema.new
+        ok {@optset.copy_into(new_schema)}.same?(@optset)
+      end
+
+    end
+
+
+  end
+
+
 end
