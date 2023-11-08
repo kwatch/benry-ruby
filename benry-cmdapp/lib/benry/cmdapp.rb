@@ -64,8 +64,8 @@ module Benry::CmdApp
     def method2help(obj, meth)
       #; [!q3y3a] returns command argument string which represents method parameters.
       #; [!r6u58] converts `.foo(x)` into `' <x>'`.
-      #; [!r6u58] converts `.foo(x=0)` into `' [<x>]'`.
-      #; [!r6u58] converts `.foo(*x)` into `' [<x>...]'`.
+      #; [!8be14] converts `.foo(x=0)` into `' [<x>]'`.
+      #; [!skofc] converts `.foo(*x)` into `' [<x>...]'`.
       #; [!61xy6] converts `.foo(x, y=0, *z)` into `' <x> [<y> [<z>...]]'`.
       #; [!0342t] ignores keyword parameters.
       sb = []; n = 0
@@ -1662,7 +1662,7 @@ module Benry::CmdApp
 
     def handle_global_options(global_opts, args)
       all = global_opts[:all]
-      #; [!dkjw8] prints help message if global option `-h, --help` specified.
+      #; [!366kv] prints help message if global option `-h, --help` specified.
       #; [!7mapy] includes hidden actions into help message if `-a, --all` specified.
       if global_opts[:help]
         action = args.empty? ? nil : args[0]

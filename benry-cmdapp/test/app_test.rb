@@ -307,7 +307,7 @@ END
 
     topic '#handle_global_options()' do
 
-      spec "[!dkjw8] prints help message if global option `-h, --help` specified." do
+      spec "[!366kv] prints help message if global option `-h, --help` specified." do
         opts = {help: true}
         sout, serr = capture_sio do
           @app.instance_eval { handle_global_options(opts, []) }

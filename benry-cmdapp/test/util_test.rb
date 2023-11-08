@@ -62,11 +62,11 @@ Oktest.scope do
         ok {Benry::CmdApp::Util.method2help(@obj, :foo1)} == " <x>"
       end
 
-      spec "[!r6u58] converts `.foo(x=0)` into `' [<x>]'`." do
+      spec "[!8be14] converts `.foo(x=0)` into `' [<x>]'`." do
         ok {Benry::CmdApp::Util.method2help(@obj, :foo2)} == " [<x>]"
       end
 
-      spec "[!r6u58] converts `.foo(*x)` into `' [<x>...]'`." do
+      spec "[!skofc] converts `.foo(*x)` into `' [<x>...]'`." do
         ok {Benry::CmdApp::Util.method2help(@obj, :foo3)} == " [<x>...]"
       end
 
