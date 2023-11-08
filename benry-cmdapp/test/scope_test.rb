@@ -867,6 +867,65 @@ END
     end
 
 
+    topic '.define_alias()' do
+
+      spec "[!tcpuz] just defines an alias when current prefix is nil." do
+        ScopeTestAction.class_eval do
+          @action.("sample")
+          def a7033()
+          end
+          define_alias "x7033", "a7033"
+        end
+        md = Benry::CmdApp::INDEX.metadata_get("x7033")
+        ok {md.action} == "a7033"
+      end
+
+      spec "[!c6duw] defines an alias with prefix when current prefix exist." do
+        ScopeTestAction.class_eval do
+          prefix "p8866:" do
+            @action.("sample")
+            def a5073()
+            end
+            define_alias "x5073", "a5073"
+          end
+        end
+        md = Benry::CmdApp::INDEX.metadata_get("x5073")
+        ok {md.action} == "p8866:a5073"
+      end
+
+      spec "[!b8ly2] supports array argument." do
+        ScopeTestAction.class_eval do
+          prefix "p2433:" do
+            @action.("sample")
+            def a9940(arg)
+            end
+            define_alias "x2433", ["a9940", "abc"]
+          end
+        end
+        md = Benry::CmdApp::INDEX.metadata_get("x2433")
+        ok {md.action} == "p2433:a9940"
+        ok {md.args} == ["abc"]
+      end
+
+      spec "[!0dkrj] keyword arguments are passed to higher function." do
+        ScopeTestAction.class_eval do
+          prefix "p5582:"
+          @action.("sample")
+          def a1017(arg)
+          end
+          define_alias "x5582", ["a1017", "abc"], hidden: true, important: true, tag: "experimental"
+          @__prefixdef__ = nil
+        end
+        md = Benry::CmdApp::INDEX.metadata_get("x5582")
+        ok {md.action}     == "p5582:a1017"
+        ok {md.hidden?}    == true
+        ok {md.important?} == true
+        ok {md.tag}        == "experimental"
+      end
+
+    end
+
+
     topic '.new_optionset()' do
 
       spec "[!us0g4] yields block with dummy action." do
