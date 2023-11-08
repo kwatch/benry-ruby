@@ -66,6 +66,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Customization of Action Help Message](#customization-of-action-help-message)
   * [Customization of Section Title in Help Message](#customization-of-section-title-in-help-message)
 * [Q & A](#q--a)
+  * [Q: How to show all backtraces of exception?](#q-how-to-show-all-backtraces-of-exception)
   * [Q: How to append some tasks to an existing action?](#q-how-to-append-some-tasks-to-an-existing-action)
   * [Q: How to delete an existing action/alias?](#q-how-to-delete-an-existing-actionalias)
   * [Q: How to re-define an existing action?](#q-how-to-re-define-an-existing-action)
@@ -2554,6 +2555,11 @@ config.deco_header = "\e[1;34m%s\e[0m"     # bold, blue
 
 
 ## Q & A
+
+
+### Q: How to show all backtraces of exception?
+
+A: Add `--deubg` option.
 
 
 ### Q: How to append some tasks to an existing action?
