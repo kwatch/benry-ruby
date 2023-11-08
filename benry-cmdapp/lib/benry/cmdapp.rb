@@ -646,7 +646,7 @@ module Benry::CmdApp
   Action = ActionScope
 
 
-  class MetadataIndex
+  class Index
 
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
@@ -784,7 +784,7 @@ module Benry::CmdApp
   end
 
 
-  INDEX = MetadataIndex.new()
+  INDEX = Index.new()
 
 
   class BuiltInAction < ActionScope

@@ -61,7 +61,7 @@ Oktest.scope do
 
 
   def with_dummy_index(index=nil, &b)
-    index ||= Benry::CmdApp::MetadataIndex.new()
+    index ||= Benry::CmdApp::Index.new()
     bkup = nil
     Benry::CmdApp.module_eval {
       bkup = const_get :INDEX
@@ -78,7 +78,7 @@ Oktest.scope do
   end
 
   def new_index_with_filter(*prefixes)
-    idx = Benry::CmdApp::MetadataIndex.new()
+    idx = Benry::CmdApp::Index.new()
     Benry::CmdApp::INDEX.metadata_each do |md|
       if md.name.start_with?(*prefixes)
         idx.metadata_add(md)
@@ -540,7 +540,7 @@ END
       spec "[!24by5] returns nil if no actions defined." do
         debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
         hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
-        index = Benry::CmdApp::MetadataIndex.new()
+        index = Benry::CmdApp::Index.new()
         with_dummy_index(index) do
           #
           x = @builder.__send__(:build_actions_part)
@@ -728,7 +728,7 @@ END
       end
 
       spec "[!fj1c7] returns header string if no aliases found." do
-        index = Benry::CmdApp::MetadataIndex.new()
+        index = Benry::CmdApp::Index.new()
         @builder.instance_variable_set(:@_index, index)
         x = @builder.build_aliases_part()
         ok {x} == "\e[1;34mAliases:\e[0m\n\n"
@@ -794,7 +794,7 @@ END
       end
 
       spec "[!dnt12] returns nil if no abbrevs found." do
-        index = Benry::CmdApp::MetadataIndex.new()
+        index = Benry::CmdApp::Index.new()
         @builder.instance_variable_set(:@_index, index)
         ok {@builder.build_abbrevs_part()} == "\e[1;34mAbbreviations:\e[0m\n\n"
         index.abbrev_add("g26:", "git:")
@@ -823,7 +823,7 @@ END
       end
 
       spec "[!p4j1o] returns nil if no prefix found." do
-        index = Benry::CmdApp::MetadataIndex.new
+        index = Benry::CmdApp::Index.new
         ["hello", "secret:crypt"].each do |action|
           index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
         end

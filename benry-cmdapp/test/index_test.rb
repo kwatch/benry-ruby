@@ -8,10 +8,10 @@ require_relative 'shared'
 Oktest.scope do
 
 
-  topic Benry::CmdApp::MetadataIndex do
+  topic Benry::CmdApp::Index do
 
     before do
-      @index = Benry::CmdApp::MetadataIndex.new
+      @index = Benry::CmdApp::Index.new
     end
 
 
