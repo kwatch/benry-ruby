@@ -191,6 +191,29 @@ module Benry::CmdApp
   }.call(OptionSchema.new)
 
 
+  class OptionSet
+
+    def initialize()
+      @items = []
+    end
+
+    def copy_from(schema)
+      #; [!d9udc] copy option items from schema.
+      schema.each {|item| @items << item }
+      #; [!v1ok3] returns self.
+      self
+    end
+
+    def copy_into(schema)
+      #; [!n00r1] copy option items into schema.
+      @items.each {|item| schema.add_item(item) }
+      #; [!ynn1m] returns self.
+      self
+    end
+
+  end
+
+
   class BaseMetadata
 
     def initialize(name, desc, tag: nil, important: nil, hidden: nil)
@@ -465,6 +488,15 @@ module Benry::CmdApp
           except = except.is_a?(Array) ? except : (except == nil ? [] : [except])
           schema.copy_from(metadata.schema, except: [:help] + except)
         end
+        #; [!7g5ug] sets Proc object to `@optionset` in subclass.
+        @optionset = lambda do |*optionsets|
+          #; [!o27kt] raises DefinitionError if `@optionset.()` called without `@action.()`.
+          @__actiondef__ != nil  or
+            raise DefinitionError.new("`@optionset.()` called without `@action.()`.")
+          #; [!ky6sg] copies option items from optionset into schema object.
+          schema = @__actiondef__[1]
+          optionsets.each {|optset| optset.copy_into(schema) }
+        end
       end
       nil
     end
@@ -619,6 +651,20 @@ module Benry::CmdApp
       #; [!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified.
       ! (action != nil && alias_of != nil)  or
         return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
+    end
+
+    def self.new_optionset(&block)
+      #; [!us0g4] yields block with dummy action.
+      #; [!1idwv] clears default option items.
+      @action.("dummy action by new_optionset()")
+      schema = @__actiondef__[1]
+      schema.each.collect(&:key).each {|key| schema.delete(key) }
+      yield
+      #; [!sp3hk] clears `@__actiondef__` to make `@action.()` available.
+      schema = @__actiondef__[1]
+      @__actiondef__ = nil
+      #; [!mwbyc] returns new OptionSet object which contains option items.
+      return OptionSet.new.copy_from(schema)
     end
 
     def run_once(action_name, *args, **kwargs)

@@ -232,6 +232,49 @@ END
 END
       end
 
+      spec "[!7g5ug] sets Proc object to `@optionset` in subclass." do
+        _ = self
+        MyAction.class_eval do
+          _.ok {@optionset} != nil
+          _.ok {@optionset}.is_a?(Proc)
+        end
+      end
+
+      spec "[!o27kt] raises DefinitionError if `@optionset.()` called without `@action.()`." do
+        pr = proc do
+          MyAction.class_eval do
+            @optionset.()
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "`@optionset.()` called without `@action.()`.")
+      end
+
+      spec "[!ky6sg] copies option items from optionset into schema object." do
+        MyAction.class_eval do
+          optset1 = new_optionset do
+            @option.(:user, "-u <user>", "user name")
+            @option.(:email, "-e <email>", "email address")
+          end
+          optset2 = new_optionset do
+            @option.(:host, "--host=<host>", "host name")
+            @option.(:port, "--port=<port>", "port number", type: Integer)
+          end
+          #
+          @action.("sample")
+          @optionset.(optset1, optset2)
+          def dummy8173(user: nil, email: nil, host: nil, port: nil)
+          end
+        end
+        metadata = Benry::CmdApp::INDEX.metadata_get("dummy8173")
+        ok {metadata.schema.to_s} == <<"END"
+  -u <user>            : user name
+  -e <email>           : email address
+  --host=<host>        : host name
+  --port=<port>        : port number
+END
+      end
+
     end
 
 
@@ -819,6 +862,59 @@ END
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
                        %q|`prefix("p7549:", action: "s0573", alias_of: "s0573")`: `action:` and `alias_of:` are exclusive.|)
+      end
+
+    end
+
+
+    topic '.new_optionset()' do
+
+      spec "[!us0g4] yields block with dummy action." do
+        _ = self
+        called = false
+        ScopeTestAction.class_eval do
+          optset1 = new_optionset() do
+            called = true
+            _.ok {@__actiondef__} != nil
+            _.ok {@__actiondef__[0]} == "dummy action by new_optionset()"
+          end
+        end
+        ok {called} == true
+      end
+
+      spec "[!1idwv] clears default option items." do
+        _ = self
+        ScopeTestAction.class_eval do
+          optset1 = new_optionset() do
+            schema = @__actiondef__[1]
+            _.ok {schema.each.to_a}.length(0)
+          end
+        end
+      end
+
+      spec "[!sp3hk] clears `@__actiondef__` to make `@action.()` available." do
+        _ = self
+        ScopeTestAction.class_eval do
+          _.ok {@__actiondef__} == nil
+          optset1 = new_optionset() do
+            _.ok {@__actiondef__} != nil
+          end
+          _.ok {@__actiondef__} == nil
+        end
+      end
+
+      spec "[!mwbyc] returns new OptionSet object which contains option items." do
+        optset1 = nil
+        ScopeTestAction.class_eval do
+          optset1 = new_optionset() do
+            @option.(:user, "-u, --user=<user>", "user name")
+            @option.(:email, "-e, --email=<email>", "email address")
+          end
+        end
+        ok {optset1}.is_a?(Benry::CmdApp::OptionSet)
+        items = optset1.instance_variable_get(:@items)
+        ok {items[0].key} == :user
+        ok {items[1].key} == :email
       end
 
     end
