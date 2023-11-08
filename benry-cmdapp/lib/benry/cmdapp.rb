@@ -686,6 +686,16 @@ module Benry::CmdApp
       nil
     end
 
+    def option_error(errmsg)
+      #; [!engp2] returns OptionError object.
+      return OptionError.new(errmsg)
+    end
+
+    def action_error(errmsg)
+      #; [!2m7d6] returns ActionError object.
+      return ActionError.new(errmsg)
+    end
+
   end
 
 
