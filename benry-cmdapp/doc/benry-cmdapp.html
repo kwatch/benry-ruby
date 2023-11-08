@@ -83,6 +83,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#custom-hook-of-application">Custom Hook of Application</a></li>
 <li><a href="#customization-of-application-help-message">Customization of Application Help Message</a></li>
 <li><a href="#customization-of-action-help-message">Customization of Action Help Message</a></li>
+<li><a href="#customization-of-section-title-in-help-message">Customization of Section Title in Help Message</a></li>
 </ul></li>
 <li><a href="#q--a">Q &amp; A</a>
 <ul>
@@ -2098,12 +2099,17 @@ end
   def <strong>build_options_part</strong>(gschema, all: false)
     super
   end
-  def <strong>build_actions_part</strong>(all: false, &amp;filter)
+  def <strong>build_actions_part</strong>(include_aliases=false, all: false)
     super
   end
   def <strong>build_postamble_part</strong>()
     super
   end
+  ### optional (for `-L &lttopic&gt;` option)
+  #def build_candidates_part(prefix, all: false); super; end
+  #def build_aliases_part(all: false); super; end
+  #def build_abbrevs_part(all: false); super; end
+  #def build_prefixes_part(depth=1, all: false); super; end
 end
 
 ## (3) Create an instance object of the class.
@@ -2159,6 +2165,11 @@ end
   def build_postamble_part()
     super
   end
+  ### optional (for `-L &lttopic&gt;` option)
+  #def build_candidates_part(prefix, all: false); super; end
+  #def build_aliases_part(all: false); super; end
+  #def build_abbrevs_part(all: false); super; end
+  #def build_prefixes_part(depth=1, all: false); super; end
 end
 
 ## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
@@ -2302,6 +2313,36 @@ Benry::CmdApp::ActionHelpBuilder<strong>.prepend(MyActionHelpBuilderMod)</strong
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
+</pre>
+</section>
+<section class="subsection" id="customization-of-section-title-in-help-message">
+<h3>Customization of Section Title in Help Message</h3>
+<p>If you want to change section titles such as 'Options:' or 'Actions:'
+in the help message, override the constants representing section titles.</p>
+<p>The following constants are defined in <code>BaseHelperBuilder</code> class.</p>
+<pre class="language-ruby">
+module Benry::CmdApp
+  class BaseHelpBuilder
+    HEADER_USAGE    = "Usage:"
+    HEADER_OPTIONS  = "Options:"
+    HEADER_ACTIONS  = "Actions:"
+    HEADER_ALIASES  = "Aliases:"
+    HEADER_ABBREVS  = "Abbreviations:"
+    HEADER_PREFIXES = "Prefixes:"
+</pre>
+<p>You can override them in <code>ApplicationHelpBuilder</code> or <code>ActionHelpBuilder</code>
+classes which are subclass of <code>BaseHandlerBuilder</code> class.</p>
+<pre class="language-ruby">
+## for example
+Benry::CmdApp::ApplicationHelpBuilder::<strong>HEADER_ACTIONS</strong> = "ACTIONS:"
+Benry::CmdApp::ActionHelpBuilder::<strong>HEADER_OPTIONS</strong> = "OPTIONS:"
+</pre>
+<p>If you want to change just decoration of section titles,
+set <code>config.deco_header</code>.</p>
+<pre class="language-ruby">
+config = Benry::CmdApp::Config.new("Test App", "1.0.0")
+<strong>config.deco_header = "\e[1;34m%s\e[0m"</strong>     # bold, blue
+<strong>#config.deco_header = "\e[1;4m%s\e[0m"</strong>     # bold, underline
 </pre>
 </section>
 </section>

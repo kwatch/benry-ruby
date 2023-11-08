@@ -64,6 +64,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Custom Hook of Application](#custom-hook-of-application)
   * [Customization of Application Help Message](#customization-of-application-help-message)
   * [Customization of Action Help Message](#customization-of-action-help-message)
+  * [Customization of Section Title in Help Message](#customization-of-section-title-in-help-message)
 * [Q & A](#q--a)
   * [Q: How to append some tasks to an existing action?](#q-how-to-append-some-tasks-to-an-existing-action)
   * [Q: How to delete an existing action/alias?](#q-how-to-delete-an-existing-actionalias)
@@ -2286,12 +2287,17 @@ class MyAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
   def build_options_part(gschema, all: false)
     super
   end
-  def build_actions_part(all: false, &filter)
+  def build_actions_part(include_aliases=false, all: false)
     super
   end
   def build_postamble_part()
     super
   end
+  ### optional (for `-L <topic>` option)
+  #def build_candidates_part(prefix, all: false); super; end
+  #def build_aliases_part(all: false); super; end
+  #def build_abbrevs_part(all: false); super; end
+  #def build_prefixes_part(depth=1, all: false); super; end
 end
 
 ## (3) Create an instance object of the class.
@@ -2349,6 +2355,11 @@ module MyHelpBuilderMod
   def build_postamble_part()
     super
   end
+  ### optional (for `-L <topic>` option)
+  #def build_candidates_part(prefix, all: false); super; end
+  #def build_aliases_part(all: false); super; end
+  #def build_abbrevs_part(all: false); super; end
+  #def build_prefixes_part(depth=1, all: false); super; end
 end
 
 ## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
@@ -2501,6 +2512,43 @@ Benry::CmdApp::ActionHelpBuilder.prepend(MyActionHelpBuilderMod)  # !!!!
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
+```
+
+
+### Customization of Section Title in Help Message
+
+If you want to change section titles such as 'Options:' or 'Actions:'
+in the help message, override the constants representing section titles.
+
+The following constants are defined in `BaseHelperBuilder` class.
+
+```ruby
+module Benry::CmdApp
+  class BaseHelpBuilder
+    HEADER_USAGE    = "Usage:"
+    HEADER_OPTIONS  = "Options:"
+    HEADER_ACTIONS  = "Actions:"
+    HEADER_ALIASES  = "Aliases:"
+    HEADER_ABBREVS  = "Abbreviations:"
+    HEADER_PREFIXES = "Prefixes:"
+```
+
+You can override them in `ApplicationHelpBuilder` or `ActionHelpBuilder`
+classes which are subclass of `BaseHandlerBuilder` class.
+
+```ruby
+## for example
+Benry::CmdApp::ApplicationHelpBuilder::HEADER_ACTIONS = "ACTIONS:"
+Benry::CmdApp::ActionHelpBuilder::HEADER_OPTIONS = "OPTIONS:"
+```
+
+If you want to change just decoration of section titles,
+set `config.deco_header`.
+
+```ruby
+config = Benry::CmdApp::Config.new("Test App", "1.0.0")
+config.deco_header = "\e[1;34m%s\e[0m"     # bold, blue
+#config.deco_header = "\e[1;4m%s\e[0m"     # bold, underline
 ```
 
 
