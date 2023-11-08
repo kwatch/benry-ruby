@@ -64,8 +64,8 @@ module Benry::CmdApp
     def method2help(obj, meth)
       #; [!q3y3a] returns command argument string which represents method parameters.
       #; [!r6u58] converts `.foo(x)` into `' <x>'`.
-      #; [!r6u58] converts `.foo(x=0)` into `' [<x>]'`.
-      #; [!r6u58] converts `.foo(*x)` into `' [<x>...]'`.
+      #; [!8be14] converts `.foo(x=0)` into `' [<x>]'`.
+      #; [!skofc] converts `.foo(*x)` into `' [<x>...]'`.
       #; [!61xy6] converts `.foo(x, y=0, *z)` into `' <x> [<y> [<z>...]]'`.
       #; [!0342t] ignores keyword parameters.
       sb = []; n = 0
@@ -459,7 +459,7 @@ module Benry::CmdApp
           kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
         end
-        #; [!en6n0] sets Proc object ot `@option` in subclass.
+        #; [!en6n0] sets Proc object to `@option` in subclass.
         @option = lambda do |key, optstr, desc,
                              type: nil, rexp: nil, pattern: nil, enum: nil,
                              range: nil, value: nil, detail: nil,
@@ -1576,9 +1576,6 @@ module Benry::CmdApp
       print_backtrace(exc) if ! exc.is_a?(BaseError) || exc.should_report_backtrace?()
       #; [!dzept] returns `1` as status code.
       return 1
-    ensure
-      #; [!pf1d2] calls teardown method at end of this method.
-      teardown()
     end
 
     def run(*args)
@@ -1665,7 +1662,7 @@ module Benry::CmdApp
 
     def handle_global_options(global_opts, args)
       all = global_opts[:all]
-      #; [!dkjw8] prints help message if global option `-h, --help` specified.
+      #; [!366kv] prints help message if global option `-h, --help` specified.
       #; [!7mapy] includes hidden actions into help message if `-a, --all` specified.
       if global_opts[:help]
         action = args.empty? ? nil : args[0]
