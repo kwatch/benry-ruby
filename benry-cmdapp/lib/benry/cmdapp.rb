@@ -1330,30 +1330,24 @@ module Benry::CmdApp
 
     def build_prefixes_part(depth=0, all: false)
       index = @_index || INDEX
+      c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
       dict = index.prefix_count_actions(depth, all: all)
       #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
-      #; [!crbav] returns top prefix list.
-      content = _render_prefix_list(dict, @config)
-      return build_section(_header(:HEADER_PREFIXES), content, "(depth=#{depth})")  # "Prefixes:"
-    end
-
-    private
-
-    def _render_prefix_list(dict, config)
-      index = @_index || INDEX
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
-      format = (config.format_prefix || config.format_action) + "\n"
+      format = (c.format_prefix || c.format_action) + "\n"
       indent = /^( *)/.match(format)[1]
-      return dict.keys.sort.collect {|prefix|
+      str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
         desc = index.prefix_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
+      #; [!crbav] returns top prefix list.
+      return build_section(_header(:HEADER_PREFIXES), str, "(depth=#{depth})")  # "Prefixes:"
     end
 
   end
