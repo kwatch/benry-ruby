@@ -1519,13 +1519,15 @@ module Benry::CmdApp
     #  print_error(exc)
     #  return 1
     #; [!bkbb4] when error raised...
-    rescue BaseError => exc
+    rescue StandardError => exc
       #; [!k4qov] not catch error if debug mode is enabled.
       raise if $DEBUG_MODE
+      #; [!lhlff] catches error if BaseError raised or `should_rescue?()` returns true.
+      raise if ! should_rescue?(exc)
       #; [!35x5p] prints error into stderr.
       print_error(exc)
       #; [!z39bh] prints backtrace unless error is a CommandError.
-      print_backtrace(exc) if exc.should_report_backtrace?()
+      print_backtrace(exc) if ! exc.is_a?(BaseError) || exc.should_report_backtrace?()
       #; [!dzept] returns `1` as status code.
       return 1
     ensure
@@ -1811,6 +1813,13 @@ module Benry::CmdApp
     def read_file_as_lines(filename)
       #; [!e9c74] reads file content as an array of line.
       return File.read(filename, encoding: 'utf-8').each_line().to_a()
+    end
+
+    protected
+
+    def should_rescue?(exc)
+      #; [!8lwyn] returns trueif exception is a BaseError.
+      return exc.is_a?(BaseError)
     end
 
   end

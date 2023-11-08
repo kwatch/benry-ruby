@@ -33,6 +33,20 @@ Oktest.scope do
           ok {pr}.raise?(Benry::CmdApp::CommandError, "foobar: Action not found.")
         end
 
+        spec "[!lhlff] catches error if BaseError raised or `should_rescue?()` returns true." do
+          pr = proc { @app.main(["testerr1"]) }
+          ok {pr}.raise?(ZeroDivisionError)
+          #
+          r = recorder()
+          r.fake_method(@app, :should_rescue? => true)
+          sout, serr = capture_sio(tty: true) do
+            pr = proc { @app.main(["testerr1"]) }
+            ok {pr}.NOT.raise?(ZeroDivisionError)
+          end
+          ok {sout} == ""
+          ok {serr} =~ /\A\e\[31m\[ERROR\]\e\[0m divided by 0$/
+        end
+
         spec "[!35x5p] prints error into stderr." do
           sout, serr = capture_sio(tty: true) { @app.main(["foobar"]) }
           ok {sout} == ""
@@ -861,6 +875,18 @@ END
         lines = @app.instance_eval { read_file_as_lines(__FILE__) }
         ok {lines}.is_a?(Array)
         ok {lines[__LINE__ - 2]} == "        ok {lines}.is_a?(Array)\n"
+      end
+
+    end
+
+
+    topic '#should_rescue?()' do
+
+      spec "[!8lwyn] returns trueif exception is a BaseError." do
+        x = @app.__send__(:should_rescue?, Benry::CmdApp::DefinitionError.new)
+        ok {x} == true
+        x = @app.__send__(:should_rescue?, RuntimeError.new)
+        ok {x} == false
       end
 
     end
