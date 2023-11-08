@@ -232,6 +232,49 @@ END
 END
       end
 
+      spec "[!7g5ug] sets Proc object to `@optionset` in subclass." do
+        _ = self
+        MyAction.class_eval do
+          _.ok {@optionset} != nil
+          _.ok {@optionset}.is_a?(Proc)
+        end
+      end
+
+      spec "[!o27kt] raises DefinitionError if `@optionset.()` called without `@action.()`." do
+        pr = proc do
+          MyAction.class_eval do
+            @optionset.()
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "`@optionset.()` called without `@action.()`.")
+      end
+
+      spec "[!ky6sg] copies option items from optionset into schema object." do
+        MyAction.class_eval do
+          optset1 = new_optionset do
+            @option.(:user, "-u <user>", "user name")
+            @option.(:email, "-e <email>", "email address")
+          end
+          optset2 = new_optionset do
+            @option.(:host, "--host=<host>", "host name")
+            @option.(:port, "--port=<port>", "port number", type: Integer)
+          end
+          #
+          @action.("sample")
+          @optionset.(optset1, optset2)
+          def dummy8173(user: nil, email: nil, host: nil, port: nil)
+          end
+        end
+        metadata = Benry::CmdApp::INDEX.metadata_get("dummy8173")
+        ok {metadata.schema.to_s} == <<"END"
+  -u <user>            : user name
+  -e <email>           : email address
+  --host=<host>        : host name
+  --port=<port>        : port number
+END
+      end
+
     end
 
 

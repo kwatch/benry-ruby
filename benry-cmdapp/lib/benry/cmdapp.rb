@@ -488,6 +488,15 @@ module Benry::CmdApp
           except = except.is_a?(Array) ? except : (except == nil ? [] : [except])
           schema.copy_from(metadata.schema, except: [:help] + except)
         end
+        #; [!7g5ug] sets Proc object to `@optionset` in subclass.
+        @optionset = lambda do |*optionsets|
+          #; [!o27kt] raises DefinitionError if `@optionset.()` called without `@action.()`.
+          @__actiondef__ != nil  or
+            raise DefinitionError.new("`@optionset.()` called without `@action.()`.")
+          #; [!ky6sg] copies option items from optionset into schema object.
+          schema = @__actiondef__[1]
+          optionsets.each {|optset| optset.copy_into(schema) }
+        end
       end
       nil
     end
