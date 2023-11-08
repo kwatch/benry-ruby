@@ -52,6 +52,11 @@ class HelpTestAction < Benry::CmdApp::Action
 end
 
 
+class HelpTestBuilder < Benry::CmdApp::BaseHelpBuilder
+  HEADER_ACTIONS = "<ACTIONS>"
+end
+
+
 Oktest.scope do
 
 
@@ -286,6 +291,21 @@ END
     end
 
 
+    topic '#_header()' do
+
+      spec "[!ep064] returns constant value defined in the class." do
+        b = Benry::CmdApp::BaseHelpBuilder.new(nil)
+        ok {b.__send__(:_header, :HEADER_ACTIONS)} == "Actions:"
+      end
+
+      spec "[!viwtn] constant value defined in child class is prior to one defined in parent class." do
+        b = HelpTestBuilder.new(nil)
+        ok {b.__send__(:_header, :HEADER_ACTIONS)} == "<ACTIONS>"
+      end
+
+    end
+
+
   end
 
 
@@ -399,6 +419,31 @@ END
     end
 
 
+    topic '#build_postamble_part()' do
+
+      spec "[!64hj1] returns postamble of application help message." do
+        @config.help_postamble = [
+          {"Examples:" => "  $ echo yes\n  yes\n"},
+          "(Tips: blablabla)",
+        ]
+        x = @builder.__send__(:build_postamble_part)
+        ok {x} == <<"END"
+\e[1;34mExamples:\e[0m
+  $ echo yes
+  yes
+
+(Tips: blablabla)
+END
+      end
+
+      spec "[!z5k2w] returns nil if postamble not set." do
+        x = @builder.__send__(:build_postamble_part)
+        ok {x} == nil
+      end
+
+    end
+
+
     topic '#build_usage_part()' do
 
       spec "[!h98me] returns 'Usage:' section of application help message." do
@@ -484,6 +529,14 @@ END
         ok {x} !~ /debuginfo/
       end
 
+      spec "[!10qp0] includes aliases if the 1st argument is true." do
+        x = @builder.__send__(:build_actions_part, true, all: true)
+        ok {x} =~ /alias of/
+        #
+        x = @builder.__send__(:build_actions_part, false, all: true)
+        ok {x} !~ /alias of/
+      end
+
       spec "[!24by5] returns nil if no actions defined." do
         debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
         hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
@@ -530,26 +583,331 @@ END
     end
 
 
-    topic '#build_postamble_part()' do
+    topic '#_build_metadata_list()' do
 
-      spec "[!64hj1] returns postamble of application help message." do
-        @config.help_postamble = [
-          {"Examples:" => "  $ echo yes\n  yes\n"},
-          "(Tips: blablabla)",
-        ]
-        x = @builder.__send__(:build_postamble_part)
+      spec "[!iokkp] builds list of actions or aliases." do
+        format = "%s : %s"
+        output = @builder.__send__(:_build_metadata_list, format) { true }
+        ok {output} =~ /^hello : greeting message$/
+      end
+
+      spec "[!grwkj] filters by block." do
+        format = "%s : %s"
+        output = @builder.__send__(:_build_metadata_list, format) {|md| md.alias? }
+        ok {output} !~ /^hello : greeting message$/
+        ok {output} =~ /alias of/
+        output = @builder.__send__(:_build_metadata_list, format) {|md| ! md.alias? }
+        ok {output} =~ /^hello : greeting message$/
+        ok {output} !~ /alias of/
+      end
+
+    end
+
+
+    topic '#build_candidates_part()' do
+
+      spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
+        x = @builder.build_candidates_part("git:")
         ok {x} == <<"END"
-\e[1;34mExamples:\e[0m
-  $ echo yes
-  yes
-
-(Tips: blablabla)
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
 END
       end
 
-      spec "[!z5k2w] returns nil if postamble not set." do
-        x = @builder.__send__(:build_postamble_part)
-        ok {x} == nil
+      spec "[!idm2h] includes hidden actions when `all: true` passed." do
+        x = @builder.build_candidates_part("git:", all: true)
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+END
+      end
+
+      spec "[!duhyd] includes actions which name is same as prefix." do
+        HelpTestAction.class_eval do
+          prefix "p8572:", action: "aaa" do
+            @action.("AAA")
+            def aaa()
+            end
+            @action.("BBB")
+            def bbb()
+            end
+          end
+          @action.("sample")
+          def p8572x()
+          end
+        end
+        x = @builder.build_candidates_part("p8572:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  p8572              : AAA
+  p8572:bbb          : BBB
+END
+      end
+
+      spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
+        Benry::CmdApp.define_alias("git", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("git") }
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+  git                : alias of 'git:stage'
+END
+      end
+
+      spec "[!otvbt] includes name of alias which corresponds to action starting with prefix." do
+        Benry::CmdApp.define_alias("add", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+  add                : alias of 'git:stage'
+END
+      end
+
+      spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
+        Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_candidates_part("git:", all: true)
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+\e[2m  git:correct        : same as `git commit --amend`\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+
+\e[1;34mAliases:\e[0m
+\e[2m  add                : alias of 'git:stage'\e[0m
+END
+        #
+        x = @builder.build_candidates_part("git:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  git:stage          : same as `git add -p`
+  git:staged         : same as `git diff --cached`
+  git:unstage        : same as `git reset HEAD`
+END
+      end
+
+      spec "[!80t51] alias names are displayed in separated section from actions." do
+        Benry::CmdApp.define_alias("add", "git:stage")
+        at_end { Benry::CmdApp.undef_alias("add") }
+        x = @builder.build_candidates_part("git:")
+        ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
+      end
+
+      spec "[!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix." do
+        x = @builder.build_candidates_part("blabla:")
+        ok {x} == "\e[1;34mActions:\e[0m\n\n"
+      end
+
+    end
+
+
+    topic '#build_aliases_part()' do
+
+      spec "[!496qq] renders alias list." do
+        Benry::CmdApp.define_alias("a9208", "hello")
+        x = @builder.build_aliases_part()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^  a9208 +: alias of 'hello'$/
+      end
+
+      spec "[!fj1c7] returns header string if no aliases found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        x = @builder.build_aliases_part()
+        ok {x} == "\e[1;34mAliases:\e[0m\n\n"
+        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
+        index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
+        x = @builder.build_aliases_part()
+        ok {x} != nil
+        ok {x} == <<"END"
+\e[1;34mAliases:\e[0m
+  h1                 : alias of 'hello'
+END
+      end
+
+      spec "[!d7vee] ignores hidden aliases in default." do
+        Benry::CmdApp.define_alias("a4904", "hello", hidden: true)
+        x = @builder.build_aliases_part()
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} !~ /a4904/
+      end
+
+      spec "[!4vvrs] include hidden aliases if `all: true` specifieid." do
+        Benry::CmdApp.define_alias("a4612", "hello", hidden: true)
+        x = @builder.build_aliases_part(all: true)
+        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
+        ok {x} =~ /^\e\[2m  a4612 +: alias of 'hello'\e\[0m$/
+      end
+
+      spec "[!v211d] sorts aliases by action names." do
+        old_index = Benry::CmdApp::INDEX
+        names = ["hello", "debuginfo", "testerr1", "git:stage", "git:staged", "git:unstage"]
+        output = nil
+        with_dummy_index do |new_index|
+          names.each {|name| new_index.metadata_add(old_index.metadata_get(name)) }
+          Benry::CmdApp.define_alias("a1", "git:unstage")
+          Benry::CmdApp.define_alias("a2", "git:stage")
+          Benry::CmdApp.define_alias("a3", "git:staged")
+          Benry::CmdApp.define_alias("a4", "testerr1")
+          Benry::CmdApp.define_alias("a5", "debuginfo")
+          Benry::CmdApp.define_alias("a6", "hello")
+          output = @builder.build_aliases_part()
+        end
+        ok {output} == <<"END"
+\e[1;34mAliases:\e[0m
+  a5                 : alias of 'debuginfo'
+  a2                 : alias of 'git:stage'
+  a3                 : alias of 'git:staged'
+  a1                 : alias of 'git:unstage'
+  a6                 : alias of 'hello'
+  a4                 : alias of 'testerr1'
+END
+      end
+
+    end
+
+
+    topic '#build_abbrevs_part()' do
+
+      spec "[!00ice] returns abbrev list string." do
+        Benry::CmdApp.define_abbrev("g25:", "git:")
+        x = @builder.build_abbrevs_part()
+        ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m\n/
+        ok {x} =~ /^  g25: +=> +git:\n/
+      end
+
+      spec "[!dnt12] returns nil if no abbrevs found." do
+        index = Benry::CmdApp::MetadataIndex.new()
+        @builder.instance_variable_set(:@_index, index)
+        ok {@builder.build_abbrevs_part()} == "\e[1;34mAbbreviations:\e[0m\n\n"
+        index.abbrev_add("g26:", "git:")
+        ok {@builder.build_abbrevs_part()} == <<END
+\e[1;34mAbbreviations:\e[0m
+  g26:       =>  git:
+END
+      end
+
+    end
+
+
+    topic '#build_prefixes_part()' do
+
+      spec "[!crbav] returns top prefix list." do
+        x = @builder.build_prefixes_part(1)
+        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
+        ok {x} =~ /^  git: \(\d+\)\n/
+      end
+
+      spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
+        x = @builder.build_prefixes_part(1, all: true)
+        ok {x} =~ /^  secret:/
+        x = @builder.build_prefixes_part(1)
+        ok {x} !~ /^  secret:/
+      end
+
+      spec "[!p4j1o] returns nil if no prefix found." do
+        index = Benry::CmdApp::MetadataIndex.new
+        ["hello", "secret:crypt"].each do |action|
+          index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
+        end
+        #
+        with_dummy_index(index) do
+          x = @builder.build_prefixes_part()
+          ok {x} == nil
+          x = @builder.build_prefixes_part(all: true)
+          ok {x} != nil
+        end
+      end
+
+      spec "[!30l2j] includes number of actions per prefix." do
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^  git: \(\d+\)\n/
+        ok {x} =~ /^  secret: \(\d+\)\n/
+      end
+
+      spec "[!qxoja] includes prefix description if registered." do
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
+      end
+
+      spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
+        @config.format_prefix = "  %-15s # %s"
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
+        #
+        @config.format_prefix = nil
+        @config.format_prefix = "    %-15s -- %s"
+        x = @builder.build_prefixes_part(all: true)
+        ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
+      end
+
+    end
+
+
+    topic '#_count_actions_per_prefix()' do
+
+      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        ok {b.__send__(:_count_actions_per_prefix, 1, all: true) }.key?("md:")
+        ok {b.__send__(:_count_actions_per_prefix, 1, all: false)}.NOT.key?("md:")
+      end
+
+      spec "[!5n3qj] counts prefix of specified depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        expected1 = {"giit:"=>13}
+        expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:"=>7,
+                     "giit:staging:"=>3}
+        expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
+                     "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
+                     "giit:staging:"=>3}
+        ok {b.__send__(:_count_actions_per_prefix, 1)} == expected1
+        ok {b.__send__(:_count_actions_per_prefix, 2)} == expected2
+        ok {b.__send__(:_count_actions_per_prefix, 3)} == expected3
+        ok {b.__send__(:_count_actions_per_prefix, 4)} == expected3
+        ok {b.__send__(:_count_actions_per_prefix, 5)} == expected3
+      end
+
+      spec "[!r2frb] counts prefix of lesser depth." do
+        idx = new_index_with_filter("giit:", "md:")
+        b = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+        b.instance_variable_set(:@_index, idx)
+        #
+        x = b.__send__(:_count_actions_per_prefix, 1)
+        ok {x}.key?("giit:")
+        ok {x}.NOT.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = b.__send__(:_count_actions_per_prefix, 2)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.NOT.key?("giit:repo:config:")
+        x = b.__send__(:_count_actions_per_prefix, 3)
+        ok {x}.key?("giit:")
+        ok {x}.key?("giit:branch:")
+        ok {x}.key?("giit:repo:config:")
       end
 
     end
@@ -761,411 +1119,6 @@ END
 
     end
 
-
-  end
-
-
-  topic Benry::CmdApp::TopicListBuilder do
-
-    before do
-      @config = Benry::CmdApp::Config.new("test app", "1.2.3",
-                                          app_name: "TestApp", app_command: "testapp",
-                                          option_verbose: true, option_quiet: true,
-                                          option_color: true, #option_debug: true,
-                                          option_trace: true)
-      @builder = Benry::CmdApp::TopicListBuilder.new(@config)
-      @index = Benry::CmdApp::INDEX
-    end
-
-
-    topic '#build_available_list()' do
-
-      spec "[!gawd3] returns mixed list of actions and aliases." do
-        x = @builder.build_available_list()
-        ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
-        ok {x} !~ /Aliases/
-      end
-
-      spec "[!yoe9b] returns header string if nothing found." do
-        index = Benry::CmdApp::MetadataIndex.new()
-        @builder.instance_variable_set(:@_index, index)
-        x = @builder.build_available_list()
-        ok {x} == "\e[1;34mActions:\e[0m\n\n"
-      end
-
-      spec "[!ry3gz] includes hidden actions and aliases if `all: true` passed." do
-        x = @builder.build_available_list(all: true)
-        ok {x} =~ /debuginfo/
-        ok {x} =~ /^\e\[2m  debuginfo          : hidden action\e\[0m$/
-        x = @builder.build_available_list()
-        ok {x} !~ /debuginfo/
-      end
-
-    end
-
-
-    topic '#build_action_list()' do
-
-      spec "[!q12ju] returns list of actions and aliases." do
-        x = @builder.build_action_list()
-        ok {x} !~ /Usage:/
-        ok {x} !~ /Options:/
-        ok {x} =~ /Actions:/
-        ok {x} =~ /\A\e\[1;34mActions:\e\[0m\n/
-      end
-
-      spec "[!90rjk] includes hidden actions and aliases if `all: true` passed." do
-        x = @builder.build_action_list()
-        ok {x} !~ /  debuginfo/
-        #
-        x = @builder.build_action_list(all: true)
-        ok {x} =~ /  debuginfo/
-        ok {x} =~ /^\e\[2m  debuginfo/
-      end
-
-      spec "[!k2tts] returns header string if no actions found." do
-        debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
-        hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
-        index        = Benry::CmdApp::MetadataIndex.new()
-        with_dummy_index(index) do
-          #
-          x = @builder.build_action_list()
-          ok {x} == "\e[1;34mActions:\e[0m\n\n"
-          #
-          index.metadata_add(debuginfo_md)
-          x = @builder.build_action_list()
-          ok {x} == "\e[1;34mActions:\e[0m\n\n"
-          x = @builder.build_action_list(all: true)
-          ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-\e[2m  debuginfo          : hidden action\e[0m
-END
-          #
-          index.metadata_add(hello_md)
-          x = @builder.build_action_list()
-          ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-  hello              : greeting message
-END
-          x = @builder.build_action_list(all: true)
-          ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-\e[2m  debuginfo          : hidden action\e[0m
-  hello              : greeting message
-END
-        end
-      end
-
-    end
-
-
-    topic '#build_candidate_list()' do
-
-      spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
-        x = @builder.build_candidate_list("git:")
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-  git:stage          : same as `git add -p`
-  git:staged         : same as `git diff --cached`
-  git:unstage        : same as `git reset HEAD`
-END
-      end
-
-      spec "[!idm2h] includes hidden actions when `all: true` passed." do
-        x = @builder.build_candidate_list("git:", all: true)
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-\e[2m  git:correct        : same as `git commit --amend`\e[0m
-  git:stage          : same as `git add -p`
-  git:staged         : same as `git diff --cached`
-  git:unstage        : same as `git reset HEAD`
-END
-      end
-
-      spec "[!duhyd] includes actions which name is same as prefix." do
-        HelpTestAction.class_eval do
-          prefix "p8571:", action: "aaa" do
-            @action.("AAA")
-            def aaa()
-            end
-            @action.("BBB")
-            def bbb()
-            end
-          end
-          @action.("sample")
-          def p8571x()
-          end
-        end
-        x = @builder.build_candidate_list("p8571:")
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-  p8571              : AAA
-  p8571:bbb          : BBB
-END
-      end
-
-      spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
-        Benry::CmdApp.define_alias("git", "git:stage")
-        at_end { Benry::CmdApp.undef_alias("git") }
-        x = @builder.build_candidate_list("git:")
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-  git:stage          : same as `git add -p`
-  git:staged         : same as `git diff --cached`
-  git:unstage        : same as `git reset HEAD`
-
-\e[1;34mAliases:\e[0m
-  git                : alias of 'git:stage'
-END
-      end
-
-      spec "[!otvbt] includes name of alias which corresponds to action starting with prefix." do
-        Benry::CmdApp.define_alias("add", "git:stage")
-        at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.build_candidate_list("git:")
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-  git:stage          : same as `git add -p`
-  git:staged         : same as `git diff --cached`
-  git:unstage        : same as `git reset HEAD`
-
-\e[1;34mAliases:\e[0m
-  add                : alias of 'git:stage'
-END
-      end
-
-      spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
-        Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
-        at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.build_candidate_list("git:", all: true)
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-\e[2m  git:correct        : same as `git commit --amend`\e[0m
-  git:stage          : same as `git add -p`
-  git:staged         : same as `git diff --cached`
-  git:unstage        : same as `git reset HEAD`
-
-\e[1;34mAliases:\e[0m
-\e[2m  add                : alias of 'git:stage'\e[0m
-END
-        #
-        x = @builder.build_candidate_list("git:")
-        ok {x} == <<"END"
-\e[1;34mActions:\e[0m
-  git:stage          : same as `git add -p`
-  git:staged         : same as `git diff --cached`
-  git:unstage        : same as `git reset HEAD`
-END
-      end
-
-      spec "[!80t51] alias names are displayed in separated section from actions." do
-        Benry::CmdApp.define_alias("add", "git:stage")
-        at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.build_candidate_list("git:")
-        ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
-      end
-
-      spec "[!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix." do
-        x = @builder.build_candidate_list("blabla:")
-        ok {x} == "\e[1;34mActions:\e[0m\n\n"
-      end
-
-    end
-
-
-    topic '#build_alias_list()' do
-
-      spec "[!496qq] renders alias list." do
-        Benry::CmdApp.define_alias("a9209", "hello")
-        x = @builder.build_alias_list()
-        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
-        ok {x} =~ /^  a9209 +: alias of 'hello'$/
-      end
-
-      spec "[!fj1c7] returns header string if no aliases found." do
-        index = Benry::CmdApp::MetadataIndex.new()
-        @builder.instance_variable_set(:@_index, index)
-        x = @builder.build_alias_list()
-        ok {x} == "\e[1;34mAliases:\e[0m\n\n"
-        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
-        index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
-        x = @builder.build_alias_list()
-        ok {x} != nil
-        ok {x} == <<"END"
-\e[1;34mAliases:\e[0m
-  h1                 : alias of 'hello'
-END
-      end
-
-      spec "[!d7vee] ignores hidden aliases in default." do
-        Benry::CmdApp.define_alias("a4903", "hello", hidden: true)
-        x = @builder.build_alias_list()
-        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
-        ok {x} !~ /a4903/
-      end
-
-      spec "[!4vvrs] include hidden aliases if `all: true` specifieid." do
-        Benry::CmdApp.define_alias("a4613", "hello", hidden: true)
-        x = @builder.build_alias_list(all: true)
-        ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
-        ok {x} =~ /^\e\[2m  a4613 +: alias of 'hello'\e\[0m$/
-      end
-
-      spec "[!v211d] sorts aliases by action names." do
-        old_index = Benry::CmdApp::INDEX
-        names = ["hello", "debuginfo", "testerr1", "git:stage", "git:staged", "git:unstage"]
-        output = nil
-        with_dummy_index do |new_index|
-          names.each {|name| new_index.metadata_add(old_index.metadata_get(name)) }
-          Benry::CmdApp.define_alias("a1", "git:unstage")
-          Benry::CmdApp.define_alias("a2", "git:stage")
-          Benry::CmdApp.define_alias("a3", "git:staged")
-          Benry::CmdApp.define_alias("a4", "testerr1")
-          Benry::CmdApp.define_alias("a5", "debuginfo")
-          Benry::CmdApp.define_alias("a6", "hello")
-          output = @builder.build_alias_list()
-        end
-        ok {output} == <<"END"
-\e[1;34mAliases:\e[0m
-  a5                 : alias of 'debuginfo'
-  a2                 : alias of 'git:stage'
-  a3                 : alias of 'git:staged'
-  a1                 : alias of 'git:unstage'
-  a6                 : alias of 'hello'
-  a4                 : alias of 'testerr1'
-END
-      end
-
-    end
-
-
-    topic '#build_abbrev_list()' do
-
-      spec "[!00ice] returns abbrev list string." do
-        Benry::CmdApp.define_abbrev("g23:", "git:")
-        x = @builder.build_abbrev_list()
-        ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m\n/
-        ok {x} =~ /^  g23: +=> +git:\n/
-      end
-
-      spec "[!dnt12] returns nil if no abbrevs found." do
-        index = Benry::CmdApp::MetadataIndex.new()
-        @builder.instance_variable_set(:@_index, index)
-        ok {@builder.build_abbrev_list()} == "\e[1;34mAbbreviations:\e[0m\n\n"
-        index.abbrev_add("g24:", "git:")
-        ok {@builder.build_abbrev_list()} == <<END
-\e[1;34mAbbreviations:\e[0m
-  g24:       =>  git:
-END
-      end
-
-    end
-
-
-    topic '#build_prefix_list()' do
-
-      spec "[!crbav] returns top prefix list." do
-        x = @builder.build_prefix_list(1)
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
-        ok {x} =~ /^  git: \(\d+\)\n/
-      end
-
-      spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
-        x = @builder.build_prefix_list(1, all: true)
-        ok {x} =~ /^  secret:/
-        x = @builder.build_prefix_list(1)
-        ok {x} !~ /^  secret:/
-      end
-
-      spec "[!p4j1o] returns nil if no prefix found." do
-        index = Benry::CmdApp::MetadataIndex.new
-        ["hello", "secret:crypt"].each do |action|
-          index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
-        end
-        #
-        with_dummy_index(index) do
-          x = @builder.build_prefix_list()
-          ok {x} == nil
-          x = @builder.build_prefix_list(all: true)
-          ok {x} != nil
-        end
-      end
-
-      spec "[!30l2j] includes number of actions per prefix." do
-        x = @builder.build_prefix_list(all: true)
-        ok {x} =~ /^  git: \(\d+\)\n/
-        ok {x} =~ /^  secret: \(\d+\)\n/
-      end
-
-      spec "[!qxoja] includes prefix description if registered." do
-        x = @builder.build_prefix_list(all: true)
-        ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
-      end
-
-      spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
-        @config.format_prefix = "  %-15s # %s"
-        x = @builder.build_prefix_list(all: true)
-        ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
-        #
-        @config.format_prefix = nil
-        @config.format_prefix = "    %-15s -- %s"
-        x = @builder.build_prefix_list(all: true)
-        ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
-      end
-
-    end
-
-
-    topic '#_count_actions_per_prefix()' do
-
-      spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
-        idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::TopicListBuilder.new(@config)
-        b.instance_variable_set(:@_index, idx)
-        #
-        ok {b.__send__(:_count_actions_per_prefix, 1, all: true) }.key?("md:")
-        ok {b.__send__(:_count_actions_per_prefix, 1, all: false)}.NOT.key?("md:")
-      end
-
-      spec "[!5n3qj] counts prefix of specified depth." do
-        idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::TopicListBuilder.new(@config)
-        b.instance_variable_set(:@_index, idx)
-        #
-        expected1 = {"giit:"=>13}
-        expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
-                     "giit:repo:"=>7,
-                     "giit:staging:"=>3}
-        expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
-                     "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
-                     "giit:staging:"=>3}
-        ok {b.__send__(:_count_actions_per_prefix, 1)} == expected1
-        ok {b.__send__(:_count_actions_per_prefix, 2)} == expected2
-        ok {b.__send__(:_count_actions_per_prefix, 3)} == expected3
-        ok {b.__send__(:_count_actions_per_prefix, 4)} == expected3
-        ok {b.__send__(:_count_actions_per_prefix, 5)} == expected3
-      end
-
-      spec "[!r2frb] counts prefix of lesser depth." do
-        idx = new_index_with_filter("giit:", "md:")
-        b = Benry::CmdApp::TopicListBuilder.new(@config)
-        b.instance_variable_set(:@_index, idx)
-        #
-        x = b.__send__(:_count_actions_per_prefix, 1)
-        ok {x}.key?("giit:")
-        ok {x}.NOT.key?("giit:branch:")
-        ok {x}.NOT.key?("giit:repo:config:")
-        x = b.__send__(:_count_actions_per_prefix, 2)
-        ok {x}.key?("giit:")
-        ok {x}.key?("giit:branch:")
-        ok {x}.NOT.key?("giit:repo:config:")
-        x = b.__send__(:_count_actions_per_prefix, 3)
-        ok {x}.key?("giit:")
-        ok {x}.key?("giit:branch:")
-        ok {x}.key?("giit:repo:config:")
-      end
-
-    end
 
   end
 
