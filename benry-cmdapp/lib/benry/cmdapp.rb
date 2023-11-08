@@ -1576,9 +1576,6 @@ module Benry::CmdApp
       print_backtrace(exc) if ! exc.is_a?(BaseError) || exc.should_report_backtrace?()
       #; [!dzept] returns `1` as status code.
       return 1
-    ensure
-      #; [!pf1d2] calls teardown method at end of this method.
-      teardown()
     end
 
     def run(*args)
