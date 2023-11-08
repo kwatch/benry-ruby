@@ -2297,7 +2297,7 @@ class MyAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
   #def build_candidates_part(prefix, all: false); super; end
   #def build_aliases_part(all: false); super; end
   #def build_abbrevs_part(all: false); super; end
-  #def build_prefixes_part(depth=1, all: false); super; end
+  #def build_prefixes_part(depth=0, all: false); super; end
 end
 
 ## (3) Create an instance object of the class.
@@ -2359,7 +2359,7 @@ module MyHelpBuilderMod
   #def build_candidates_part(prefix, all: false); super; end
   #def build_aliases_part(all: false); super; end
   #def build_abbrevs_part(all: false); super; end
-  #def build_prefixes_part(depth=1, all: false); super; end
+  #def build_prefixes_part(depth=0, all: false); super; end
 end
 
 ## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
