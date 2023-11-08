@@ -93,7 +93,7 @@ Oktest.scope do
         ok {x[2]} == {:usage=>nil, :detail=>nil, :postamble=>nil, :tag=>nil, :important=>nil, :hidden=>nil}
       end
 
-      spec "[!en6n0] sets Proc object ot `@option` in subclass." do
+      spec "[!en6n0] sets Proc object to `@option` in subclass." do
         x = ScopeTestAction.class_eval { @option }
         ok {x}.is_a?(Proc)
         ok {x}.lambda?

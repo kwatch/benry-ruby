@@ -459,7 +459,7 @@ module Benry::CmdApp
           kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
         end
-        #; [!en6n0] sets Proc object ot `@option` in subclass.
+        #; [!en6n0] sets Proc object to `@option` in subclass.
         @option = lambda do |key, optstr, desc,
                              type: nil, rexp: nil, pattern: nil, enum: nil,
                              range: nil, value: nil, detail: nil,
