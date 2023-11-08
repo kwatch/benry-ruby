@@ -653,6 +653,22 @@ module Benry::CmdApp
         return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
     end
 
+    def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+      #; [!tcpuz] just defines an alias when current prefix is nil.
+      prefix = self.current_prefix()
+      if prefix == nil
+        nil
+      #; [!b8ly2] supports array argument.
+      elsif action_name.is_a?(Array)
+        action_name[0] = prefix + action_name[0]
+      #; [!c6duw] defines an alias with prefix when current prefix exist.
+      else
+        action_name = prefix + action_name
+      end
+      #; [!0dkrj] keyword arguments are passed to higher function.
+      Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
+    end
+
     def self.new_optionset(&block)
       #; [!us0g4] yields block with dummy action.
       #; [!1idwv] clears default option items.

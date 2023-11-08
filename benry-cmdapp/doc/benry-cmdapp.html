@@ -1290,37 +1290,48 @@ zip -r build.zip build
 </section>
 <section class="subsection" id="alias-of-action">
 <h3>Alias of Action</h3>
+<p>Alias of action provides alternative short name of action.</p>
 <ul>
-<li>Alias of action provides alternative short name of action.</li>
+<li><code>define_alias()</code> in action class defines an alias with taking action name prefix into account.</li>
+<li><code>Benry::CmdApp.define_alias()</code> defines an alias, without taking action name prefix into account.</li>
 </ul>
 <p>File: ex21.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 require 'benry/cmdapp'
 
-class SampleAction &lt Benry::CmdApp::Action
-  <strong>prefix "foo:bar:"</strong>
+class GitAction &lt Benry::CmdApp::Action
+  <strong>prefix "git:"</strong>                                   # !!!!
 
-  @action.("test action #1")
-  def <strong>test1</strong>()                 # action name: 'foo:bar:test1'
-    puts __method__
+  @action.("show current status in compact mode")
+  def status()
+    puts "git status -sb"
+  end
+
+  <strong>define_alias "st", "status"</strong>                     # !!!!
+  ## or:
+  #<strong>Benry::CmdApp.define_alias "st", "git:status"</strong>  # !!!!
+
+  <strong>prefix "staging:" do</strong>                            # !!!!
+
+    @action.("show changes in staging area")
+    def show()
+      puts "git diff --cached"
+    end
+
+    <strong>define_alias "staged" , "show"</strong>                # !!!!
+    ## or:
+    #<strong>Benry::CmdApp.define_alias "staged", "git:staging:show"</strong> # !!!!
+
   end
 
 end
 
-<strong>Benry::CmdApp.define_alias "test", "foo:bar:test1"</strong>   # !!!!
+<strong>Benry::CmdApp.define_alias "git", "git:status"</strong>    # !!!!
 
 config = Benry::CmdApp::Config.new("sample app")
 app = Benry::CmdApp::Application.new(config)
 exit app.main()
-</pre>
-<p>Output:</p>
-<pre class="language-console">
-[bash]$ ruby ex21.rb <strong>test</strong>             # alias name
-test1
-
-[bash]$ ruby ex21.rb <strong>foo:bar:test1</strong>    # original action name
-test1
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -1336,9 +1347,29 @@ Options:
   -a, --all          : list hidden actions/options, too
 
 Actions:
-  foo:bar:test1      : test action #1
+  <strong>git                : alias of 'git:status'</strong>           # !!!!
+  git:staging:show   : show changes in staging area
+  git:status         : show current status in compact mode
   help               : print help message (of action if specified)
-  <strong>test               : alias of 'foo:bar:test1'</strong>
+  <strong>st                 : alias of 'git:status'</strong>           # !!!!
+  <strong>staged             : alias of 'git:staging:show'</strong>     # !!!!
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ruby ex21.rb <strong>st</strong>                # alias name
+git status -sb
+
+[bash]$ ruby ex21.rb <strong>git:status</strong>        # original action name
+git status -sb
+
+[bash]$ ruby ex21.rb <strong>staged</strong>            # alias name
+git diff --cached
+
+[bash]$ ruby ex21.rb <strong>git:staging:show</strong>  # original action name
+git diff --cached
+
+[bash]$ ruby ex21.rb <strong>git</strong>               # alias name
+git status -sb
 </pre>
 <ul>
 <li>Both alias and action names should be string. Symbol is not allowed.</li>
