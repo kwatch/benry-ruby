@@ -124,7 +124,7 @@ Oktest.scope do
     topic '#start_action()' do
 
       spec "[!2mnh7] looks up action metadata with action or alias name." do
-        metadata = Benry::CmdApp::INDEX.metadata_get("foo:anyargs")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("foo:anyargs")
         ok {metadata} != nil
         Benry::CmdApp.define_alias("ali21", "foo:anyargs")
         Benry::CmdApp.define_alias("ali22", "ali21")
@@ -146,7 +146,7 @@ Oktest.scope do
       end
 
       spec "[!9n46s] if alias has its own args, combines them with command-line args." do
-        metadata = Benry::CmdApp::INDEX.metadata_get("foo:anyargs")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("foo:anyargs")
         ok {metadata} != nil
         Benry::CmdApp.define_alias("ali31", ["foo:anyargs", "aa"])
         Benry::CmdApp.define_alias("ali32", "ali31")
@@ -162,7 +162,7 @@ Oktest.scope do
       end
 
       spec "[!5ru31] options in alias args are also parsed as well as command-line options." do
-        metadata = Benry::CmdApp::INDEX.metadata_get("hello")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("hello")
         ok {metadata} != nil
         Benry::CmdApp.define_alias("ali41", ["hello", "-l", "it"])
         Benry::CmdApp.define_alias("ali42", ["ali41"])
@@ -361,7 +361,7 @@ END
     topic '#new_scope_object()' do
 
       spec "[!1uzs3] creates new scope object." do
-        md = Benry::CmdApp::INDEX.metadata_get("hello")
+        md = Benry::CmdApp::REGISTRY.metadata_get("hello")
         x = @context.__send__(:new_scope_object, md)
         ok {x}.is_a?(md.klass)
         ok {x}.is_a?(MyAction)

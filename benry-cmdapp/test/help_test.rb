@@ -60,26 +60,26 @@ end
 Oktest.scope do
 
 
-  def with_dummy_index(index=nil, &b)
-    index ||= Benry::CmdApp::Index.new()
+  def with_dummy_registry(registry=nil, &b)
+    registry ||= Benry::CmdApp::Registry.new()
     bkup = nil
     Benry::CmdApp.module_eval {
-      bkup = const_get :INDEX
-      remove_const :INDEX
-      const_set :INDEX, index
+      bkup = const_get :REGISTRY
+      remove_const :REGISTRY
+      const_set :REGISTRY, registry
     }
-    yield index
-    return index
+    yield registry
+    return registry
   ensure
     Benry::CmdApp.module_eval {
-      remove_const :INDEX
-      const_set :INDEX, bkup
+      remove_const :REGISTRY
+      const_set :REGISTRY, bkup
     }
   end
 
-  def new_index_with_filter(*prefixes)
-    idx = Benry::CmdApp::Index.new()
-    Benry::CmdApp::INDEX.metadata_each do |md|
+  def new_registry_with_filter(*prefixes)
+    idx = Benry::CmdApp::Registry.new()
+    Benry::CmdApp::REGISTRY.metadata_each do |md|
       if md.name.start_with?(*prefixes)
         idx.metadata_add(md)
       end
@@ -222,11 +222,11 @@ END
     topic '#build_action_line()' do
 
       spec "[!ferqn] returns '  <action> : <descriptn>' line." do
-        metadata = Benry::CmdApp::INDEX.metadata_get("hello")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("hello")
         x = @builder.__send__(:build_action_line, metadata)
         ok {x} == "  hello              : greeting message\n"
         #
-        metadata = Benry::CmdApp::INDEX.metadata_get("debuginfo")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("debuginfo")
         x = @builder.__send__(:build_action_line, metadata)
         ok {x} == "\e[2m  debuginfo          : hidden action\e[0m\n"
       end
@@ -538,15 +538,15 @@ END
       end
 
       spec "[!24by5] returns nil if no actions defined." do
-        debuginfo_md = Benry::CmdApp::INDEX.metadata_get("debuginfo")
-        hello_md     = Benry::CmdApp::INDEX.metadata_get("hello")
-        index = Benry::CmdApp::Index.new()
-        with_dummy_index(index) do
+        debuginfo_md = Benry::CmdApp::REGISTRY.metadata_get("debuginfo")
+        hello_md     = Benry::CmdApp::REGISTRY.metadata_get("hello")
+        registry = Benry::CmdApp::Registry.new()
+        with_dummy_registry(registry) do
           #
           x = @builder.__send__(:build_actions_part)
           ok {x} == nil
           #
-          index.metadata_add(debuginfo_md)
+          registry.metadata_add(debuginfo_md)
           x = @builder.__send__(:build_actions_part)
           ok {x} == nil
           x = @builder.__send__(:build_actions_part, all: true)
@@ -555,7 +555,7 @@ END
 \e[2m  debuginfo          : hidden action\e[0m
 END
           #
-          index.metadata_add(hello_md)
+          registry.metadata_add(hello_md)
           x = @builder.__send__(:build_actions_part)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
@@ -728,12 +728,12 @@ END
       end
 
       spec "[!fj1c7] returns header string if no aliases found." do
-        index = Benry::CmdApp::Index.new()
-        @builder.instance_variable_set(:@_index, index)
+        registry = Benry::CmdApp::Registry.new()
+        @builder.instance_variable_set(:@_registry, registry)
         x = @builder.build_aliases_part()
         ok {x} == "\e[1;34mAliases:\e[0m\n\n"
-        index.metadata_add(Benry::CmdApp::INDEX.metadata_get("hello"))
-        index.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
+        registry.metadata_add(Benry::CmdApp::REGISTRY.metadata_get("hello"))
+        registry.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
         x = @builder.build_aliases_part()
         ok {x} != nil
         ok {x} == <<"END"
@@ -757,11 +757,11 @@ END
       end
 
       spec "[!v211d] sorts aliases by action names." do
-        old_index = Benry::CmdApp::INDEX
+        old_registry = Benry::CmdApp::REGISTRY
         names = ["hello", "debuginfo", "testerr1", "git:stage", "git:staged", "git:unstage"]
         output = nil
-        with_dummy_index do |new_index|
-          names.each {|name| new_index.metadata_add(old_index.metadata_get(name)) }
+        with_dummy_registry do |new_registry|
+          names.each {|name| new_registry.metadata_add(old_registry.metadata_get(name)) }
           Benry::CmdApp.define_alias("a1", "git:unstage")
           Benry::CmdApp.define_alias("a2", "git:stage")
           Benry::CmdApp.define_alias("a3", "git:staged")
@@ -794,10 +794,10 @@ END
       end
 
       spec "[!dnt12] returns header string if no abbrevs found." do
-        index = Benry::CmdApp::Index.new()
-        @builder.instance_variable_set(:@_index, index)
+        registry = Benry::CmdApp::Registry.new()
+        @builder.instance_variable_set(:@_registry, registry)
         ok {@builder.build_abbrevs_part()} == "\e[1;34mAbbreviations:\e[0m\n\n"
-        index.abbrev_add("g26:", "git:")
+        registry.abbrev_add("g26:", "git:")
         ok {@builder.build_abbrevs_part()} == <<END
 \e[1;34mAbbreviations:\e[0m
   g26:       =>  git:
@@ -823,12 +823,12 @@ END
       end
 
       spec "[!p4j1o] returns nil if no prefix found." do
-        index = Benry::CmdApp::Index.new
+        registry = Benry::CmdApp::Registry.new
         ["hello", "secret:crypt"].each do |action|
-          index.metadata_add(Benry::CmdApp::INDEX.metadata_get(action))
+          registry.metadata_add(Benry::CmdApp::REGISTRY.metadata_get(action))
         end
         #
-        with_dummy_index(index) do
+        with_dummy_registry(registry) do
           x = @builder.build_prefixes_part()
           ok {x} == nil
           x = @builder.build_prefixes_part(all: true)
@@ -873,13 +873,13 @@ END
                                           option_color: true, #option_debug: true,
                                           option_trace: true)
       @builder = Benry::CmdApp::ActionHelpBuilder.new(@config)
-      @index = Benry::CmdApp::INDEX
+      @registry = Benry::CmdApp::REGISTRY
     end
 
     topic '#build_help_message()' do
 
       spec "[!f3436] returns help message of an action." do
-        metadata = @index.metadata_get("hello")
+        metadata = @registry.metadata_get("hello")
         x = @builder.build_help_message(metadata)
         ok {x} == <<"END"
 \e[1mtestapp hello\e[0m --- greeting message
@@ -893,7 +893,7 @@ END
       end
 
       spec "[!8acs1] includes hidden options if `all: true` passed." do
-        metadata = @index.metadata_get("debuginfo")
+        metadata = @registry.metadata_get("debuginfo")
         x = @builder.build_help_message(metadata, all: true)
         ok {x} == <<"END"
 \e[1mtestapp debuginfo\e[0m --- hidden action
@@ -908,7 +908,7 @@ END
       end
 
       spec "[!vcg9w] not include 'Options:' section if action has no options." do
-        metadata = @index.metadata_get("noopt")
+        metadata = @registry.metadata_get("noopt")
         x = @builder.build_help_message(metadata, all: true)
         ok {x} == <<"END"
 \e[1mtestapp noopt\e[0m --- no options
@@ -922,7 +922,7 @@ END
       end
 
       spec "[!1auu5] not include '[<options>]' in 'Usage:'section if action has no options." do
-        metadata = @index.metadata_get("debuginfo")
+        metadata = @registry.metadata_get("debuginfo")
         x = @builder.build_help_message(metadata)
         ok {x} == <<"END"
 \e[1mtestapp debuginfo\e[0m --- hidden action
@@ -938,7 +938,7 @@ END
     topic '#build_preamble_part()' do
 
       spec "[!a6nk4] returns preamble of action help message." do
-        metadata = @index.metadata_get("hello")
+        metadata = @registry.metadata_get("hello")
         x = @builder.__send__(:build_preamble_part, metadata)
         ok {x} == <<"END"
 \e[1mtestapp hello\e[0m --- greeting message
@@ -948,7 +948,7 @@ END
       spec "[!imxdq] includes `config.app_command`, not `config.app_name`, into preamble." do
         @config.app_name    = "TestApp1"
         @config.app_command = "testapp1"
-        metadata = @index.metadata_get("hello")
+        metadata = @registry.metadata_get("hello")
         x = @builder.__send__(:build_preamble_part, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 hello\e[0m --- greeting message
@@ -957,7 +957,7 @@ END
 
       spec "[!7uy4f] includes `detail:` kwarg value of `@action.()` if specified." do
         @config.app_command = "testapp1"
-        metadata = @index.metadata_get("prepostamble")
+        metadata = @registry.metadata_get("prepostamble")
         x = @builder.__send__(:build_preamble_part, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 prepostamble\e[0m --- preamble and postamble
@@ -972,7 +972,7 @@ END
     topic '#build_usage_part()' do
 
       spec "[!jca5d] not add '[<options>]' if action has no options." do
-        metadata = @index.metadata_get("noopt")
+        metadata = @registry.metadata_get("noopt")
         x = @builder.__send__(:build_usage_part, metadata)
         ok {x}.NOT.include?("[<options>]")
         ok {x} == <<"END"
@@ -980,7 +980,7 @@ END
   $ \e[1mtestapp noopt\e[0m <aa> [<bb>]
 END
         #
-        metadata = @index.metadata_get("debuginfo")   # has a hidden option
+        metadata = @registry.metadata_get("debuginfo")   # has a hidden option
         x = @builder.__send__(:build_usage_part, metadata)
         ok {x}.NOT.include?("[<options>]")
         ok {x} == <<"END"
@@ -990,7 +990,7 @@ END
       end
 
       spec "[!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string." do
-        metadata = @index.metadata_get("usagesample1")
+        metadata = @registry.metadata_get("usagesample1")
         x = @builder.__send__(:build_usage_part, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -999,7 +999,7 @@ END
       end
 
       spec "[!nfuxz] `usage:` kwarg can be a string or an array of string." do
-        metadata = @index.metadata_get("usagesample2")
+        metadata = @registry.metadata_get("usagesample2")
         x = @builder.__send__(:build_usage_part, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -1009,13 +1009,13 @@ END
       end
 
       spec "[!z3lh9] if `usage:` kwarg not specified in `@action.()`, generates usage string from method parameters." do
-        metadata = @index.metadata_get("argsample")
+        metadata = @registry.metadata_get("argsample")
         x = @builder.__send__(:build_usage_part, metadata)
         ok {x}.include?("[<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]")
       end
 
       spec "[!iuctx] returns 'Usage:' section of action help message." do
-        metadata = @index.metadata_get("argsample")
+        metadata = @registry.metadata_get("argsample")
         x = @builder.__send__(:build_usage_part, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -1029,7 +1029,7 @@ END
     topic '#build_options_part()' do
 
       spec "[!pafgs] returns 'Options:' section of help message." do
-        metadata = @index.metadata_get("hello")
+        metadata = @registry.metadata_get("hello")
         x = @builder.__send__(:build_options_part, metadata)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
@@ -1038,7 +1038,7 @@ END
       end
 
       spec "[!85wus] returns nil if action has no options." do
-        metadata = @index.metadata_get("noopt")
+        metadata = @registry.metadata_get("noopt")
         x = @builder.__send__(:build_options_part, metadata)
         ok {x} == nil
       end
@@ -1049,7 +1049,7 @@ END
     topic '#build_postamble_part()' do
 
       spec "[!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`." do
-        metadata = @index.metadata_get("prepostamble")
+        metadata = @registry.metadata_get("prepostamble")
         x = @builder.__send__(:build_postamble_part, metadata)
         ok {x} == <<"END"
 \e[1;34mExamples:\e[0m
@@ -1060,7 +1060,7 @@ END
       end
 
       spec "[!jajse] returns nil if postamble is not set." do
-        metadata = @index.metadata_get("hello")
+        metadata = @registry.metadata_get("hello")
         x = @builder.__send__(:build_postamble_part, metadata)
         ok {x} == nil
       end

@@ -163,7 +163,7 @@ Oktest.scope do
         end
         at_end { Benry::CmdApp.undef_action("hello3942") }
         #
-        md = Benry::CmdApp::INDEX.metadata_get("hello3942")
+        md = Benry::CmdApp::REGISTRY.metadata_get("hello3942")
         ok {md.schema.option_help()} == <<"END"
   -l <lang>            : language
   --color[=<on|off>]   : color mode
@@ -266,7 +266,7 @@ END
           def dummy8173(user: nil, email: nil, host: nil, port: nil)
           end
         end
-        metadata = Benry::CmdApp::INDEX.metadata_get("dummy8173")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("dummy8173")
         ok {metadata.schema.to_s} == <<"END"
   -u <user>            : user name
   -e <email>           : email address
@@ -347,7 +347,7 @@ END
           def s9321__aa_bb__cc_dd_()
           end
         end
-        md = Benry::CmdApp::INDEX.metadata_each.find {|x| x.name =~ /s9321/ }
+        md = Benry::CmdApp::REGISTRY.metadata_each.find {|x| x.name =~ /s9321/ }
         ok {md} != nil
         ok {md.name} == "s9321:aa-bb:cc-dd"
       end
@@ -380,9 +380,9 @@ END
                 end
               end
             end
-            ok {Benry::CmdApp::INDEX.metadata_get("p9782:s3867")} == nil
-            ok {Benry::CmdApp::INDEX.metadata_get("p9782")} != nil
-            ok {Benry::CmdApp::INDEX.metadata_get("p9782").meth} == :p9782__s3867
+            ok {Benry::CmdApp::REGISTRY.metadata_get("p9782:s3867")} == nil
+            ok {Benry::CmdApp::REGISTRY.metadata_get("p9782")} != nil
+            ok {Benry::CmdApp::REGISTRY.metadata_get("p9782").meth} == :p9782__s3867
           end
 
           spec "[!cydex] clears `action:` kwarg." do
@@ -419,10 +419,10 @@ END
                 end
               end
             end
-            md = Benry::CmdApp::INDEX.metadata_each.find {|x| x.name =~ /s6368/ }
+            md = Benry::CmdApp::REGISTRY.metadata_each.find {|x| x.name =~ /s6368/ }
             ok {md.name} == "p8134:s6368"
             ok {md}.NOT.alias?
-            md = Benry::CmdApp::INDEX.metadata_get("p8134")
+            md = Benry::CmdApp::REGISTRY.metadata_get("p8134")
             ok {md.name} == "p8134"
             ok {md}.alias?
           end
@@ -442,7 +442,7 @@ END
                 end
               end
             end
-            md = Benry::CmdApp::INDEX.metadata_each.find {|x| x.name =~ /s0629/ }
+            md = Benry::CmdApp::REGISTRY.metadata_each.find {|x| x.name =~ /s0629/ }
             ok {md.name} == "p9986:s0629"
             ok {md}.NOT.alias?
           end
@@ -464,10 +464,10 @@ END
               end
             end
           end
-          md = Benry::CmdApp::INDEX.metadata_get("p2592:s4487")
+          md = Benry::CmdApp::REGISTRY.metadata_get("p2592:s4487")
           ok {md.name} == "p2592:s4487"
           ok {md}.NOT.alias?
-          md = Benry::CmdApp::INDEX.metadata_get("p2592")
+          md = Benry::CmdApp::REGISTRY.metadata_get("p2592")
           ok {md.name} == "p2592"
           ok {md}.NOT.alias?
         end
@@ -522,7 +522,7 @@ END
           end
         end
         ok {pr}.NOT.raise?(Exception)
-        metadata = Benry::CmdApp::INDEX.metadata_get("p2946:print")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("p2946:print")
         ok {metadata} != nil
         ok {metadata.meth} == :p2946__print
         #
@@ -546,7 +546,7 @@ END
             end
           end
         end
-        md = Benry::CmdApp::INDEX.metadata_get("p7966:s3198")
+        md = Benry::CmdApp::REGISTRY.metadata_get("p7966:s3198")
         ok {md} != nil
         ok {md.name} == "p7966:s3198"
         ok {md}.NOT.alias?
@@ -560,11 +560,11 @@ END
             end
           end
         end
-        md = Benry::CmdApp::INDEX.metadata_get("p0692")
+        md = Benry::CmdApp::REGISTRY.metadata_get("p0692")
         ok {md} != nil
         ok {md}.alias?
         ok {md.action} == "p0692:s8075"
-        md = Benry::CmdApp::INDEX.metadata_get("p0692:s8075")
+        md = Benry::CmdApp::REGISTRY.metadata_get("p0692:s8075")
         ok {md} != nil
         ok {md}.NOT.alias?
       end
@@ -593,13 +593,13 @@ END
 
       spec "[!u0td6] registers prefix of action if not registered yet." do
         prefix = "p1777:foo:bar:"
-        ok {Benry::CmdApp::INDEX.prefix_exist?(prefix)} == false
+        ok {Benry::CmdApp::REGISTRY.prefix_exist?(prefix)} == false
         ScopeTestAction.class_eval do
           @action.("example")
           def p1777__foo__bar__hello()
           end
         end
-        ok {Benry::CmdApp::INDEX.prefix_exist?(prefix)} == true
+        ok {Benry::CmdApp::REGISTRY.prefix_exist?(prefix)} == true
       end
 
     end
@@ -618,7 +618,7 @@ END
           #
           def a5759(arg1, arg2=nil, foo: nil, baz: nil, **kws)
           end
-          md = Benry::CmdApp::INDEX.metadata_get("a5758")
+          md = Benry::CmdApp::REGISTRY.metadata_get("a5758")
           errmsg = __validate_kwargs(:a5759, md.schema)
         end
         ok {errmsg} == nil
@@ -635,7 +635,7 @@ END
           #
           def a5757(arg1, arg2=nil, foo: nil, baz: nil)
           end
-          md = Benry::CmdApp::INDEX.metadata_get("a5756")
+          md = Benry::CmdApp::REGISTRY.metadata_get("a5756")
           errmsg = __validate_kwargs(:a5757, md.schema)
         end
         ok {errmsg} == "Keyword argument `bar:` expected which corresponds to the `:bar` option, but not exist."
@@ -760,8 +760,8 @@ END
               end
             end
           end
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p0516:")} == "bla bla"
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p0516:git:")} == "boom boom"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0516:")} == "bla bla"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0516:git:")} == "boom boom"
           #
           ScopeTestAction.class_eval do
             prefix "p3893:", "guu guu", action: "a1" do
@@ -773,14 +773,14 @@ END
               def a1(); end
             end
           end
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p3893:")} == "guu guu"
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p3893:git:")} == "gii gii"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p3893:")} == "guu guu"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p3893:git:")} == "gii gii"
           #
           ScopeTestAction.class_eval do
             prefix "p2358:" do
             end
           end
-          ok {Benry::CmdApp::INDEX.prefix_exist?("p2358:")} == true
+          ok {Benry::CmdApp::REGISTRY.prefix_exist?("p2358:")} == true
         end
 
         spec "[!w52y5] raises DefinitionError if `action:` specified but target action not defined." do
@@ -830,20 +830,20 @@ END
           ScopeTestAction.class_eval do
             prefix "p6712:", "bowow"
           end
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p6712:")} == "bowow"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p6712:")} == "bowow"
           #
           ScopeTestAction.class_eval do
             prefix "p9461:", "hoo hoo", action: "homhom"
             prefix "p0438:", "yaa yaa", alias_of: "homhom"
             @__prefixdef__ = nil
           end
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p9461:")} == "hoo hoo"
-          ok {Benry::CmdApp::INDEX.prefix_get_desc("p0438:")} == "yaa yaa"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p9461:")} == "hoo hoo"
+          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0438:")} == "yaa yaa"
           #
           ScopeTestAction.class_eval do
             prefix "p7217:"
           end
-          ok {Benry::CmdApp::INDEX.prefix_exist?("p7217:")} == true
+          ok {Benry::CmdApp::REGISTRY.prefix_exist?("p7217:")} == true
         end
 
       end
@@ -929,7 +929,7 @@ END
           end
           define_alias "x7033", "a7033"
         end
-        md = Benry::CmdApp::INDEX.metadata_get("x7033")
+        md = Benry::CmdApp::REGISTRY.metadata_get("x7033")
         ok {md.action} == "a7033"
       end
 
@@ -942,7 +942,7 @@ END
             define_alias "x5073", "a5073"
           end
         end
-        md = Benry::CmdApp::INDEX.metadata_get("x5073")
+        md = Benry::CmdApp::REGISTRY.metadata_get("x5073")
         ok {md.action} == "p8866:a5073"
       end
 
@@ -955,7 +955,7 @@ END
             define_alias "x2433", ["a9940", "abc"]
           end
         end
-        md = Benry::CmdApp::INDEX.metadata_get("x2433")
+        md = Benry::CmdApp::REGISTRY.metadata_get("x2433")
         ok {md.action} == "p2433:a9940"
         ok {md.args} == ["abc"]
       end
@@ -969,7 +969,7 @@ END
           define_alias "x5582", ["a1017", "abc"], hidden: true, important: true, tag: "experimental"
           @__prefixdef__ = nil
         end
-        md = Benry::CmdApp::INDEX.metadata_get("x5582")
+        md = Benry::CmdApp::REGISTRY.metadata_get("x5582")
         ok {md.action}     == "p5582:a1017"
         ok {md.hidden?}    == true
         ok {md.important?} == true
