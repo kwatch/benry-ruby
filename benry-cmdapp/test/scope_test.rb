@@ -117,7 +117,7 @@ Oktest.scope do
           @option.(:lang, "-l <lang>", "language", detail: "blabla", hidden: true) {|val| val }
           @option.(:color, "--color[=<on|off>]", "color mode", type: TrueClass)
           tuple = @__actiondef__
-          def s2055(help: false)
+          def s2055(help: false, lang: nil, color: nil)
           end
         end
         schema = tuple[1]
@@ -307,7 +307,7 @@ END
         ScopeTestAction.class_eval do
           def s6732()
           end
-          @__actiondef__ = ["test", nil, {}]
+          @__actiondef__ = ["test", Benry::CmdApp::OptionSchema.new, {}]
         end
         x = ScopeTestAction.__send__(:method_added, :s6732)
         ok {x} == true
