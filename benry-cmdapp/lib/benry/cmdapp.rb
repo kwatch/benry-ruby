@@ -1360,10 +1360,10 @@ module Benry::CmdApp
     end
 
     def _build_metadata_list(format, all: false, &filter)
-      index = @_registry || REGISTRY
+      registry = @_registry || REGISTRY
       #; [!iokkp] builds list of actions or aliases.
       sb = []
-      index.metadata_each(all: all) do |metadata|
+      registry.metadata_each(all: all) do |metadata|
         md = metadata
         #; [!grwkj] filters by block.
         next unless yield(md)
@@ -1376,7 +1376,7 @@ module Benry::CmdApp
 
     def build_candidates_part(prefix, all: false)
       c = @config
-      index = @_registry || REGISTRY
+      registry = @_registry || REGISTRY
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       str = _build_metadata_list(c.format_action, all: all) {|metadata|
@@ -1389,7 +1389,7 @@ module Benry::CmdApp
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       sb = []
-      index.metadata_each(all: all) do |metadata|
+      registry.metadata_each(all: all) do |metadata|
         md = metadata
         if md.alias? && md.action.start_with?(prefix)
           sb << build_action_line(md)
@@ -1412,13 +1412,13 @@ module Benry::CmdApp
     private :_prefix_action?
 
     def build_aliases_part(all: false)
-      index = @_registry || REGISTRY
+      registry = @_registry || REGISTRY
       sb = []
       format = @config.format_action
       #; [!d7vee] ignores hidden aliases in default.
       #; [!4vvrs] include hidden aliases if `all: true` specifieid.
       #; [!v211d] sorts aliases by action names.
-      index.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
+      registry.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
@@ -1428,11 +1428,11 @@ module Benry::CmdApp
     end
 
     def build_abbrevs_part(all: false)
-      index = @_registry || REGISTRY
+      registry = @_registry || REGISTRY
       format = @config.format_abbrev
       _ = all   # not used
       sb = []
-      index.abbrev_each do |abbrev, prefix|
+      registry.abbrev_each do |abbrev, prefix|
         sb << format % [abbrev, prefix] << "\n"
       end
       #; [!dnt12] returns header string if no abbrevs found.
@@ -1441,12 +1441,12 @@ module Benry::CmdApp
     end
 
     def build_prefixes_part(depth=0, all: false)
-      index = @_registry || REGISTRY
+      registry = @_registry || REGISTRY
       c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = index.prefix_count_actions(depth, all: all)
-      #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
+      dict = registry.prefix_count_actions(depth, all: all)
+      #registry.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
@@ -1455,7 +1455,7 @@ module Benry::CmdApp
       str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
-        desc = index.prefix_get_desc(prefix)
+        desc = registry.prefix_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
       #; [!crbav] returns top prefix list.
