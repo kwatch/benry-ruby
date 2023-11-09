@@ -24,7 +24,7 @@ class HelpTestAction < Benry::CmdApp::Action
 
   @action.("usage sample", usage: ["input.txt | less", "input.txt > output.txt"])
   @option.(:file, "-f <file>", "filename")
-  def usagesample2(aa, bb, cc=nil)
+  def usagesample2(aa, bb, cc=nil, file: nil)
   end
 
   @action.("arguments sample")

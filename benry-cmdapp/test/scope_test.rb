@@ -117,7 +117,7 @@ Oktest.scope do
           @option.(:lang, "-l <lang>", "language", detail: "blabla", hidden: true) {|val| val }
           @option.(:color, "--color[=<on|off>]", "color mode", type: TrueClass)
           tuple = @__actiondef__
-          def s2055(help: false)
+          def s2055(help: false, lang: nil, color: nil)
           end
         end
         schema = tuple[1]
@@ -307,7 +307,7 @@ END
         ScopeTestAction.class_eval do
           def s6732()
           end
-          @__actiondef__ = ["test", nil, {}]
+          @__actiondef__ = ["test", Benry::CmdApp::OptionSchema.new, {}]
         end
         x = ScopeTestAction.__send__(:method_added, :s6732)
         ok {x} == true
@@ -325,6 +325,20 @@ END
         end
         ok {x1} != nil
         ok {x2} == nil
+      end
+
+      spec "[!jq4ex] raises DefinitionError if option defined but corresponding keyword arg is missing." do
+        pr = proc do
+          ScopeTestAction.class_eval do
+            @action.("test")
+            @option.(:foo, "--foo", "foo option")
+            @option.(:bar, "--bar", "bar option")
+            def a7913(arg, foo: nil, baz: nil)
+            end
+          end
+        end
+        ok {pr}.raise?(Benry::CmdApp::DefinitionError,
+                       "def a7913(): Keyword argument `bar:` expected which corresponds to the `:bar` option, but not exist.")
       end
 
       spec "[!ejdlo] converts method name to action name." do
@@ -586,6 +600,45 @@ END
           end
         end
         ok {Benry::CmdApp::INDEX.prefix_exist?(prefix)} == true
+      end
+
+    end
+
+
+    topic '.__validate_kwargs()' do
+
+      spec "[!xpg47] returns nil if `**kwargs` exist." do
+        errmsg = ""
+        ScopeTestAction.class_eval do
+          @action.("dummy")
+          @option.(:foo, "--foo", "foo option")
+          @option.(:bar, "--bar", "bar option")
+          def a5758(foo: nil, bar: nil)
+          end
+          #
+          def a5759(arg1, arg2=nil, foo: nil, baz: nil, **kws)
+          end
+          md = Benry::CmdApp::INDEX.metadata_get("a5758")
+          errmsg = __validate_kwargs(:a5759, md.schema)
+        end
+        ok {errmsg} == nil
+      end
+
+      spec "[!qowwj] returns error message if option defined but corresponding keyword arg is missing." do
+        errmsg = nil
+        ScopeTestAction.class_eval do
+          @action.("dummy")
+          @option.(:foo, "--foo", "foo option")
+          @option.(:bar, "--bar", "bar option")
+          def a5756(foo: nil, bar: nil)
+          end
+          #
+          def a5757(arg1, arg2=nil, foo: nil, baz: nil)
+          end
+          md = Benry::CmdApp::INDEX.metadata_get("a5756")
+          errmsg = __validate_kwargs(:a5757, md.schema)
+        end
+        ok {errmsg} == "Keyword argument `bar:` expected which corresponds to the `:bar` option, but not exist."
       end
 
     end

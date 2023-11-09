@@ -528,6 +528,11 @@ module Benry::CmdApp
       meth = method_symbol
       desc, schema, kws = @__actiondef__
       @__actiondef__ = nil
+      #; [!jq4ex] raises DefinitionError if option defined but corresponding keyword arg is missing.
+      errmsg = __validate_kwargs(method_symbol, schema)
+      errmsg == nil  or
+        raise DefinitionError,
+              "def #{method_symbol}(): #{errmsg}"
       #; [!ejdlo] converts method name to action name.
       action = Util.method2action(meth)  # ex: :a__b_c => "a:b-c"
       #; [!w9qat] when `prefix()` called before defining action method...
@@ -579,6 +584,29 @@ module Benry::CmdApp
       INDEX.prefix_add_via_action(action)
       #
       return true    # for testing purpose
+    end
+
+    def self.__validate_kwargs(method_symbol, schema)  # :nodoc:
+      fnkeys = []
+      keyrest_p = false
+      self.instance_method(method_symbol).parameters.each do |kind, key|
+        case kind
+        when :key     ; fnkeys << key        # ex: f(x: nil)
+        when :keyrest ; keyrest_p = true     # ex: f(**x)
+        end
+      end
+      #; [!xpg47] returns nil if `**kwargs` exist.
+      return nil if keyrest_p
+      #; [!qowwj] returns error message if option defined but corresponding keyword arg is missing.
+      optkeys = schema.each.collect(&:key)
+      optkeys.delete(:help)
+      missing = optkeys - fnkeys
+      missing.empty?  or
+        return "Keyword argument `#{missing[0]}:` expected which corresponds to the `:#{missing[0]}` option, but not exist."
+      #toomuch = fnkeys - optkeys
+      #toomuch.empty?  or
+      #  return "Keyword argument `#{toomuch[0]}:` exist but has no corresponding option."
+      return nil
     end
 
     def self.__validate_action_method(action, meth, method_symbol)  # :nodoc:

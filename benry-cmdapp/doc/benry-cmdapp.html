@@ -328,7 +328,7 @@ Usage:
 <h3>Options</h3>
 <ul>
 <li>Action can take command-line options.</li>
-<li>Option values specified in command-line are passed to actio method as keyword arguments.</li>
+<li>Option values specified in command-line are passed to action method as keyword arguments.</li>
 </ul>
 <p>File: ex04.rb</p>
 <pre class="language-ruby">
@@ -419,6 +419,27 @@ Usage:
 Options:
   -l, --lang=&lten|fr|it&gt; : language        # !!!!
   <strong>    --repeat=&ltN&gt;   : repeat &ltN&gt; times</strong>   # !!!!
+</pre>
+<ul>
+<li>If an option defined but the corresponding keyword argument is missing, error will be raised.</li>
+<li>If an action method accepts any keyword arguments (such as <code>**kwargs</code>), nothing will be raised.</li>
+</ul>
+<pre class="language-ruby">
+  ### ERROR: option `:repeat` is defined but keyword arg `repeat:` is missing.
+  @action.("greeting message")
+  @option.(<strong>:lang</strong>  , "-l &ltlang&gt;", "language")
+  @option.(<strong>:repeat</strong>, "-n &ltN&gt;"   , "repeat N times")
+  def hello(user="world", <strong>lang:</strong> "en")
+    ....
+  end
+
+  ### NO ERROR: `**kwargs` accepts any keyword arguments.
+  @action.("greeting message")
+  @option.(:lang  , "-l &ltlang&gt;", "language")
+  @option.(:repeat, "-n &ltN&gt;"   , "repeat N times")
+  def hello(user="world", lang: "en", <strong>**kwargs</strong>)
+    ....
+  end
 </pre>
 <p>For usability reason, Benry-CmdApp supports <code>--lang=&ltval&gt;</code> style of long option
 but doesn't support <code>--lang &ltval&gt;</code> style.
