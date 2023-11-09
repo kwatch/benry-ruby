@@ -75,7 +75,10 @@ module Benry::CmdApp
         when :opt  ; sb << " [<#{param2arg(param)}>"     ; n += 1
         when :rest ; sb << " [<#{param2arg(param)}>...]"
         when :key
+        when :keyreq
         when :keyrest
+        else
+          raise "** assertion failed: kind=#{kind.inspect}"
         end
       end
       sb << ("]" * n) if n > 0
@@ -103,7 +106,10 @@ module Benry::CmdApp
         when :opt     ; n_opt += 1           # ex: f(x=0)
         when :rest    ; rest_p = true        # ex: f(*x)
         when :key     ; kws.delete(param)    # ex: f(x: 0)
+        when :keyreq  ; kws.delete(param)    # ex: f(x:)
         when :keyrest ; keyrest_p = true     # ex: f(**x)
+        else
+          raise "** assertion failed: kind=#{kind.inspect}"
         end
       end
       #; [!jalnr] returns error message if argument required but no args specified.
@@ -591,8 +597,8 @@ module Benry::CmdApp
       keyrest_p = false
       self.instance_method(method_symbol).parameters.each do |kind, key|
         case kind
-        when :key     ; fnkeys << key        # ex: f(x: nil)
-        when :keyrest ; keyrest_p = true     # ex: f(**x)
+        when :key, :keyreq ; fnkeys << key       # ex: f(x: nil), f(x:)
+        when :keyrest      ; keyrest_p = true    # ex: f(**x)
         end
       end
       #; [!xpg47] returns nil if `**kwargs` exist.
