@@ -337,7 +337,7 @@ module Benry::CmdApp
       raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
     alias_metadata = AliasMetadata.new(alias_name, action_name, args, tag: tag, important: important, hidden: hidden)
-    INDEX.metadata_add(alias_metadata)
+    REGISTRY.metadata_add(alias_metadata)
     #; [!wfbqu] returns alias metadata.
     return alias_metadata
   end
@@ -352,14 +352,14 @@ module Benry::CmdApp
     end
     #; [!zh0a9] returns error message if other alias already exists.
     #; [!ohow0] returns error message if other action exists with the same name as alias.
-    alias_md = INDEX.metadata_get(alias_name)
+    alias_md = REGISTRY.metadata_get(alias_name)
     if    alias_md == nil  ; nil   # ok: new alias should be not defined
     elsif alias_md.alias?  ; return "Alias '#{alias_name}' already defined."
     else                   ; return "Can't define new alias '#{alias_name}' because already defined as an action."
     end
     #; [!r24qn] returns error message if action doesn't exist.
     #; [!9phlr] returns no error message if other alias exists with the same name as action.
-    action_md = INDEX.metadata_get(action_name)
+    action_md = REGISTRY.metadata_get(action_name)
     if    action_md == nil ; return "Action '#{action_name}' not found."
     elsif action_md.alias? ; nil   # ok: allow to define an alias of other alias
     else                   ; nil   # ok: action should be defined
@@ -373,7 +373,7 @@ module Benry::CmdApp
     Util.name_should_be_a_string(alias_name, 'Alias', DefinitionError)
     #; [!krdkt] raises DefinitionError if alias not exist.
     #; [!juykx] raises DefinitionError if action specified instead of alias.
-    md = INDEX.metadata_get(alias_name)
+    md = REGISTRY.metadata_get(alias_name)
     errmsg = (
       if    md == nil ; "Alias not exist."
       elsif md.alias? ; nil
@@ -383,7 +383,7 @@ module Benry::CmdApp
     errmsg == nil  or
       raise DefinitionError.new("undef_alias(#{alias_name.inspect}): #{errmsg}")
     #; [!ocyso] deletes existing alias.
-    INDEX.metadata_del(alias_name)
+    REGISTRY.metadata_del(alias_name)
     nil
   end
 
@@ -392,7 +392,7 @@ module Benry::CmdApp
     Util.name_should_be_a_string(action_name, 'Action', DefinitionError)
     #; [!bvu95] raises error if action not exist.
     #; [!717fw] raises error if alias specified instead of action.
-    md = INDEX.metadata_get(action_name)
+    md = REGISTRY.metadata_get(action_name)
     errmsg = (
       if    md == nil ; "Action not exist."
       elsif md.alias? ; "Action expected but alias name specified."
@@ -402,7 +402,7 @@ module Benry::CmdApp
     errmsg == nil  or
       raise DefinitionError.new("undef_action(#{action_name.inspect}): #{errmsg}")
     #; [!01sx1] deletes existing action.
-    INDEX.metadata_del(action_name)
+    REGISTRY.metadata_del(action_name)
     #; [!op8z5] deletes action method from action class.
     md.klass.class_eval { remove_method(md.meth) }
     nil
@@ -414,11 +414,11 @@ module Benry::CmdApp
     errmsg == nil  or
       raise DefinitionError.new(errmsg)
     #; [!ed6hr] registers abbrev with prefix.
-    INDEX.abbrev_add(abbrev, prefix)
+    REGISTRY.abbrev_add(abbrev, prefix)
     nil
   end
 
-  def self.__validate_abbrev(abbrev, prefix, _index: INDEX)  # :nodoc:
+  def self.__validate_abbrev(abbrev, prefix, _registry: REGISTRY)  # :nodoc:
     #; [!qfzbp] abbrev should be a string.
     abbrev.is_a?(String)            or return "#{abbrev.inspect}: Abbreviation should be a string, but got #{abbrev.class.name} object."
     #; [!f5isx] abbrev should end with ':'.
@@ -426,15 +426,15 @@ module Benry::CmdApp
     #; [!r673p] abbrev should not contain unexpected symbol.
     abbrev =~ /\A\w[-\w]*:/         or return "'#{abbrev}': Invalid abbreviation."
     #; [!dckvt] abbrev should not exist.
-    ! _index.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
+    ! _registry.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
     #; [!5djjt] abbrev should not be the same name with existing prefix.
-    ! _index.prefix_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
+    ! _registry.prefix_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
     #; [!mq4ki] prefix should be a string.
     prefix.is_a?(String)            or return "#{prefix.inspect}: Prefix should be a string, but got #{prefix.class.name} object."
     #; [!a82z3] prefix should end with ':'.
     prefix.end_with?(":")           or return "'#{prefix}': Prefix should end with ':'."
     #; [!eq5iu] prefix should exist.
-    _index.prefix_exist?(prefix)    or return "'#{prefix}': No such prefix."
+    _registry.prefix_exist?(prefix)    or return "'#{prefix}': No such prefix."
     #; [!jzkhc] returns nil if no error found.
     return nil
   end
@@ -489,7 +489,7 @@ module Benry::CmdApp
         #; [!aiwns] `@copy_options.()` copies options from other action.
         @copy_options = lambda do |action_name, except: []|
           #; [!mhhn2] `@copy_options.()` raises DefinitionError when action not found.
-          metadata = INDEX.metadata_get(action_name)  or
+          metadata = REGISTRY.metadata_get(action_name)  or
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Action not found.")
           #; [!0slo8] raises DefinitionError if `@copy_options.()` called without `@action.()`.
           @__actiondef__ != nil  or
@@ -571,17 +571,17 @@ module Benry::CmdApp
         raise DefinitionError.new("def #{method_symbol}(): #{errmsg}")
       #; [!7fnh4] registers action metadata.
       action_metadata = ActionMetadata.new(action, desc, schema, self, meth, **kws)
-      INDEX.metadata_add(action_metadata)
+      REGISTRY.metadata_add(action_metadata)
       #; [!lyn0z] registers alias metadata if necessary.
       if alias_p
         prefix != nil  or raise "** assertion failed: ailas_target=#{alias_target.inspect}"
         alias_metadata = AliasMetadata.new(prefix.chomp(':'), action, nil)
-        INDEX.metadata_add(alias_metadata)
+        REGISTRY.metadata_add(alias_metadata)
         #; [!4402s] clears `alias_of:` kwarg.
         @__prefixdef__[2] = nil
       end
       #; [!u0td6] registers prefix of action if not registered yet.
-      INDEX.prefix_add_via_action(action)
+      REGISTRY.prefix_add_via_action(action)
       #
       return true    # for testing purpose
     end
@@ -611,7 +611,7 @@ module Benry::CmdApp
 
     def self.__validate_action_method(action, meth, method_symbol)  # :nodoc:
       #; [!5a4d3] returns error message if action with same name already defined.
-      ! INDEX.metadata_exist?(action)  or
+      ! REGISTRY.metadata_exist?(action)  or
         return "Action '#{action}' already defined (to redefine it, delete it beforehand by `undef_action()`)."
       #; [!uxsx3] returns error message if method already defined in parent or ancestor class.
       #; [!3fmpo] method override check is done with new method name (= prefixed name).
@@ -641,7 +641,7 @@ module Benry::CmdApp
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
         #; [!j00pk] registers prefix and description, even if no actions defined.
-        INDEX.prefix_add(prefix, desc)
+        REGISTRY.prefix_add(prefix, desc)
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
@@ -662,7 +662,7 @@ module Benry::CmdApp
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
         #; [!ncskq] registers prefix and description, even if no actions defined.
-        INDEX.prefix_add(prefix, desc)
+        REGISTRY.prefix_add(prefix, desc)
       end
       nil
     end
@@ -758,7 +758,7 @@ module Benry::CmdApp
   Action = ActionScope
 
 
-  class Index
+  class Registry
 
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
@@ -917,7 +917,7 @@ module Benry::CmdApp
   end
 
 
-  INDEX = Index.new()
+  REGISTRY = Registry.new()
 
 
   class BuiltInAction < ActionScope
@@ -938,9 +938,9 @@ module Benry::CmdApp
 
   class ApplicationContext
 
-    def initialize(config, _index: INDEX)
+    def initialize(config, _registry: REGISTRY)
       @config        = config
-      @index         = _index
+      @registry      = _registry
       #@scope_objects = {}     # {action_name => ActionScope}
       @status_dict   = {}      # {action_name => (:done|:doing)}
       @curr_action   = nil     # ActionMetadata
@@ -970,7 +970,7 @@ module Benry::CmdApp
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
       #; [!2mnh7] looks up action metadata with action or alias name.
-      metadata, alias_args = @index.metadata_lookup(action_name)
+      metadata, alias_args = @registry.metadata_lookup(action_name)
       #; [!0ukvb] raises CommandError if action nor alias not found.
       metadata != nil  or
         raise CommandError.new("#{action_name}: Action nor alias not found.")
@@ -995,11 +995,11 @@ module Benry::CmdApp
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
         prefix = $1
-        metadata = @index.metadata_get(prefix + action)
+        metadata = @registry.metadata_get(prefix + action)
         action = prefix + action if metadata
       end
       #; [!ygpsw] raises ActionError if action not found.
-      metadata ||= @index.metadata_get(action)
+      metadata ||= @registry.metadata_get(action)
       metadata != nil  or
         raise ActionError.new("#{action}: Action not found.")
       #; [!de6a9] raises ActionError if alias name specified.
@@ -1360,10 +1360,10 @@ module Benry::CmdApp
     end
 
     def _build_metadata_list(format, all: false, &filter)
-      index = @_index || INDEX
+      registry = @_registry || REGISTRY
       #; [!iokkp] builds list of actions or aliases.
       sb = []
-      index.metadata_each(all: all) do |metadata|
+      registry.metadata_each(all: all) do |metadata|
         md = metadata
         #; [!grwkj] filters by block.
         next unless yield(md)
@@ -1376,7 +1376,7 @@ module Benry::CmdApp
 
     def build_candidates_part(prefix, all: false)
       c = @config
-      index = @_index || INDEX
+      registry = @_registry || REGISTRY
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       str = _build_metadata_list(c.format_action, all: all) {|metadata|
@@ -1389,7 +1389,7 @@ module Benry::CmdApp
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       sb = []
-      index.metadata_each(all: all) do |metadata|
+      registry.metadata_each(all: all) do |metadata|
         md = metadata
         if md.alias? && md.action.start_with?(prefix)
           sb << build_action_line(md)
@@ -1412,13 +1412,13 @@ module Benry::CmdApp
     private :_prefix_action?
 
     def build_aliases_part(all: false)
-      index = @_index || INDEX
+      registry = @_registry || REGISTRY
       sb = []
       format = @config.format_action
       #; [!d7vee] ignores hidden aliases in default.
       #; [!4vvrs] include hidden aliases if `all: true` specifieid.
       #; [!v211d] sorts aliases by action names.
-      index.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
+      registry.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
@@ -1428,11 +1428,11 @@ module Benry::CmdApp
     end
 
     def build_abbrevs_part(all: false)
-      index = @_index || INDEX
+      registry = @_registry || REGISTRY
       format = @config.format_abbrev
       _ = all   # not used
       sb = []
-      index.abbrev_each do |abbrev, prefix|
+      registry.abbrev_each do |abbrev, prefix|
         sb << format % [abbrev, prefix] << "\n"
       end
       #; [!dnt12] returns header string if no abbrevs found.
@@ -1441,12 +1441,12 @@ module Benry::CmdApp
     end
 
     def build_prefixes_part(depth=0, all: false)
-      index = @_index || INDEX
+      registry = @_registry || REGISTRY
       c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = index.prefix_count_actions(depth, all: all)
-      #index.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
+      dict = registry.prefix_count_actions(depth, all: all)
+      #registry.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
@@ -1455,7 +1455,7 @@ module Benry::CmdApp
       str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
-        desc = index.prefix_get_desc(prefix)
+        desc = registry.prefix_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
       #; [!crbav] returns top prefix list.
@@ -1610,10 +1610,10 @@ module Benry::CmdApp
 
   class Application
 
-    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _index: INDEX)
+    def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _registry: REGISTRY)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
-      @index         = _index
+      @registry      = _registry
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
     end
@@ -1762,7 +1762,7 @@ module Benry::CmdApp
 
     def render_action_help(action, all: false)
       #; [!c510c] returns action help message.
-      metadata, _alias_args = @index.metadata_lookup(action)
+      metadata, _alias_args = @registry.metadata_lookup(action)
       metadata  or
         raise CommandError.new("#{action}: Action not found.")
       builder = get_action_help_builder()
@@ -1842,12 +1842,12 @@ module Benry::CmdApp
 
     def start_action(action_name, args)
       #; [!6htva] supports abbreviation of prefix.
-      if ! INDEX.metadata_exist?(action_name)
-        resolved = INDEX.abbrev_resolve(action_name)
+      if ! REGISTRY.metadata_exist?(action_name)
+        resolved = REGISTRY.abbrev_resolve(action_name)
         action_name = resolved if resolved
       end
       #; [!vbymd] runs action with args and returns `0`.
-      INDEX.metadata_get(action_name)  or
+      REGISTRY.metadata_get(action_name)  or
         raise CommandError.new("#{action_name}: Action not found.")
       new_context().start_action(action_name, args)
       return 0

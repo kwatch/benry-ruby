@@ -31,10 +31,10 @@ Oktest.scope do
       end
 
       spec "[!oo91b] registers new metadata of alias." do
-        metadata = Benry::CmdApp::INDEX.metadata_get("tmphello1")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("tmphello1")
         ok {metadata} == nil
         Benry::CmdApp.define_alias("tmphello1", "hello")
-        metadata = Benry::CmdApp::INDEX.metadata_get("tmphello1")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("tmphello1")
         ok {metadata} != nil
         ok {metadata}.is_a?(Benry::CmdApp::AliasMetadata)
         ok {metadata.name} == "tmphello1"
@@ -42,7 +42,7 @@ Oktest.scope do
         ok {metadata.args} == []
         #
         Benry::CmdApp.define_alias("tmphello2", ["hello", "aa", "bb", "cc"])
-        metadata = Benry::CmdApp::INDEX.metadata_get("tmphello2")
+        metadata = Benry::CmdApp::REGISTRY.metadata_get("tmphello2")
         ok {metadata.args} == ["aa", "bb", "cc"]
       end
 
@@ -162,9 +162,9 @@ Oktest.scope do
           def dummy2049()
           end
         end
-        ok {Benry::CmdApp::INDEX.metadata_get("dummy2049")} != nil
+        ok {Benry::CmdApp::REGISTRY.metadata_get("dummy2049")} != nil
         Benry::CmdApp.undef_action("dummy2049")
-        ok {Benry::CmdApp::INDEX.metadata_get("dummy2049")} == nil
+        ok {Benry::CmdApp::REGISTRY.metadata_get("dummy2049")} == nil
       end
 
       spec "[!op8z5] deletes action method from action class." do
@@ -202,10 +202,10 @@ Oktest.scope do
       end
 
       spec "[!ed6hr] registers abbrev with prefix." do
-        ok { Benry::CmdApp::INDEX.abbrev_exist?("g99:") } == false
+        ok { Benry::CmdApp::REGISTRY.abbrev_exist?("g99:") } == false
         Benry::CmdApp.define_abbrev("g99:", "git:")
-        ok { Benry::CmdApp::INDEX.abbrev_exist?("g99:") } == true
-        ok { Benry::CmdApp::INDEX.abbrev_get_prefix("g99:") } == "git:"
+        ok { Benry::CmdApp::REGISTRY.abbrev_exist?("g99:") } == true
+        ok { Benry::CmdApp::REGISTRY.abbrev_get_prefix("g99:") } == "git:"
       end
 
       def _perform(abbrev, prefix)
