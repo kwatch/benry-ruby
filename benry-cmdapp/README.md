@@ -125,13 +125,14 @@ class MyAction < Benry::CmdApp::Action    # !!!!
 
 end
 
-## configuration
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-
 ## run application
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+status_code = Benry::CmdApp.main("sample app", "1.0.0")
+exit status_coe
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#status_code = app.main()
+#exit status_code
 ```
 
 Output:
@@ -221,10 +222,13 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("test app")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
+status_code = Benry::CmdApp.main("test app")
 exit status_code
+## or:
+#config = Benry::CmdApp::Config.new("test app")
+#app = Benry::CmdApp::Application.new(config)
+#status_code = app.main()
+#exit status_code
 ```
 
 Help message:
@@ -298,10 +302,13 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
+status_code = Benry::CmdApp.main("sample app", "1.0.0")
 exit status_code
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#status_code = app.main()
+#exit status_code
 ```
 
 Help message:
@@ -348,10 +355,11 @@ class MyAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -396,10 +404,11 @@ class MyAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -508,9 +517,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("test app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("test app")
+## or:
+#config = Benry::CmdApp::Config.new("test app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -619,10 +630,11 @@ class MyAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -681,10 +693,11 @@ class MyAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -725,9 +738,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app", "1.0.0")
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -777,9 +792,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("git helper")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("git helper")
+## or:
+#config = Benry::CmdApp::Config.new("git helper")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -849,9 +866,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("Sample App")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("Sample App")
+## or:
+#config = Benry::CmdApp::Config.new("Sample App")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Help message:
@@ -930,9 +949,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("Sample App")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("Sample App")
+## or:
+#config = Benry::CmdApp::Config.new("Sample App")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Help message:
@@ -985,9 +1006,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("Sample App")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("Sample App")
+## or:
+#config = Benry::CmdApp::Config.new("Sample App")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1054,9 +1077,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1126,9 +1151,11 @@ class GitAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1181,9 +1208,11 @@ class GitAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1223,9 +1252,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1295,9 +1326,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1343,9 +1376,11 @@ class LoopedAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1390,9 +1425,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1448,9 +1485,11 @@ end
 
 Benry::CmdApp.define_alias "git", "git:status"    # !!!!
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Help message:
@@ -1533,9 +1572,11 @@ end
 Benry::CmdApp.define_alias("bonjour", ["hello", "--lang=fr"])        # !!!!
 Benry::CmdApp.define_alias("ciao"   , ["hello", "-l", "it", "Bob"])  # !!!!
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1582,9 +1623,11 @@ class GitAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1638,9 +1681,11 @@ end
 ## define abbreviation 'b:' of prefix 'git:branch:'
 Benry::CmdApp.define_abbrev("b:", "git:branch:")     # !!!!
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1681,10 +1726,13 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-config.default_action = "test1"     # !!!!
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app", "1.0.0",
+                        default_action: "test1")   # !!!!
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#config.default_action = "test1"     # !!!!
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1759,9 +1807,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1854,9 +1904,11 @@ class GitAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1914,9 +1966,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
@@ -1963,9 +2017,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Action list (without `-a` nor `--all`):
@@ -2012,9 +2068,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Help message (without `-a` nor `--all`):
@@ -2082,9 +2140,11 @@ class SampleAction < Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
+## or:
+#config = Benry::CmdApp::Config.new("sample app")
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 ```
 
 Output:
