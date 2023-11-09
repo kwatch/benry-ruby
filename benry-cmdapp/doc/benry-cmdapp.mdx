@@ -759,13 +759,13 @@ class SampleAction < Benry::CmdApp::Action
     @option.(:user , "-u, --user=<user>" , "user name")
   }
 
-  @action.("connect to postgresql")
+  @action.("connect to postgresql server")
   {{*@optionset.(optset1, optset2)*}}                           # !!!!
   def postgresql(host: nil, port: nil, user: nil)
     puts "psql ...."
   end
 
-  @action.("connect to mysql")
+  @action.("connect to mysql server")
   {{*@optionset.(optset1, optset2)*}}                           # !!!!
   def mysql(host: nil, port: nil, user: nil)
     puts "mysql ...."
@@ -802,6 +802,27 @@ Options:
   {{*-H, --host=<host>  : host name*}}         # !!!!
   {{*-p, --port=<port>  : port number*}}       # !!!!
   {{*-u, --user=<user>  : user name*}}         # !!!!
+```
+
+Option set object has the following methods.
+
+* ``OptionSet#select(:key1, :key2, ...)`` ---
+  Creates new OptionSet object with copying options which are filtered by the keys specified.
+* ``OptionSet#exclude(:key1, :key2, ...)`` ---
+  Creates new OptionSet object with copying options which are filtered by dropping the options that key is included in specified keys.
+
+```ruby
+  @action.("connect to postgresql server")
+  @optionset.({{*optset1.select(:host, :port)*}})    # !!!!
+  def postgresql(host: nil, port: nil)
+    ....
+  end
+
+  @action.("connect to mysql server")
+  @optionset.({{*optset1.exclude(:port)*}})          # !!!!
+  def mysql(host: nil)
+    ....
+  end
 ```
 
 

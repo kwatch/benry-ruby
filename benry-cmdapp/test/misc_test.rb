@@ -90,8 +90,9 @@ Oktest.scope do
     before do
       @optset = Benry::CmdApp::OptionSet.new
       @schema = Benry::CmdApp::OptionSchema.new
-      @schema.add(:user, "-u, --user=<user>", "user name")
+      @schema.add(:user , "-u, --user=<user>"  , "user name")
       @schema.add(:email, "-e, --email=<email>", "email address")
+      @schema.add(:port , "-p, --port=<number>", "port number", type: Integer)
     end
 
 
@@ -103,9 +104,10 @@ Oktest.scope do
         #
         @optset.copy_from(@schema)
         new_items = @optset.instance_variable_get(:@items)
-        ok {new_items}.length(2)
+        ok {new_items}.length(3)
         ok {new_items[0]} == items[0]
         ok {new_items[1]} == items[1]
+        ok {new_items[2]} == items[2]
       end
 
       spec "[!v1ok3] returns self." do
@@ -124,15 +126,44 @@ Oktest.scope do
         new_items = []
         new_schema.each {|item| new_items << item }
         items = @optset.instance_variable_get(:@items)
-        ok {new_items}.length(2)
+        ok {new_items}.length(3)
         ok {new_items[0]} == items[0]
         ok {new_items[1]} == items[1]
+        ok {new_items[2]} == items[2]
       end
 
       spec "[!ynn1m] returns self." do
         @optset.copy_from(@schema)
         new_schema = Benry::CmdApp::OptionSchema.new
         ok {@optset.copy_into(new_schema)}.same?(@optset)
+      end
+
+    end
+
+
+    topic '#select()' do
+
+      spec "[!mqkzf] creates new OptionSet object with filtered options." do
+        @optset.copy_from(@schema)
+        newone = @optset.select(:user, :email)
+        ok {newone}.is_a?(Benry::CmdApp::OptionSet)
+        items = newone.instance_variable_get(:@items)
+        ok {items}.length(2)
+        ok {items.collect(&:key).sort} == [:email, :user]
+      end
+
+    end
+
+
+    topic '#exclude()' do
+
+      spec "[!oey0q] creates new OptionSet object with remained options." do
+        @optset.copy_from(@schema)
+        newone = @optset.exclude(:user, :email)
+        ok {newone}.is_a?(Benry::CmdApp::OptionSet)
+        items = newone.instance_variable_get(:@items)
+        ok {items}.length(1)
+        ok {items.collect(&:key).sort} == [:port]
       end
 
     end
