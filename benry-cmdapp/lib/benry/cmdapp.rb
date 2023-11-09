@@ -193,8 +193,8 @@ module Benry::CmdApp
 
   class OptionSet
 
-    def initialize()
-      @items = []
+    def initialize(*items)
+      @items = items
     end
 
     def copy_from(schema)
@@ -209,6 +209,18 @@ module Benry::CmdApp
       @items.each {|item| schema.add_item(item) }
       #; [!ynn1m] returns self.
       self
+    end
+
+    def select(*keys)
+      #; [!mqkzf] creates new OptionSet object with filtered options.
+      items = @items.select {|item| keys.include?(item.key) }
+      return self.class.new(*items)
+    end
+
+    def exclude(*keys)
+      #; [!oey0q] creates new OptionSet object with remained options.
+      items = @items.select {|item| ! keys.include?(item.key) }
+      return self.class.new(*items)
     end
 
   end
