@@ -281,6 +281,73 @@ Oktest.scope do
     end
 
 
+    topic '.main()' do
+
+      spec "[!6mfxt] accepts the same arguments as 'Config#initialize()'." do
+        ARGV.clear()
+        ARGV.push("-h", "-a")
+        at_end { ARGV.clear() }
+        sout, serr = capture_sio do
+          Benry::CmdApp.main("Sample App", "1.2.0", app_command: "sampleapp", option_verbose: true)
+        end
+        ok {serr} == ""
+        ok {sout}.start_with?(<<END)
+sampleapp (1.2.0) --- Sample App
+END
+        ok {sout} =~ /^      --debug        : debug mode$/
+      end
+
+      spec "[!scpwa] runs application." do
+        ARGV.clear()
+        ARGV.push("-h", "-a")
+        at_end { ARGV.clear() }
+        sout, serr = capture_sio do
+          Benry::CmdApp.main("Sample App", "1.2.0", app_command: "sampleapp", option_verbose: true)
+        end
+        ok {serr} == ""
+        ok {sout}.start_with?(<<END)
+sampleapp (1.2.0) --- Sample App
+
+Usage:
+  $ sampleapp [<options>] <action> [<arguments>...]
+
+Options:
+  -h, --help         : print help message (of action if specified)
+  -V, --version      : print version
+  -l, --list         : list actions
+  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
+  -a, --all          : list hidden actions/options, too
+  -v, --verbose      : verbose mode
+      --debug        : debug mode
+
+Actions:
+END
+      end
+
+      spec "[!jbv9z] returns the status code." do
+        ARGV.clear()
+        ARGV.push("-h", "-a")
+        at_end { ARGV.clear() }
+        status_code = nil
+        #
+        sout, serr = capture_sio do
+          status_code = Benry::CmdApp.main("Sample App", "1.2.0")
+        end
+        ok {serr} == ""
+        ok {status_code} == 0
+        #
+        ARGV.clear()
+        ARGV.push("--blabla")
+        sout, serr = capture_sio do
+          status_code = Benry::CmdApp.main("Sample App", "1.2.0")
+        end
+        ok {serr} == "[ERROR] --blabla: Unknown long option.\n"
+        ok {status_code} == 1
+      end
+
+    end
+
+
   end
 
 

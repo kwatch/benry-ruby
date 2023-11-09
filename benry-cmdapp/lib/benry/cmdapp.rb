@@ -1929,4 +1929,15 @@ module Benry::CmdApp
   end
 
 
+  def self.main(app_desc, app_version=nil, **kwargs)
+    #; [!6mfxt] accepts the same arguments as 'Config#initialize()'.
+    config = Config.new(app_desc, app_version, **kwargs)
+    #; [!scpwa] runs application.
+    app = Application.new(config)
+    #; [!jbv9z] returns the status code.
+    status_code = app.main()
+    return status_code
+  end
+
+
 end

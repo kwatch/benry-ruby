@@ -145,13 +145,14 @@ class MyAction &lt <strong>Benry::CmdApp::Action</strong>    # !!!!
 
 end
 
-## configuration
-config = <strong>Benry::CmdApp::Config.new("sample app", "1.0.0")</strong>
-
 ## run application
-app = <strong>Benry::CmdApp::Application.new(config)</strong>
-status_code = app.main()
-exit status_code
+status_code = <strong>Benry::CmdApp.main("sample app", "1.0.0")</strong>
+exit status_coe
+## or:
+#config = <strong>Benry::CmdApp::Config.new("sample app", "1.0.0")</strong>
+#app = <strong>Benry::CmdApp::Application.new(config)</strong>
+#status_code = app.main()
+#exit status_code
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -234,10 +235,13 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("test app")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
+status_code = Benry::CmdApp.main("test app")
 exit status_code
+## or:
+#config = Benry::CmdApp::Config.new("test app")
+#app = Benry::CmdApp::Application.new(config)
+#status_code = app.main()
+#exit status_code
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -304,9 +308,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
+status_code = Benry::CmdApp.main("sample app", "1.0.0")
 exit status_code
 </pre>
 <p>Help message:</p>
@@ -351,10 +353,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -396,10 +395,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -500,9 +496,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("test app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("test app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -603,10 +597,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -661,10 +652,7 @@ class MyAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-status_code = app.main()
-exit status_code
+exit Benry::CmdApp.main("sample app", "1.0.0")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -701,9 +689,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app", "1.0.0")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app", "1.0.0")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -749,9 +735,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("git helper")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("git helper")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -813,9 +797,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("Sample App")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("Sample App")
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -888,9 +870,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("Sample App")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("Sample App")
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -939,9 +919,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("Sample App")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("Sample App")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1002,9 +980,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1069,9 +1045,7 @@ class GitAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1119,9 +1093,7 @@ class GitAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1158,9 +1130,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1227,9 +1197,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1272,9 +1240,7 @@ class LoopedAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1316,9 +1282,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1370,9 +1334,7 @@ end
 
 <strong>Benry::CmdApp.define_alias "git", "git:status"</strong>    # !!!!
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -1450,9 +1412,7 @@ end
 Benry::CmdApp.define_alias("bonjour", <strong>["hello", "--lang=fr"]</strong>)        # !!!!
 Benry::CmdApp.define_alias("ciao"   , <strong>["hello", "-l", "it", "Bob"]</strong>)  # !!!!
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1496,9 +1456,7 @@ class GitAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1545,9 +1503,7 @@ end
 ## define abbreviation 'b:' of prefix 'git:branch:'
 Benry::CmdApp.<strong>define_abbrev("b:", "git:branch:")</strong>     # !!!!
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1583,10 +1539,13 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-<strong>config.default_action = "test1"</strong>     # !!!!
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app", "1.0.0",
+                        <strong>default_action: "test1"</strong>)   # !!!!
+## or:
+#config = Benry::CmdApp::Config.new("sample app", "1.0.0")
+#<strong>config.default_action = "test1"</strong>     # !!!!
+#app = Benry::CmdApp::Application.new(config)
+#exit app.main()
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1654,9 +1613,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1736,9 +1693,7 @@ class GitAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1791,9 +1746,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1837,9 +1790,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Action list (without <code>-a</code> nor <code>--all</code>):</p>
 <pre class="language-console">
@@ -1881,9 +1832,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Help message (without <code>-a</code> nor <code>--all</code>):</p>
 <pre class="language-console">
@@ -1943,9 +1892,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1985,7 +1932,7 @@ Options:
 <li><code>config.option_help = true</code> enables <code>-h</code> and <code>--help</code> options. (default: <code>true</code>)</li>
 <li><code>config.option_version = true</code> enables <code>-V</code> and <code>--version</code> options. (default: <code>true</code> if <code>app_version</code> provided, <code>false</code> if else)</li>
 <li><code>config.option_list = true</code> enables <code>-l</code> and <code>--list</code> options. (default: <code>true</code>)</li>
-<li><code>config.option_target = true</code> enables <code>-L &lttarget&gt;</code> option. (default: <code>:hidden</code>)</li>
+<li><code>config.option_topic = true</code> enables <code>-L &lttopic&gt;</code> option. (default: <code>:hidden</code>)</li>
 <li><code>config.option_all = true</code> enables <code>-a</code> and <code>--all</code> options which shows private (hidden) actions and options into help message. (default: <code>true</code>)</li>
 <li><code>config.option_verbose = true</code> enables <code>-v</code> and <code>--verbose</code> options which sets <code>$QUIET_MODE = false</code>. (default: <code>false</code>)</li>
 <li><code>config.option_quiet = true</code> enables <code>-q</code> and <code>--quiet</code> options which sets <code>$QUIET_MODE = true</code>. (default: <code>false</code>)</li>
@@ -1995,6 +1942,9 @@ Options:
 <li><code>config.format_option = "  %-18s : %s"</code> sets format of options in help message. (default: <code>"  %-18s : %s"</code>)</li>
 <li><code>config.format_action = "  %-18s : %s"</code> sets format of actions in help message. (default: <code>"  %-18s : %s"</code>)</li>
 <li><code>config.format_usage = "  $ %s"</code> sets format of usage in help message. (default: <code>"  $ %s"</code>)</li>
+<li><code>config.format_avvrev = "  %-10s =&gt;  %s"</code> sets format of abbreviations in output of <code>-L abbrev</code> option. (default: <code>"  %-10s =&gt;  %s"</code>)</li>
+<li><code>config.format_usage = "  $ %s"</code> sets format of usage in help message. (default: <code>"  $ %s"</code>)</li>
+<li><code>config.format_prefix = "  $-18s : %s""</code> sets format of prefixes in output of <code>-L prefix</code> option. (default: <code>nil</code> which means to use value of <code>config.format_action</code>)</li>
 </ul>
 <p>File: ex34.rb</p>
 <pre class="language-ruby">
@@ -2023,13 +1973,16 @@ config.<strong>format_usage</strong>         = "  $ %s"
 config.<strong>format_prefix</strong>        = nil
 config.<strong>deco_command</strong>         = "\e[1m%s\e[0m"        # bold
 config.<strong>deco_header</strong>          = "\e[1;34m%s\e[0m"     # bold, blue
+config.<strong>deco_extra</strong>           = "\e[2m%s\e[0m"        # gray color
 config.<strong>deco_strong</strong>          = "\e[1m%s\e[0m"        # bold
 config.<strong>deco_weak</strong>            = "\e[2m%s\e[0m"        # gray color
 config.<strong>deco_hidden</strong>          = "\e[2m%s\e[0m"        # gray color
+config.<strong>deco_debug</strong>           = "\e[2m%s\e[0m"        # gray color
 config.<strong>deco_error</strong>           = "\e[31m%s\e[0m"       # red
 config.<strong>option_help</strong>          = true
 config.<strong>option_version</strong>       = true
 config.<strong>option_list</strong>          = true
+config.<strong>option_topic</strong>         = :hidden
 config.<strong>option_all</strong>           = true
 config.<strong>option_verbose</strong>       = false
 config.<strong>option_quiet</strong>         = false
