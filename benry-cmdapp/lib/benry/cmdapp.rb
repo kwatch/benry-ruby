@@ -1234,15 +1234,6 @@ module Benry::CmdApp
       return sb.empty? ? nil : sb.join()
     end
 
-    def build_action_line(metadata)
-      #; [!ferqn] returns '  <action> : <descriptn>' line.
-      md = metadata
-      format = @config.format_action
-      s = format % [md.name, md.desc]
-      s = decorate_str(s, md.hidden?, md.important?)
-      return s + "\n"
-    end
-
     def decorate_command(s)
       #; [!zffx5] decorates command string.
       return @config.deco_command % s

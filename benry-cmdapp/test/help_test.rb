@@ -219,21 +219,6 @@ END
     end
 
 
-    topic '#build_action_line()' do
-
-      spec "[!ferqn] returns '  <action> : <descriptn>' line." do
-        metadata = Benry::CmdApp::REGISTRY.metadata_get("hello")
-        x = @builder.__send__(:build_action_line, metadata)
-        ok {x} == "  hello              : greeting message\n"
-        #
-        metadata = Benry::CmdApp::REGISTRY.metadata_get("debuginfo")
-        x = @builder.__send__(:build_action_line, metadata)
-        ok {x} == "\e[2m  debuginfo          : hidden action\e[0m\n"
-      end
-
-    end
-
-
     topic '#decorate_command()' do
 
       spec "[!zffx5] decorates command string." do
