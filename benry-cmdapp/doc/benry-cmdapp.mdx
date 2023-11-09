@@ -269,7 +269,7 @@ Usage:
 === Options
 
 * Action can take command-line options.
-* Option values specified in command-line are passed to actio method as keyword arguments.
+* Option values specified in command-line are passed to action method as keyword arguments.
 
 File: ex04.rb
 
@@ -368,6 +368,27 @@ Usage:
 Options:
   -l, --lang=<en|fr|it> : language        # !!!!
   {{*    --repeat=<N>   : repeat <N> times*}}   # !!!!
+```
+
+* If an option defined but the corresponding keyword argument is missing, error will be raised.
+* If an action method accepts any keyword arguments (such as ``**kwargs``), nothing will be raised.
+
+```ruby
+  ### ERROR: option `:repeat` is defined but keyword arg `repeat:` is missing.
+  @action.("greeting message")
+  @option.({{*:lang*}}  , "-l <lang>", "language")
+  @option.({{*:repeat*}}, "-n <N>"   , "repeat N times")
+  def hello(user="world", {{*lang:*}} "en")
+    ....
+  end
+
+  ### NO ERROR: `**kwargs` accepts any keyword arguments.
+  @action.("greeting message")
+  @option.(:lang  , "-l <lang>", "language")
+  @option.(:repeat, "-n <N>"   , "repeat N times")
+  def hello(user="world", lang: "en", {{***kwargs*}})
+    ....
+  end
 ```
 
 For usability reason, Benry-CmdApp supports ``--lang=<val>`` style of long option
