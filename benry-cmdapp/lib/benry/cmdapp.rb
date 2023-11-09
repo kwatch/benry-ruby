@@ -1388,15 +1388,11 @@ module Benry::CmdApp
       s1 = build_section(_header(:HEADER_ACTIONS), str)
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
-      sb = []
-      registry.metadata_each(all: all) do |metadata|
-        md = metadata
-        if md.alias? && md.action.start_with?(prefix)
-          sb << build_action_line(md)
-        end
-      end
+      str = _build_metadata_list(c.format_action, all: all) {|metadata|
+        metadata.alias? && metadata.action.start_with?(prefix)
+      }
       #; [!80t51] alias names are displayed in separated section from actions.
-      s2 = sb.empty? ? nil : build_section(_header(:HEADER_ALIASES), sb.join())
+      s2 = str.empty? ? nil : build_section(_header(:HEADER_ALIASES), str)
       #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
       #; [!3c3f1] returns list of actions which name starts with prefix specified.
       return [s1, s2].compact().join("\n")
