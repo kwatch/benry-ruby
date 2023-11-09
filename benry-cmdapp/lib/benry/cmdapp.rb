@@ -1552,8 +1552,10 @@ module Benry::CmdApp
       return if ! config
       #; [!ppcvp] adds options according to config object.
       c = config
-      topics = ["action", "alias", "prefix", "abbrev",
-                "prefix1", "prefix2", "prefix3", "prefix4"]
+      topics = ["action", "actions", "alias", "aliases",
+                "prefix", "prefixes", "abbrev", "abbrevs",
+                "prefix1", "prefixes1", "prefix2", "prefixes2",
+                "prefix3", "prefixes3", "prefix4", "prefixes4"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
@@ -1817,10 +1819,10 @@ module Benry::CmdApp
       builder = get_app_help_builder()
       return (
         case topic
-        when "action"           ; builder.build_actions_part(false, all: all)
-        when "alias"            ; builder.build_aliases_part(all: all)
-        when "abbrev"           ; builder.build_abbrevs_part(all: all)
-        when /\Aprefix(\d+)?\z/ ; builder.build_prefixes_part(($1 || 0).to_i, all: all)
+        when "action", "actions"; builder.build_actions_part(false, all: all)
+        when "alias" , "aliases"; builder.build_aliases_part(all: all)
+        when "abbrev", "abbrevs"; builder.build_abbrevs_part(all: all)
+        when /\Aprefix(?:es)?(\d+)?\z/ ; builder.build_prefixes_part(($1 || 0).to_i, all: all)
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )

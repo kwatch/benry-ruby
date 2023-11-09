@@ -369,17 +369,25 @@ END
       end
 
       spec "[!ooiaf] prints topic list if global option '-L <topic>' specified." do
-        g_opts = {topic: "action"}
-        sout, serr = capture_sio do
-          @app.instance_eval { handle_global_options(g_opts, []) }
+        prefixes = "\\e\\[1;34mPrefixes:\\e\\[0m"
+        data = [
+          [/\A\e\[1;34mActions:\e\[0m$/            , ["action" , "actions"  ]],
+          [/\A\e\[1;34mAliases:\e\[0m$/            , ["alias"  , "aliases"  ]],
+          [/\A\e\[1;34mAbbreviations:\e\[0m$/      , ["abbrev" , "abbrevs"  ]],
+          [/\A#{prefixes} \e\[2m\(depth=0\)\e\[0m$/, ["prefix" , "prefixes" ]],
+          [/\A#{prefixes} \e\[2m\(depth=1\)\e\[0m$/, ["prefix1", "prefixes1"]],
+          [/\A#{prefixes} \e\[2m\(depth=2\)\e\[0m$/, ["prefix2", "prefixes2"]],
+          [/\A#{prefixes} \e\[2m\(depth=3\)\e\[0m$/, ["prefix3", "prefixes3"]],
+        ]
+        data.each do |rexp, topics|
+          topics.each do |topic|
+            g_opts = {topic: topic}
+            sout, serr = capture_sio(tty: true) do
+              @app.instance_eval { handle_global_options(g_opts, []) }
+            end
+            ok {sout} =~ rexp
+          end
         end
-        ok {sout} =~ /\AActions:$/
-        #
-        g_opts = {topic: "prefix"}
-        sout, serr = capture_sio do
-          @app.instance_eval { handle_global_options(g_opts, []) }
-        end
-        ok {sout} =~ /\APrefixes: \(depth=0\)$/
       end
 
       spec "[!ymifi] includes hidden actions into topic list if `-a, --all` specified." do
