@@ -1941,6 +1941,7 @@ Options:
 <li><code>config.option_color = true</code> enables <code>--color[=&lton|off&gt;]</code> option which sets <code>$COLOR_MODE = true/false</code>. This affects to help message colorized or not. (default: <code>false</code>)</li>
 <li><code>config.option_debug = true</code> enables <code>-D</code> and <code>--debug</code> options which sets <code>$DEBUG_MODE = true</code>. (default: <code>:hidden</code>)</li>
 <li><code>config.option_trace = true</code> enables <code>-T</code> and <code>--trace</code> options. Entering into and exitting from action are reported when trace mode is on. (default: <code>false</code>)</li>
+<li><code>config.option_dryrun = true</code> enables <code>-X</code> and <code>--dryrun</code> options which sets <code>$DRYRUN_MODE = true</code>. (default: <code>false</code>)</li>
 <li><code>config.format_option = "  %-18s : %s"</code> sets format of options in help message. (default: <code>"  %-18s : %s"</code>)</li>
 <li><code>config.format_action = "  %-18s : %s"</code> sets format of actions in help message. (default: <code>"  %-18s : %s"</code>)</li>
 <li><code>config.format_usage = "  $ %s"</code> sets format of usage in help message. (default: <code>"  $ %s"</code>)</li>
@@ -1991,6 +1992,7 @@ config.<strong>option_quiet</strong>         = false
 config.<strong>option_color</strong>         = false
 config.<strong>option_debug</strong>         = :hidden
 config.<strong>option_trace</strong>         = false
+config.<strong>option_dryrun</strong>        = false
 config.<strong>backtrace_ignore_rexp</strong> = nil
 config.<strong>trace_mode</strong>           = nil
 </pre>
