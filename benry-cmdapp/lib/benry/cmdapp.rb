@@ -365,10 +365,10 @@ module Benry::CmdApp
     else                   ; return "Can't define new alias '#{alias_name}' because already defined as an action."
     end
     #; [!r24qn] returns error message if action doesn't exist.
-    #; [!9phlr] returns no error message if other alias exists with the same name as action.
+    #; [!lxolh] returns error message if action is an alias name.
     action_md = REGISTRY.metadata_get(action_name)
     if    action_md == nil ; return "Action '#{action_name}' not found."
-    elsif action_md.alias? ; nil   # ok: allow to define an alias of other alias
+    elsif action_md.alias? ; return "'#{action_name}' should be an action, but is an alias."
     else                   ; nil   # ok: action should be defined
     end
     #; [!b6my2] returns nil if no errors found.
