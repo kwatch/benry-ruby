@@ -1402,6 +1402,20 @@ git diff --cached
 git status -sb
 ```
 
+* Aliases are printed in the help message of action (if defined).
+
+```console
+[bash]$ ruby ex28.rb git:status -h
+ex28.rb git:status --- show current status in compact mode
+
+Usage:
+  $ ex28.rb git:status
+
+{{*Aliases:*}}                                               # !!!!
+  {{*git                : alias of 'git:status'*}}           # !!!!
+  {{*st                 : alias of 'git:status'*}}           # !!!!
+```
+
 * Both alias and action names should be string. Symbol is not allowed.
 
 ```ruby
@@ -1459,7 +1473,7 @@ Bonjour, Alice!
 Ciao, Bob!
 ```
 
-* It is allowed to define an alias of other alias, but not recommended.
+* [EXPERIMENTAL] It is allowed to define an alias of other alias, but not recommended.
 
 ```
 ## define an alias
@@ -1500,8 +1514,8 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
-Global option ``-L alias`` lists all aliases.
-This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).
+* Global option ``-L alias`` lists all aliases.
+  This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).
 
 ```console
 [bash]$ ruby ex30.rb -L alias
