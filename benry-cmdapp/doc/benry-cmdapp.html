@@ -1444,13 +1444,13 @@ Bonjour, Alice!
 Ciao, Bob!
 </pre>
 <ul>
-<li>[EXPERIMENTAL] It is allowed to define an alias of other alias, but not recommended.</li>
+<li>It is not allowed to define an alias of other alias.</li>
 </ul>
 <pre>
 ## define an alias
 Benry::CmdApp.define_alias(<strong>"hello-it"</strong>   , ["hello", "-l", "it"])
 
-## define an alias of other alias
+## ERROR: define an alias of other alias
 Benry::CmdApp.define_alias("ciao"       , <strong>"hello-it"</strong>)   # !!!!
 </pre>
 <ul>
