@@ -40,7 +40,7 @@ class HelpTestAction < Benry::CmdApp::Action
     end
   end
 
-  category "descdemo:", "prefix description demo" do
+  category "descdemo:", "category description demo" do
     @action.("demo #1")
     def demo1()
     end
@@ -488,7 +488,7 @@ END
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions
-\e[2m  -L <topic>         : list of a topic (action|alias|prefix|abbrev)\e[0m
+\e[2m  -L <topic>         : list of a topic (action|alias|category|abbrev)\e[0m
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -843,20 +843,20 @@ END
         ok {x} =~ /^  secret: \(\d+\)\n/
       end
 
-      spec "[!qxoja] includes prefix description if registered." do
+      spec "[!qxoja] includes category description if registered." do
         x = @builder.build_categories_part(all: true)
-        ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
+        ok {x} =~ /^  descdemo: \(2\)      : category description demo$/
       end
 
-      spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
-        @config.format_prefix = "  %-15s # %s"
+      spec "[!k3y6q] uses `config.format_category` or `config.format_action`." do
+        @config.format_category = "  %-15s # %s"
         x = @builder.build_categories_part(all: true)
-        ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
+        ok {x} =~ /^  descdemo: \(2\)   # category description demo\n/
         #
-        @config.format_prefix = nil
-        @config.format_prefix = "    %-15s -- %s"
+        @config.format_category = nil
+        @config.format_category = "    %-15s -- %s"
         x = @builder.build_categories_part(all: true)
-        ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
+        ok {x} =~ /^    descdemo: \(2\)   -- category description demo$/
       end
 
     end

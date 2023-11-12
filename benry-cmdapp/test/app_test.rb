@@ -1020,7 +1020,7 @@ END
       --help           : print help message (of action if specified)
       --version        : print version
       --list           : list actions
-  -L <topic>           : list of a topic (action|alias|prefix|abbrev)
+  -L <topic>           : list of a topic (action|alias|category|abbrev)
       --all            : list hidden actions/options, too
       --verbose        : verbose mode
       --quiet          : quiet mode

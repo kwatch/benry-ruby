@@ -1100,7 +1100,7 @@ module Benry::CmdApp
     FORMAT_ACTION         = "  %-18s : %s"
     FORMAT_ABBREV         = "  %-10s =>  %s"
     FORMAT_USAGE          = "  $ %s"
-    FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
+    FORMAT_CATEGORY       = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
     DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
     DECORATION_EXTRA      = "\e[2m%s\e[0m"      # gray color
@@ -1115,7 +1115,7 @@ module Benry::CmdApp
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
                    help_postamble: nil,
-                   format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_prefix: nil,
+                   format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_category: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_topic: :hidden, option_all: true,
@@ -1137,7 +1137,7 @@ module Benry::CmdApp
       @format_action      = format_action || FORMAT_ACTION
       @format_abbrev      = format_abbrev || FORMAT_ABBREV
       @format_usage       = format_usage  || FORMAT_USAGE
-      @format_prefix      = format_prefix   # nil means to use @format_action
+      @format_category    = format_category   # nil means to use @format_action
       @deco_command       = deco_command || DECORATION_COMMAND  # for command name in help
       @deco_header        = deco_header  || DECORATION_HEADER   # for "Usage:" or "Actions"
       @deco_extra         = deco_extra   || DECORATION_EXTRA    # for "(default: )" or "(depth=1)"
@@ -1168,7 +1168,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
-    attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_prefix
+    attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_category
     attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
@@ -1403,7 +1403,7 @@ module Benry::CmdApp
       str = _build_metadata_list(c.format_action, all: all) {|metadata|
         #; [!duhyd] includes actions which name is same as prefix.
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
-        _prefix_action?(metadata, prefix)
+        _category_action?(metadata, prefix)
       }
       #s1 = str.empty? ? nil : build_section(_header(:HEADER_ACTIONS), str)
       s1 = build_section(_header(:HEADER_ACTIONS), str)
@@ -1419,14 +1419,14 @@ module Benry::CmdApp
       return [s1, s2].compact().join("\n")
     end
 
-    def _prefix_action?(md, prefix)
+    def _category_action?(md, prefix)
       return true  if md.name.start_with?(prefix)
       return false if md.name != prefix.chomp(':')
       return true  if ! md.alias?
       return false if md.action.start_with?(prefix)
       return true
     end
-    private :_prefix_action?
+    private :_category_action?
 
     def build_aliases_part(all: false)
       registry = @_registry || REGISTRY
@@ -1466,12 +1466,12 @@ module Benry::CmdApp
       #registry.category_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
-      #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
-      format = (c.format_prefix || c.format_action) + "\n"
+      #; [!k3y6q] uses `config.format_category` or `config.format_action`.
+      format = (c.format_category || c.format_action) + "\n"
       indent = /^( *)/.match(format)[1]
       str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
-        #; [!qxoja] includes prefix description if registered.
+        #; [!qxoja] includes category description if registered.
         desc = registry.category_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
@@ -1599,7 +1599,7 @@ module Benry::CmdApp
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
-      _add(c, :topic  , "-L <topic>"   , "list of a topic (action|alias|prefix|abbrev)", enum: topics)
+      _add(c, :topic  , "-L <topic>"   , "list of a topic (action|alias|category|abbrev)", enum: topics)
       _add(c, :all    , "-a, --all"    , "list hidden actions/options, too")
       _add(c, :verbose, "-v, --verbose", "verbose mode")
       _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
