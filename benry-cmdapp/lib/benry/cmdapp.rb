@@ -12,7 +12,7 @@ module Benry::CmdApp
   $COLOR_MODE   = nil    # true when global option '--color' specified
   $DEBUG_MODE   = nil    # true when global option '--debug' specified
   #$TRACE_MODE  = nil    # use `@config.trace_mode?` instead.
-  $DRYRUN_MODE  = nil    # true when global option '-x, --dryrun' specified
+  $DRYRUN_MODE  = nil    # true when global option '-X, --dryrun' specified
 
 
   class BaseError < StandardError
@@ -1137,7 +1137,7 @@ module Benry::CmdApp
       @option_color       = option_color        # enable or disable `--color[=<on|off>]`
       @option_debug       = option_debug        # enable or disable `--debug`
       @option_trace       = option_trace        # enable or disable `-T, --trace`
-      @option_dryrun      = option_dryrun       # enable or disable `-x, --dryrun`
+      @option_dryrun      = option_dryrun       # enable or disable `-X, --dryrun`
       @backtrace_ignore_rexp = backtrace_ignore_rexp
       #
       #@verobse_mode       = nil
@@ -1564,7 +1564,7 @@ module Benry::CmdApp
       _add(c, :color  , "--color[=<on|off>]", "color mode", type: TrueClass)
       _add(c, :debug  , "    --debug"  , "debug mode")
       _add(c, :trace  , "-T, --trace"  , "trace mode")
-      _add(c, :dryrun , "-x, --dryrun" , "dry-run mode (not run; just echoback)")
+      _add(c, :dryrun , "-X, --dryrun" , "dry-run mode (not run; just echoback)")
     end
 
     def _add(c, key, optstr, desc, type: nil, enum: nil)
