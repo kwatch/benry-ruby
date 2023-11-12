@@ -122,8 +122,8 @@ Oktest.scope do
 
       spec "[!dcs9v] looks up action metadata recursively if alias name specified." do
         Benry::CmdApp.define_alias("ali61", "hello")
-        Benry::CmdApp.define_alias("ali62", "ali61")
-        Benry::CmdApp.define_alias("ali63", "ali62")
+        Benry::CmdApp.define_alias!("ali62", "ali61")
+        Benry::CmdApp.define_alias!("ali63", "ali62")
         #
         hello_md = Benry::CmdApp::REGISTRY.metadata_get("hello")
         ok {hello_md}.is_a?(Benry::CmdApp::ActionMetadata)
@@ -137,8 +137,8 @@ Oktest.scope do
 
       spec "[!f8fqx] returns action metadata and alias args." do
         Benry::CmdApp.define_alias("ali71", ["hello", "a"])
-        Benry::CmdApp.define_alias("ali72", "ali71")
-        Benry::CmdApp.define_alias("ali73", ["ali72", "b", "c"])
+        Benry::CmdApp.define_alias!("ali72", "ali71")
+        Benry::CmdApp.define_alias!("ali73", ["ali72", "b", "c"])
         #
         hello_md = Benry::CmdApp::REGISTRY.metadata_get("hello")
         ok {Benry::CmdApp::REGISTRY.metadata_lookup("hello")} == [hello_md, []]

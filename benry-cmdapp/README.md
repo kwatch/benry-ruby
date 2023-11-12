@@ -1529,13 +1529,13 @@ Bonjour, Alice!
 Ciao, Bob!
 ```
 
-* [EXPERIMENTAL] It is allowed to define an alias of other alias, but not recommended.
+* It is not allowed to define an alias of other alias.
 
 ```
 ## define an alias
 Benry::CmdApp.define_alias("hello-it"   , ["hello", "-l", "it"])
 
-## define an alias of other alias
+## ERROR: define an alias of other alias
 Benry::CmdApp.define_alias("ciao"       , "hello-it")   # !!!!
 ```
 

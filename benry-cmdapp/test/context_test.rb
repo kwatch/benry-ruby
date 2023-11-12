@@ -127,8 +127,8 @@ Oktest.scope do
         metadata = Benry::CmdApp::REGISTRY.metadata_get("foo:anyargs")
         ok {metadata} != nil
         Benry::CmdApp.define_alias("ali21", "foo:anyargs")
-        Benry::CmdApp.define_alias("ali22", "ali21")
-        Benry::CmdApp.define_alias("ali23", "ali22")
+        Benry::CmdApp.define_alias!("ali22", "ali21")
+        Benry::CmdApp.define_alias!("ali23", "ali22")
         #
         sout, serr = capture_sio() { @context.start_action("ali23", []) }
         ok {sout} == "args=[], kwargs={}\n"
@@ -149,8 +149,8 @@ Oktest.scope do
         metadata = Benry::CmdApp::REGISTRY.metadata_get("foo:anyargs")
         ok {metadata} != nil
         Benry::CmdApp.define_alias("ali31", ["foo:anyargs", "aa"])
-        Benry::CmdApp.define_alias("ali32", "ali31")
-        Benry::CmdApp.define_alias("ali33", ["ali32"      , "bb", "cc"])
+        Benry::CmdApp.define_alias!("ali32", "ali31")
+        Benry::CmdApp.define_alias!("ali33", ["ali32"      , "bb", "cc"])
         #
         sout, serr = capture_sio() { @context.start_action("ali33", ["xx", "yy"]) }
         ok {sout} == "args=[\"aa\", \"bb\", \"cc\", \"xx\", \"yy\"], kwargs={}\n"
@@ -165,7 +165,7 @@ Oktest.scope do
         metadata = Benry::CmdApp::REGISTRY.metadata_get("hello")
         ok {metadata} != nil
         Benry::CmdApp.define_alias("ali41", ["hello", "-l", "it"])
-        Benry::CmdApp.define_alias("ali42", ["ali41"])
+        Benry::CmdApp.define_alias!("ali42", ["ali41"])
         #
         sout, serr = capture_sio() { @context.start_action("ali42", ["-l", "fr", "Alice"]) }
         ok {sout} == "Bonjour, Alice!\n"

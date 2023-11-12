@@ -90,10 +90,11 @@ Oktest.scope do
                        %q|define_alias("tmphello6", "hello99"): Action 'hello99' not found.|)
       end
 
-      spec "[!9phlr] returns no error message if other alias exists with the same name as action." do
-        pr = proc { Benry::CmdApp.define_alias("tmphello6", "hello99") }
+      spec "[!lxolh] returns error message if action is an alias name." do
+        Benry::CmdApp.define_alias("tmphello6x", "hello")
+        pr = proc { Benry::CmdApp.define_alias("tmphello6y", "tmphello6x") }
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|define_alias("tmphello6", "hello99"): Action 'hello99' not found.|)
+                       %q|define_alias("tmphello6y", "tmphello6x"): 'tmphello6x' should be an action, but is an alias.|)
       end
 
       spec "[!b6my2] returns nil if no errors found." do
