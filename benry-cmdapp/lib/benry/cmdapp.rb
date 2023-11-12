@@ -716,10 +716,10 @@ module Benry::CmdApp
       Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
     end
 
-    def self.new_optionset(&block)
+    def self.optionset(&block)
       #; [!us0g4] yields block with dummy action.
       #; [!1idwv] clears default option items.
-      @action.("dummy action by new_optionset()")
+      @action.("dummy action by optionset()")
       schema = @__actiondef__[1]
       schema.each.collect(&:key).each {|key| schema.delete(key) }
       yield
@@ -1468,12 +1468,14 @@ module Benry::CmdApp
     def build_help_message(metadata, all: false)
       #; [!f3436] returns help message of an action.
       #; [!8acs1] includes hidden options if `all: true` passed.
+      #; [!mtvw8] includes 'Aliases:' section if action has any aliases.
       #; [!vcg9w] not include 'Options:' section if action has no options.
       #; [!1auu5] not include '[<options>]' in 'Usage:'section if action has no options.
       sb = []
       sb << build_preamble_part(metadata)
       sb << build_usage_part(metadata, all: all)
       sb << build_options_part(metadata, all: all)
+      sb << build_aliases_part(metadata, all: all)
       sb << build_postamble_part(metadata)
       return sb.compact().join("\n")
     end
@@ -1523,6 +1525,27 @@ module Benry::CmdApp
       s = build_option_help(metadata.schema, format, all: all)
       return nil if s == nil
       return build_section(_header(:HEADER_OPTIONS), s)  # "Options:"
+    end
+
+    def build_aliases_part(metadata, all: false)
+      #; [!kjpt9] returns 'Aliases:' section of help message.
+      #; [!cjr0q] returns nil if action has no options.
+      format = @config.format_action
+      registry = @_registry || REGISTRY
+      action_name = metadata.name
+      sb = []
+      registry.metadata_each(all: all) do |md|
+        next unless md.alias?
+        action_md, args = registry.metadata_lookup(md.name)
+        next unless action_md
+        next unless action_md.name == action_name
+        desc = "alias of '#{([action_name] + args).join(' ')}'"
+        s = format % [md.name, desc]
+        #s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+      end
+      return nil if sb.empty?
+      return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
     end
 
     def build_postamble_part(metadata)

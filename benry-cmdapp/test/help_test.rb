@@ -49,6 +49,16 @@ class HelpTestAction < Benry::CmdApp::Action
     end
   end
 
+  ## alias test
+  @action.("sample action")
+  @option.(:aa, "-a, --aa", "option A")
+  @option.(:bb, "    --bb", "option B")
+  def alitest1(xx, yy=0, *zz, aa: nil, bb: nil)
+  end
+  define_alias "alitest1x", "alitest1"
+  define_alias "alitest1y", ["alitest1", "--aa"]
+  define_alias "alitest1z", ["alitest1y", "foobar"]
+
 end
 
 
@@ -872,7 +882,7 @@ END
       spec "[!f3436] returns help message of an action." do
         metadata = @registry.metadata_get("hello")
         x = @builder.build_help_message(metadata)
-        ok {x} == <<"END"
+        ok {x}.start_with?(<<"END")
 \e[1mtestapp hello\e[0m --- greeting message
 
 \e[1;34mUsage:\e[0m
@@ -895,6 +905,27 @@ END
 \e[1;34mOptions:\e[0m
 \e[2m  -h, --help         : print help message\e[0m
 \e[2m  --val=<val>        : something value\e[0m
+END
+      end
+
+      spec "[!mtvw8] includes 'Aliases:' section if action has any aliases." do
+        metadata = @registry.metadata_get("alitest1")
+        output = @builder.build_help_message(metadata, all: true)
+        ok {output} == <<"END"
+\e[1mtestapp alitest1\e[0m --- sample action
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp alitest1\e[0m [<options>] <xx> [<yy> [<zz>...]]
+
+\e[1;34mOptions:\e[0m
+\e[2m  -h, --help         : print help message\e[0m
+  -a, --aa           : option A
+      --bb           : option B
+
+\e[1;34mAliases:\e[0m
+  alitest1x          : alias of 'alitest1'
+  alitest1y          : alias of 'alitest1 --aa'
+  alitest1z          : alias of 'alitest1 --aa foobar'
 END
       end
 
@@ -1032,6 +1063,36 @@ END
         metadata = @registry.metadata_get("noopt")
         x = @builder.__send__(:build_options_part, metadata)
         ok {x} == nil
+      end
+
+    end
+
+
+    topic '#build_aliases_part()' do
+
+      spec "[!kjpt9] returns 'Aliases:' section of help message." do
+        action = "alitest1"
+        x = @registry.metadata_each.any? {|md| md.alias? && md.action == action }
+        ok {x} == true
+        #
+        metadata = @registry.metadata_get("alitest1")
+        output = @builder.__send__(:build_aliases_part, metadata)
+        ok {output} == <<"END"
+\e[1;34mAliases:\e[0m
+  alitest1x          : alias of 'alitest1'
+  alitest1y          : alias of 'alitest1 --aa'
+  alitest1z          : alias of 'alitest1 --aa foobar'
+END
+      end
+
+      spec "[!cjr0q] returns nil if action has no options." do
+        action = "argsample"
+        x = @registry.metadata_each.any? {|md| md.alias? && md.action == action }
+        ok {x} == false
+        #
+        metadata = @registry.metadata_get(action)
+        output = @builder.__send__(:build_aliases_part, metadata)
+        ok {output} == nil
       end
 
     end
