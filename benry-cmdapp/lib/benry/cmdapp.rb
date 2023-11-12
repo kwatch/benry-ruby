@@ -1914,7 +1914,10 @@ module Benry::CmdApp
     end
 
     def skip_backtrace?(bt)
-      return false
+      #; [!r2fmv] ignores backtraces if matched to 'config.backtrace_ignore_rexp'.
+      #; [!c6f11] not ignore backtraces if 'config.backtrace_ignore_rexp' is not set.
+      rexp = @config.backtrace_ignore_rexp
+      return rexp ? bt =~ rexp : false
     end
 
     def read_file_as_lines(filename)
