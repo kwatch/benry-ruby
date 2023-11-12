@@ -446,13 +446,13 @@ module Benry::CmdApp
     #; [!dckvt] abbrev should not exist.
     ! _registry.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
     #; [!5djjt] abbrev should not be the same name with existing prefix.
-    ! _registry.prefix_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
+    ! _registry.category_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
     #; [!mq4ki] prefix should be a string.
     prefix.is_a?(String)            or return "#{prefix.inspect}: Prefix should be a string, but got #{prefix.class.name} object."
     #; [!a82z3] prefix should end with ':'.
     prefix.end_with?(":")           or return "'#{prefix}': Prefix should end with ':'."
     #; [!eq5iu] prefix should exist.
-    _registry.prefix_exist?(prefix)    or return "'#{prefix}': No such prefix."
+    _registry.category_exist?(prefix)    or return "'#{prefix}': No such prefix."
     #; [!jzkhc] returns nil if no error found.
     return nil
   end
@@ -600,7 +600,7 @@ module Benry::CmdApp
         @__prefixdef__[2] = nil
       end
       #; [!u0td6] registers prefix of action if not registered yet.
-      REGISTRY.prefix_add_via_action(action)
+      REGISTRY.category_add_via_action(action)
       #
       return true    # for testing purpose
     end
@@ -662,7 +662,7 @@ module Benry::CmdApp
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
         #; [!j00pk] registers prefix and description, even if no actions defined.
-        REGISTRY.prefix_add(prefix, desc)
+        REGISTRY.category_add(prefix, desc)
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
@@ -683,7 +683,7 @@ module Benry::CmdApp
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
         #; [!ncskq] registers prefix and description, even if no actions defined.
-        REGISTRY.prefix_add(prefix, desc)
+        REGISTRY.category_add(prefix, desc)
       end
       nil
     end
@@ -785,7 +785,7 @@ module Benry::CmdApp
 
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
-      @prefix_dict   = {}          # {prefix => description}
+      @category_dict = {}          # {prefix => description}
       @abbrev_dict   = {}
     end
 
@@ -840,47 +840,47 @@ module Benry::CmdApp
       return md, alias_args
     end
 
-    def prefix_add(prefix, desc=nil)
+    def category_add(prefix, desc=nil)
       #; [!k27in] registers prefix if not registered yet.
       #; [!xubc8] registers prefix whenever desc is not a nil.
-      if ! @prefix_dict.key?(prefix) || desc
-        @prefix_dict[prefix] = desc
+      if ! @category_dict.key?(prefix) || desc
+        @category_dict[prefix] = desc
       end
       nil
     end
 
-    def prefix_add_via_action(action)
+    def category_add_via_action(action)
       #; [!ztrfj] registers prefix of action.
       #; [!31pik] do nothing if prefix already registered.
       #; [!oqq7j] do nothing if action has no prefix.
       if action =~ /\A(?:[-\w]+:)+/
         prefix = $&
-        @prefix_dict[prefix] = nil unless @prefix_dict.key?(prefix)
+        @category_dict[prefix] = nil unless @category_dict.key?(prefix)
       end
       nil
     end
 
-    def prefix_exist?(prefix)
+    def category_exist?(prefix)
       #; [!79cyx] returns true if prefix is already registered.
       #; [!jx7fk] returns false if prefix is not registered yet.
-      return @prefix_dict.key?(prefix)
+      return @category_dict.key?(prefix)
     end
 
-    def prefix_each(&block)
+    def category_each(&block)
       #; [!67r3i] returns Enumerator object if block not given.
-      return enum_for(:prefix_each) unless block_given?()
+      return enum_for(:category_each) unless block_given?()
       #; [!g3d1z] yields block with each prefix and desc.
-      @prefix_dict.each(&block)
+      @category_dict.each(&block)
       nil
     end
 
-    def prefix_get_desc(prefix)
+    def category_get_desc(prefix)
       #; [!d47kq] returns description if prefix is registered.
       #; [!otp1b] returns nil if prefix is not registered.
-      return @prefix_dict[prefix]
+      return @category_dict[prefix]
     end
 
-    def prefix_count_actions(depth, all: false)
+    def category_count_actions(depth, all: false)
       dict = {}
       #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
       metadata_each(all: all) do |metadata|
@@ -1462,8 +1462,8 @@ module Benry::CmdApp
       c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = registry.prefix_count_actions(depth, all: all)
-      #registry.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
+      dict = registry.category_count_actions(depth, all: all)
+      #registry.category_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
       #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
@@ -1472,7 +1472,7 @@ module Benry::CmdApp
       str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
         #; [!qxoja] includes prefix description if registered.
-        desc = registry.prefix_get_desc(prefix)
+        desc = registry.category_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
       #; [!crbav] returns top prefix list.

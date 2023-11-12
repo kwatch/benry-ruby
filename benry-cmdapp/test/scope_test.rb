@@ -593,13 +593,13 @@ END
 
       spec "[!u0td6] registers prefix of action if not registered yet." do
         prefix = "p1777:foo:bar:"
-        ok {Benry::CmdApp::REGISTRY.prefix_exist?(prefix)} == false
+        ok {Benry::CmdApp::REGISTRY.category_exist?(prefix)} == false
         ScopeTestAction.class_eval do
           @action.("example")
           def p1777__foo__bar__hello()
           end
         end
-        ok {Benry::CmdApp::REGISTRY.prefix_exist?(prefix)} == true
+        ok {Benry::CmdApp::REGISTRY.category_exist?(prefix)} == true
       end
 
     end
@@ -760,8 +760,8 @@ END
               end
             end
           end
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0516:")} == "bla bla"
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0516:git:")} == "boom boom"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p0516:")} == "bla bla"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p0516:git:")} == "boom boom"
           #
           ScopeTestAction.class_eval do
             category "p3893:", "guu guu", action: "a1" do
@@ -773,14 +773,14 @@ END
               def a1(); end
             end
           end
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p3893:")} == "guu guu"
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p3893:git:")} == "gii gii"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p3893:")} == "guu guu"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p3893:git:")} == "gii gii"
           #
           ScopeTestAction.class_eval do
             category "p2358:" do
             end
           end
-          ok {Benry::CmdApp::REGISTRY.prefix_exist?("p2358:")} == true
+          ok {Benry::CmdApp::REGISTRY.category_exist?("p2358:")} == true
         end
 
         spec "[!w52y5] raises DefinitionError if `action:` specified but target action not defined." do
@@ -830,20 +830,20 @@ END
           ScopeTestAction.class_eval do
             category "p6712:", "bowow"
           end
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p6712:")} == "bowow"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p6712:")} == "bowow"
           #
           ScopeTestAction.class_eval do
             category "p9461:", "hoo hoo", action: "homhom"
             category "p0438:", "yaa yaa", alias_of: "homhom"
             @__prefixdef__ = nil
           end
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p9461:")} == "hoo hoo"
-          ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0438:")} == "yaa yaa"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p9461:")} == "hoo hoo"
+          ok {Benry::CmdApp::REGISTRY.category_get_desc("p0438:")} == "yaa yaa"
           #
           ScopeTestAction.class_eval do
             category "p7217:"
           end
-          ok {Benry::CmdApp::REGISTRY.prefix_exist?("p7217:")} == true
+          ok {Benry::CmdApp::REGISTRY.category_exist?("p7217:")} == true
         end
 
       end
