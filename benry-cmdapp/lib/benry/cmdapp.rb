@@ -1100,7 +1100,8 @@ module Benry::CmdApp
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_topic: :hidden, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
-                   option_debug: :hidden, option_trace: false)
+                   option_debug: :hidden, option_trace: false,
+                   backtrace_ignore_rexp: nil)
       #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.
       option_version = !! app_version if option_version == nil
       #
@@ -1135,6 +1136,7 @@ module Benry::CmdApp
       @option_color       = option_color        # enable or disable `--color[=<on|off>]`
       @option_debug       = option_debug        # enable or disable `--debug`
       @option_trace       = option_trace        # enable or disable `-T, --trace`
+      @backtrace_ignore_rexp = backtrace_ignore_rexp
       #
       #@verobse_mode       = nil
       #@quiet_mode         = nil
@@ -1153,6 +1155,7 @@ module Benry::CmdApp
     attr_accessor :option_verbose, :option_quiet, :option_color
     attr_accessor :option_debug, :option_trace
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
+    attr_accessor :backtrace_ignore_rexp
     alias trace_mode? trace_mode
 
     def each(sort: false, &b)
