@@ -1525,6 +1525,27 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
+    def build_aliases_part(metadata, all: false)
+      #; [!kjpt9] returns 'Aliases:' section of help message.
+      #; [!cjr0q] returns nil if action has no options.
+      format = @config.format_action
+      registry = @_registry || REGISTRY
+      action_name = metadata.name
+      sb = []
+      registry.metadata_each(all: all) do |md|
+        next unless md.alias?
+        action_md, args = registry.metadata_lookup(md.name)
+        next unless action_md
+        next unless action_md.name == action_name
+        desc = "alias of '#{([action_name] + args).join(' ')}'"
+        s = format % [md.name, desc]
+        #s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+      end
+      return nil if sb.empty?
+      return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
+    end
+
     def build_postamble_part(metadata)
       #; [!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`.
       #; [!jajse] returns nil if postamble is not set.
