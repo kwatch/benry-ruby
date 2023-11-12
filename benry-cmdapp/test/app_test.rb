@@ -877,6 +877,33 @@ END
     end
 
 
+    topic '#skip_backtrace?()' do
+
+      spec "[!r2fmv] ignores backtraces if matched to 'config.backtrace_ignore_rexp'." do
+        @config.backtrace_ignore_rexp = /\/foobar\.rb/
+        bt1 = "/home/yourname/foobar.rb:123:"
+        bt2 = "/home/yourname/blabla.rb:123:"
+        _ = self
+        @app.instance_eval do
+          _.ok {skip_backtrace?(bt1)} == 14
+          _.ok {skip_backtrace?(bt2)} == nil
+        end
+      end
+
+      spec "[!c6f11] not ignore backtraces if 'config.backtrace_ignore_rexp' is not set." do
+        @config.backtrace_ignore_rexp = nil
+        bt1 = "/home/yourname/foobar.rb:123:"
+        bt2 = "/home/yourname/blabla.rb:123:"
+        _ = self
+        @app.instance_eval do
+          _.ok {skip_backtrace?(bt1)} == false
+          _.ok {skip_backtrace?(bt2)} == false
+        end
+      end
+
+    end
+
+
     topic '#read_file_as_lines()' do
 
       spec "[!e9c74] reads file content as an array of line." do

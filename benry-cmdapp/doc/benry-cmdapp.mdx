@@ -2015,6 +2015,7 @@ Options:
 * ``config.app_name = "<string>"`` sets application name which is shown in help message. (default: same as ``config.app_command``)
 * ``config.app_usage = "<text>" (or ``["<text1>", "<text2>", ...]``) sets usage string in help message. (default: ``" <action> [<arguments>...]"``)
 * ``config.app_detail = "<text>"`` sets detailed description of command which is showin in help message. (default: ``nil``)
+* ``config.backtrace_ignore_rexp = /.../`` sets regular expression to ignore backtrace when error raised. (default: ``nil``)
 * ``config.help_postamble = {"<Title>:" => "<text>"}`` sets postamble of help message, such as 'Example:' or 'Tips:'. (default: ``nil``)
 * ``config.default_action = "<action>"`` sets default action name. (default: ``nil``)
 * ``config.option_help = true`` enables ``-h`` and ``--help`` options. (default: ``true``)
@@ -2080,6 +2081,7 @@ config.{{*option_quiet*}}         = false
 config.{{*option_color*}}         = false
 config.{{*option_debug*}}         = :hidden
 config.{{*option_trace*}}         = false
+config.{{*backtrace_ignore_rexp*}} = nil
 config.{{*trace_mode*}}           = nil
 ```
 
