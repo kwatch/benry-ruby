@@ -1928,6 +1928,7 @@ Options:
 <li><code>config.app_name = "&ltstring&gt;"</code> sets application name which is shown in help message. (default: same as <code>config.app_command</code>)</li>
 <li><code>config.app_usage = "&lttext&gt;" (or </code>["&lttext1&gt;", "&lttext2&gt;", ...]<code>) sets usage string in help message. (default: </code>" &ltaction&gt; [&ltarguments&gt;...]"``)</li>
 <li><code>config.app_detail = "&lttext&gt;"</code> sets detailed description of command which is showin in help message. (default: <code>nil</code>)</li>
+<li><code>config.backtrace_ignore_rexp = /.../</code> sets regular expression to ignore backtrace when error raised. (default: <code>nil</code>)</li>
 <li><code>config.help_postamble = {"&ltTitle&gt;:" =&gt; "&lttext&gt;"}</code> sets postamble of help message, such as 'Example:' or 'Tips:'. (default: <code>nil</code>)</li>
 <li><code>config.default_action = "&ltaction&gt;"</code> sets default action name. (default: <code>nil</code>)</li>
 <li><code>config.option_help = true</code> enables <code>-h</code> and <code>--help</code> options. (default: <code>true</code>)</li>
@@ -1990,6 +1991,7 @@ config.<strong>option_quiet</strong>         = false
 config.<strong>option_color</strong>         = false
 config.<strong>option_debug</strong>         = :hidden
 config.<strong>option_trace</strong>         = false
+config.<strong>backtrace_ignore_rexp</strong> = nil
 config.<strong>trace_mode</strong>           = nil
 </pre>
 <p>You may notice that the value of <code>config.option_debug</code> is <code>:hidden</code>.
