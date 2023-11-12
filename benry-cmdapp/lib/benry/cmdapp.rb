@@ -937,7 +937,10 @@ module Benry::CmdApp
         raise ActionError.new("'help' action is available only when invoked from application.")
       #; [!g0n06] prints application help message if action name not specified.
       #; [!epj74] prints action help message if action name specified.
-      print app.render_help_message(action, all: all)
+      str = app.render_help_message(action, all: all)
+      #; [!2t43b] deletes escape characters from help message when non-color mode.
+      str = Util.delete_escape_chars(str) unless Util.color_mode?
+      print str
     end
 
   end

@@ -260,15 +260,15 @@ Oktest.scope do
   -l, --lang=<lang>  : language name (en/fr/it)
 END
         #
-        sout, serr = capture_sio do
+        sout, serr = capture_sio(tty: true) do
           @context.invoke_action("hello", [], {:help=>true})
         end
         ok {sout} == expected
         #
-        sout, serr = capture_sio { app.run("hello", "--help", "--lang=en") }
+        sout, serr = capture_sio(tty: true) { app.run("hello", "--help", "--lang=en") }
         ok {sout} == expected
         #
-        sout, serr = capture_sio { app.run("hello", "-h", "-lfr") }
+        sout, serr = capture_sio(tty: true) { app.run("hello", "-h", "-lfr") }
         ok {sout} == expected
       end
 
