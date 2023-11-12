@@ -1468,12 +1468,14 @@ module Benry::CmdApp
     def build_help_message(metadata, all: false)
       #; [!f3436] returns help message of an action.
       #; [!8acs1] includes hidden options if `all: true` passed.
+      #; [!mtvw8] includes 'Aliases:' section if action has any aliases.
       #; [!vcg9w] not include 'Options:' section if action has no options.
       #; [!1auu5] not include '[<options>]' in 'Usage:'section if action has no options.
       sb = []
       sb << build_preamble_part(metadata)
       sb << build_usage_part(metadata, all: all)
       sb << build_options_part(metadata, all: all)
+      sb << build_aliases_part(metadata, all: all)
       sb << build_postamble_part(metadata)
       return sb.compact().join("\n")
     end

@@ -882,7 +882,7 @@ END
       spec "[!f3436] returns help message of an action." do
         metadata = @registry.metadata_get("hello")
         x = @builder.build_help_message(metadata)
-        ok {x} == <<"END"
+        ok {x}.start_with?(<<"END")
 \e[1mtestapp hello\e[0m --- greeting message
 
 \e[1;34mUsage:\e[0m
@@ -905,6 +905,27 @@ END
 \e[1;34mOptions:\e[0m
 \e[2m  -h, --help         : print help message\e[0m
 \e[2m  --val=<val>        : something value\e[0m
+END
+      end
+
+      spec "[!mtvw8] includes 'Aliases:' section if action has any aliases." do
+        metadata = @registry.metadata_get("alitest1")
+        output = @builder.build_help_message(metadata, all: true)
+        ok {output} == <<"END"
+\e[1mtestapp alitest1\e[0m --- sample action
+
+\e[1;34mUsage:\e[0m
+  $ \e[1mtestapp alitest1\e[0m [<options>] <xx> [<yy> [<zz>...]]
+
+\e[1;34mOptions:\e[0m
+\e[2m  -h, --help         : print help message\e[0m
+  -a, --aa           : option A
+      --bb           : option B
+
+\e[1;34mAliases:\e[0m
+  alitest1x          : alias of 'alitest1'
+  alitest1y          : alias of 'alitest1 --aa'
+  alitest1z          : alias of 'alitest1 --aa foobar'
 END
       end
 

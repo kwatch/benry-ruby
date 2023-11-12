@@ -244,6 +244,12 @@ Oktest.scope do
         Benry::CmdApp._set_current_app(app)
         at_end { Benry::CmdApp._set_current_app(nil) }
         #
+        alias_names = []
+        Benry::CmdApp::REGISTRY.metadata_each(all: true) do |md|
+          alias_names << md.name if md.alias? && md.action == "hello"
+        end
+        alias_names.each {|alias_name| Benry::CmdApp.undef_alias(alias_name) }
+        #
         expected = <<"END"
 \e[1mtestapp hello\e[0m --- greeting message
 
