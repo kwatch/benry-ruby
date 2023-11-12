@@ -812,11 +812,11 @@ require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
 
-  optset1 = new_optionset() {                             # !!!!
+  optset1 = optionset() {                             # !!!!
     @option.(:host , "-H, --host=<host>" , "host name")
     @option.(:port , "-p, --port=<port>" , "port number", type: Integer)
   }
-  optset2 = new_optionset() {                             # !!!!
+  optset2 = optionset() {                             # !!!!
     @option.(:user , "-u, --user=<user>" , "user name")
   }
 

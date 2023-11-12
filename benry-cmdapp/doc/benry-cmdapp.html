@@ -776,11 +776,11 @@ require 'benry/cmdapp'
 
 class SampleAction &lt Benry::CmdApp::Action
 
-  optset1 = <strong>new_optionset()</strong> {                             # !!!!
+  optset1 = <strong>optionset()</strong> {                             # !!!!
     @option.(:host , "-H, --host=&lthost&gt;" , "host name")
     @option.(:port , "-p, --port=&ltport&gt;" , "port number", type: Integer)
   }
-  optset2 = <strong>new_optionset()</strong> {                             # !!!!
+  optset2 = <strong>optionset()</strong> {                             # !!!!
     @option.(:user , "-u, --user=&ltuser&gt;" , "user name")
   }
 
