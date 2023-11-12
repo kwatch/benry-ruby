@@ -750,19 +750,25 @@ END
           Benry::CmdApp.define_alias("a1", "git:unstage")
           Benry::CmdApp.define_alias("a2", "git:stage")
           Benry::CmdApp.define_alias("a3", "git:staged")
-          Benry::CmdApp.define_alias("a4", "testerr1")
-          Benry::CmdApp.define_alias("a5", "debuginfo")
-          Benry::CmdApp.define_alias("a6", "hello")
+          Benry::CmdApp.define_alias("a6", "git:staged")
+          Benry::CmdApp.define_alias("a5", "git:staged")
+          Benry::CmdApp.define_alias("a4", "git:staged")
+          Benry::CmdApp.define_alias("a7", "testerr1")
+          Benry::CmdApp.define_alias("a8", "debuginfo")
+          Benry::CmdApp.define_alias("a9", "hello")
           output = @builder.build_aliases_part()
         end
         ok {output} == <<"END"
 \e[1;34mAliases:\e[0m
-  a5                 : alias of 'debuginfo'
+  a8                 : alias of 'debuginfo'
   a2                 : alias of 'git:stage'
   a3                 : alias of 'git:staged'
+  a4                 : alias of 'git:staged'
+  a5                 : alias of 'git:staged'
+  a6                 : alias of 'git:staged'
   a1                 : alias of 'git:unstage'
-  a6                 : alias of 'hello'
-  a4                 : alias of 'testerr1'
+  a9                 : alias of 'hello'
+  a7                 : alias of 'testerr1'
 END
       end
 

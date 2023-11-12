@@ -1414,7 +1414,7 @@ module Benry::CmdApp
       #; [!d7vee] ignores hidden aliases in default.
       #; [!4vvrs] include hidden aliases if `all: true` specifieid.
       #; [!v211d] sorts aliases by action names.
-      registry.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| md.action }.each do |md|
+      registry.metadata_each(all: all).select {|md| md.alias? }.sort_by {|md| [md.action, md.name] }.each do |md|
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
