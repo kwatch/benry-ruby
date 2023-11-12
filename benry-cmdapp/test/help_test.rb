@@ -57,7 +57,7 @@ class HelpTestAction < Benry::CmdApp::Action
   end
   define_alias "alitest1x", "alitest1"
   define_alias "alitest1y", ["alitest1", "--aa"]
-  define_alias "alitest1z", ["alitest1y", "foobar"]
+  Benry::CmdApp.define_alias! "alitest1z", ["alitest1y", "foobar"]   # error
 
 end
 

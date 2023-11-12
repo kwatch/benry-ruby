@@ -331,6 +331,14 @@ module Benry::CmdApp
 
 
   def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_of_alias: false)
+  end
+
+  def self.define_alias!(alias_name, action_name, tag: nil, important: nil, hidden: nil)  # :nodoc:
+    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_of_alias: true)
+  end
+
+  def self.__define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil, alias_of_alias: false)  # :nodoc:
     #; [!zawcd] action arg can be a string or an array of string.
     action_arg = action_name
     if action_arg.is_a?(Array)
@@ -339,7 +347,7 @@ module Benry::CmdApp
       args = []
     end
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
-    errmsg = self.__validate_alias_and_action(alias_name, action_name)
+    errmsg = self.__validate_alias_and_action(alias_name, action_name, alias_of_alias)
     errmsg == nil  or
       raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
@@ -349,7 +357,7 @@ module Benry::CmdApp
     return alias_metadata
   end
 
-  def self.__validate_alias_and_action(alias_name, action_name)  # :nodoc:
+  def self.__validate_alias_and_action(alias_name, action_name, alias_of_alias=false)  # :nodoc:
     #; [!2x1ew] returns error message if alias name is not a string.
     #; [!galce] returns error message if action name is not a string.
     if ! alias_name.is_a?(String)
@@ -368,6 +376,7 @@ module Benry::CmdApp
     #; [!lxolh] returns error message if action is an alias name.
     action_md = REGISTRY.metadata_get(action_name)
     if    action_md == nil ; return "Action '#{action_name}' not found."
+    elsif alias_of_alias   ; nil   # ok: alias of alias is allowed
     elsif action_md.alias? ; return "'#{action_name}' should be an action, but is an alias."
     else                   ; nil   # ok: action should be defined
     end
