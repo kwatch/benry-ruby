@@ -252,11 +252,11 @@ END
 
       spec "[!ky6sg] copies option items from optionset into schema object." do
         MyAction.class_eval do
-          optset1 = new_optionset do
+          optset1 = optionset do
             @option.(:user, "-u <user>", "user name")
             @option.(:email, "-e <email>", "email address")
           end
-          optset2 = new_optionset do
+          optset2 = optionset do
             @option.(:host, "--host=<host>", "host name")
             @option.(:port, "--port=<port>", "port number", type: Integer)
           end
@@ -979,16 +979,16 @@ END
     end
 
 
-    topic '.new_optionset()' do
+    topic '.optionset()' do
 
       spec "[!us0g4] yields block with dummy action." do
         _ = self
         called = false
         ScopeTestAction.class_eval do
-          optset1 = new_optionset() do
+          optset1 = optionset() do
             called = true
             _.ok {@__actiondef__} != nil
-            _.ok {@__actiondef__[0]} == "dummy action by new_optionset()"
+            _.ok {@__actiondef__[0]} == "dummy action by optionset()"
           end
         end
         ok {called} == true
@@ -997,7 +997,7 @@ END
       spec "[!1idwv] clears default option items." do
         _ = self
         ScopeTestAction.class_eval do
-          optset1 = new_optionset() do
+          optset1 = optionset() do
             schema = @__actiondef__[1]
             _.ok {schema.each.to_a}.length(0)
           end
@@ -1008,7 +1008,7 @@ END
         _ = self
         ScopeTestAction.class_eval do
           _.ok {@__actiondef__} == nil
-          optset1 = new_optionset() do
+          optset1 = optionset() do
             _.ok {@__actiondef__} != nil
           end
           _.ok {@__actiondef__} == nil
@@ -1018,7 +1018,7 @@ END
       spec "[!mwbyc] returns new OptionSet object which contains option items." do
         optset1 = nil
         ScopeTestAction.class_eval do
-          optset1 = new_optionset() do
+          optset1 = optionset() do
             @option.(:user, "-u, --user=<user>", "user name")
             @option.(:email, "-e, --email=<email>", "email address")
           end

@@ -716,10 +716,10 @@ module Benry::CmdApp
       Benry::CmdApp.define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden)
     end
 
-    def self.new_optionset(&block)
+    def self.optionset(&block)
       #; [!us0g4] yields block with dummy action.
       #; [!1idwv] clears default option items.
-      @action.("dummy action by new_optionset()")
+      @action.("dummy action by optionset()")
       schema = @__actiondef__[1]
       schema.each.collect(&:key).each {|key| schema.delete(key) }
       yield
