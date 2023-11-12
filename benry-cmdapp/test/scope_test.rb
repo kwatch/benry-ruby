@@ -21,7 +21,7 @@ class OverrideTestAction1 < Benry::CmdApp::Action
 end
 
 class OverrideTestAction2 < OverrideTestAction1
-  #prefix "foo1:"
+  #category "foo1:"
   #@action.("foo1")
   #def bar1()
   #end
@@ -352,13 +352,13 @@ END
         ok {md.name} == "s9321:aa-bb:cc-dd"
       end
 
-      case_when "[!w9qat] when `prefix()` called before defining action method..." do
+      case_when "[!w9qat] when `category()` called before defining action method..." do
 
         spec "[!3pl1r] renames method name to new name with prefix." do
           ScopeTestAction.class_eval do
-            prefix "p3442:" do
-              prefix "foo:" do
-                prefix "bar:" do
+            category "p3442:" do
+              category "foo:" do
+                category "bar:" do
                   @action.("test")
                   def s9192()
                   end
@@ -370,11 +370,11 @@ END
           ok {ScopeTestAction.method_defined?(:p3442__foo__bar__s9192)} == true
         end
 
-        case_when "[!mil2g] when action name matched to 'action:' kwarg of `prefix()`..." do
+        case_when "[!mil2g] when action name matched to 'action:' kwarg of `category()`..." do
 
           spec "[!hztpp] uses pefix name as action name." do
             ScopeTestAction.class_eval do
-              prefix "p9782:", action: "s3867" do
+              category "p9782:", action: "s3867" do
                 @action.("test")
                 def s3867()
                 end
@@ -388,7 +388,7 @@ END
           spec "[!cydex] clears `action:` kwarg." do
             x1 = x2 = x3 = nil
             ScopeTestAction.class_eval do
-              prefix "p3503:", action: "s5319" do
+              category "p3503:", action: "s5319" do
                 x1 = @__prefixdef__[1]
                 #
                 @action.("test")
@@ -409,11 +409,11 @@ END
 
         end
 
-        case_when "[!8xsnw] when action name matched to `alias_of:` kwarg of `prefix()`..." do
+        case_when "[!8xsnw] when action name matched to `alias_of:` kwarg of `category()`..." do
 
           spec "[!iguvp] adds prefix name to action name." do
             ScopeTestAction.class_eval do
-              prefix "p8134:", alias_of: "s6368" do
+              category "p8134:", alias_of: "s6368" do
                 @action.("test")
                 def s6368()
                 end
@@ -433,7 +433,7 @@ END
 
           spec "[!9cyc2] adds prefix name to action name." do
             ScopeTestAction.class_eval do
-              prefix "p9986:", alias_of: "s4711" do
+              category "p9986:", alias_of: "s4711" do
                 @action.("test")
                 def s0629()
                 end
@@ -455,7 +455,7 @@ END
 
         spec "[!0ki5g] not add prefix to action name." do
           ScopeTestAction.class_eval do
-            prefix "p2592:", action: "s2619" do
+            category "p2592:", action: "s2619" do
               @action.("test")
               def s4487()
               end
@@ -487,7 +487,7 @@ END
         #
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "git:" do
+            category "git:" do
               @action.("duplicate")
               def stage()
               end
@@ -514,7 +514,7 @@ END
       spec "[!dj0ql] method override check is done with new method name (= prefixed name)." do
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p2946:" do
+            category "p2946:" do
               @action.("print")
               def print()
               end
@@ -528,7 +528,7 @@ END
         #
         pr = proc do
           OverrideTestAction2.class_eval do
-            prefix "foo1:"
+            category "foo1:"
             @action.("foo1")
             def bar1()
             end
@@ -540,7 +540,7 @@ END
 
       spec "[!7fnh4] registers action metadata." do
         ScopeTestAction.class_eval do
-          prefix "p7966:" do
+          category "p7966:" do
             @action.("test")
             def s3198()
             end
@@ -554,7 +554,7 @@ END
 
       spec "[!lyn0z] registers alias metadata if necessary." do
         ScopeTestAction.class_eval do
-          prefix "p0692:", alias_of: "s8075" do
+          category "p0692:", alias_of: "s8075" do
             @action.("test")
             def s8075()
             end
@@ -572,7 +572,7 @@ END
       spec "[!4402s] clears `alias_of:` kwarg." do
         x1 = x2 = x3 = nil
         ScopeTestAction.class_eval do
-          prefix "p7506:", alias_of: "s3449" do
+          category "p7506:", alias_of: "s3449" do
             x1 = @__prefixdef__[2]
             #
             @action.("test")
@@ -679,9 +679,9 @@ END
         x1 = x2 = x3 = x4 = x5 = nil
         ScopeTestAction.class_eval do
           x1 = current_prefix()
-          prefix "p9912:" do
+          category "p9912:" do
             x2 = current_prefix()
-            prefix "p3138:" do
+            category "p3138:" do
               x3 = current_prefix()
             end
             x4 = current_prefix()
@@ -698,40 +698,40 @@ END
     end
 
 
-    topic '.prefix()' do
+    topic '.category()' do
 
       spec "[!mp1p5] raises DefinitionError if prefix is invalid." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p2737"
+            category "p2737"
             @action.("test")
             def s4393()
             end
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       "prefix(\"p2737\"): Prefix name should end with ':'.")
+                       "category(\"p2737\"): Prefix name should end with ':'.")
       end
 
       spec "[!q01ma] raises DefinitionError if action or alias name is invalid." do
         pr = proc do
-          ScopeTestAction.class_eval { prefix "p0936:", action: :foo }
+          ScopeTestAction.class_eval { category "p0936:", action: :foo }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p0936:", action: :foo)`: Action name should be a string, but got Symbol object.|)
+                       %q|`category("p0936:", action: :foo)`: Action name should be a string, but got Symbol object.|)
         #
         pr = proc do
-          ScopeTestAction.class_eval { prefix "p0936:", alias_of: :bar }
+          ScopeTestAction.class_eval { category "p0936:", alias_of: :bar }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p0936:", alias_of: :bar)`: Alias name should be a string, but got Symbol object.|)
+                       %q|`category("p0936:", alias_of: :bar)`: Alias name should be a string, but got Symbol object.|)
         #
         pr = proc do
-          ScopeTestAction.class_eval { prefix "p0936:", action: "foo", alias_of: "bar" }
+          ScopeTestAction.class_eval { category "p0936:", action: "foo", alias_of: "bar" }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p0936:", action: "foo", alias_of: "bar")`: `action:` and `alias_of:` are exclusive.|)
+                       %q|`category("p0936:", action: "foo", alias_of: "bar")`: `action:` and `alias_of:` are exclusive.|)
       end
 
       case_when "[!kwst6] if block given..." do
@@ -740,7 +740,7 @@ END
           x1 = x2 = x3 = nil
           ScopeTestAction.class_eval do
             x1 = @__prefixdef__
-            prefix "p4929:" do
+            category "p4929:" do
               x2 = @__prefixdef__
               @action.("test")
               def s0997()
@@ -755,8 +755,8 @@ END
 
         spec "[!j00pk] registers prefix and description, even if no actions defined." do
           ScopeTestAction.class_eval do
-            prefix "p0516:", "bla bla" do
-              prefix "git:", "boom boom" do
+            category "p0516:", "bla bla" do
+              category "git:", "boom boom" do
               end
             end
           end
@@ -764,8 +764,8 @@ END
           ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0516:git:")} == "boom boom"
           #
           ScopeTestAction.class_eval do
-            prefix "p3893:", "guu guu", action: "a1" do
-              prefix "git:", "gii gii", alias_of: "a2" do
+            category "p3893:", "guu guu", action: "a1" do
+              category "git:", "gii gii", alias_of: "a2" do
                 @action.("x")
                 def a2(); end
               end
@@ -777,7 +777,7 @@ END
           ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p3893:git:")} == "gii gii"
           #
           ScopeTestAction.class_eval do
-            prefix "p2358:" do
+            category "p2358:" do
             end
           end
           ok {Benry::CmdApp::REGISTRY.prefix_exist?("p2358:")} == true
@@ -787,7 +787,7 @@ END
           at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
           pr = proc do
             ScopeTestAction.class_eval do
-              prefix "p4929:", action: "s7832" do
+              category "p4929:", action: "s7832" do
                 @action.("test")
                 def s2649()
                 end
@@ -795,14 +795,14 @@ END
             end
           end
           ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                         %q|prefix("p4929:", action: "s7832"): Target action not defined.|)
+                         %q|category("p4929:", action: "s7832"): Target action not defined.|)
         end
 
         spec "[!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined." do
           at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
           pr = proc do
             ScopeTestAction.class_eval do
-              prefix "p2476:", alias_of: "s6678" do
+              category "p2476:", alias_of: "s6678" do
                 @action.("test")
                 def s1452()
                 end
@@ -810,7 +810,7 @@ END
             end
           end
           ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                         %q|prefix("p2476:", alias_of: "s6678"): Target action of alias not defined.|)
+                         %q|category("p2476:", alias_of: "s6678"): Target action of alias not defined.|)
         end
 
       end
@@ -820,7 +820,7 @@ END
         spec "[!tgux9] just stores arguments into class." do
           ScopeTestAction.class_eval do
             @__prefixdef__ = nil
-            prefix "p6062:"
+            category "p6062:"
           end
           x = ScopeTestAction.class_eval { @__prefixdef__ }
           ok {x} == ["p6062:", nil, nil]
@@ -828,20 +828,20 @@ END
 
         spec "[!ncskq] registers prefix and description, even if no actions defined." do
           ScopeTestAction.class_eval do
-            prefix "p6712:", "bowow"
+            category "p6712:", "bowow"
           end
           ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p6712:")} == "bowow"
           #
           ScopeTestAction.class_eval do
-            prefix "p9461:", "hoo hoo", action: "homhom"
-            prefix "p0438:", "yaa yaa", alias_of: "homhom"
+            category "p9461:", "hoo hoo", action: "homhom"
+            category "p0438:", "yaa yaa", alias_of: "homhom"
             @__prefixdef__ = nil
           end
           ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p9461:")} == "hoo hoo"
           ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p0438:")} == "yaa yaa"
           #
           ScopeTestAction.class_eval do
-            prefix "p7217:"
+            category "p7217:"
           end
           ok {Benry::CmdApp::REGISTRY.prefix_exist?("p7217:")} == true
         end
@@ -886,35 +886,35 @@ END
       spec "[!38ji9] returns error message if action name is not a string." do
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p1871:", action: :foo
+            category "p1871:", action: :foo
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p1871:", action: :foo)`: Action name should be a string, but got Symbol object.|)
+                       %q|`category("p1871:", action: :foo)`: Action name should be a string, but got Symbol object.|)
       end
 
       spec "[!qge3m] returns error message if alias name is not a string." do
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p7328:", alias_of: :foo
+            category "p7328:", alias_of: :foo
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
+                       %q|`category("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
       end
 
       spec "[!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do
           ScopeTestAction.class_eval do
-            prefix "p7549:", action: "s0573", alias_of: "s0573"
+            category "p7549:", action: "s0573", alias_of: "s0573"
             @action.("test")
             def s0573()
             end
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`prefix("p7549:", action: "s0573", alias_of: "s0573")`: `action:` and `alias_of:` are exclusive.|)
+                       %q|`category("p7549:", action: "s0573", alias_of: "s0573")`: `action:` and `alias_of:` are exclusive.|)
       end
 
     end
@@ -935,7 +935,7 @@ END
 
       spec "[!c6duw] defines an alias with prefix when current prefix exist." do
         ScopeTestAction.class_eval do
-          prefix "p8866:" do
+          category "p8866:" do
             @action.("sample")
             def a5073()
             end
@@ -948,7 +948,7 @@ END
 
       spec "[!b8ly2] supports array argument." do
         ScopeTestAction.class_eval do
-          prefix "p2433:" do
+          category "p2433:" do
             @action.("sample")
             def a9940(arg)
             end
@@ -962,7 +962,7 @@ END
 
       spec "[!0dkrj] keyword arguments are passed to higher function." do
         ScopeTestAction.class_eval do
-          prefix "p5582:"
+          category "p5582:"
           @action.("sample")
           def a1017(arg)
           end

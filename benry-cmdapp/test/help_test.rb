@@ -34,13 +34,13 @@ class HelpTestAction < Benry::CmdApp::Action
     puts "aa=#{aa.inspect}, bb=#{bb.inspect}, cc=#{cc.inspect}, dd=#{dd.inspect}, rest=#{rest.inspect}, xx=#{xx.inspect}, yy=#{yy.inspect}"
   end
 
-  prefix "secret:" do
+  category "secret:" do
     @action.("secret action", hidden: true)
     def crypt()
     end
   end
 
-  prefix "descdemo:", "prefix description demo" do
+  category "descdemo:", "prefix description demo" do
     @action.("demo #1")
     def demo1()
     end
@@ -624,7 +624,7 @@ END
 
       spec "[!duhyd] includes actions which name is same as prefix." do
         HelpTestAction.class_eval do
-          prefix "p8572:", action: "aaa" do
+          category "p8572:", action: "aaa" do
             @action.("AAA")
             def aaa()
             end

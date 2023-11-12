@@ -46,7 +46,7 @@ end
 
 
 class GitAction < Benry::CmdApp::Action
-  prefix "git:"
+  category "git:"
 
   @action.("same as `git add -p`")
   def stage(*file)
@@ -74,14 +74,14 @@ end
 
 
 class DeepPrefixAction < Benry::CmdApp::Action
-  prefix "giit:", "gitt commands" do
+  category "giit:", "gitt commands" do
 
     #@action.("show current status in compact format")
     #def status()
     #  sys "git status -sb"
     #end
 
-    prefix "staging:" do
+    category "staging:" do
       @action.("add changes into staging area")
       def add(); end
       @action.("show changes in staging area")
@@ -90,25 +90,25 @@ class DeepPrefixAction < Benry::CmdApp::Action
       def delete(); end
     end
 
-    prefix "commit:" do
+    category "commit:" do
       @action.("list commits")
       def list(); end
     end
 
-    prefix "branch:" do
+    category "branch:" do
       @action.("list branches")
       def list(); end
       @action.("switch branch")
       def switch(name); end
     end
 
-    prefix "repo:" do
+    category "repo:" do
       @action.("create direcotry, move to it, and init repository")
       def create(); end
       @action.("initialize git repository with initial empty commit")
       def init(); end
 
-      prefix "config:" do
+      category "config:" do
         @action.("add config of repository")
         def add(); end
         @action.("delete config of repository")
@@ -117,7 +117,7 @@ class DeepPrefixAction < Benry::CmdApp::Action
         def list(); end
       end
 
-      prefix "remote:" do
+      category "remote:" do
         @action.("list remote repositories")
         def list(); end
         @action.("set remote repo url ('github:<user>/<proj>' available)")
@@ -128,7 +128,7 @@ class DeepPrefixAction < Benry::CmdApp::Action
 
   end
 
-  prefix "md:", "markdown actions" do
+  category "md:", "markdown actions" do
     @action.("create *.html", hidden: true)
     def html(); end
     @action.("create *.txt", hidden: true)

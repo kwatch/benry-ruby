@@ -554,7 +554,7 @@ module Benry::CmdApp
               "def #{method_symbol}(): #{errmsg}"
       #; [!ejdlo] converts method name to action name.
       action = Util.method2action(meth)  # ex: :a__b_c => "a:b-c"
-      #; [!w9qat] when `prefix()` called before defining action method...
+      #; [!w9qat] when `category()` called before defining action method...
       alias_p = false
       if @__prefixdef__
         prefix, prefix_action, alias_target = @__prefixdef__
@@ -562,13 +562,13 @@ module Benry::CmdApp
         meth = "#{prefix.gsub(':', '__')}#{meth}".intern
         alias_method(meth, method_symbol)
         remove_method(method_symbol)
-        #; [!mil2g] when action name matched to 'action:' kwarg of `prefix()`...
+        #; [!mil2g] when action name matched to 'action:' kwarg of `category()`...
         if action == prefix_action
           #; [!hztpp] uses pefix name as action name.
           action = prefix.chomp(':')
           #; [!cydex] clears `action:` kwarg.
           @__prefixdef__[1] = nil
-        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `prefix()`...
+        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `category()`...
         elsif action == alias_target
           #; [!iguvp] adds prefix name to action name.
           action = prefix + action
@@ -646,15 +646,15 @@ module Benry::CmdApp
       return @__prefixdef__ ? @__prefixdef__[0] : nil
     end
 
-    def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
+    def self.category(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = __validate_prefix(prefix)
       errmsg == nil  or
-        raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
+        raise DefinitionError.new("category(#{prefix.inspect}): #{errmsg}")
       #; [!q01ma] raises DefinitionError if action or alias name is invalid.
       argstr, errmsg = __validate_action_and_alias(action, alias_of)
       errmsg == nil  or
-        raise DefinitionError.new("`prefix(#{prefix.inspect}, #{argstr})`: #{errmsg}")
+        raise DefinitionError.new("`category(#{prefix.inspect}, #{argstr})`: #{errmsg}")
       #; [!kwst6] if block given...
       if block_given?()
         #; [!t8wwm] saves previous prefix data and restore them at end of block.
@@ -668,12 +668,12 @@ module Benry::CmdApp
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
           if action
             @__prefixdef__[1] == nil  or
-              raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
+              raise DefinitionError.new("category(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
           end
           #; [!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined.
           if alias_of
             @__prefixdef__[2] == nil  or
-              raise DefinitionError.new("prefix(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
+              raise DefinitionError.new("category(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
           end
         ensure
           @__prefixdef__ = prev

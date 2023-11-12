@@ -182,7 +182,7 @@ Oktest.scope do
         #
         MyAction.class_eval do
           private
-          prefix "p8902:" do
+          category "p8902:" do
             @action.("dummy")
             def dummy9024()
             end
