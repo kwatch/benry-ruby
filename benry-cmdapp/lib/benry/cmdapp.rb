@@ -347,7 +347,7 @@ module Benry::CmdApp
       args = []
     end
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
-    errmsg = self.__validate_alias_and_action(alias_name, action_name, alias_of_alias)
+    errmsg = __validate_alias_and_action(alias_name, action_name, alias_of_alias)
     errmsg == nil  or
       raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
@@ -356,6 +356,7 @@ module Benry::CmdApp
     #; [!wfbqu] returns alias metadata.
     return alias_metadata
   end
+  private_class_method :__define_alias
 
   def self.__validate_alias_and_action(alias_name, action_name, alias_of_alias=false)  # :nodoc:
     #; [!2x1ew] returns error message if alias name is not a string.
@@ -383,6 +384,7 @@ module Benry::CmdApp
     #; [!b6my2] returns nil if no errors found.
     return nil
   end
+  private_class_method :__validate_alias_and_action
 
   def self.undef_alias(alias_name)
     #; [!pk3ya] raises DefinitionError if alias name is not a string.
@@ -454,6 +456,7 @@ module Benry::CmdApp
     #; [!jzkhc] returns nil if no error found.
     return nil
   end
+  private_class_method :__validate_abbrev
 
 
   class ActionScope
@@ -624,6 +627,7 @@ module Benry::CmdApp
       #  return "Keyword argument `#{toomuch[0]}:` exist but has no corresponding option."
       return nil
     end
+    private_class_method :__validate_kwargs
 
     def self.__validate_action_method(action, meth, method_symbol)  # :nodoc:
       #; [!5a4d3] returns error message if action with same name already defined.
@@ -635,6 +639,7 @@ module Benry::CmdApp
         return "Please rename it to `#{method_symbol}_()`, because it overrides existing method in parent or ancestor class."
       return nil
     end
+    private_class_method :__validate_action_method
 
     def self.current_prefix()
       #; [!2zt0f] returns current prefix name such as 'foo:bar:'.
@@ -643,11 +648,11 @@ module Benry::CmdApp
 
     def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
-      errmsg = self.__validate_prefix(prefix)
+      errmsg = __validate_prefix(prefix)
       errmsg == nil  or
         raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
       #; [!q01ma] raises DefinitionError if action or alias name is invalid.
-      argstr, errmsg = self.__validate_action_and_alias(action, alias_of)
+      argstr, errmsg = __validate_action_and_alias(action, alias_of)
       errmsg == nil  or
         raise DefinitionError.new("`prefix(#{prefix.inspect}, #{argstr})`: #{errmsg}")
       #; [!kwst6] if block given...
@@ -696,6 +701,7 @@ module Benry::CmdApp
       prefix =~ rexp        or return "Invalid prefix name."
       return nil
     end
+    private_class_method :__validate_prefix
 
     def self.__validate_action_and_alias(action, alias_of)
       #; [!38ji9] returns error message if action name is not a string.
@@ -708,6 +714,7 @@ module Benry::CmdApp
       ! (action != nil && alias_of != nil)  or
         return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
     end
+    private_class_method :__validate_action_and_alias
 
     def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
       #; [!tcpuz] just defines an alias when current prefix is nil.
