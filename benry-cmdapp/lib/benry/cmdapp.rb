@@ -12,6 +12,7 @@ module Benry::CmdApp
   $COLOR_MODE   = nil    # true when global option '--color' specified
   $DEBUG_MODE   = nil    # true when global option '--debug' specified
   #$TRACE_MODE  = nil    # use `@config.trace_mode?` instead.
+  $DRYRUN_MODE  = nil    # true when global option '-X, --dryrun' specified
 
 
   class BaseError < StandardError
@@ -1100,7 +1101,7 @@ module Benry::CmdApp
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_topic: :hidden, option_all: true,
                    option_verbose: false, option_quiet: false, option_color: false,
-                   option_debug: :hidden, option_trace: false,
+                   option_debug: :hidden, option_trace: false, option_dryrun: false,
                    backtrace_ignore_rexp: nil)
       #; [!pzp34] if `option_version` is not specified, then set true if `app_version` is provided.
       option_version = !! app_version if option_version == nil
@@ -1136,6 +1137,7 @@ module Benry::CmdApp
       @option_color       = option_color        # enable or disable `--color[=<on|off>]`
       @option_debug       = option_debug        # enable or disable `--debug`
       @option_trace       = option_trace        # enable or disable `-T, --trace`
+      @option_dryrun      = option_dryrun       # enable or disable `-X, --dryrun`
       @backtrace_ignore_rexp = backtrace_ignore_rexp
       #
       #@verobse_mode       = nil
@@ -1153,7 +1155,7 @@ module Benry::CmdApp
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
     attr_accessor :option_help, :option_version, :option_list, :option_topic, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
-    attr_accessor :option_debug, :option_trace
+    attr_accessor :option_debug, :option_trace, :option_dryrun
     attr_accessor :trace_mode #, :verbose_mode, :quiet_mode, :color_mode, :debug_mode
     attr_accessor :backtrace_ignore_rexp
     alias trace_mode? trace_mode
@@ -1562,6 +1564,7 @@ module Benry::CmdApp
       _add(c, :color  , "--color[=<on|off>]", "color mode", type: TrueClass)
       _add(c, :debug  , "    --debug"  , "debug mode")
       _add(c, :trace  , "-T, --trace"  , "trace mode")
+      _add(c, :dryrun , "-X, --dryrun" , "dry-run mode (not run; just echoback)")
     end
 
     def _add(c, key, optstr, desc, type: nil, enum: nil)
@@ -1721,6 +1724,8 @@ module Benry::CmdApp
       $DEBUG_MODE        = d[:debug] if d[:debug] != nil
       #; [!y9fow] sets `config.trace_mode` if global option specified.
       @config.trace_mode = d[:trace] if d[:trace] != nil
+      #; [!dply7] sets `$DRYRUN_MODE` according to global option.
+      $DRYRUN_MODE       = d[:dryrun] if d[:dryrun] != nil
       nil
     end
 

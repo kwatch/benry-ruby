@@ -302,6 +302,15 @@ END
         ok {@config.trace_mode} == false
       end
 
+      spec "[!dply7] sets `$DRYRUN_MODE` according to global option." do
+        ok {$DRYRUN_MODE} == nil
+        at_end { $DRYRUN_MODE = nil }
+        #
+        opts = {dryrun: true}
+        @app.instance_eval { toggle_global_options(opts) }
+        ok {$DRYRUN_MODE} == true
+      end
+
     end
 
 

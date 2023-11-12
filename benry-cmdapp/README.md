@@ -2084,6 +2084,7 @@ Options:
 * `config.option_color = true` enables `--color[=<on|off>]` option which sets `$COLOR_MODE = true/false`. This affects to help message colorized or not. (default: `false`)
 * `config.option_debug = true` enables `-D` and `--debug` options which sets `$DEBUG_MODE = true`. (default: `:hidden`)
 * `config.option_trace = true` enables `-T` and `--trace` options. Entering into and exitting from action are reported when trace mode is on. (default: `false`)
+* `config.option_dryrun = true` enables `-X` and `--dryrun` options which sets `$DRYRUN_MODE = true`. (default: `false`)
 * `config.format_option = "  %-18s : %s"` sets format of options in help message. (default: `"  %-18s : %s"`)
 * `config.format_action = "  %-18s : %s"` sets format of actions in help message. (default: `"  %-18s : %s"`)
 * `config.format_usage = "  $ %s"` sets format of usage in help message. (default: `"  $ %s"`)
@@ -2137,6 +2138,7 @@ config.option_quiet         = false
 config.option_color         = false
 config.option_debug         = :hidden
 config.option_trace         = false
+config.option_dryrun        = false
 config.backtrace_ignore_rexp = nil
 config.trace_mode           = nil
 ```
