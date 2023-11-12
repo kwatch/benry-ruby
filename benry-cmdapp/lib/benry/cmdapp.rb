@@ -1207,7 +1207,7 @@ module Benry::CmdApp
     HEADER_ACTIONS  = "Actions:"
     HEADER_ALIASES  = "Aliases:"
     HEADER_ABBREVS  = "Abbreviations:"
-    HEADER_PREFIXES = "Prefixes:"
+    HEADER_CATEGORIES = "Categories:"
 
     def build_help_message(x, all: false)
       #; [!0hy81] this is an abstract method.
@@ -1313,7 +1313,7 @@ module Benry::CmdApp
       sb << build_actions_part(true, all: all)
       #sb << build_aliases_part(all: all)
       #sb << build_abbrevs_part(all: all)
-      #sb << build_prefixes_part(0, all: all)
+      #sb << build_categories_part(0, all: all)
       sb << build_postamble_part()
       return sb.compact().join("\n")
     end
@@ -1457,7 +1457,7 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
 
-    def build_prefixes_part(depth=0, all: false)
+    def build_categories_part(depth=0, all: false)
       registry = @_registry || REGISTRY
       c = @config
       #; [!30l2j] includes number of actions per prefix.
@@ -1476,7 +1476,7 @@ module Benry::CmdApp
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
       #; [!crbav] returns top prefix list.
-      return build_section(_header(:HEADER_PREFIXES), str, "(depth=#{depth})")  # "Prefixes:"
+      return build_section(_header(:HEADER_CATEGORIES), str, "(depth=#{depth})")  # "Categories:"
     end
 
   end
@@ -1593,9 +1593,9 @@ module Benry::CmdApp
       #; [!ppcvp] adds options according to config object.
       c = config
       topics = ["action", "actions", "alias", "aliases",
-                "prefix", "prefixes", "abbrev", "abbrevs",
-                "prefix1", "prefixes1", "prefix2", "prefixes2",
-                "prefix3", "prefixes3", "prefix4", "prefixes4"]
+                "category", "categories", "abbrev", "abbrevs",
+                "category1", "categories1", "category2", "categories2",
+                "category3", "categories3", "category4", "categories4"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
@@ -1839,7 +1839,7 @@ module Benry::CmdApp
         #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
         depth = prefix.length
-        s = builder.build_prefixes_part(depth, all: all)  or
+        s = builder.build_categories_part(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...
@@ -1858,14 +1858,14 @@ module Benry::CmdApp
 
     def render_topic_list(topic, all: false)
       #; [!uzmml] renders topic list.
-      #; [!vrzu0] topic 'prefix1' or 'prefix2' is acceptable.
+      #; [!vrzu0] topic 'category1' or 'categories2' is acceptable.
       builder = get_app_help_builder()
       return (
         case topic
         when "action", "actions"; builder.build_actions_part(false, all: all)
         when "alias" , "aliases"; builder.build_aliases_part(all: all)
         when "abbrev", "abbrevs"; builder.build_abbrevs_part(all: all)
-        when /\Aprefix(?:es)?(\d+)?\z/ ; builder.build_prefixes_part(($1 || 0).to_i, all: all)
+        when /\Acategor(?:y|ies)(\d+)?\z/ ; builder.build_categories_part(($1 || 0).to_i, all: all)
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )

@@ -378,15 +378,15 @@ END
       end
 
       spec "[!ooiaf] prints topic list if global option '-L <topic>' specified." do
-        prefixes = "\\e\\[1;34mPrefixes:\\e\\[0m"
+        chead = '\e\[1;34mCategories:\e\[0m'
         data = [
           [/\A\e\[1;34mActions:\e\[0m$/            , ["action" , "actions"  ]],
           [/\A\e\[1;34mAliases:\e\[0m$/            , ["alias"  , "aliases"  ]],
           [/\A\e\[1;34mAbbreviations:\e\[0m$/      , ["abbrev" , "abbrevs"  ]],
-          [/\A#{prefixes} \e\[2m\(depth=0\)\e\[0m$/, ["prefix" , "prefixes" ]],
-          [/\A#{prefixes} \e\[2m\(depth=1\)\e\[0m$/, ["prefix1", "prefixes1"]],
-          [/\A#{prefixes} \e\[2m\(depth=2\)\e\[0m$/, ["prefix2", "prefixes2"]],
-          [/\A#{prefixes} \e\[2m\(depth=3\)\e\[0m$/, ["prefix3", "prefixes3"]],
+          [/\A#{chead} \e\[2m\(depth=0\)\e\[0m$/, ["category" , "categories" ]],
+          [/\A#{chead} \e\[2m\(depth=1\)\e\[0m$/, ["category1", "categories1"]],
+          [/\A#{chead} \e\[2m\(depth=2\)\e\[0m$/, ["category2", "categories2"]],
+          [/\A#{chead} \e\[2m\(depth=3\)\e\[0m$/, ["category3", "categories3"]],
         ]
         data.each do |rexp, topics|
           topics.each do |topic|
@@ -491,7 +491,7 @@ END
       class FakeAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
         def build_actions_part(include=false, all: false); return nil; end
         def build_candidates_part(prefix, all: false); return nil; end
-        def build_prefixes_part(depth=1, all: false); return nil; end
+        def build_categories_part(depth=1, all: false); return nil; end
       end
 
       def fake_app_help_builder(&b)
@@ -533,7 +533,7 @@ END
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
-          ok {s} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
+          ok {s} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
           #
           ok {s} !~ /^  hello/
           ok {s} =~ /^  foo: \(\d+\)$/
@@ -552,7 +552,7 @@ END
           ok {s} !~ /\A\e\[1;34mUsage:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mOptions:\e\[0m$/
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
-          ok {s} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
+          ok {s} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
           #
           ok {s} =~ /^  foo: \(\d+\)$/
           ok {s} =~ /^  git: \(\d+\)$/
@@ -622,8 +622,8 @@ END
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m$/
         ok {x} =~ /^  chiaou             : alias of 'hello -l it'$/
         #
-        x = @app.__send__(:render_topic_list, "prefix")
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=0\)\e\[0m$/
+        x = @app.__send__(:render_topic_list, "category")
+        ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=0\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
         #
@@ -633,16 +633,16 @@ END
         ok {x} =~ /^  g31: +=>  git:$/
       end
 
-      spec "[!vrzu0] topic 'prefix1' or 'prefix2' is acceptable." do
-        x = @app.__send__(:render_topic_list, "prefix1")
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
+      spec "[!vrzu0] topic 'category1' or 'categories2' is acceptable." do
+        x = @app.__send__(:render_topic_list, "category1")
+        ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=1\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(\d+\) +: gitt commands$/
         ok {x} !~ /^  giit:branch:/
         ok {x} !~ /^  giit:repo:/
         #
-        x = @app.__send__(:render_topic_list, "prefix2")
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=2\)\e\[0m$/
+        x = @app.__send__(:render_topic_list, "category2")
+        ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=2\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(0\) +: gitt commands$/
         ok {x} =~ /^  giit:branch: \(2\)$/
@@ -650,8 +650,8 @@ END
         ok {x} !~ /^  giit:repo:config:/
         ok {x} !~ /^  giit:repo:remote:/
         #
-        x = @app.__send__(:render_topic_list, "prefix3")
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=3\)\e\[0m$/
+        x = @app.__send__(:render_topic_list, "categories3")
+        ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=3\)\e\[0m$/
         ok {x} =~ /^  git: \(3\)$/
         ok {x} =~ /^  giit: \(0\) +: gitt commands$/
         ok {x} =~ /^  giit:branch: \(2\)$/

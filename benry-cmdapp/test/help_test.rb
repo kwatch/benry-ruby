@@ -87,10 +87,10 @@ Oktest.scope do
     }
   end
 
-  def new_registry_with_filter(*prefixes)
+  def new_registry_with_filter(*categories)
     idx = Benry::CmdApp::Registry.new()
     Benry::CmdApp::REGISTRY.metadata_each do |md|
-      if md.name.start_with?(*prefixes)
+      if md.name.start_with?(*categories)
         idx.metadata_add(md)
       end
     end
@@ -808,18 +808,18 @@ END
     end
 
 
-    topic '#build_prefixes_part()' do
+    topic '#build_categories_part()' do
 
       spec "[!crbav] returns top prefix list." do
-        x = @builder.build_prefixes_part(1)
-        ok {x} =~ /\A\e\[1;34mPrefixes:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
+        x = @builder.build_categories_part(1)
+        ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 
       spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
-        x = @builder.build_prefixes_part(1, all: true)
+        x = @builder.build_categories_part(1, all: true)
         ok {x} =~ /^  secret:/
-        x = @builder.build_prefixes_part(1)
+        x = @builder.build_categories_part(1)
         ok {x} !~ /^  secret:/
       end
 
@@ -830,32 +830,32 @@ END
         end
         #
         with_dummy_registry(registry) do
-          x = @builder.build_prefixes_part()
+          x = @builder.build_categories_part()
           ok {x} == nil
-          x = @builder.build_prefixes_part(all: true)
+          x = @builder.build_categories_part(all: true)
           ok {x} != nil
         end
       end
 
       spec "[!30l2j] includes number of actions per prefix." do
-        x = @builder.build_prefixes_part(all: true)
+        x = @builder.build_categories_part(all: true)
         ok {x} =~ /^  git: \(\d+\)\n/
         ok {x} =~ /^  secret: \(\d+\)\n/
       end
 
       spec "[!qxoja] includes prefix description if registered." do
-        x = @builder.build_prefixes_part(all: true)
+        x = @builder.build_categories_part(all: true)
         ok {x} =~ /^  descdemo: \(2\)      : prefix description demo$/
       end
 
       spec "[!k3y6q] uses `config.format_prefix` or `config.format_action`." do
         @config.format_prefix = "  %-15s # %s"
-        x = @builder.build_prefixes_part(all: true)
+        x = @builder.build_categories_part(all: true)
         ok {x} =~ /^  descdemo: \(2\)   # prefix description demo\n/
         #
         @config.format_prefix = nil
         @config.format_prefix = "    %-15s -- %s"
-        x = @builder.build_prefixes_part(all: true)
+        x = @builder.build_categories_part(all: true)
         ok {x} =~ /^    descdemo: \(2\)   -- prefix description demo$/
       end
 

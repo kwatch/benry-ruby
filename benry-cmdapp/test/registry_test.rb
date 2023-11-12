@@ -10,10 +10,10 @@ Oktest.scope do
 
   topic Benry::CmdApp::Registry do
 
-    def new_registry_with_filter(*prefixes)
+    def new_registry_with_filter(*categories)
       idx = Benry::CmdApp::Registry.new()
       Benry::CmdApp::REGISTRY.metadata_each do |md|
-        idx.metadata_add(md) if md.name.start_with?(*prefixes)
+        idx.metadata_add(md) if md.name.start_with?(*categories)
       end
       return idx
     end
