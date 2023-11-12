@@ -1136,7 +1136,7 @@ END
         Benry::CmdApp._set_current_app(app)
         at_end { Benry::CmdApp._set_current_app(nil) }
         scope = Benry::CmdApp::BuiltInAction.new(@config)
-        sout, serr = capture_sio { scope.help() }
+        sout, serr = capture_sio(tty: true) { scope.help() }
         ok {sout} =~ /\A\e\[1mTestApp\e\[0m \e\[2m\(1\.2\.3\)\e\[0m --- test app$/
         ok {sout} =~ /^\e\[1;34mUsage:\e\[0m$/
         ok {sout} =~ /^\e\[1;34mOptions:\e\[0m$/
@@ -1148,11 +1148,30 @@ END
         Benry::CmdApp._set_current_app(app)
         at_end { Benry::CmdApp._set_current_app(nil) }
         scope = Benry::CmdApp::BuiltInAction.new(@config)
-        sout, serr = capture_sio { scope.help("hello") }
+        sout, serr = capture_sio(tty: true) { scope.help("hello") }
         ok {sout} =~ /\A\e\[1mtestapp hello\e\[0m --- greeting message$/
         ok {sout} =~ /^\e\[1;34mUsage:\e\[0m$/
         ok {sout} =~ /^\e\[1;34mOptions:\e\[0m$/
         ok {sout} !~ /^\e\[1;34mActions:\e\[0m$/
+      end
+
+      spec "[!2t43b] deletes escape characters from help message when non-color mode." do
+        app = Benry::CmdApp::Application.new(@config)
+        Benry::CmdApp._set_current_app(app)
+        at_end { Benry::CmdApp._set_current_app(nil) }
+        scope = Benry::CmdApp::BuiltInAction.new(@config)
+        #
+        sout, serr = capture_sio(tty: false) { scope.help() }
+        ok {sout} =~ /\ATestApp \(1\.2\.3\) --- test app$/
+        ok {sout} =~ /^Usage:$/
+        ok {sout} =~ /^Options:$/
+        ok {sout} =~ /^Actions:$/
+        #
+        sout, serr = capture_sio(tty: false) { scope.help("hello") }
+        ok {sout} =~ /\Atestapp hello --- greeting message$/
+        ok {sout} =~ /^Usage:$/
+        ok {sout} =~ /^Options:$/
+        ok {sout} !~ /^Actions:$/
       end
 
     end
