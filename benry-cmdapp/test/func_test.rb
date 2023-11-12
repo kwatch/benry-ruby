@@ -98,7 +98,9 @@ Oktest.scope do
       end
 
       spec "[!b6my2] returns nil if no errors found." do
-        x = Benry::CmdApp.__validate_alias_and_action("tmphello7", "hello")
+        x = Benry::CmdApp.class_eval {
+          __validate_alias_and_action("tmphello7", "hello")
+        }
         ok {x} == nil
         #
         pr = proc { Benry::CmdApp.define_alias("tmphello7", "hello") }

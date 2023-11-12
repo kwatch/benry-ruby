@@ -854,27 +854,27 @@ END
     topic '.__validate_prefix()' do
 
       spec "[!bac19] returns error message if prefix is not a string." do
-        errmsg = ScopeTestAction.__validate_prefix(:foo)
+        errmsg = ScopeTestAction.class_eval { __validate_prefix(:foo) }
         ok {errmsg} == "String expected, but got Symbol."
       end
 
       spec "[!608fc] returns error message if prefix doesn't end with ':'." do
-        errmsg = ScopeTestAction.__validate_prefix("foo")
+        errmsg = ScopeTestAction.class_eval { __validate_prefix("foo") }
         ok {errmsg} == "Prefix name should end with ':'."
       end
 
       spec "[!vupza] returns error message if prefix contains '_'." do
-        errmsg = ScopeTestAction.__validate_prefix("foo_bar:")
+        errmsg = ScopeTestAction.class_eval { __validate_prefix("foo_bar:") }
         ok {errmsg} == "Prefix name should not contain '_' (use '-' instead)."
       end
 
       spec "[!5vgn3] returns error message if prefix is invalid." do
-        errmsg = ScopeTestAction.__validate_prefix("123:")
+        errmsg = ScopeTestAction.class_eval { __validate_prefix("123:") }
         ok {errmsg} == "Invalid prefix name."
       end
 
       spec "[!7rphu] returns nil if prefix is valid." do
-        errmsg = ScopeTestAction.__validate_prefix("foo-bar:")
+        errmsg = ScopeTestAction.class_eval { __validate_prefix("foo-bar:") }
         ok {errmsg} == nil
       end
 
