@@ -446,13 +446,13 @@ module Benry::CmdApp
     #; [!dckvt] abbrev should not exist.
     ! _registry.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
     #; [!5djjt] abbrev should not be the same name with existing prefix.
-    ! _registry.prefix_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
+    ! _registry.category_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
     #; [!mq4ki] prefix should be a string.
     prefix.is_a?(String)            or return "#{prefix.inspect}: Prefix should be a string, but got #{prefix.class.name} object."
     #; [!a82z3] prefix should end with ':'.
     prefix.end_with?(":")           or return "'#{prefix}': Prefix should end with ':'."
     #; [!eq5iu] prefix should exist.
-    _registry.prefix_exist?(prefix)    or return "'#{prefix}': No such prefix."
+    _registry.category_exist?(prefix)    or return "'#{prefix}': No such prefix."
     #; [!jzkhc] returns nil if no error found.
     return nil
   end
@@ -554,7 +554,7 @@ module Benry::CmdApp
               "def #{method_symbol}(): #{errmsg}"
       #; [!ejdlo] converts method name to action name.
       action = Util.method2action(meth)  # ex: :a__b_c => "a:b-c"
-      #; [!w9qat] when `prefix()` called before defining action method...
+      #; [!w9qat] when `category()` called before defining action method...
       alias_p = false
       if @__prefixdef__
         prefix, prefix_action, alias_target = @__prefixdef__
@@ -562,13 +562,13 @@ module Benry::CmdApp
         meth = "#{prefix.gsub(':', '__')}#{meth}".intern
         alias_method(meth, method_symbol)
         remove_method(method_symbol)
-        #; [!mil2g] when action name matched to 'action:' kwarg of `prefix()`...
+        #; [!mil2g] when action name matched to 'action:' kwarg of `category()`...
         if action == prefix_action
           #; [!hztpp] uses pefix name as action name.
           action = prefix.chomp(':')
           #; [!cydex] clears `action:` kwarg.
           @__prefixdef__[1] = nil
-        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `prefix()`...
+        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `category()`...
         elsif action == alias_target
           #; [!iguvp] adds prefix name to action name.
           action = prefix + action
@@ -600,7 +600,7 @@ module Benry::CmdApp
         @__prefixdef__[2] = nil
       end
       #; [!u0td6] registers prefix of action if not registered yet.
-      REGISTRY.prefix_add_via_action(action)
+      REGISTRY.category_add_via_action(action)
       #
       return true    # for testing purpose
     end
@@ -646,15 +646,15 @@ module Benry::CmdApp
       return @__prefixdef__ ? @__prefixdef__[0] : nil
     end
 
-    def self.prefix(prefix, desc=nil, action: nil, alias_of: nil, &block)
+    def self.category(prefix, desc=nil, action: nil, alias_of: nil, &block)
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = __validate_prefix(prefix)
       errmsg == nil  or
-        raise DefinitionError.new("prefix(#{prefix.inspect}): #{errmsg}")
+        raise DefinitionError.new("category(#{prefix.inspect}): #{errmsg}")
       #; [!q01ma] raises DefinitionError if action or alias name is invalid.
       argstr, errmsg = __validate_action_and_alias(action, alias_of)
       errmsg == nil  or
-        raise DefinitionError.new("`prefix(#{prefix.inspect}, #{argstr})`: #{errmsg}")
+        raise DefinitionError.new("`category(#{prefix.inspect}, #{argstr})`: #{errmsg}")
       #; [!kwst6] if block given...
       if block_given?()
         #; [!t8wwm] saves previous prefix data and restore them at end of block.
@@ -662,18 +662,18 @@ module Benry::CmdApp
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
         @__prefixdef__ = [prefix, action, alias_of]
         #; [!j00pk] registers prefix and description, even if no actions defined.
-        REGISTRY.prefix_add(prefix, desc)
+        REGISTRY.category_add(prefix, desc)
         begin
           yield
           #; [!w52y5] raises DefinitionError if `action:` specified but target action not defined.
           if action
             @__prefixdef__[1] == nil  or
-              raise DefinitionError.new("prefix(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
+              raise DefinitionError.new("category(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
           end
           #; [!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined.
           if alias_of
             @__prefixdef__[2] == nil  or
-              raise DefinitionError.new("prefix(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
+              raise DefinitionError.new("category(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
           end
         ensure
           @__prefixdef__ = prev
@@ -683,7 +683,7 @@ module Benry::CmdApp
         #; [!tgux9] just stores arguments into class.
         @__prefixdef__ = [prefix, action, alias_of]
         #; [!ncskq] registers prefix and description, even if no actions defined.
-        REGISTRY.prefix_add(prefix, desc)
+        REGISTRY.category_add(prefix, desc)
       end
       nil
     end
@@ -785,7 +785,7 @@ module Benry::CmdApp
 
     def initialize()
       @metadata_dict = {}          # {name => (ActionMetadata|AliasMetadata)}
-      @prefix_dict   = {}          # {prefix => description}
+      @category_dict = {}          # {prefix => description}
       @abbrev_dict   = {}
     end
 
@@ -840,47 +840,47 @@ module Benry::CmdApp
       return md, alias_args
     end
 
-    def prefix_add(prefix, desc=nil)
+    def category_add(prefix, desc=nil)
       #; [!k27in] registers prefix if not registered yet.
       #; [!xubc8] registers prefix whenever desc is not a nil.
-      if ! @prefix_dict.key?(prefix) || desc
-        @prefix_dict[prefix] = desc
+      if ! @category_dict.key?(prefix) || desc
+        @category_dict[prefix] = desc
       end
       nil
     end
 
-    def prefix_add_via_action(action)
+    def category_add_via_action(action)
       #; [!ztrfj] registers prefix of action.
       #; [!31pik] do nothing if prefix already registered.
       #; [!oqq7j] do nothing if action has no prefix.
       if action =~ /\A(?:[-\w]+:)+/
         prefix = $&
-        @prefix_dict[prefix] = nil unless @prefix_dict.key?(prefix)
+        @category_dict[prefix] = nil unless @category_dict.key?(prefix)
       end
       nil
     end
 
-    def prefix_exist?(prefix)
+    def category_exist?(prefix)
       #; [!79cyx] returns true if prefix is already registered.
       #; [!jx7fk] returns false if prefix is not registered yet.
-      return @prefix_dict.key?(prefix)
+      return @category_dict.key?(prefix)
     end
 
-    def prefix_each(&block)
+    def category_each(&block)
       #; [!67r3i] returns Enumerator object if block not given.
-      return enum_for(:prefix_each) unless block_given?()
+      return enum_for(:category_each) unless block_given?()
       #; [!g3d1z] yields block with each prefix and desc.
-      @prefix_dict.each(&block)
+      @category_dict.each(&block)
       nil
     end
 
-    def prefix_get_desc(prefix)
+    def category_get_desc(prefix)
       #; [!d47kq] returns description if prefix is registered.
       #; [!otp1b] returns nil if prefix is not registered.
-      return @prefix_dict[prefix]
+      return @category_dict[prefix]
     end
 
-    def prefix_count_actions(depth, all: false)
+    def category_count_actions(depth, all: false)
       dict = {}
       #; [!8wipx] includes prefix of hidden actions if `all: true` passed.
       metadata_each(all: all) do |metadata|
@@ -1100,7 +1100,7 @@ module Benry::CmdApp
     FORMAT_ACTION         = "  %-18s : %s"
     FORMAT_ABBREV         = "  %-10s =>  %s"
     FORMAT_USAGE          = "  $ %s"
-    FORMAT_PREFIX         = nil                 # same as 'config.format_action' if nil
+    FORMAT_CATEGORY       = nil                 # same as 'config.format_action' if nil
     DECORATION_COMMAND    = "\e[1m%s\e[0m"      # bold
     DECORATION_HEADER     = "\e[1;34m%s\e[0m"   # bold, blue
     DECORATION_EXTRA      = "\e[2m%s\e[0m"      # gray color
@@ -1115,7 +1115,7 @@ module Benry::CmdApp
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
                    help_postamble: nil,
-                   format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_prefix: nil,
+                   format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_category: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
                    option_help: true, option_version: nil, option_list: true, option_topic: :hidden, option_all: true,
@@ -1137,7 +1137,7 @@ module Benry::CmdApp
       @format_action      = format_action || FORMAT_ACTION
       @format_abbrev      = format_abbrev || FORMAT_ABBREV
       @format_usage       = format_usage  || FORMAT_USAGE
-      @format_prefix      = format_prefix   # nil means to use @format_action
+      @format_category    = format_category   # nil means to use @format_action
       @deco_command       = deco_command || DECORATION_COMMAND  # for command name in help
       @deco_header        = deco_header  || DECORATION_HEADER   # for "Usage:" or "Actions"
       @deco_extra         = deco_extra   || DECORATION_EXTRA    # for "(default: )" or "(depth=1)"
@@ -1168,7 +1168,7 @@ module Benry::CmdApp
 
     attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
-    attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_prefix
+    attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_category
     attr_accessor :deco_command, :deco_header, :deco_extra
     attr_accessor :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
@@ -1207,7 +1207,7 @@ module Benry::CmdApp
     HEADER_ACTIONS  = "Actions:"
     HEADER_ALIASES  = "Aliases:"
     HEADER_ABBREVS  = "Abbreviations:"
-    HEADER_PREFIXES = "Prefixes:"
+    HEADER_CATEGORIES = "Categories:"
 
     def build_help_message(x, all: false)
       #; [!0hy81] this is an abstract method.
@@ -1313,7 +1313,7 @@ module Benry::CmdApp
       sb << build_actions_part(true, all: all)
       #sb << build_aliases_part(all: all)
       #sb << build_abbrevs_part(all: all)
-      #sb << build_prefixes_part(0, all: all)
+      #sb << build_categories_part(0, all: all)
       sb << build_postamble_part()
       return sb.compact().join("\n")
     end
@@ -1403,7 +1403,7 @@ module Benry::CmdApp
       str = _build_metadata_list(c.format_action, all: all) {|metadata|
         #; [!duhyd] includes actions which name is same as prefix.
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
-        _prefix_action?(metadata, prefix)
+        _category_action?(metadata, prefix)
       }
       #s1 = str.empty? ? nil : build_section(_header(:HEADER_ACTIONS), str)
       s1 = build_section(_header(:HEADER_ACTIONS), str)
@@ -1419,14 +1419,14 @@ module Benry::CmdApp
       return [s1, s2].compact().join("\n")
     end
 
-    def _prefix_action?(md, prefix)
+    def _category_action?(md, prefix)
       return true  if md.name.start_with?(prefix)
       return false if md.name != prefix.chomp(':')
       return true  if ! md.alias?
       return false if md.action.start_with?(prefix)
       return true
     end
-    private :_prefix_action?
+    private :_category_action?
 
     def build_aliases_part(all: false)
       registry = @_registry || REGISTRY
@@ -1457,26 +1457,26 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
 
-    def build_prefixes_part(depth=0, all: false)
+    def build_categories_part(depth=0, all: false)
       registry = @_registry || REGISTRY
       c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
-      dict = registry.prefix_count_actions(depth, all: all)
-      #registry.prefix_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
+      dict = registry.category_count_actions(depth, all: all)
+      #registry.category_each {|prefix, _| dict[prefix] = 0 unless dict.key?(prefix) }
       #; [!p4j1o] returns nil if no prefix found.
       return nil if dict.empty?
-      #; [!k3y6q] uses `config.format_prefix` or `config.format_action`.
-      format = (c.format_prefix || c.format_action) + "\n"
+      #; [!k3y6q] uses `config.format_category` or `config.format_action`.
+      format = (c.format_category || c.format_action) + "\n"
       indent = /^( *)/.match(format)[1]
       str = dict.keys.sort.collect {|prefix|
         s = "#{prefix} (#{dict[prefix]})"
-        #; [!qxoja] includes prefix description if registered.
-        desc = registry.prefix_get_desc(prefix)
+        #; [!qxoja] includes category description if registered.
+        desc = registry.category_get_desc(prefix)
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
       #; [!crbav] returns top prefix list.
-      return build_section(_header(:HEADER_PREFIXES), str, "(depth=#{depth})")  # "Prefixes:"
+      return build_section(_header(:HEADER_CATEGORIES), str, "(depth=#{depth})")  # "Categories:"
     end
 
   end
@@ -1593,13 +1593,13 @@ module Benry::CmdApp
       #; [!ppcvp] adds options according to config object.
       c = config
       topics = ["action", "actions", "alias", "aliases",
-                "prefix", "prefixes", "abbrev", "abbrevs",
-                "prefix1", "prefixes1", "prefix2", "prefixes2",
-                "prefix3", "prefixes3", "prefix4", "prefixes4"]
+                "category", "categories", "abbrev", "abbrevs",
+                "category1", "categories1", "category2", "categories2",
+                "category3", "categories3", "category4", "categories4"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions")
-      _add(c, :topic  , "-L <topic>"   , "list of a topic (action|alias|prefix|abbrev)", enum: topics)
+      _add(c, :topic  , "-L <topic>"   , "list of a topic (action|alias|category|abbrev)", enum: topics)
       _add(c, :all    , "-a, --all"    , "list hidden actions/options, too")
       _add(c, :verbose, "-v, --verbose", "verbose mode")
       _add(c, :quiet  , "-q, --quiet"  , "quiet mode")
@@ -1839,7 +1839,7 @@ module Benry::CmdApp
         #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
         depth = prefix.length
-        s = builder.build_prefixes_part(depth, all: all)  or
+        s = builder.build_categories_part(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...
@@ -1858,14 +1858,14 @@ module Benry::CmdApp
 
     def render_topic_list(topic, all: false)
       #; [!uzmml] renders topic list.
-      #; [!vrzu0] topic 'prefix1' or 'prefix2' is acceptable.
+      #; [!vrzu0] topic 'category1' or 'categories2' is acceptable.
       builder = get_app_help_builder()
       return (
         case topic
         when "action", "actions"; builder.build_actions_part(false, all: all)
         when "alias" , "aliases"; builder.build_aliases_part(all: all)
         when "abbrev", "abbrevs"; builder.build_abbrevs_part(all: all)
-        when /\Aprefix(?:es)?(\d+)?\z/ ; builder.build_prefixes_part(($1 || 0).to_i, all: all)
+        when /\Acategor(?:y|ies)(\d+)?\z/ ; builder.build_categories_part(($1 || 0).to_i, all: all)
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )

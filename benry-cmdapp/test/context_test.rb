@@ -7,17 +7,17 @@ require_relative "shared"
 
 
 class FooBarAction < Benry::CmdApp::Action
-  prefix "foo:"
+  category "foo:"
 
   @action.("prep for foo")
   def prep; puts "foo:prep"; end
 
-  prefix "bar:" do
+  category "bar:" do
 
     @action.("prep for foo:bar")
     def prep; puts "foo:bar:prep"; end
 
-    prefix "baz:" do
+    category "baz:" do
 
       @action.("prep for foo:bar:baz")
       def prep; puts "foo:bar:baz:prep"; end

@@ -10,10 +10,10 @@ Oktest.scope do
 
   topic Benry::CmdApp::Registry do
 
-    def new_registry_with_filter(*prefixes)
+    def new_registry_with_filter(*categories)
       idx = Benry::CmdApp::Registry.new()
       Benry::CmdApp::REGISTRY.metadata_each do |md|
-        idx.metadata_add(md) if md.name.start_with?(*prefixes)
+        idx.metadata_add(md) if md.name.start_with?(*categories)
       end
       return idx
     end
@@ -154,20 +154,20 @@ Oktest.scope do
 
       spec "[!k27in] registers prefix if not registered yet." do
         prefix = "p7885:"
-        ok {@registry.prefix_exist?(prefix)} == false
-        @registry.prefix_add(prefix, nil)
-        ok {@registry.prefix_exist?(prefix)} == true
-        ok {@registry.prefix_get_desc(prefix)} == nil
+        ok {@registry.category_exist?(prefix)} == false
+        @registry.category_add(prefix, nil)
+        ok {@registry.category_exist?(prefix)} == true
+        ok {@registry.category_get_desc(prefix)} == nil
       end
 
       spec "[!xubc8] registers prefix whenever desc is not a nil." do
         prefix = "p8796:"
-        @registry.prefix_add(prefix, "some description")
-        ok {@registry.prefix_exist?(prefix)} == true
-        ok {@registry.prefix_get_desc(prefix)} == "some description"
+        @registry.category_add(prefix, "some description")
+        ok {@registry.category_exist?(prefix)} == true
+        ok {@registry.category_get_desc(prefix)} == "some description"
         #
-        @registry.prefix_add(prefix, "other description")
-        ok {@registry.prefix_get_desc(prefix)} == "other description"
+        @registry.category_add(prefix, "other description")
+        ok {@registry.category_get_desc(prefix)} == "other description"
       end
 
     end
@@ -176,27 +176,27 @@ Oktest.scope do
     topic '#prefix_add_via_action()' do
 
       spec "[!ztrfj] registers prefix of action." do
-        @registry.prefix_add_via_action("p5671:hello")
-        ok {@registry.prefix_exist?("p5671:")}   == true
-        ok {@registry.prefix_get_desc("p5671:")} == nil
+        @registry.category_add_via_action("p5671:hello")
+        ok {@registry.category_exist?("p5671:")}   == true
+        ok {@registry.category_get_desc("p5671:")} == nil
         #
-        @registry.prefix_add_via_action("p5671:fo-o:ba_r:baz9:hello2")
-        ok {@registry.prefix_exist?("p5671:fo-o:ba_r:baz9:")} == true
-        ok {@registry.prefix_exist?("p5671:fo-o:ba_r:")}      == false
-        ok {@registry.prefix_exist?("p5671:fo-o:")}          == false
+        @registry.category_add_via_action("p5671:fo-o:ba_r:baz9:hello2")
+        ok {@registry.category_exist?("p5671:fo-o:ba_r:baz9:")} == true
+        ok {@registry.category_exist?("p5671:fo-o:ba_r:")}      == false
+        ok {@registry.category_exist?("p5671:fo-o:")}          == false
       end
 
       spec "[!31pik] do nothing if prefix already registered." do
         prefix = "p0620:hello"
-        @registry.prefix_add(prefix, "some desc")
-        @registry.prefix_add_via_action(prefix)
-        ok {@registry.prefix_get_desc(prefix)} == "some desc"
+        @registry.category_add(prefix, "some desc")
+        @registry.category_add_via_action(prefix)
+        ok {@registry.category_get_desc(prefix)} == "some desc"
       end
 
       spec "[!oqq7j] do nothing if action has no prefix." do
-        ok {@registry.prefix_each().count()} == 0
-        @registry.prefix_add_via_action("a4049")
-        ok {@registry.prefix_each().count()} == 0
+        ok {@registry.category_each().count()} == 0
+        @registry.category_add_via_action("a4049")
+        ok {@registry.category_each().count()} == 0
       end
 
     end
@@ -205,14 +205,14 @@ Oktest.scope do
     topic '#prefix_each()' do
 
       spec "[!67r3i] returns Enumerator object if block not given." do
-        ok {@registry.prefix_each()}.is_a?(Enumerator)
+        ok {@registry.category_each()}.is_a?(Enumerator)
       end
 
       spec "[!g3d1z] yields block with each prefix and desc." do
-        @registry.prefix_add("p2358:", nil)
-        @registry.prefix_add("p3892:", "some desc")
+        @registry.category_add("p2358:", nil)
+        @registry.category_add("p3892:", "some desc")
         d = {}
-        @registry.prefix_each() {|prefix, desc| d[prefix] = desc }
+        @registry.category_each() {|prefix, desc| d[prefix] = desc }
         ok {d} == {"p2358:" => nil, "p3892:" => "some desc"}
       end
 
@@ -222,12 +222,12 @@ Oktest.scope do
     topic '#prefix_exist?()' do
 
       spec "[!79cyx] returns true if prefix is already registered." do
-        @registry.prefix_add("p0057:", nil)
-        ok {@registry.prefix_exist?("p0057:")} == true
+        @registry.category_add("p0057:", nil)
+        ok {@registry.category_exist?("p0057:")} == true
       end
 
       spec "[!jx7fk] returns false if prefix is not registered yet." do
-        ok {@registry.prefix_exist?("p0760:")} == false
+        ok {@registry.category_exist?("p0760:")} == false
       end
 
     end
@@ -236,12 +236,12 @@ Oktest.scope do
     topic '#prefix_get_desc()' do
 
       spec "[!d47kq] returns description if prefix is registered." do
-        Benry::CmdApp::REGISTRY.prefix_add("p5679", "bla bla")
-        ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p5679")} == "bla bla"
+        Benry::CmdApp::REGISTRY.category_add("p5679", "bla bla")
+        ok {Benry::CmdApp::REGISTRY.category_get_desc("p5679")} == "bla bla"
       end
 
       spec "[!otp1b] returns nil if prefix is not registered." do
-        ok {Benry::CmdApp::REGISTRY.prefix_get_desc("p8233")} == nil
+        ok {Benry::CmdApp::REGISTRY.category_get_desc("p8233")} == nil
       end
 
     end
@@ -250,13 +250,13 @@ Oktest.scope do
     topic '#prefix_count_actions()' do
 
       spec "[!8wipx] includes prefix of hidden actions if `all: true` passed." do
-        idx = new_registry_with_filter("giit:", "md:")
-        ok {idx.prefix_count_actions(1, all: true) }.key?("md:")
-        ok {idx.prefix_count_actions(1, all: false)}.NOT.key?("md:")
+        registry = new_registry_with_filter("giit:", "md:")
+        ok {registry.category_count_actions(1, all: true) }.key?("md:")
+        ok {registry.category_count_actions(1, all: false)}.NOT.key?("md:")
       end
 
       spec "[!5n3qj] counts prefix of specified depth." do
-        idx = new_registry_with_filter("giit:", "md:")
+        registry = new_registry_with_filter("giit:", "md:")
         expected1 = {"giit:"=>13}
         expected2 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
                      "giit:repo:"=>7,
@@ -264,24 +264,24 @@ Oktest.scope do
         expected3 = {"giit:branch:"=>2, "giit:"=>0, "giit:commit:"=>1,
                      "giit:repo:config:"=>3, "giit:repo:"=>2, "giit:repo:remote:"=>2,
                      "giit:staging:"=>3}
-        ok {idx.prefix_count_actions(1)} == expected1
-        ok {idx.prefix_count_actions(2)} == expected2
-        ok {idx.prefix_count_actions(3)} == expected3
-        ok {idx.prefix_count_actions(4)} == expected3
-        ok {idx.prefix_count_actions(5)} == expected3
+        ok {registry.category_count_actions(1)} == expected1
+        ok {registry.category_count_actions(2)} == expected2
+        ok {registry.category_count_actions(3)} == expected3
+        ok {registry.category_count_actions(4)} == expected3
+        ok {registry.category_count_actions(5)} == expected3
       end
 
       spec "[!r2frb] counts prefix of lesser depth." do
-        idx = new_registry_with_filter("giit:", "md:")
-        x = idx.prefix_count_actions(1)
+        registry = new_registry_with_filter("giit:", "md:")
+        x = registry.category_count_actions(1)
         ok {x}.key?("giit:")
         ok {x}.NOT.key?("giit:branch:")
         ok {x}.NOT.key?("giit:repo:config:")
-        x = idx.prefix_count_actions(2)
+        x = registry.category_count_actions(2)
         ok {x}.key?("giit:")
         ok {x}.key?("giit:branch:")
         ok {x}.NOT.key?("giit:repo:config:")
-        x = idx.prefix_count_actions(3)
+        x = registry.category_count_actions(3)
         ok {x}.key?("giit:")
         ok {x}.key?("giit:branch:")
         ok {x}.key?("giit:repo:config:")
