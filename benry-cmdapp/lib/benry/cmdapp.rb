@@ -327,6 +327,13 @@ module Benry::CmdApp
       return true
     end
 
+    def name_with_args()
+      #; [!6kjuv] returns alias name if no args.
+      return @name if ! @args || @args.empty?
+      #; [!d4xrb] returns alias name and args as combined.
+      return "#{@name} (with '#{@args.join(' ')}')"
+    end
+
   end
 
 
@@ -826,6 +833,16 @@ module Benry::CmdApp
         yield metadata if all || ! metadata.hidden?
       end
       nil
+    end
+
+    def metadata_action2aliases(all: true)
+      #; [!krry6] returns a Hash object (key: action name, value: alias metadatas).
+      dict = {}    # {action_name => [alias_metadata]}
+      metadata_each(all: all) do |md|
+        #; [!zhcm6] skips actions which has no aliases.
+        (dict[md.action] ||= []) << md if md.alias?
+      end
+      return dict
     end
 
     def metadata_lookup(name)
@@ -1365,12 +1382,12 @@ module Benry::CmdApp
 
     public
 
-    def build_actions_part(include_aliases=false, all: false)
+    def build_actions_part(include_aliases=true, all: false)
       c = @config
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
-      str = _build_metadata_list(c.format_action, all: all) {|md|
+      str = _build_metadata_list(c.format_action, include_aliases, all: all) {|md|
         #; [!10qp0] includes aliases if the 1st argument is true.
-        include_aliases || ! md.alias?
+        ! md.alias?
       }
       #; [!24by5] returns nil if no actions defined.
       return nil if str.empty?
@@ -1380,16 +1397,29 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_ACTIONS), str, extra)  # "Actions:"
     end
 
-    def _build_metadata_list(format, all: false, &filter)
+    def _build_metadata_list(format, include_aliases=true, all: false, &filter)
       registry = @_registry || REGISTRY
       #; [!iokkp] builds list of actions or aliases.
       sb = []
+      action2aliases = nil  # {action_name => [alias_metadata]}
+      ali_indent = nil
       registry.metadata_each(all: all) do |metadata|
         md = metadata
         #; [!grwkj] filters by block.
         next unless yield(md)
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+        #; [!hv7or] if action has any aliases, print them below of the action.
+        next if ! include_aliases
+        next if md.alias?
+        action2aliases ||= registry.metadata_action2aliases()
+        next unless action2aliases[md.name]
+        ali_str = action2aliases[md.name].collect {|alias_metadata|
+          alias_metadata.name_with_args()
+        }.join(", ")
+        ali_indent ||= (format % ["", ""]).gsub(/[^ ]/, " ")
+        s2 = "#{ali_indent}(alias: #{ali_str})"
+        sb << decorate_str(s2, nil, false) << "\n"
       end
       return sb.join()
     end

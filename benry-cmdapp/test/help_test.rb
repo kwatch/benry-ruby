@@ -526,10 +526,10 @@ END
 
       spec "[!10qp0] includes aliases if the 1st argument is true." do
         x = @builder.__send__(:build_actions_part, true, all: true)
-        ok {x} =~ /alias of/
+        ok {x} =~ /\(alias: /
         #
         x = @builder.__send__(:build_actions_part, false, all: true)
-        ok {x} !~ /alias of/
+        ok {x} !~ /\(alias: /
       end
 
       spec "[!24by5] returns nil if no actions defined." do
@@ -596,6 +596,15 @@ END
         ok {output} !~ /alias of/
       end
 
+      spec "[!hv7or] if action has any aliases, print them below of the action." do
+        format = "  %-18s : %s"
+        include_aliases = true
+        output = @builder.instance_eval{
+          _build_metadata_list(format, include_aliases) {|md| ! md.alias? }
+        }
+        ok {output} =~ /^\e\[2m +\(alias: .*\)\e\[0m$/
+      end
+
     end
 
 
@@ -651,6 +660,7 @@ END
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
+\e[2m                       (alias: git)\e[0m
   git:staged         : same as `git diff --cached`
   git:unstage        : same as `git reset HEAD`
 
@@ -666,6 +676,7 @@ END
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
+\e[2m                       (alias: add)\e[0m
   git:staged         : same as `git diff --cached`
   git:unstage        : same as `git reset HEAD`
 
@@ -682,6 +693,7 @@ END
 \e[1;34mActions:\e[0m
 \e[2m  git:correct        : same as `git commit --amend`\e[0m
   git:stage          : same as `git add -p`
+\e[2m                       (alias: add)\e[0m
   git:staged         : same as `git diff --cached`
   git:unstage        : same as `git reset HEAD`
 
@@ -693,6 +705,7 @@ END
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
+\e[2m                       (alias: add)\e[0m
   git:staged         : same as `git diff --cached`
   git:unstage        : same as `git reset HEAD`
 END

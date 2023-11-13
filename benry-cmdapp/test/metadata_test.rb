@@ -166,6 +166,25 @@ END
     end
 
 
+    topic '#name_with_args()' do
+
+      spec "[!6kjuv] returns alias name if no args." do
+        metadata = Benry::CmdApp::AliasMetadata.new("a1549", "hello", nil)
+        ok {metadata.name_with_args} == "a1549"
+        metadata = Benry::CmdApp::AliasMetadata.new("a1549", "hello", [])
+        ok {metadata.name_with_args} == "a1549"
+      end
+
+      spec "[!d4xrb] returns alias name and args as combined." do
+        metadata = Benry::CmdApp::AliasMetadata.new("a1549", "hello", ["x"])
+        ok {metadata.name_with_args} == "a1549 (with 'x')"
+        metadata = Benry::CmdApp::AliasMetadata.new("a1549", "hello", ["x", "y"])
+        ok {metadata.name_with_args} == "a1549 (with 'x y')"
+      end
+
+    end
+
+
   end
 
 
