@@ -1385,7 +1385,7 @@ module Benry::CmdApp
     def build_actions_part(include_aliases=false, all: false)
       c = @config
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
-      str = _build_metadata_list(c.format_action, all: all) {|md|
+      str = _build_metadata_list(c.format_action, include_aliases, all: all) {|md|
         #; [!10qp0] includes aliases if the 1st argument is true.
         include_aliases || ! md.alias?
       }
@@ -1397,16 +1397,29 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_ACTIONS), str, extra)  # "Actions:"
     end
 
-    def _build_metadata_list(format, all: false, &filter)
+    def _build_metadata_list(format, include_aliases=false, all: false, &filter)
       registry = @_registry || REGISTRY
       #; [!iokkp] builds list of actions or aliases.
       sb = []
+      action2aliases = nil  # {action_name => [alias_metadata]}
+      ali_indent = nil
       registry.metadata_each(all: all) do |metadata|
         md = metadata
         #; [!grwkj] filters by block.
         next unless yield(md)
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
+        #; [!hv7or] if action has any aliases, print them below of the action.
+        next if ! include_aliases
+        next if md.alias?
+        action2aliases ||= registry.metadata_action2aliases()
+        next unless action2aliases[md.name]
+        ali_str = action2aliases[md.name].collect {|alias_metadata|
+          alias_metadata.name_with_args()
+        }.join(", ")
+        ali_indent ||= (format % ["", ""]).gsub(/[^ ]/, " ")
+        s2 = "#{ali_indent}(alias: #{ali_str})"
+        sb << decorate_str(s2, nil, false) << "\n"
       end
       return sb.join()
     end

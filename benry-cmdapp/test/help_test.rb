@@ -596,6 +596,15 @@ END
         ok {output} !~ /alias of/
       end
 
+      spec "[!hv7or] if action has any aliases, print them below of the action." do
+        format = "  %-18s : %s"
+        include_aliases = true
+        output = @builder.instance_eval{
+          _build_metadata_list(format, include_aliases) {|md| ! md.alias? }
+        }
+        ok {output} =~ /^\e\[2m +\(alias: .*\)\e\[0m$/
+      end
+
     end
 
 
