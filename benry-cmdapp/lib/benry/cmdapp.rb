@@ -1395,20 +1395,15 @@ module Benry::CmdApp
       #; [!iokkp] builds list of actions or aliases.
       sb = []
       registry.metadata_each(all: all) do |metadata|
+        md = metadata
         #; [!grwkj] filters by block.
-        next unless yield(metadata)
-        sb<< _build_action_line(metadata, format)
+        next unless yield(md)
+        s = format % [md.name, md.desc]
+        sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
       return sb.join()
     end
     private :_build_metadata_list
-
-    def _build_action_line(md, format)
-      s = format % [md.name, md.desc]
-      s = decorate_str(s, md.hidden?, md.important?) + "\n"
-      return s
-    end
-    private :_build_action_line
 
     def build_candidates_part(prefix, all: false)
       c = @config
