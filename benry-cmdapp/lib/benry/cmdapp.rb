@@ -1823,7 +1823,7 @@ module Benry::CmdApp
         print_str render_version()
         return 0
       end
-      #; [!hj4hf] prints action list if global option `-l, --list` specified.
+      #; [!hj4hf] prints action and alias list if global option `-l, --list` specified.
       #; [!tyxwo] includes hidden actions into action list if `-a, --all` specified.
       if global_opts[:list]
         print_str render_item_list(nil, all: all)
@@ -1867,7 +1867,7 @@ module Benry::CmdApp
       when nil
         #; [!36vz6] returns action list string if any actions defined.
         #; [!znuy4] raises CommandError if no actions defined.
-        s = builder.build_actions_part(true, all: all)  or
+        s = builder.build_availables_part(all: all)  or
           raise CommandError.new("No actions defined.")
         return s
       #; [!jcq4z] when separator is specified...

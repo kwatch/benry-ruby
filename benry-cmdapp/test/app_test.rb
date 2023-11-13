@@ -353,12 +353,13 @@ END
         ok {sout} == "1.2.3\n"
       end
 
-      spec "[!hj4hf] prints action list if global option `-l, --list` specified." do
+      spec "[!hj4hf] prints action and alias list if global option `-l, --list` specified." do
         opts = {list: true}
-        sout, serr = capture_sio do
+        sout, serr = capture_sio(tty: true) do
           @app.instance_eval { handle_global_options(opts, []) }
         end
-        ok {sout} =~ /\AActions:$/
+        ok {sout} =~ /\A\e\[1;34mActions:\e\[0m$/
+        ok {sout} =~ /\n\n\e\[1;34mAliases:\e\[0m$/
       end
 
       spec "[!tyxwo] includes hidden actions into action list if `-a, --all` specified." do
@@ -489,7 +490,7 @@ END
     topic '#render_item_list()' do
 
       class FakeAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
-        def build_actions_part(include=false, all: false); return nil; end
+        def build_availables_part(include=true, all: false); return nil; end
         def build_candidates_part(prefix, all: false); return nil; end
         def build_categories_part(depth=1, all: false); return nil; end
       end
