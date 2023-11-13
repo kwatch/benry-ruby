@@ -118,6 +118,48 @@ Oktest.scope do
     end
 
 
+    topic '#metadata_action2aliases()' do
+
+      before do
+        hello_action   = Benry::CmdApp::REGISTRY.metadata_get("hello")
+        stage_action   = Benry::CmdApp::REGISTRY.metadata_get("git:stage")
+        staged_action  = Benry::CmdApp::REGISTRY.metadata_get("git:staged")
+        unstage_action = Benry::CmdApp::REGISTRY.metadata_get("git:unstage")
+        @aliases = [
+          Benry::CmdApp::AliasMetadata.new("hi", "hello", []),
+          Benry::CmdApp::AliasMetadata.new("chao", "hello", ["-l", "it"]),
+          Benry::CmdApp::AliasMetadata.new("clear", "git:unstage", []),
+        ]
+        @registry = Benry::CmdApp::Registry.new
+        reg = @registry
+        reg.metadata_add(hello_action)
+        reg.metadata_add(stage_action)
+        reg.metadata_add(staged_action)
+        reg.metadata_add(unstage_action)
+        @aliases.each do |md|
+          reg.metadata_add(md)
+        end
+      end
+
+      spec "[!krry6] returns a Hash object (key: action name, value: alias metadatas)." do
+        d = @registry.metadata_action2aliases()
+        ok {d}.is_a?(Hash)
+        ok {d.keys} == ["hello", "git:unstage"]
+        ok {Set.new(d["hello"])} == Set.new([@aliases[0], @aliases[1]])
+        ok {d["git:unstage"]} == [@aliases[2]]
+      end
+
+      spec "[!zhcm6] skips actions which has no aliases." do
+        d = @registry.metadata_action2aliases()
+        ok {d}.is_a?(Hash)
+        ok {d.keys} == ["hello", "git:unstage"]
+        ok {d.keys}.NOT.include?("git:stage")
+        ok {d.keys}.NOT.include?("git:staged")
+      end
+
+    end
+
+
     topic '#metadata_lookup()' do
 
       spec "[!dcs9v] looks up action metadata recursively if alias name specified." do

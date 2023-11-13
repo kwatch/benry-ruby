@@ -828,6 +828,16 @@ module Benry::CmdApp
       nil
     end
 
+    def metadata_action2aliases(all: true)
+      #; [!krry6] returns a Hash object (key: action name, value: alias metadatas).
+      dict = {}    # {action_name => [alias_metadata]}
+      metadata_each(all: all) do |md|
+        #; [!zhcm6] skips actions which has no aliases.
+        (dict[md.action] ||= []) << md if md.alias?
+      end
+      return dict
+    end
+
     def metadata_lookup(name)
       #; [!dcs9v] looks up action metadata recursively if alias name specified.
       #; [!f8fqx] returns action metadata and alias args.
