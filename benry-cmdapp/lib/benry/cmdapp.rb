@@ -1382,12 +1382,12 @@ module Benry::CmdApp
 
     public
 
-    def build_actions_part(include_aliases=false, all: false)
+    def build_actions_part(include_aliases=true, all: false)
       c = @config
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
       str = _build_metadata_list(c.format_action, include_aliases, all: all) {|md|
         #; [!10qp0] includes aliases if the 1st argument is true.
-        include_aliases || ! md.alias?
+        ! md.alias?
       }
       #; [!24by5] returns nil if no actions defined.
       return nil if str.empty?

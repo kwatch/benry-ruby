@@ -526,10 +526,10 @@ END
 
       spec "[!10qp0] includes aliases if the 1st argument is true." do
         x = @builder.__send__(:build_actions_part, true, all: true)
-        ok {x} =~ /alias of/
+        ok {x} =~ /\(alias: /
         #
         x = @builder.__send__(:build_actions_part, false, all: true)
-        ok {x} !~ /alias of/
+        ok {x} !~ /\(alias: /
       end
 
       spec "[!24by5] returns nil if no actions defined." do
