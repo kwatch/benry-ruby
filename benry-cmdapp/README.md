@@ -49,15 +49,15 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Copy Options](#copy-options)
   * [Option Error and Action Error](#option-error-and-action-error)
 * [Advanced Feature](#advanced-feature)
-  * [Prefix of Action Name](#prefix-of-action-name)
-  * [Nested Prefix](#nested-prefix)
-  * [Prefix Action or Alias](#prefix-action-or-alias)
+  * [Category of Action](#category-of-action)
+  * [Nested Category](#nested-category)
+  * [Category Action or Alias](#category-action-or-alias)
   * [Invoke Other Action](#invoke-other-action)
   * [Cleaning Up Block](#cleaning-up-block)
   * [Alias of Action](#alias-of-action)
-  * [Abbreviation of Prefix](#abbreviation-of-prefix)
+  * [Abbreviation of Category](#abbreviation-of-category)
   * [Default Action](#default-action)
-  * [Action List and Prefix List](#action-list-and-prefix-list)
+  * [Action List and Category List](#action-list-and-category-list)
   * [Hidden Action](#hidden-action)
   * [Hidden Option](#hidden-option)
   * [Important Actions or Options](#important-actions-or-options)
@@ -80,7 +80,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to define a multiple option, like `-I` option of Ruby?](#q-how-to-define-a-multiple-option-like--i-option-of-ruby)
   * [Q: How to show global option `-L <topic>` in help message?](#q-how-to-show-global-option--l-topic-in-help-message)
   * [Q: How to specify detailed description of options?](#q-how-to-specify-detailed-description-of-options)
-  * [Q: What is the difference between `prefix(alias_of:)` and `prefix(action:)`?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction)
+  * [Q: What is the difference between `category(alias_of:)` and `category(action:)`?](#q-what-is-the-difference-between-categoryalias_of-and-categoryaction)
   * [Q: How to list only aliases (or actions) excluding actions (or aliases) ?](#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-)
   * [Q: How to change the order of options in help message?](#q-how-to-change-the-order-of-options-in-help-message)
   * [Q: How to add metadata to actions or options?](#q-how-to-add-metadata-to-actions-or-options)
@@ -1003,12 +1003,12 @@ ex13.rb:17:in `openssl': Command failed: openssl enc ... (Benry::CmdApp::ActionE
 ## Advanced Feature
 
 
-### Prefix of Action Name
+### Category of Action
 
-* `prefix "foo:bar:"` in action class adds prefix `foo:bar:` to each action name.
-* Prefix name shoud end with `:`. For example, `prefix "foo:"` is OK but `prefix "foo"` will be error.
-* Prefix name should be a string. Symbol is not allowed.
-* Method name `def baz__test()` with `prefix: "foo:bar"` results in action name `foo:bar:baz:test`.
+* `category "foo:bar:"` in action class adds prefix `foo:bar:` to each action name.
+* Category name should be specified as a prefix string ending with `:`. For example, `category "foo:"` is OK but `category "foo"` will be error.
+* Symbol is not allowed. For example, `category :foo` will be error.
+* Method name `def baz__test()` with `category "foo:bar:"` results in the action name `foo:bar:baz:test`.
 
 File: ex21.rb
 
@@ -1017,7 +1017,7 @@ File: ex21.rb
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
-  prefix "foo:bar:"                # !!!!
+  category "foo:bar:"                # !!!!
 
   @action.("test action #1")
   def test1()                      # action name: 'foo:bar:test1'
@@ -1055,19 +1055,19 @@ foo__bar__baz__test2          # <== puts methods().grep(/test1/)
 ```
 
 (INTERNAL MECHANISM):
-As shown in the above output, Benry-CmdApp internally renames `test1()` and `baz__test2()` methods within prefix `foo:bar` to `foo__bar__test1()` and `foo__bar__baz__test2()` respectively.
+As shown in the above output, Benry-CmdApp internally renames `test1()` and `baz__test2()` methods within category `foo:bar:` to `foo__bar__test1()` and `foo__bar__baz__test2()` respectively.
 `__method__` seems to keep original method name, but don't be fooled, methods are renamed indeed.
-Due to this mechanism, it is possible to define the same name methods in different prefixes with no confliction.
+Due to this mechanism, it is possible to define the same name methods in different categories with no confliction.
 
-* `prefix()` can take a description text of prefix.
-  For example, `prefix "foo:", "Bla bla"` registers `"Bla bla` as a description of prefix `foo:`.
-  Description of prefix is displayed in list of prefix list.
+* `category()` can take a description text of category.
+  For example, `category "foo:", "Bla bla"` registers `"Bla bla` as a description of category `foo:`.
+  Description of category is displayed in list of category list.
   See [Action List and Prefix List](#action-list-and-prefix-list) section for details.
 
 
-### Nested Prefix
+### Nested Category
 
-`prefix()` can take a block which represents sub-level of prefix.
+`category()` can take a block which represents sub-category.
 
 File: ex22.rb
 
@@ -1076,14 +1076,14 @@ File: ex22.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  prefix "git:"                   # top level prefix
+  category "git:"                   # top level category
 
   @action.("show current status in compact format")
   def status(path=".")
     puts "git status -sb #{path}"
   end
 
-  prefix "commit:" do             # sub level prefix
+  category "commit:" do             # sub level category
 
     @action.("create a new commit")
     def create(message: nil)
@@ -1092,7 +1092,7 @@ class GitAction < Benry::CmdApp::Action
 
   end
 
-  prefix "branch:" do             # sub level prefix
+  category "branch:" do             # sub level category
 
     @action.("create a new branch")
     def create(branch)
@@ -1117,7 +1117,7 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
-Block of `prefix()` is nestable.
+Block of `category()` is nestable.
 
 File: ex23.rb
 
@@ -1127,14 +1127,14 @@ require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
 
-  prefix "git:" do                 # top level prefix
+  category "git:" do                 # top level category
 
     @action.("show current status in compact format")
     def status(path=".")
       puts "git status -sb #{path}"
     end
 
-    prefix "commit:" do            # sub level prefix
+    category "commit:" do            # sub level category
 
       @action.("create a new commit")
       def create(message: nil)
@@ -1143,7 +1143,7 @@ class GitAction < Benry::CmdApp::Action
 
     end
 
-    prefix "branch:" do            # sub level prefix
+    category "branch:" do            # sub level category
 
       @action.("create a new branch")
       def create(branch)
@@ -1171,9 +1171,9 @@ Actions:
 ```
 
 
-### Prefix Action or Alias
+### Category Action or Alias
 
-* `prefix "foo:bar:", action: "blabla"` defines `foo:bar` action (instead of `foo:bar:blabla`) with `blabla()` method.
+* `category "foo:bar:", action: "blabla"` defines `foo:bar` action (instead of `foo:bar:blabla`) with `blabla()` method.
 
 File: ex24.rb
 
@@ -1182,7 +1182,7 @@ File: ex24.rb
 require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
-  prefix "foo:bar:", action: "test3"      # !!!!
+  category "foo:bar:", action: "test3"      # !!!!
 
   @action.("test action #1")
   def test1()                 # action name: 'foo:bar:test1'
@@ -1218,21 +1218,19 @@ test1
 test3
 ```
 
-* `prefix "foo:", alias_of: "blabla"` defines `foo` as an alias of `foo:blabla` action.
+* `category "foo:", alias_of: "blabla"` defines `foo` as an alias of `foo:blabla` action.
   See [Alias of Action](#alias-of-action) section about alias of action.
 
 * Keyword arguments `action:` and `alias_of:` are exclusive.
   It is not allowed to specify both of them at the same time.
-  See [Q: What is the difference between prefix(alias_of:) and prefix(action:)?](#q-what-is-the-difference-between-prefixalias_of-and-prefixaction) section for details.
+  See [Q: What is the difference between category(alias_of:) and category(action:)?](#q-what-is-the-difference-between-categoryalias_of-and-categoryaction) section for details.
 
-* Prefix name and action name should be a string. Notice that Symbol is not allowed.
+* Action name (and also category name) should be specified as a string. Symbol is not allowed.
 
 ```ruby
-    ## Error because prefix name is a Symbol.
-    prefix :foo
-
-    ## Error because action name is a Symbol.
-    prefix "foo:", action: :blabla
+    ## Symbol is not allowed
+    category :foo                       #=> error
+    category "foo:", action: :blabla    #=> error
 ```
 
 
@@ -1375,8 +1373,8 @@ rm -rf build    # !!!! clean-up block invoked at the end of process !!!!
 
 Alias of action provides alternative short name of action.
 
-* `define_alias()` in action class defines an alias with taking action name prefix into account.
-* `Benry::CmdApp.define_alias()` defines an alias, without taking action name prefix into account.
+* `define_alias()` in action class defines an alias with taking action category into account.
+* `Benry::CmdApp.define_alias()` defines an alias, without taking category into account.
 
 File: ex28.rb
 
@@ -1385,7 +1383,7 @@ File: ex28.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  prefix "git:"                                   # !!!!
+  category "git:"                                   # !!!!
 
   @action.("show current status in compact mode")
   def status()
@@ -1396,7 +1394,7 @@ class GitAction < Benry::CmdApp::Action
   ## or:
   #Benry::CmdApp.define_alias "st", "git:status"  # !!!!
 
-  prefix "staging:" do                            # !!!!
+  category "staging:" do                            # !!!!
 
     @action.("show changes in staging area")
     def show()
@@ -1501,7 +1499,7 @@ class MyAction < Benry::CmdApp::Action
     when "fr" ; puts "Bonjour, #{user}!"
     when "it" ; puts "Ciao, #{user}!"
     else
-      raise "#{lang}: unknown language."
+      raise "#{lang}: Unknown language."
     end
   end
 
@@ -1539,7 +1537,7 @@ Benry::CmdApp.define_alias("hello-it"   , ["hello", "-l", "it"])
 Benry::CmdApp.define_alias("ciao"       , "hello-it")   # !!!!
 ```
 
-* `prefix "foo:", alias_of: "bar"` defines new alias `foo` which is an alias of `foo:bar` action.
+* `category "foo:", alias_of: "bar"` defines new alias `foo` which is an alias of `foo:bar` action.
 
 File: ex30.rb
 
@@ -1548,7 +1546,7 @@ File: ex30.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  prefix "git:", alias_of: "status"
+  category "git:", alias_of: "status"
 
   @action.("show status in compact format")
   def status(path=".")
@@ -1580,10 +1578,10 @@ Aliases:
 ```
 
 
-### Abbreviation of Prefix
+### Abbreviation of Category
 
-Abbreviation of prefix is a shortcut of prefix.
-For example, when `b:` is an abbreviation of a prefix `git:branch:`, you can invoke `git:branch:create` action by `b:create`.
+Abbreviation of category is a shortcut of category prefix.
+For example, when `b:` is an abbreviation of a category prefix `git:branch:`, you can invoke `git:branch:create` action by `b:create`.
 
 File: ex31.rb
 
@@ -1593,9 +1591,9 @@ require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
 
-  prefix "git:" do
+  category "git:" do
 
-    prefix "branch:" do
+    category "branch:" do
 
       @action.("create a new branch")
       def create(branch)
@@ -1608,7 +1606,7 @@ class GitAction < Benry::CmdApp::Action
 
 end
 
-## define abbreviation 'b:' of prefix 'git:branch:'
+## define abbreviation 'b:' of category prefix 'git:branch:'
 Benry::CmdApp.define_abbrev("b:", "git:branch:")     # !!!!
 
 exit Benry::CmdApp.main("sample app")
@@ -1691,7 +1689,7 @@ Actions: (default: test1)                   # !!!!
 ```
 
 
-### Action List and Prefix List
+### Action List and Category List
 
 When `config.default_action` is not specified, Benry-CmdAction lists action names if action name is not specified in command-line.
 
@@ -1707,7 +1705,7 @@ class SampleAction < Benry::CmdApp::Action
   def test1()
   end
 
-  prefix "foo:" do
+  category "foo:" do
 
     @action.("test action #2")
     def test2()
@@ -1715,13 +1713,13 @@ class SampleAction < Benry::CmdApp::Action
 
   end
 
-  prefix "bar:" do
+  category "bar:" do
 
     @action.("test action #3")
     def test3()
     end
 
-    prefix "baz:" do
+    category "baz:" do
 
       @action.("test action #4")
       def test4()
@@ -1755,8 +1753,8 @@ Action name list contains alias names, too.
 If you want to list only action names (or alias names), specify `-L action` or `-L alias` option.
 See [Q: How to list only aliases (or actions) excluding actions (or aliases) ?](#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-) for details.
 
-If prefix (such as `xxx:`) is specified instead of action name,
-Benry-CmdApp lists action names which have that prefix.
+If category prefix (such as `xxx:`) is specified instead of action name,
+Benry-CmdApp lists action names which have that category prefix.
 
 Output:
 
@@ -1771,21 +1769,21 @@ Actions:
   bar:test3          : test action #3
 ```
 
-If `:` is specified instead of action name, Benry-CmdApp lists top prefixes of action names and number of actions under the each prefix.
+If `:` is specified instead of action name, Benry-CmdApp lists top-level category prefixes of action names and number of actions under the each category prefix.
 
 Outuput:
 
 ```console
 [bash]$ ruby ex33.rb :                 # !!!!
-Prefixes: (depth=1)
+Categories: (depth=1)
   bar: (2)           # !!! two actions ('bar:test3' and 'bar:baz:test4')
   foo: (1)           # !!! one action ('foo:text2')
 ```
 
-In the above example, only top level prefixes are displayed.
-If you specified `::` instead of `:`, two-level prefixes are displayed,
+In the above example, only top-level category prefixes are displayed.
+If you specified `::` instead of `:`, second-level category prefixes are displayed,
 for example `foo:xxx:` and `foo:yyy:`.
-Of course, `:::` displays more level prefixes.
+Of course, `:::` displays more level category prefixes.
 
 File: ex34.rb
 
@@ -1794,30 +1792,30 @@ File: ex34.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  prefix "git:"
+  category "git:"
 
-  prefix "staging:" do
+  category "staging:" do
     @action.("...");  def add(); end
     @action.("...");  def show(); end
     @action.("...");  def delete(); end
   end
 
-  prefix "branch:" do
+  category "branch:" do
     @action.("...");  def list(); end
     @action.("...");  def switch(name); end
   end
 
-  prefix "repo:" do
+  category "repo:" do
     @action.("...");  def create(); end
     @action.("...");  def init(); end
 
-    prefix "config:" do
+    category "config:" do
       @action.("...");  def add(); end
       @action.("...");  def delete(); end
       @action.("...");  def list(); end
     end
 
-    prefix "remote:" do
+    category "remote:" do
       @action.("...");  def list(); end
       @action.("...");  def set(); end
     end
@@ -1833,18 +1831,18 @@ Output:
 
 ```console
 [bash]$ ruby ex34.rb :
-Prefixes: (depth=1)
+Categories: (depth=1)
   git: (12)
 
 [bash]$ ruby ex34.rb ::             # !!!!
-Prefixes: (depth=2)
+Categories: (depth=2)
   git: (0)
   git:branch: (2)
   git:repo: (7)
   git:staging: (3)
 
 [bash]$ ruby ex34.rb :::            # !!!!
-Prefixes: (depth=3)
+Categories: (depth=3)
   git: (0)
   git:branch: (2)
   git:repo: (2)
@@ -1853,8 +1851,8 @@ Prefixes: (depth=3)
   git:staging: (3)
 ```
 
-`prefix()` can take a description of prefix as 2nd argument.
-Descriptions of prefix are displayed in the prefix list.
+`category()` can take a description of category as second argument.
+Descriptions of category are displayed in the category prefix list.
 
 File: ex35.rb
 
@@ -1864,18 +1862,18 @@ require 'benry/cmdapp'
 
 class SampleAction < Benry::CmdApp::Action
 
-  prefix "foo:", "description of Foo" do
+  category "foo:", "description of Foo" do
     @action.("test action #2")
     def test2()
     end
   end
 
-  prefix "bar:", "description of Bar" do
+  category "bar:", "description of Bar" do
     @action.("test action #3")
     def test3()
     end
 
-    prefix "baz:", "description fo Baz" do
+    category "baz:", "description fo Baz" do
       @action.("test action #4")
       def test4()
       end
@@ -1891,7 +1889,7 @@ Output:
 
 ```console
 [bash]$ ruby ex35.rb :                       # !!!!
-Prefixes: (depth=1)
+Categories: (depth=1)
   bar: (2)           : description of Bar    # !!!!
   foo: (1)           : description of Foo    # !!!!
 ```
@@ -2104,7 +2102,7 @@ Options:
 * `config.format_usage = "  $ %s"` sets format of usage in help message. (default: `"  $ %s"`)
 * `config.format_avvrev = "  %-10s =>  %s"` sets format of abbreviations in output of `-L abbrev` option. (default: `"  %-10s =>  %s"`)
 * `config.format_usage = "  $ %s"` sets format of usage in help message. (default: `"  $ %s"`)
-* `config.format_prefix = "  $-18s : %s""` sets format of prefixes in output of `-L prefix` option. (default: `nil` which means to use value of `config.format_action`)
+* `config.format_category = "  $-18s : %s""` sets format of category prefixes in output of `-L category` option. (default: `nil` which means to use value of `config.format_action`)
 
 File: ex41.rb
 
@@ -2133,7 +2131,7 @@ config.help_postamble       = nil
 config.format_option        = "  %-18s : %s"
 config.format_action        = "  %-18s : %s"
 config.format_usage         = "  $ %s"
-config.format_prefix        = nil
+config.format_category      = nil
 config.deco_command         = "\e[1m%s\e[0m"        # bold
 config.deco_header          = "\e[1;34m%s\e[0m"     # bold, blue
 config.deco_extra           = "\e[2m%s\e[0m"        # gray color
@@ -2501,7 +2499,7 @@ class MyAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
   #def build_candidates_part(prefix, all: false); super; end
   #def build_aliases_part(all: false); super; end
   #def build_abbrevs_part(all: false); super; end
-  #def build_prefixes_part(depth=0, all: false); super; end
+  #def build_categories_part(depth=0, all: false); super; end
 end
 
 ## (3) Create an instance object of the class.
@@ -2563,7 +2561,7 @@ module MyHelpBuilderMod
   #def build_candidates_part(prefix, all: false); super; end
   #def build_aliases_part(all: false); super; end
   #def build_abbrevs_part(all: false); super; end
-  #def build_prefixes_part(depth=0, all: false); super; end
+  #def build_categories_part(depth=0, all: false); super; end
 end
 
 ## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
@@ -2729,12 +2727,12 @@ The following constants are defined in `BaseHelperBuilder` class.
 ```ruby
 module Benry::CmdApp
   class BaseHelpBuilder
-    HEADER_USAGE    = "Usage:"
-    HEADER_OPTIONS  = "Options:"
-    HEADER_ACTIONS  = "Actions:"
-    HEADER_ALIASES  = "Aliases:"
-    HEADER_ABBREVS  = "Abbreviations:"
-    HEADER_PREFIXES = "Prefixes:"
+    HEADER_USAGE      = "Usage:"
+    HEADER_OPTIONS    = "Options:"
+    HEADER_ACTIONS    = "Actions:"
+    HEADER_ALIASES    = "Aliases:"
+    HEADER_ABBREVS    = "Abbreviations:"
+    HEADER_CATEGORIES = "Categories:"
 ```
 
 You can override them in `ApplicationHelpBuilder` or `ActionHelpBuilder`
@@ -3076,7 +3074,7 @@ Options:
 ```
 
 
-### Q: What is the difference between `prefix(alias_of:)` and `prefix(action:)`?
+### Q: What is the difference between `category(alias_of:)` and `category(action:)`?
 
 A: The former defines an alias, and the latter doesn't.
 
@@ -3086,7 +3084,7 @@ File: ex67.rb
 require 'benry/cmdapp'
 
 class AaaAction < Benry::CmdApp::Action
-  prefix "aaa:", alias_of: "print"
+  category "aaa:", alias_of: "print"
 
   @action.("test #1")
   def print_()
@@ -3096,7 +3094,7 @@ class AaaAction < Benry::CmdApp::Action
 end
 
 class BbbAction < Benry::CmdApp::Action
-  prefix "bbb:", action: "print"
+  category "bbb:", action: "print"
 
   @action.("test #2")
   def print_()
@@ -3122,7 +3120,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -l, --list         : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|category|abbrev)
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -3132,8 +3130,8 @@ Actions:
   help               : print help message (of action if specified)
 ```
 
-In the above example, alias `aaa` is defined due to `prefix(alias_of:)`,
-and action `bbb` is not an alias due to `prefix(action:)`.
+In the above example, alias `aaa` is defined due to `category(alias_of:)`,
+and action `bbb` is not an alias due to `category(action:)`.
 
 
 ### Q: How to list only aliases (or actions) excluding actions (or aliases) ?
@@ -3213,7 +3211,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -a, --all          : list hidden actions/options, too
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
+  -L <topic>         : list of a topic (action|alias|category|abbrev)
   -l, --list         : list actions
 
 Actions:
