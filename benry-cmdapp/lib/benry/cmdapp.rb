@@ -1397,7 +1397,7 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_ACTIONS), str, extra)  # "Actions:"
     end
 
-    def _build_metadata_list(format, include_aliases=false, all: false, &filter)
+    def _build_metadata_list(format, include_aliases=true, all: false, &filter)
       registry = @_registry || REGISTRY
       #; [!iokkp] builds list of actions or aliases.
       sb = []
