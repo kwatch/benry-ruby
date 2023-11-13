@@ -327,6 +327,13 @@ module Benry::CmdApp
       return true
     end
 
+    def name_with_args()
+      #; [!6kjuv] returns alias name if no args.
+      return @name if ! @args || @args.empty?
+      #; [!d4xrb] returns alias name and args as combined.
+      return "#{@name} (with '#{@args.join(' ')}')"
+    end
+
   end
 
 
