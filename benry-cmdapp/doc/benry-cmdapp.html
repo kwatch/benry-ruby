@@ -103,7 +103,6 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-define-a-multiple-option-like--i-option-of-ruby">Q: How to define a multiple option, like <code>-I</code> option of Ruby?</a></li>
 <li><a href="#q-how-to-show-global-option--l-topic-in-help-message">Q: How to show global option <code>-L &lttopic&gt;</code> in help message?</a></li>
 <li><a href="#q-how-to-specify-detailed-description-of-options">Q: How to specify detailed description of options?</a></li>
-<li><a href="#q-what-is-the-difference-between-categoryalias_of-and-categoryaction">Q: What is the difference between <code>category(alias_of:)</code> and <code>category(action:)</code>?</a></li>
 <li><a href="#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">Q: How to list only aliases (or actions) excluding actions (or aliases) ?</a></li>
 <li><a href="#q-how-to-change-the-order-of-options-in-help-message">Q: How to change the order of options in help message?</a></li>
 <li><a href="#q-how-to-add-metadata-to-actions-or-options">Q: How to add metadata to actions or options?</a></li>
@@ -348,7 +347,7 @@ class MyAction &lt Benry::CmdApp::Action
     when "fr" ; puts "Bonjour, #{user}!"
     when "it" ; puts "Ciao, #{user}!"
     else
-      raise "#{lang}: unknown language."
+      raise "#{lang}: Unknown language."
     end
   end
 
@@ -389,7 +388,7 @@ class MyAction &lt Benry::CmdApp::Action
       when "fr" ; puts "Bonjour, #{user}!"
       when "it" ; puts "Ciao, #{user}!"
       else
-        raise "#{lang}: unknown language."
+        raise "#{lang}: Unknown language."
       end
     end
   end
@@ -414,7 +413,7 @@ Usage:
   $ ex05.rb hello [&ltoptions&gt;] [&ltuser&gt;]
 
 Options:
-  -l, --lang=&lten|fr|it&gt; : language        # !!!!
+  -l, --lang=&lten|fr|it&gt; : language
   <strong>    --repeat=&ltN&gt;   : repeat &ltN&gt; times</strong>   # !!!!
 </pre>
 <ul>
@@ -444,22 +443,31 @@ Benry-CmdApp regards <code>--lang &ltval&gt;</code> as 'long option without argu
 and 'argument for command'.</p>
 <pre class="language-console">
 [bash]$ ruby ex05.rb hello <strong>--lang fr</strong>         # ``--lang fr`` != ``--lang=fr``
-<strong>[ERROR] --lang: argument required.</strong>
+<strong>[ERROR] --lang: Argument required.</strong>
 </pre>
 </section>
 <section class="subsection" id="option-definition-format">
 <h3>Option Definition Format</h3>
-<p>Option definition format should be one of:</p>
+<p>There are 9 option definition formats.</p>
 <ul>
-<li>(short option) <code>-q</code>  : no values.</li>
-<li>(short option) <code>-f &ltfile&gt;</code> : value required.</li>
-<li>(short option) <code>-i[&ltwidth&gt;]</code> : value is optional.</li>
-<li>(long option) <code>--quiet</code>  : no values.</li>
-<li>(long option) <code>--file=&ltfile&gt;</code> : value required.</li>
-<li>(long option) <code>--indent[=&ltwidth&gt;]</code> : value is optional.</li>
-<li>(short &amp; long) <code>-q, --quiet</code>  : no values.</li>
-<li>(short &amp; long) <code>-f, --file=&ltfile&gt;</code> : value required.</li>
-<li>(short &amp; long) <code>-i, --indent[=&ltwidth&gt;]</code> : value is optional.</li>
+<li>When the option takes no value:
+<ul>
+<li><code>-q</code> --- Short style.</li>
+<li><code>--quiet</code> --- Long style.</li>
+<li><code>-q, --quiet</code> --- Short and long style.</li>
+</ul></li>
+<li>When the option takes a required value:
+<ul>
+<li><code>-f &ltpath&gt;</code> --- Short style.</li>
+<li><code>--file=&ltpath&gt;</code> --- Long style.</li>
+<li><code>-f, --file=&ltpath&gt;</code> --- Short and long style.</li>
+</ul></li>
+<li>When the option takes an optional value:
+<ul>
+<li><code>-i[&ltN&gt;]</code> --- Short style.</li>
+<li><code>--indent[=&ltN&gt;]</code> --- Long style.</li>
+<li><code>-i, --indent[=&ltN&gt;]</code> --- Short and long style.</li>
+</ul></li>
 </ul>
 <p>File: ex06.rb</p>
 <pre class="language-ruby">
@@ -591,7 +599,7 @@ class MyAction &lt Benry::CmdApp::Action
       when "fr" ; puts "Bonjour, #{user}!"
       when "it" ; puts "Ciao, #{user}!"
       else
-        raise "#{lang}: unknown language."
+        raise "#{lang}: Unknown language."
       end
     end
   end
@@ -646,7 +654,7 @@ class MyAction &lt Benry::CmdApp::Action
       when "fr" ; puts "Bonjour, #{user}!"
       when "it" ; puts "Ciao, #{user}!"
       else
-        raise "#{lang}: unknown language."
+        raise "#{lang}: Unknown language."
       end
     end
   end
@@ -1151,13 +1159,6 @@ test1
 test3
 </pre>
 <ul>
-<li><code>category "foo:", alias_of: "blabla"</code> defines <code>foo</code> as an alias of <code>foo:blabla</code> action.
-  See <a href="#alias-of-action">Alias of Action</a> section about alias of action.</li>
-<p></p>
-<li>Keyword arguments <code>action:</code> and <code>alias_of:</code> are exclusive.
-  It is not allowed to specify both of them at the same time.
-  See <a href="#q-what-is-the-difference-between-categoryalias_of-and-categoryaction">Q: What is the difference between category(alias_of:) and category(action:)?</a> section for details.</li>
-<p></p>
 <li>Action name (and also category name) should be specified as a string. Symbol is not allowed.</li>
 </ul>
 <pre class="language-ruby">
@@ -1450,34 +1451,6 @@ Benry::CmdApp.define_alias(<strong>"hello-it"</strong>   , ["hello", "-l", "it"]
 
 ## ERROR: define an alias of other alias
 Benry::CmdApp.define_alias("ciao"       , <strong>"hello-it"</strong>)   # !!!!
-</pre>
-<ul>
-<li><code>category "foo:", alias_of: "bar"</code> defines new alias <code>foo</code> which is an alias of <code>foo:bar</code> action.</li>
-</ul>
-<p>File: ex30.rb</p>
-<pre class="language-ruby">
-# coding: utf-8
-require 'benry/cmdapp'
-
-class GitAction &lt Benry::CmdApp::Action
-  <strong>category "git:", alias_of: "status"</strong>
-
-  @action.("show status in compact format")
-  def <strong>status</strong>(path=".")
-    system "git status -sb #{path}"
-  end
-
-end
-
-exit Benry::CmdApp.main("sample app")
-</pre>
-<p>Output:</p>
-<pre class="language-console">
-[bash]$ ruby ex30.rb -l
-Actions:
-  <strong>git                : alias of 'git:status'</strong>                      # !!!!
-  git:status         : show status in compact format
-  help               : print help message (of action if specified)
 </pre>
 <ul>
 <li>Global option <code>-L alias</code> lists all aliases.
@@ -2851,60 +2824,6 @@ Options:
                           <strong>q, quiet:   print litte output</strong>
                           <strong>c, compact: print summary output</strong>
 </pre>
-</section>
-<section class="subsection" id="q-what-is-the-difference-between-categoryalias_of-and-categoryaction">
-<h3>Q: What is the difference between <code>category(alias_of:)</code> and <code>category(action:)</code>?</h3>
-<p>A: The former defines an alias, and the latter doesn't.</p>
-<p>File: ex67.rb</p>
-<pre class="language-ruby">
-require 'benry/cmdapp'
-
-class AaaAction &lt Benry::CmdApp::Action
-  category "aaa:", <strong>alias_of:</strong> "print"
-
-  @action.("test #1")
-  def print_()
-    puts "test"
-  end
-
-end
-
-class BbbAction &lt Benry::CmdApp::Action
-  category "bbb:", <strong>action:</strong> "print"
-
-  @action.("test #2")
-  def print_()
-    puts "test"
-  end
-
-end
-
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
-</pre>
-<p>Help message:</p>
-<pre class="language-console">
-[bash]$ ruby ex67.rb -h
-ex67.rb --- sample app
-
-Usage:
-  $ ex67.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
-
-Options:
-  -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
-  -L &lttopic&gt;         : list of a topic (action|alias|category|abbrev)
-  -a, --all          : list hidden actions/options, too
-
-Actions:
-  <strong>aaa                : alias of 'aaa:print' action</strong>    # !!!!
-  aaa:print          : test #1
-  <strong>bbb                : test #2</strong>                        # !!!!
-  help               : print help message (of action if specified)
-</pre>
-<p>In the above example, alias <code>aaa</code> is defined due to <code>category(alias_of:)</code>,
-and action <code>bbb</code> is not an alias due to <code>category(action:)</code>.</p>
 </section>
 <section class="subsection" id="q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">
 <h3>Q: How to list only aliases (or actions) excluding actions (or aliases) ?</h3>

@@ -289,7 +289,7 @@ class MyAction < Benry::CmdApp::Action
     when "fr" ; puts "Bonjour, #{user}!"
     when "it" ; puts "Ciao, #{user}!"
     else
-      raise "#{lang}: unknown language."
+      raise "#{lang}: Unknown language."
     end
   end
 
@@ -333,7 +333,7 @@ class MyAction < Benry::CmdApp::Action
       when "fr" ; puts "Bonjour, #{user}!"
       when "it" ; puts "Ciao, #{user}!"
       else
-        raise "#{lang}: unknown language."
+        raise "#{lang}: Unknown language."
       end
     end
   end
@@ -362,7 +362,7 @@ Usage:
   $ ex05.rb hello [<options>] [<user>]
 
 Options:
-  -l, --lang=<en|fr|it> : language        # !!!!
+  -l, --lang=<en|fr|it> : language
   {{*    --repeat=<N>   : repeat <N> times*}}   # !!!!
 ```
 
@@ -394,23 +394,26 @@ and 'argument for command'.
 
 ```console
 [bash]$ ruby ex05.rb hello {{*--lang fr*}}         # ``--lang fr`` != ``--lang=fr``
-{{*[ERROR] --lang: argument required.*}}
+{{*[ERROR] --lang: Argument required.*}}
 ```
 
 
 === Option Definition Format
 
-Option definition format should be one of:
+There are 9 option definition formats.
 
-* (short option) ``-q``  : no values.
-* (short option) ``-f <file>`` : value required.
-* (short option) ``-i[<width>]`` : value is optional.
-* (long option) ``--quiet``  : no values.
-* (long option) ``--file=<file>`` : value required.
-* (long option) ``--indent[=<width>]`` : value is optional.
-* (short & long) ``-q, --quiet``  : no values.
-* (short & long) ``-f, --file=<file>`` : value required.
-* (short & long) ``-i, --indent[=<width>]`` : value is optional.
+* When the option takes no value:
+  * ``-q`` --- Short style.
+  * ``--quiet`` --- Long style.
+  * ``-q, --quiet`` --- Short and long style.
+* When the option takes a required value:
+  * ``-f <path>`` --- Short style.
+  * ``--file=<path>`` --- Long style.
+  * ``-f, --file=<path>`` --- Short and long style.
+* When the option takes an optional value:
+  * ``-i[<N>]`` --- Short style.
+  * ``--indent[=<N>]`` --- Long style.
+  * ``-i, --indent[=<N>]`` --- Short and long style.
 
 File: ex06.rb
 
@@ -551,7 +554,7 @@ class MyAction < Benry::CmdApp::Action
       when "fr" ; puts "Bonjour, #{user}!"
       when "it" ; puts "Ciao, #{user}!"
       else
-        raise "#{lang}: unknown language."
+        raise "#{lang}: Unknown language."
       end
     end
   end
@@ -610,7 +613,7 @@ class MyAction < Benry::CmdApp::Action
       when "fr" ; puts "Bonjour, #{user}!"
       when "it" ; puts "Ciao, #{user}!"
       else
-        raise "#{lang}: unknown language."
+        raise "#{lang}: Unknown language."
       end
     end
   end
@@ -1162,12 +1165,14 @@ test1
 test3
 ```
 
+<!--
 * ``category "foo:", alias_of: "blabla"`` defines ``foo`` as an alias of ``foo:blabla`` action.
   See [Alias of Action](#alias-of-action) section about alias of action.
 
 * Keyword arguments ``action:`` and ``alias_of:`` are exclusive.
   It is not allowed to specify both of them at the same time.
   See [Q: What is the difference between category(alias_of:) and category(action:)?](#q-what-is-the-difference-between-categoryalias_of-and-categoryaction) section for details.
+-->
 
 * Action name (and also category name) should be specified as a string. Symbol is not allowed.
 
@@ -1481,6 +1486,7 @@ Benry::CmdApp.define_alias({{*"hello-it"*}}   , ["hello", "-l", "it"])
 Benry::CmdApp.define_alias("ciao"       , {{*"hello-it"*}})   # !!!!
 ```
 
+<!--
 * ``category "foo:", alias_of: "bar"`` defines new alias ``foo`` which is an alias of ``foo:bar`` action.
 
 File: ex30.rb
@@ -1511,6 +1517,7 @@ Actions:
   git:status         : show status in compact format
   help               : print help message (of action if specified)
 ```
+-->
 
 * Global option ``-L alias`` lists all aliases.
   This option is hidden in default, therefore not shown in help message but available in default (for debug purpose).
@@ -3018,6 +3025,7 @@ Options:
 ```
 
 
+<!--
 === Q: What is the difference between ``category(alias_of:)`` and ``category(action:)``?
 
 A: The former defines an alias, and the latter doesn't.
@@ -3076,6 +3084,7 @@ Actions:
 
 In the above example, alias ``aaa`` is defined due to ``category(alias_of:)``,
 and action ``bbb`` is not an alias due to ``category(action:)``.
+-->
 
 
 === Q: How to list only aliases (or actions) excluding actions (or aliases) ?
