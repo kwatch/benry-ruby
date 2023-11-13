@@ -1425,6 +1425,13 @@ module Benry::CmdApp
     end
     private :_build_metadata_list
 
+    def build_availables_part(include_aliases=true, all: false)
+      #; [!pz0cu] includes 'Actions:' and 'Aliases:' sections.
+      s1 = build_actions_part(include_aliases, all: all)
+      s2 = build_aliases_part(all: all)
+      return [s1, s2].compact.join("\n")
+    end
+
     def build_candidates_part(prefix, all: false)
       c = @config
       registry = @_registry || REGISTRY
