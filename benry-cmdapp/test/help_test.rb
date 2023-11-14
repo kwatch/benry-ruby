@@ -330,7 +330,7 @@ END
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -356,7 +356,7 @@ END
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -470,7 +470,7 @@ END
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -487,7 +487,7 @@ END
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
 \e[2m  -L <topic>         : list of a topic (action|alias|category|abbrev)\e[0m
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode

@@ -173,7 +173,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -253,7 +253,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1346,7 +1346,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1553,7 +1553,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions: <strong>(default: test1)</strong>                   # !!!!
@@ -1996,7 +1996,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
       <strong>--debug        : debug mode</strong>             # !!!!
 
@@ -2049,7 +2049,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   <strong>--logging          : enable logging</strong>          # !!!!
 
@@ -2074,7 +2074,7 @@ require 'benry/cmdapp'
 ## (2) Add global options as you want.
 <strong>schema.add</strong>(:help   , "-h, --help"   , "print help message")
 <strong>schema.add</strong>(:version, "-V, --version", "print version")
-<strong>schema.add</strong>(:list   , "-l, --list"   , "list actions")
+<strong>schema.add</strong>(:list   , "-l, --list"   , "list actions and aliases")
 <strong>schema.add</strong>(:all    , "-a, --all"    , "list hidden actions/options, too")
 <strong>schema.add</strong>(:verbose, "-v, --verbose", "verbose mode")
 <strong>schema.add</strong>(:quiet  , "-q, --quiet"  , "quiet mode")
@@ -2098,7 +2098,7 @@ Usage:
 Options:
   <strong>-h, --help         : print help message</strong>
   <strong>-V, --version      : print version</strong>
-  <strong>-l, --list         : list actions</strong>
+  <strong>-l, --list         : list actions and aliases</strong>
   <strong>-a, --all          : list hidden actions/options, too</strong>
   <strong>-v, --verbose      : verbose mode</strong>
   <strong>-q, --quiet        : quiet mode</strong>
@@ -2246,7 +2246,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2658,7 +2658,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2735,7 +2735,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   <strong>--color[=&lton|off&gt;] : enable/disable color</strong>      # !!!!
 
@@ -2896,7 +2896,7 @@ Options:
   -V, --version      : print version
   -a, --all          : list hidden actions/options, too
   -L &lttopic&gt;         : list of a topic (action|alias|category|abbrev)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
 
 Actions:
   help               : print help message (of action if specified)
