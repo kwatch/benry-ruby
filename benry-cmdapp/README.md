@@ -157,7 +157,7 @@ Usage:
 Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -242,7 +242,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1429,7 +1429,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -1686,7 +1686,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions: (default: test1)                   # !!!!
@@ -2176,7 +2176,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
       --debug        : debug mode             # !!!!
 
@@ -2233,7 +2233,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   --logging          : enable logging          # !!!!
 
@@ -2260,7 +2260,7 @@ schema = Benry::CmdApp::GlobalOptionSchema.new(nil)   # !!!!
 ## (2) Add global options as you want.
 schema.add(:help   , "-h, --help"   , "print help message")
 schema.add(:version, "-V, --version", "print version")
-schema.add(:list   , "-l, --list"   , "list actions")
+schema.add(:list   , "-l, --list"   , "list actions and aliases")
 schema.add(:all    , "-a, --all"    , "list hidden actions/options, too")
 schema.add(:verbose, "-v, --verbose", "verbose mode")
 schema.add(:quiet  , "-q, --quiet"  , "quiet mode")
@@ -2286,7 +2286,7 @@ Usage:
 Options:
   -h, --help         : print help message
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
   -q, --quiet        : quiet mode
@@ -2445,7 +2445,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2891,7 +2891,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 Actions:
@@ -2978,7 +2978,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
   --color[=<on|off>] : enable/disable color      # !!!!
 
@@ -3126,7 +3126,7 @@ Usage:
 
 Options:
   -h, --help         : print help message (of action if specified)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -L <topic>         : list of a topic (action|alias|category|abbrev)
   -a, --all          : list hidden actions/options, too
 
@@ -3220,7 +3220,7 @@ Options:
   -V, --version      : print version
   -a, --all          : list hidden actions/options, too
   -L <topic>         : list of a topic (action|alias|category|abbrev)
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
 
 Actions:
   help               : print help message (of action if specified)
