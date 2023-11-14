@@ -608,6 +608,17 @@ END
     end
 
 
+    topic '#build_availables_part()' do
+
+      spec "[!pz0cu] includes 'Actions:' and 'Aliases:' sections." do
+        output = @builder.build_availables_part()
+        ok {output} =~ /\A\e\[1;34mActions:\e\[0m\n/
+        ok {output} =~ /\n\n\e\[1;34mAliases:\e\[0m\n/
+      end
+
+    end
+
+
     topic '#build_candidates_part()' do
 
       spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
