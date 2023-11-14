@@ -1635,7 +1635,7 @@ module Benry::CmdApp
                 "category3", "categories3", "category4", "categories4"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
-      _add(c, :list   , "-l, --list"   , "list actions")
+      _add(c, :list   , "-l, --list"   , "list actions and aliases")
       _add(c, :topic  , "-L <topic>"   , "list of a topic (action|alias|category|abbrev)", enum: topics)
       _add(c, :all    , "-a, --all"    , "list hidden actions/options, too")
       _add(c, :verbose, "-v, --verbose", "verbose mode")

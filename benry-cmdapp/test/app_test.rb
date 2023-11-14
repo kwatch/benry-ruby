@@ -464,7 +464,7 @@ END
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
-  -l, --list         : list actions
+  -l, --list         : list actions and aliases
   -a, --all          : list hidden actions/options, too
 
 \e[1;34mActions:\e[0m
@@ -964,7 +964,7 @@ END
         ok {schema.to_s} == <<"END"
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
-  -l, --list     : list actions
+  -l, --list     : list actions and aliases
   -a, --all      : list hidden actions/options, too
 END
         ok {schema.get(:trace)}   == nil
@@ -1020,7 +1020,7 @@ END
         ok {schema.option_help(all: true)} == <<'END'
       --help           : print help message (of action if specified)
       --version        : print version
-      --list           : list actions
+      --list           : list actions and aliases
   -L <topic>           : list of a topic (action|alias|category|abbrev)
       --all            : list hidden actions/options, too
       --verbose        : verbose mode
@@ -1047,14 +1047,14 @@ END
         ok {schema.to_s} == <<'END'
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
-  -l, --list     : list actions
+  -l, --list     : list actions and aliases
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
         #
         schema.reorder_options(:list, :topic, :help, :all, :debug, :version)
         ok {schema.to_s} == <<'END'
-  -l, --list     : list actions
+  -l, --list     : list actions and aliases
   -h, --help     : print help message (of action if specified)
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
@@ -1067,7 +1067,7 @@ END
         schema = new_schema(config)
         schema.reorder_options(:list, :help)
         ok {schema.to_s} == <<'END'
-  -l, --list     : list actions
+  -l, --list     : list actions and aliases
   -h, --help     : print help message (of action if specified)
   -V, --version  : print version
   -a, --all      : list hidden actions/options, too
