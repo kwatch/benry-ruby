@@ -46,12 +46,12 @@ Test double (spy, stub, or mock) library for unit test.
 https://github.com/kwatch/benry-ruby/tree/main/benry-recorder
 
 
-Benry-UnixCmd
--------------
+Benry-UnixCommand
+-----------------
 
 Utility which provides basic UNIX command features. Better than `FileUtils.rb`.
 
-https://github.com/kwatch/benry-ruby/tree/main/benry-unixcmd
+https://github.com/kwatch/benry-ruby/tree/main/benry-unixcommand
 
 
 Benry-YamlUtil
