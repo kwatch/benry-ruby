@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 # frozen_string_literal: true
 
+###
+### $Release: 0.0.0 $
+### $Copyright: copyright(c) 2023 kwatch@gmail.com $
+### $License: MIT License $
+###
+
 require 'benry/cmdopt'
 
 
