@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.email           = "kwatch@gmail.com"
   spec.platform        = Gem::Platform::RUBY
   spec.homepage        = "https://kwatch.github.io/benry-ruby/benry-cmdapp.html"
-  spec.summary         = "Command-line application framework`"
+  spec.summary         = "Command-line application framework"
   spec.description     = <<-"END"
 Benry-CmdApp is a framework to create command-line application
 like `git`, `docker`, or `npm` commands.
