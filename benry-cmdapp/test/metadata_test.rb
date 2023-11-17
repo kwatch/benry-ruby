@@ -145,12 +145,12 @@ END
 
       spec "[!qtb61] sets description string automatically." do
         metadata = Benry::CmdApp::AliasMetadata.new("a9344", "hello", nil)
-        ok {metadata.desc} == "alias of 'hello'"
+        ok {metadata.desc} == "alias for 'hello'"
       end
 
       spec "[!kgic6] includes args value into description if provided." do
         metadata = Benry::CmdApp::AliasMetadata.new("a1312", "hello", ["aa", "bb"])
-        ok {metadata.desc} == "alias of 'hello aa bb'"
+        ok {metadata.desc} == "alias for 'hello aa bb'"
       end
 
     end
