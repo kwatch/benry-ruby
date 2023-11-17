@@ -54,7 +54,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Category Action or Alias](#category-action-or-alias)
   * [Invoke Other Action](#invoke-other-action)
   * [Cleaning Up Block](#cleaning-up-block)
-  * [Alias of Action](#alias-of-action)
+  * [Alias for Action](#alias-for-action)
   * [Abbreviation of Category](#abbreviation-of-category)
   * [Default Action](#default-action)
   * [Action List and Category List](#action-list-and-category-list)
@@ -1221,12 +1221,12 @@ test3
 ```
 
 <!--
-* `category "foo:", alias_of: "blabla"` defines `foo` as an alias of `foo:blabla` action.
-  See [Alias of Action](#alias-of-action) section about alias of action.
+* `category "foo:", alias_for: "blabla"` defines `foo` as an alias for `foo:blabla` action.
+  See [Alias for Action](#alias-of-action) section about alias for action.
 
-* Keyword arguments `action:` and `alias_of:` are exclusive.
+* Keyword arguments `action:` and `alias_for:` are exclusive.
   It is not allowed to specify both of them at the same time.
-  See [Q: What is the difference between category(alias_of:) and category(action:)?](#q-what-is-the-difference-between-categoryalias_of-and-categoryaction) section for details.
+  See [Q: What is the difference between category(alias_for:) and category(action:)?](#q-what-is-the-difference-between-categoryalias_for-and-categoryaction) section for details.
 -->
 
 * Action name (and also category name) should be specified as a string. Symbol is not allowed.
@@ -1373,9 +1373,9 @@ rm -rf build    # !!!! clean-up block invoked at the end of process !!!!
 ```
 
 
-### Alias of Action
+### Alias for Action
 
-Alias of action provides alternative short name of action.
+Alias provides alternative short name of action.
 
 * `define_alias()` in action class defines an alias with taking action category into account.
 * `Benry::CmdApp.define_alias()` defines an alias, without taking category into account.
@@ -1433,12 +1433,12 @@ Options:
   -a, --all          : list hidden actions/options, too
 
 Actions:
-  git                : alias of 'git:status'           # !!!!
+  git                : alias for 'git:status'           # !!!!
   git:staging:show   : show changes in staging area
   git:status         : show current status in compact mode
   help               : print help message (of action if specified)
-  st                 : alias of 'git:status'           # !!!!
-  staged             : alias of 'git:staging:show'     # !!!!
+  st                 : alias for 'git:status'           # !!!!
+  staged             : alias for 'git:staging:show'     # !!!!
 ```
 
 Output:
@@ -1470,8 +1470,8 @@ Usage:
   $ ex28.rb git:status
 
 Aliases:                                               # !!!!
-  git                : alias of 'git:status'           # !!!!
-  st                 : alias of 'git:status'           # !!!!
+  git                : alias for 'git:status'           # !!!!
+  st                 : alias for 'git:status'           # !!!!
 ```
 
 * Both alias and action names should be string. Symbol is not allowed.
@@ -1531,18 +1531,18 @@ Bonjour, Alice!
 Ciao, Bob!
 ```
 
-* It is not allowed to define an alias of other alias.
+* It is not allowed to define an alias for other alias.
 
 ```
 ## define an alias
 Benry::CmdApp.define_alias("hello-it"   , ["hello", "-l", "it"])
 
-## ERROR: define an alias of other alias
+## ERROR: define an alias for other alias
 Benry::CmdApp.define_alias("ciao"       , "hello-it")   # !!!!
 ```
 
 <!--
-* `category "foo:", alias_of: "bar"` defines new alias `foo` which is an alias of `foo:bar` action.
+* `category "foo:", alias_for: "bar"` defines new alias `foo` which is an alias for `foo:bar` action.
 
 File: ex30.rb
 
@@ -1551,7 +1551,7 @@ File: ex30.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  category "git:", alias_of: "status"
+  category "git:", alias_for: "status"
 
   @action.("show status in compact format")
   def status(path=".")
@@ -1568,7 +1568,7 @@ Output:
 ```console
 [bash]$ ruby ex30.rb -l
 Actions:
-  git                : alias of 'git:status'                      # !!!!
+  git                : alias for 'git:status'                     # !!!!
   git:status         : show status in compact format
   help               : print help message (of action if specified)
 ```
@@ -1580,7 +1580,7 @@ Actions:
 ```console
 [bash]$ ruby ex30.rb -L alias
 Aliases:
-  git                : alias of 'git:status'
+  git                : alias for 'git:status'
 ```
 
 
@@ -2803,7 +2803,7 @@ end
 
 ## (a) use method alias
 class SampleAction               # open existing class
-  alias __old_hello hello        # alias of existing method
+  alias __old_hello hello        # alias for existing method
   def hello(user="world")        # override existing method
     puts "---- >8 ---- >8 ----"
     __old_hello(user)            # call original method
@@ -3081,7 +3081,7 @@ Options:
 
 
 <!--
-### Q: What is the difference between `category(alias_of:)` and `category(action:)`?
+### Q: What is the difference between `category(alias_for:)` and `category(action:)`?
 
 A: The former defines an alias, and the latter doesn't.
 
@@ -3091,7 +3091,7 @@ File: ex67.rb
 require 'benry/cmdapp'
 
 class AaaAction < Benry::CmdApp::Action
-  category "aaa:", alias_of: "print"
+  category "aaa:", alias_for: "print"
 
   @action.("test #1")
   def print_()
@@ -3131,13 +3131,13 @@ Options:
   -a, --all          : list hidden actions/options, too
 
 Actions:
-  aaa                : alias of 'aaa:print' action    # !!!!
+  aaa                : alias for 'aaa:print' action   # !!!!
   aaa:print          : test #1
   bbb                : test #2                        # !!!!
   help               : print help message (of action if specified)
 ```
 
-In the above example, alias `aaa` is defined due to `category(alias_of:)`,
+In the above example, alias `aaa` is defined due to `category(alias_for:)`,
 and action `bbb` is not an alias due to `category(action:)`.
 -->
 
@@ -3149,22 +3149,22 @@ A: Specify global option `-L alias` or `-L action`.
 ```console
 [bash]$ ruby gitexample.rb -l
 Actions:
-  git                : alias of 'git:status'
+  git                : alias for 'git:status'
   git:stage          : put changes of files into staging area
   git:staged         : show changes in staging area
   git:status         : show status in compact format
   git:unstage        : remove changes from staging area
-  stage              : alias of 'git:stage'
-  staged             : alias of 'git:staged'
-  unstage            : alias of 'git:unstage'
+  stage              : alias for 'git:stage'
+  staged             : alias for 'git:staged'
+  unstage            : alias for 'git:unstage'
 
 ### list only aliases (ordered by action name automatically)
 [bash]$ ruby gitexample.rb -L alias     # !!!!
 Aliases:
-  stage              : alias of 'git:stage'
-  staged             : alias of 'git:staged'
-  git                : alias of 'git:status'
-  unstage            : alias of 'git:unstage'
+  stage              : alias for 'git:stage'
+  staged             : alias for 'git:staged'
+  git                : alias for 'git:status'
+  unstage            : alias for 'git:unstage'
 
 ### list only actions
 [bash]$ ruby gitexample.rb -L action     # !!!!

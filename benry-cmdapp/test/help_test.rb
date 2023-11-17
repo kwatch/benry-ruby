@@ -590,10 +590,10 @@ END
         format = "%s : %s"
         output = @builder.__send__(:_build_metadata_list, format) {|md| md.alias? }
         ok {output} !~ /^hello : greeting message$/
-        ok {output} =~ /alias of/
+        ok {output} =~ /alias for/
         output = @builder.__send__(:_build_metadata_list, format) {|md| ! md.alias? }
         ok {output} =~ /^hello : greeting message$/
-        ok {output} !~ /alias of/
+        ok {output} !~ /alias for/
       end
 
       spec "[!hv7or] if action has any aliases, print them below of the action." do
@@ -676,7 +676,7 @@ END
   git:unstage        : same as `git reset HEAD`
 
 \e[1;34mAliases:\e[0m
-  git                : alias of 'git:stage'
+  git                : alias for 'git:stage'
 END
       end
 
@@ -692,7 +692,7 @@ END
   git:unstage        : same as `git reset HEAD`
 
 \e[1;34mAliases:\e[0m
-  add                : alias of 'git:stage'
+  add                : alias for 'git:stage'
 END
       end
 
@@ -709,7 +709,7 @@ END
   git:unstage        : same as `git reset HEAD`
 
 \e[1;34mAliases:\e[0m
-\e[2m  add                : alias of 'git:stage'\e[0m
+\e[2m  add                : alias for 'git:stage'\e[0m
 END
         #
         x = @builder.build_candidates_part("git:")
@@ -743,7 +743,7 @@ END
         Benry::CmdApp.define_alias("a9208", "hello")
         x = @builder.build_aliases_part()
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
-        ok {x} =~ /^  a9208 +: alias of 'hello'$/
+        ok {x} =~ /^  a9208 +: alias for 'hello'$/
       end
 
       spec "[!fj1c7] returns header string if no aliases found." do
@@ -757,7 +757,7 @@ END
         ok {x} != nil
         ok {x} == <<"END"
 \e[1;34mAliases:\e[0m
-  h1                 : alias of 'hello'
+  h1                 : alias for 'hello'
 END
       end
 
@@ -772,7 +772,7 @@ END
         Benry::CmdApp.define_alias("a4612", "hello", hidden: true)
         x = @builder.build_aliases_part(all: true)
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
-        ok {x} =~ /^\e\[2m  a4612 +: alias of 'hello'\e\[0m$/
+        ok {x} =~ /^\e\[2m  a4612 +: alias for 'hello'\e\[0m$/
       end
 
       spec "[!v211d] sorts aliases by action names." do
@@ -794,15 +794,15 @@ END
         end
         ok {output} == <<"END"
 \e[1;34mAliases:\e[0m
-  a8                 : alias of 'debuginfo'
-  a2                 : alias of 'git:stage'
-  a3                 : alias of 'git:staged'
-  a4                 : alias of 'git:staged'
-  a5                 : alias of 'git:staged'
-  a6                 : alias of 'git:staged'
-  a1                 : alias of 'git:unstage'
-  a9                 : alias of 'hello'
-  a7                 : alias of 'testerr1'
+  a8                 : alias for 'debuginfo'
+  a2                 : alias for 'git:stage'
+  a3                 : alias for 'git:staged'
+  a4                 : alias for 'git:staged'
+  a5                 : alias for 'git:staged'
+  a6                 : alias for 'git:staged'
+  a1                 : alias for 'git:unstage'
+  a9                 : alias for 'hello'
+  a7                 : alias for 'testerr1'
 END
       end
 
@@ -947,9 +947,9 @@ END
       --bb           : option B
 
 \e[1;34mAliases:\e[0m
-  alitest1x          : alias of 'alitest1'
-  alitest1y          : alias of 'alitest1 --aa'
-  alitest1z          : alias of 'alitest1 --aa foobar'
+  alitest1x          : alias for 'alitest1'
+  alitest1y          : alias for 'alitest1 --aa'
+  alitest1z          : alias for 'alitest1 --aa foobar'
 END
       end
 
@@ -1103,9 +1103,9 @@ END
         output = @builder.__send__(:build_aliases_part, metadata)
         ok {output} == <<"END"
 \e[1;34mAliases:\e[0m
-  alitest1x          : alias of 'alitest1'
-  alitest1y          : alias of 'alitest1 --aa'
-  alitest1z          : alias of 'alitest1 --aa foobar'
+  alitest1x          : alias for 'alitest1'
+  alitest1y          : alias for 'alitest1 --aa'
+  alitest1z          : alias for 'alitest1 --aa foobar'
 END
       end
 

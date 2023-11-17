@@ -621,7 +621,7 @@ END
         Benry::CmdApp.define_alias("chiaou", ["hello", "-l", "it"])
         x = @app.__send__(:render_topic_list, "alias")
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m$/
-        ok {x} =~ /^  chiaou             : alias of 'hello -l it'$/
+        ok {x} =~ /^  chiaou             : alias for 'hello -l it'$/
         #
         x = @app.__send__(:render_topic_list, "category")
         ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=0\)\e\[0m$/

@@ -73,7 +73,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#category-action-or-alias">Category Action or Alias</a></li>
 <li><a href="#invoke-other-action">Invoke Other Action</a></li>
 <li><a href="#cleaning-up-block">Cleaning Up Block</a></li>
-<li><a href="#alias-of-action">Alias of Action</a></li>
+<li><a href="#alias-for-action">Alias for Action</a></li>
 <li><a href="#abbreviation-of-category">Abbreviation of Category</a></li>
 <li><a href="#default-action">Default Action</a></li>
 <li><a href="#action-list-and-category-list">Action List and Category List</a></li>
@@ -1293,9 +1293,9 @@ zip -r build.zip build
 <strong>rm -rf build</strong>    # !!!! clean-up block invoked at the end of process !!!!
 </pre>
 </section>
-<section class="subsection" id="alias-of-action">
-<h3>Alias of Action</h3>
-<p>Alias of action provides alternative short name of action.</p>
+<section class="subsection" id="alias-for-action">
+<h3>Alias for Action</h3>
+<p>Alias provides alternative short name of action.</p>
 <ul>
 <li><code>define_alias()</code> in action class defines an alias with taking action category into account.</li>
 <li><code>Benry::CmdApp.define_alias()</code> defines an alias, without taking category into account.</li>
@@ -1350,12 +1350,12 @@ Options:
   -a, --all          : list hidden actions/options, too
 
 Actions:
-  <strong>git                : alias of 'git:status'</strong>           # !!!!
+  <strong>git                : alias for 'git:status'</strong>           # !!!!
   git:staging:show   : show changes in staging area
   git:status         : show current status in compact mode
   help               : print help message (of action if specified)
-  <strong>st                 : alias of 'git:status'</strong>           # !!!!
-  <strong>staged             : alias of 'git:staging:show'</strong>     # !!!!
+  <strong>st                 : alias for 'git:status'</strong>           # !!!!
+  <strong>staged             : alias for 'git:staging:show'</strong>     # !!!!
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -1385,8 +1385,8 @@ Usage:
   $ ex28.rb git:status
 
 <strong>Aliases:</strong>                                               # !!!!
-  <strong>git                : alias of 'git:status'</strong>           # !!!!
-  <strong>st                 : alias of 'git:status'</strong>           # !!!!
+  <strong>git                : alias for 'git:status'</strong>           # !!!!
+  <strong>st                 : alias for 'git:status'</strong>           # !!!!
 </pre>
 <ul>
 <li>Both alias and action names should be string. Symbol is not allowed.</li>
@@ -1443,13 +1443,13 @@ Bonjour, Alice!
 Ciao, Bob!
 </pre>
 <ul>
-<li>It is not allowed to define an alias of other alias.</li>
+<li>It is not allowed to define an alias for other alias.</li>
 </ul>
 <pre>
 ## define an alias
 Benry::CmdApp.define_alias(<strong>"hello-it"</strong>   , ["hello", "-l", "it"])
 
-## ERROR: define an alias of other alias
+## ERROR: define an alias for other alias
 Benry::CmdApp.define_alias("ciao"       , <strong>"hello-it"</strong>)   # !!!!
 </pre>
 <ul>
@@ -1459,7 +1459,7 @@ Benry::CmdApp.define_alias("ciao"       , <strong>"hello-it"</strong>)   # !!!!
 <pre class="language-console">
 [bash]$ ruby ex30.rb -L alias
 Aliases:
-  git                : alias of 'git:status'
+  git                : alias for 'git:status'
 </pre>
 </section>
 <section class="subsection" id="abbreviation-of-category">
@@ -2578,7 +2578,7 @@ end
 
 ## (a) use method alias
 class SampleAction               # open existing class
-  <strong>alias __old_hello hello</strong>        # alias of existing method
+  <strong>alias __old_hello hello</strong>        # alias for existing method
   def <strong>hello</strong>(user="world")        # override existing method
     puts "---- &gt;8 ---- &gt;8 ----"
     <strong>__old_hello(user)</strong>            # call original method
@@ -2831,22 +2831,22 @@ Options:
 <pre class="language-console">
 [bash]$ ruby gitexample.rb -l
 Actions:
-  git                : alias of 'git:status'
+  git                : alias for 'git:status'
   git:stage          : put changes of files into staging area
   git:staged         : show changes in staging area
   git:status         : show status in compact format
   git:unstage        : remove changes from staging area
-  stage              : alias of 'git:stage'
-  staged             : alias of 'git:staged'
-  unstage            : alias of 'git:unstage'
+  stage              : alias for 'git:stage'
+  staged             : alias for 'git:staged'
+  unstage            : alias for 'git:unstage'
 
 ### list only aliases (ordered by action name automatically)
 [bash]$ ruby gitexample.rb <strong>-L alias</strong>     # !!!!
 Aliases:
-  stage              : alias of 'git:stage'
-  staged             : alias of 'git:staged'
-  git                : alias of 'git:status'
-  unstage            : alias of 'git:unstage'
+  stage              : alias for 'git:stage'
+  staged             : alias for 'git:staged'
+  git                : alias for 'git:status'
+  unstage            : alias for 'git:unstage'
 
 ### list only actions
 [bash]$ ruby gitexample.rb <strong>-L action</strong>     # !!!!

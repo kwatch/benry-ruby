@@ -409,11 +409,11 @@ END
 
         end
 
-        case_when "[!8xsnw] when action name matched to `alias_of:` kwarg of `category()`..." do
+        case_when "[!8xsnw] when action name matched to `alias_for:` kwarg of `category()`..." do
 
           spec "[!iguvp] adds prefix name to action name." do
             ScopeTestAction.class_eval do
-              category "p8134:", alias_of: "s6368" do
+              category "p8134:", alias_for: "s6368" do
                 @action.("test")
                 def s6368()
                 end
@@ -433,7 +433,7 @@ END
 
           spec "[!9cyc2] adds prefix name to action name." do
             ScopeTestAction.class_eval do
-              category "p9986:", alias_of: "s4711" do
+              category "p9986:", alias_for: "s4711" do
                 @action.("test")
                 def s0629()
                 end
@@ -554,7 +554,7 @@ END
 
       spec "[!lyn0z] registers alias metadata if necessary." do
         ScopeTestAction.class_eval do
-          category "p0692:", alias_of: "s8075" do
+          category "p0692:", alias_for: "s8075" do
             @action.("test")
             def s8075()
             end
@@ -569,10 +569,10 @@ END
         ok {md}.NOT.alias?
       end
 
-      spec "[!4402s] clears `alias_of:` kwarg." do
+      spec "[!4402s] clears `alias_for:` kwarg." do
         x1 = x2 = x3 = nil
         ScopeTestAction.class_eval do
-          category "p7506:", alias_of: "s3449" do
+          category "p7506:", alias_for: "s3449" do
             x1 = @__prefixdef__[2]
             #
             @action.("test")
@@ -722,16 +722,16 @@ END
                        %q|`category("p0936:", action: :foo)`: Action name should be a string, but got Symbol object.|)
         #
         pr = proc do
-          ScopeTestAction.class_eval { category "p0936:", alias_of: :bar }
+          ScopeTestAction.class_eval { category "p0936:", alias_for: :bar }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`category("p0936:", alias_of: :bar)`: Alias name should be a string, but got Symbol object.|)
+                       %q|`category("p0936:", alias_for: :bar)`: Alias name should be a string, but got Symbol object.|)
         #
         pr = proc do
-          ScopeTestAction.class_eval { category "p0936:", action: "foo", alias_of: "bar" }
+          ScopeTestAction.class_eval { category "p0936:", action: "foo", alias_for: "bar" }
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`category("p0936:", action: "foo", alias_of: "bar")`: `action:` and `alias_of:` are exclusive.|)
+                       %q|`category("p0936:", action: "foo", alias_for: "bar")`: `action:` and `alias_for:` are exclusive.|)
       end
 
       case_when "[!kwst6] if block given..." do
@@ -765,7 +765,7 @@ END
           #
           ScopeTestAction.class_eval do
             category "p3893:", "guu guu", action: "a1" do
-              category "git:", "gii gii", alias_of: "a2" do
+              category "git:", "gii gii", alias_for: "a2" do
                 @action.("x")
                 def a2(); end
               end
@@ -798,11 +798,11 @@ END
                          %q|category("p4929:", action: "s7832"): Target action not defined.|)
         end
 
-        spec "[!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined." do
+        spec "[!zs3b5] raises DefinitionError if `alias_for:` specified but target action not defined." do
           at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
           pr = proc do
             ScopeTestAction.class_eval do
-              category "p2476:", alias_of: "s6678" do
+              category "p2476:", alias_for: "s6678" do
                 @action.("test")
                 def s1452()
                 end
@@ -810,7 +810,7 @@ END
             end
           end
           ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                         %q|category("p2476:", alias_of: "s6678"): Target action of alias not defined.|)
+                         %q|category("p2476:", alias_for: "s6678"): Target action of alias not defined.|)
         end
 
       end
@@ -834,7 +834,7 @@ END
           #
           ScopeTestAction.class_eval do
             category "p9461:", "hoo hoo", action: "homhom"
-            category "p0438:", "yaa yaa", alias_of: "homhom"
+            category "p0438:", "yaa yaa", alias_for: "homhom"
             @__prefixdef__ = nil
           end
           ok {Benry::CmdApp::REGISTRY.category_get_desc("p9461:")} == "hoo hoo"
@@ -896,25 +896,25 @@ END
       spec "[!qge3m] returns error message if alias name is not a string." do
         pr = proc do
           ScopeTestAction.class_eval do
-            category "p7328:", alias_of: :foo
+            category "p7328:", alias_for: :foo
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`category("p7328:", alias_of: :foo)`: Alias name should be a string, but got Symbol object.|)
+                       %q|`category("p7328:", alias_for: :foo)`: Alias name should be a string, but got Symbol object.|)
       end
 
-      spec "[!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified." do
+      spec "[!ermv8] returns error message if both `action:` and `alias_for:` kwargs are specified." do
         at_end { ScopeTestAction.class_eval { @__prefixdef__ = nil } }
         pr = proc do
           ScopeTestAction.class_eval do
-            category "p7549:", action: "s0573", alias_of: "s0573"
+            category "p7549:", action: "s0573", alias_for: "s0573"
             @action.("test")
             def s0573()
             end
           end
         end
         ok {pr}.raise?(Benry::CmdApp::DefinitionError,
-                       %q|`category("p7549:", action: "s0573", alias_of: "s0573")`: `action:` and `alias_of:` are exclusive.|)
+                       %q|`category("p7549:", action: "s0573", alias_for: "s0573")`: `action:` and `alias_for:` are exclusive.|)
       end
 
     end

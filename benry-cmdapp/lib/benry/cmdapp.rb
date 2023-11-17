@@ -323,8 +323,8 @@ module Benry::CmdApp
     attr_reader :action, :args
 
     def _build_desc(action_name, args)
-      return args && ! args.empty? ? "alias of '#{action_name} #{args.join(' ')}'" \
-                                   : "alias of '#{action_name}'"
+      return args && ! args.empty? ? "alias for '#{action_name} #{args.join(' ')}'" \
+                                   : "alias for '#{action_name}'"
     end
     private :_build_desc
 
@@ -344,14 +344,14 @@ module Benry::CmdApp
 
 
   def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
-    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_of_alias: false)
+    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_for_alias: false)
   end
 
   def self.define_alias!(alias_name, action_name, tag: nil, important: nil, hidden: nil)  # :nodoc:
-    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_of_alias: true)
+    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_for_alias: true)
   end
 
-  def self.__define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil, alias_of_alias: false)  # :nodoc:
+  def self.__define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil, alias_for_alias: false)  # :nodoc:
     #; [!zawcd] action arg can be a string or an array of string.
     action_arg = action_name
     if action_arg.is_a?(Array)
@@ -360,7 +360,7 @@ module Benry::CmdApp
       args = []
     end
     #; [!hqc27] raises DefinitionError if something error exists in alias or action.
-    errmsg = __validate_alias_and_action(alias_name, action_name, alias_of_alias)
+    errmsg = __validate_alias_and_action(alias_name, action_name, alias_for_alias)
     errmsg == nil  or
       raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
     #; [!oo91b] registers new metadata of alias.
@@ -371,7 +371,7 @@ module Benry::CmdApp
   end
   private_class_method :__define_alias
 
-  def self.__validate_alias_and_action(alias_name, action_name, alias_of_alias=false)  # :nodoc:
+  def self.__validate_alias_and_action(alias_name, action_name, alias_for_alias=false)  # :nodoc:
     #; [!2x1ew] returns error message if alias name is not a string.
     #; [!galce] returns error message if action name is not a string.
     if ! alias_name.is_a?(String)
@@ -390,7 +390,7 @@ module Benry::CmdApp
     #; [!lxolh] returns error message if action is an alias name.
     action_md = REGISTRY.metadata_get(action_name)
     if    action_md == nil ; return "Action '#{action_name}' not found."
-    elsif alias_of_alias   ; nil   # ok: alias of alias is allowed
+    elsif alias_for_alias  ; nil   # ok: alias for alias is allowed
     elsif action_md.alias? ; return "'#{action_name}' should be an action, but is an alias."
     else                   ; nil   # ok: action should be defined
     end
@@ -581,7 +581,7 @@ module Benry::CmdApp
           action = prefix.chomp(':')
           #; [!cydex] clears `action:` kwarg.
           @__prefixdef__[1] = nil
-        #; [!8xsnw] when action name matched to `alias_of:` kwarg of `category()`...
+        #; [!8xsnw] when action name matched to `alias_for:` kwarg of `category()`...
         elsif action == alias_target
           #; [!iguvp] adds prefix name to action name.
           action = prefix + action
@@ -609,7 +609,7 @@ module Benry::CmdApp
         prefix != nil  or raise "** assertion failed: ailas_target=#{alias_target.inspect}"
         alias_metadata = AliasMetadata.new(prefix.chomp(':'), action, nil)
         REGISTRY.metadata_add(alias_metadata)
-        #; [!4402s] clears `alias_of:` kwarg.
+        #; [!4402s] clears `alias_for:` kwarg.
         @__prefixdef__[2] = nil
       end
       #; [!u0td6] registers prefix of action if not registered yet.
@@ -659,13 +659,13 @@ module Benry::CmdApp
       return @__prefixdef__ ? @__prefixdef__[0] : nil
     end
 
-    def self.category(prefix, desc=nil, action: nil, alias_of: nil, &block)
+    def self.category(prefix, desc=nil, action: nil, alias_for: nil, &block)
       #; [!mp1p5] raises DefinitionError if prefix is invalid.
       errmsg = __validate_prefix(prefix)
       errmsg == nil  or
         raise DefinitionError.new("category(#{prefix.inspect}): #{errmsg}")
       #; [!q01ma] raises DefinitionError if action or alias name is invalid.
-      argstr, errmsg = __validate_action_and_alias(action, alias_of)
+      argstr, errmsg = __validate_action_and_alias(action, alias_for)
       errmsg == nil  or
         raise DefinitionError.new("`category(#{prefix.inspect}, #{argstr})`: #{errmsg}")
       #; [!kwst6] if block given...
@@ -673,7 +673,7 @@ module Benry::CmdApp
         #; [!t8wwm] saves previous prefix data and restore them at end of block.
         prev = @__prefixdef__
         prefix = prev[0] + prefix if prev      # ex: "foo:" => "parent:foo:"
-        @__prefixdef__ = [prefix, action, alias_of]
+        @__prefixdef__ = [prefix, action, alias_for]
         #; [!j00pk] registers prefix and description, even if no actions defined.
         REGISTRY.category_add(prefix, desc)
         begin
@@ -683,10 +683,10 @@ module Benry::CmdApp
             @__prefixdef__[1] == nil  or
               raise DefinitionError.new("category(#{prefix.inspect}, action: #{action.inspect}): Target action not defined.")
           end
-          #; [!zs3b5] raises DefinitionError if `alias_of:` specified but target action not defined.
-          if alias_of
+          #; [!zs3b5] raises DefinitionError if `alias_for:` specified but target action not defined.
+          if alias_for
             @__prefixdef__[2] == nil  or
-              raise DefinitionError.new("category(#{prefix.inspect}, alias_of: #{alias_of.inspect}): Target action of alias not defined.")
+              raise DefinitionError.new("category(#{prefix.inspect}, alias_for: #{alias_for.inspect}): Target action of alias not defined.")
           end
         ensure
           @__prefixdef__ = prev
@@ -694,7 +694,7 @@ module Benry::CmdApp
       #; [!yqhm8] else...
       else
         #; [!tgux9] just stores arguments into class.
-        @__prefixdef__ = [prefix, action, alias_of]
+        @__prefixdef__ = [prefix, action, alias_for]
         #; [!ncskq] registers prefix and description, even if no actions defined.
         REGISTRY.category_add(prefix, desc)
       end
@@ -716,16 +716,16 @@ module Benry::CmdApp
     end
     private_class_method :__validate_prefix
 
-    def self.__validate_action_and_alias(action, alias_of)
+    def self.__validate_action_and_alias(action, alias_for)
       #; [!38ji9] returns error message if action name is not a string.
       action == nil || action.is_a?(String)  or
         return "action: #{action.inspect}", "Action name should be a string, but got #{action.class.name} object."
       #; [!qge3m] returns error message if alias name is not a string.
-      alias_of == nil || alias_of.is_a?(String)  or
-        return "alias_of: #{alias_of.inspect}", "Alias name should be a string, but got #{alias_of.class.name} object."
-      #; [!ermv8] returns error message if both `action:` and `alias_of:` kwargs are specified.
-      ! (action != nil && alias_of != nil)  or
-        return "action: #{action.inspect}, alias_of: #{alias_of.inspect}", "`action:` and `alias_of:` are exclusive."
+      alias_for == nil || alias_for.is_a?(String)  or
+        return "alias_for: #{alias_for.inspect}", "Alias name should be a string, but got #{alias_for.class.name} object."
+      #; [!ermv8] returns error message if both `action:` and `alias_for:` kwargs are specified.
+      ! (action != nil && alias_for != nil)  or
+        return "action: #{action.inspect}, alias_for: #{alias_for.inspect}", "`action:` and `alias_for:` are exclusive."
     end
     private_class_method :__validate_action_and_alias
 
@@ -1601,7 +1601,7 @@ module Benry::CmdApp
         action_md, args = registry.metadata_lookup(md.name)
         next unless action_md
         next unless action_md.name == action_name
-        desc = "alias of '#{([action_name] + args).join(' ')}'"
+        desc = "alias for '#{([action_name] + args).join(' ')}'"
         s = format % [md.name, desc]
         #s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
