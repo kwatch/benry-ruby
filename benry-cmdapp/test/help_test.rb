@@ -773,11 +773,11 @@ END
         ok {x} =~ /^  a9208 +: alias for 'hello'$/
       end
 
-      spec "[!fj1c7] returns header string if no aliases found." do
+      spec "[!fj1c7] returns nil if no aliases found." do
         registry = Benry::CmdApp::Registry.new()
         @builder.instance_variable_set(:@_registry, registry)
         x = @builder.section_aliases()
-        ok {x} == "\e[1;34mAliases:\e[0m\n\n"
+        ok {x} == nil
         registry.metadata_add(Benry::CmdApp::REGISTRY.metadata_get("hello"))
         registry.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
         x = @builder.section_aliases()

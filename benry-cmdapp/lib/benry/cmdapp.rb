@@ -1494,7 +1494,8 @@ module Benry::CmdApp
         s = format % [md.name, md.desc]
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
-      #; [!fj1c7] returns header string if no aliases found.
+      #; [!fj1c7] returns nil if no aliases found.
+      return nil if sb.empty?
       #; [!496qq] renders alias list.
       return render_section(header(:HEADER_ALIASES), sb.join())  # "Aliases:"
     end
