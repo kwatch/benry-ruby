@@ -147,7 +147,7 @@ end
 
 ## run application
 status_code = <strong>Benry::CmdApp.main("sample app", "1.0.0")</strong>
-exit status_coe
+exit status_code
 ## or:
 #config = <strong>Benry::CmdApp::Config.new("sample app", "1.0.0")</strong>
 #app = <strong>Benry::CmdApp::Application.new(config)</strong>
@@ -1815,7 +1815,7 @@ class SampleAction &lt Benry::CmdApp::Action
   @option.(:verbose, "-v", "verbose mode")
   @option.(:debug , "-D", "debug mode", <strong>hidden: true</strong>)      # !!!!
   def test1(verbose: false, debug: false)
-    puts "verbose=#{verbose}, debug=#{_debug}"
+    puts "verbose=#{verbose}, debug=#{debug}"
   end
 
 end
@@ -1916,6 +1916,7 @@ Options:
 <li><code>config.app_usage = "&lttext&gt;" (or </code>["&lttext1&gt;", "&lttext2&gt;", ...]<code>) sets usage string in help message. (default: </code>" &ltaction&gt; [&ltarguments&gt;...]"``)</li>
 <li><code>config.app_detail = "&lttext&gt;"</code> sets detailed description of command which is showin in help message. (default: <code>nil</code>)</li>
 <li><code>config.backtrace_ignore_rexp = /.../</code> sets regular expression to ignore backtrace when error raised. (default: <code>nil</code>)</li>
+<li><code>config.help_description = "&lttext&gt;"</code> sets text of 'Description:' section in help message. (default: <code>nil</code>)</li>
 <li><code>config.help_postamble = {"&ltTitle&gt;:" =&gt; "&lttext&gt;"}</code> sets postamble of help message, such as 'Example:' or 'Tips:'. (default: <code>nil</code>)</li>
 <li><code>config.default_action = "&ltaction&gt;"</code> sets default action name. (default: <code>nil</code>)</li>
 <li><code>config.option_help = true</code> enables <code>-h</code> and <code>--help</code> options. (default: <code>true</code>)</li>
@@ -1956,6 +1957,7 @@ config.<strong>app_command</strong>          = "ex41.rb"             # == File.b
 config.<strong>app_usage</strong>            = nil
 config.<strong>app_detail</strong>           = nil
 config.<strong>default_action</strong>       = nil
+config.<strong>help_description</strong>     = nil
 config.<strong>help_postamble</strong>       = nil
 config.<strong>format_option</strong>        = "  %-18s : %s"
 config.<strong>format_action</strong>        = "  %-18s : %s"
@@ -2209,7 +2211,10 @@ exit app.main()
 <section class="subsection" id="customization-of-application-help-message">
 <h3>Customization of Application Help Message</h3>
 <p>If you want to just add more text into application help message,
-set <code>config.app_detail</code> and/or <code>config.help_postamble</code>.</p>
+set the followings:</p>
+<p>.* <code>config.app_detail = &lttext&gt;</code> --- print text before 'Usage:' section.
+.* <code>config.help_description = &lttext&gt;</code> --- print text after 'Usage:' section as 'Description:' section.
+.* <code>config.help_postamble = {&lthead&gt; =&gt; &lttext&gt;}</code> --- print at end of help message.</p>
 <p>File: ex47.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
@@ -2224,8 +2229,9 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
+config = Benry::CmdApp::Config.new("sample app", "1.0.0")
 <strong>config.app_detail = "See https://...."</strong>            # !!!!
+<strong>config.help_description = "  Bla bla bla"</strong>         # !!!!
 <strong>config.help_postamble = [</strong>                         # !!!!
 <strong>  {"Example:" =&gt; "  $ &ltcommand&gt; hello Alice\n"},</strong>  # !!!!
 <strong>  "(Tips: ....)",</strong>                                 # !!!!
@@ -2239,10 +2245,13 @@ exit app.main()
 [bash]$ ruby ex47.rb -h
 ex47.rb --- sample app
 
-<strong>See https://....</strong>
+<strong>See https://....</strong>                       # !!!!
 
 Usage:
   $ ex47.rb [&ltoptions&gt;] &ltaction&gt; [&ltarguments&gt;...]
+
+<strong>Description:</strong>                           # !!!!
+  <strong>Bla bla bla</strong>                          # !!!!
 
 Options:
   -h, --help         : print help message (of action if specified)
@@ -2252,10 +2261,10 @@ Options:
 Actions:
   hello              : test action #1
 
-<strong>Example:</strong>
-  <strong>$ &ltcommand&gt; hello Alice</strong>
+<strong>Example:</strong>                                # !!!!
+  <strong>$ &ltcommand&gt; hello Alice</strong>               # !!!!
 
-<strong>(Tips: ....)</strong>
+<strong>(Tips: ....)</strong>                            # !!!!
 </pre>
 <p>If you want to change behaviour of building command help message:</p>
 <ul>
@@ -2291,10 +2300,10 @@ end
   def <strong>build_usage_part</strong>()
     super
   end
-  def <strong>build_options_part</strong>(gschema, all: false)
+  def <strong>build_options_part</strong>(global_opts_schema, all: false)
     super
   end
-  def <strong>build_actions_part</strong>(include_aliases=false, all: false)
+  def <strong>build_actions_part</strong>(include_aliases=true, all: false)
     super
   end
   def <strong>build_postamble_part</strong>()
@@ -2351,10 +2360,10 @@ end
   def build_usage_part()
     super
   end
-  def build_options_part(gschema, all: false)
+  def build_options_part(global_opts_schema, all: false)
     super
   end
-  def build_actions_part(all: false)
+  def build_actions_part(include_aliases=true, all: false)
     super
   end
   def build_postamble_part()
@@ -2370,16 +2379,19 @@ end
 ## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
 <strong>Benry::CmdApp::ApplicationHelpBuilder.prepend(MyHelpBuilderMod)</strong>
 
-## (3) Create and execute Application object.
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+## (3) Run application.
+exit Benry::CmdApp.main("sample app")
 </pre>
 </section>
 <section class="subsection" id="customization-of-action-help-message">
 <h3>Customization of Action Help Message</h3>
 <p>If you want to just add more text into action help message,
-pass <code>detail:</code> and/or <code>postamble:</code> keyword arguments to <code>@action.()</code>.</p>
+pass the following keyword arguments to <code>@action.()</code>.</p>
+<ul>
+<li><code>detail: &lttext&gt;</code> --- printed before 'Usage:' section.</li>
+<li><code>description: &lttext&gt;</code> --- printed after 'Usage:' section as 'Description:' section, like <code>man</code> command in UNIX.</li>
+<li><code>postamble: {&ltheader&gt; =&gt; &lttext&gt;}</code> --- printed at end of help message as a dedicated section.</li>
+</ul>
 <p>File: ex50.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
@@ -2389,6 +2401,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
   @action.("test action #1",
            <strong>detail: "See https://...."</strong>,           # !!!!
+           <strong>description: "  Bla bla bla"</strong>,         # !!!!
            <strong>postamble: {"Example:" =&gt; "  ...."}</strong>)  # !!!!
   def hello(user="world")
     puts "Hello, #{user}!"
@@ -2396,9 +2409,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -2409,6 +2420,9 @@ ex50.rb hello --- test action #1
 
 Usage:
   $ ex50.rb hello [&ltuser&gt;]
+
+<strong>Description:</strong>                      # !!!!
+  <strong>Bla bla bla</strong>                     # !!!!
 
 <strong>Example:</strong>
   <strong>....</strong>                            # !!!!
@@ -2445,6 +2459,9 @@ end
   def <strong>build_usage_part</strong>(metadata, all: false)
     super
   end
+  def <strong>build_description_part</strong>(metadata)
+    super
+  end
   def <strong>build_options_part</strong>(metadata, all: false)
     super
   end
@@ -2466,7 +2483,7 @@ exit app.main()
 <ul>
 <li>(1) Create a module and override methods of <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
 <li>(2) Prepend it to <code>Benry::CmdApp::ActionHelpBuilder</code> class.</li>
-<li>(3) Create and execute Application object.</li>
+<li>(3) Run application.</li>
 </ul>
 <p>File: ex52.rb</p>
 <pre class="language-ruby">
@@ -2493,6 +2510,9 @@ end
   def <strong>build_usage_part</strong>(metadata, all: false)
     super
   end
+  def <strong>build_description_part</strong>(metadata)
+    super
+  end
   def <strong>build_options_part</strong>(metadata, all: false)
     super
   end
@@ -2504,10 +2524,8 @@ end
 ## (2) Prepend it to ``Benry::CmdApp::ActionHelpBuilder`` class.
 Benry::CmdApp::ActionHelpBuilder<strong>.prepend(MyActionHelpBuilderMod)</strong>  # !!!!
 
-## (3) Create and execute Application object.
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+## (3) Run application.
+exit Benry::CmdApp::main("sample app")
 </pre>
 </section>
 <section class="subsection" id="customization-of-section-title-in-help-message">
@@ -2518,12 +2536,13 @@ in the help message, override the constants representing section titles.</p>
 <pre class="language-ruby">
 module Benry::CmdApp
   class BaseHelpBuilder
-    HEADER_USAGE      = "Usage:"
-    HEADER_OPTIONS    = "Options:"
-    HEADER_ACTIONS    = "Actions:"
-    HEADER_ALIASES    = "Aliases:"
-    HEADER_ABBREVS    = "Abbreviations:"
-    HEADER_CATEGORIES = "Categories:"
+    HEADER_USAGE       = "Usage:"
+    HEADER_DESCRIPTION = "Description:"
+    HEADER_OPTIONS     = "Options:"
+    HEADER_ACTIONS     = "Actions:"
+    HEADER_ALIASES     = "Aliases:"
+    HEADER_ABBREVS     = "Abbreviations:"
+    HEADER_CATEGORIES  = "Categories:"
 </pre>
 <p>You can override them in <code>ApplicationHelpBuilder</code> or <code>ActionHelpBuilder</code>
 classes which are subclass of <code>BaseHandlerBuilder</code> class.</p>
@@ -2596,9 +2615,7 @@ end
 end
 SampleAction<strong>.prepend(SampleMod)</strong>  # prepend it to existing class
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -2644,9 +2661,7 @@ class <strong>OtherAction</strong> &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -2688,10 +2703,8 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-<strong>config.option_trace = true</strong>                      # !!!! (or `:hidden`)
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app", "1.0.0",
+     			<strong>option_trace: true</strong>)    # !!!! (or `:hidden`)
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -2720,10 +2733,8 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-<strong>config.option_color = true</strong>                       # !!!!
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app",
+                        <strong>option_color: true</strong>)         # !!!!
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -2771,9 +2782,7 @@ class TestAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("test app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("test app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
@@ -2806,9 +2815,7 @@ END
 
 end
 
-config = Benry::CmdApp::Config.new("test app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("test app")
 </pre>
 <p>Help message:</p>
 <pre class="language-console">
@@ -2926,9 +2933,7 @@ class SampleAction &lt Benry::CmdApp::Action
 
 end
 
-config = Benry::CmdApp::Config.new("sample app")
-app = Benry::CmdApp::Application.new(config)
-exit app.main()
+exit Benry::CmdApp.main("sample app")
 </pre>
 </section>
 <section class="subsection" id="q-how-to-remove-common-help-option-from-all-actions">

@@ -309,6 +309,7 @@ END
     before do
       @config = Benry::CmdApp::Config.new("test app", "1.2.3",
                                           app_name: "TestApp", app_command: "testapp",
+                                          help_description: "This is a description of application.",
                                           option_verbose: true, option_quiet: true,
                                           option_color: true, #option_debug: true,
                                           option_trace: true)
@@ -326,6 +327,9 @@ END
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+
+\e[1;34mDescription:\e[0m
+This is a description of application.
 
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -352,6 +356,9 @@ END
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+
+\e[1;34mDescription:\e[0m
+This is a description of application.
 
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -456,6 +463,26 @@ END
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <command> [<args>...]
 END
+      end
+
+    end
+
+
+    topic '#build_description_part()' do
+
+      spec "[!qarrk] returns 'Description:' section if `config.help_description` is set." do
+        @config.help_description = "This is a description of application."
+        str = @builder.__send__(:build_description_part)
+        ok {str} == <<~"END"
+        \e[1;34mDescription:\e[0m
+        This is a description of application.
+        END
+      end
+
+      spec "[!ealol] returns nil if `config.help_description` is nil." do
+        @config.help_description = nil
+        str = @builder.__send__(:build_description_part)
+        ok {str} == nil
       end
 
     end
@@ -905,12 +932,21 @@ END
 
       spec "[!f3436] returns help message of an action." do
         metadata = @registry.metadata_get("hello")
+        bkup = nil
+        metadata.instance_eval {
+          bkup = @description; @description = "Example of description."
+        }
+        at_end { metadata.instance_eval { @description = bkup } }
+        #
         x = @builder.build_help_message(metadata)
         ok {x}.start_with?(<<"END")
 \e[1mtestapp hello\e[0m --- greeting message
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp hello\e[0m [<options>] [<name>]
+
+\e[1;34mDescription:\e[0m
+Example of description.
 
 \e[1;34mOptions:\e[0m
   -l, --lang=<lang>  : language name (en/fr/it)
@@ -1067,6 +1103,32 @@ END
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp argsample\e[0m [<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]
 END
+      end
+
+    end
+
+
+    topic '#build_descriptin_part()' do
+
+      spec "[!zeujz] returns 'Description:' section if action description is set." do
+        metadata = @registry.metadata_get("hello")
+        bkup = nil
+        metadata.instance_eval {
+          bkup = @description; @description = "Example of description."
+        }
+        at_end { metadata.instance_eval { @description = bkup } }
+        str = @builder.__send__(:build_description_part, metadata)
+        ok {str} == <<~"END"
+        \e[1;34mDescription:\e[0m
+        Example of description.
+        END
+      end
+
+      spec "[!0zffw] returns nil if action description is nil." do
+        metadata = @registry.metadata_get("hello")
+        metadata.instance_eval { @description = nil }
+        str = @builder.__send__(:build_description_part, metadata)
+        ok {str} == nil
       end
 
     end

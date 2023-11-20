@@ -262,17 +262,18 @@ module Benry::CmdApp
 
   class ActionMetadata < BaseMetadata
 
-    def initialize(name, desc, schema, klass, meth, usage: nil, detail: nil, postamble: nil, tag: nil, important: nil, hidden: nil)
+    def initialize(name, desc, schema, klass, meth, usage: nil, detail: nil, description: nil, postamble: nil, tag: nil, important: nil, hidden: nil)
       super(name, desc, tag: tag, important: important, hidden: hidden)
       @schema    = schema
       @klass     = klass
       @meth      = meth
       @usage     = usage       if nil != usage
       @detail    = detail      if nil != detail
+      @description = description if nil != description
       @postamble = postamble   if nil != postamble
     end
 
-    attr_reader :schema, :klass, :meth, :usage, :detail, :postamble
+    attr_reader :schema, :klass, :meth, :usage, :detail, :description, :postamble
 
     def hidden?()
       #; [!stied] returns true/false if `hidden:` kwarg provided.
@@ -494,13 +495,13 @@ module Benry::CmdApp
         @__actiondef__ = nil
         @__prefixdef__ = nil
         #; [!8cck9] sets Proc object to `@action` in subclass.
-        @action = lambda do |desc, usage: nil, detail: nil, postamble: nil, tag: nil, important: nil, hidden: nil|
+        @action = lambda do |desc, usage: nil, detail: nil, description: nil, postamble: nil, tag: nil, important: nil, hidden: nil|
           #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
           @__actiondef__ == nil  or
             raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
           schema = new_option_schema()
           #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
-          kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
+          kws = {usage: usage, detail: detail, description: description, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
         end
         #; [!en6n0] sets Proc object to `@option` in subclass.
@@ -1137,7 +1138,7 @@ module Benry::CmdApp
     def initialize(app_desc, app_version=nil,
                    app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
-                   help_postamble: nil,
+                   help_description: nil, help_postamble: nil,
                    format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_category: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
@@ -1155,6 +1156,7 @@ module Benry::CmdApp
       @app_usage          = app_usage
       @app_detail         = app_detail
       @default_action     = default_action
+      @help_description   = help_description
       @help_postamble     = help_postamble
       @format_option      = format_option || FORMAT_OPTION
       @format_action      = format_action || FORMAT_ACTION
@@ -1193,7 +1195,7 @@ module Benry::CmdApp
     attr_accessor :default_action
     attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_category
     attr_accessor :deco_command, :deco_header, :deco_extra
-    attr_accessor :help_postamble
+    attr_accessor :help_description, :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
     attr_accessor :option_help, :option_version, :option_list, :option_topic, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
@@ -1226,6 +1228,7 @@ module Benry::CmdApp
     end
 
     HEADER_USAGE    = "Usage:"
+    HEADER_DESCRIPTION = "Description:"
     HEADER_OPTIONS  = "Options:"
     HEADER_ACTIONS  = "Actions:"
     HEADER_ALIASES  = "Aliases:"
@@ -1332,6 +1335,7 @@ module Benry::CmdApp
       sb = []
       sb << build_preamble_part()
       sb << build_usage_part()
+      sb << build_description_part()
       sb << build_options_part(gschema, all: all)
       sb << build_actions_part(true, all: all)
       #sb << build_aliases_part(all: all)
@@ -1374,6 +1378,14 @@ module Benry::CmdApp
       #; [!i9d4r] includes `config.app_usage` into help message if it is set.
       usage = s + (c.app_usage || @config.class.const_get(:APP_USAGE))
       return build_section(_header(:HEADER_USAGE), usage + "\n")  # "Usage:"
+    end
+
+    def build_description_part()
+      c = @config
+      #; [!qarrk] returns 'Description:' section if `config.help_description` is set.
+      #; [!ealol] returns nil if `config.help_description` is nil.
+      return nil unless c.help_description
+      return build_section(_header(:HEADER_DESCRIPTION), c.help_description)
     end
 
     def build_options_part(gschema, all: false)
@@ -1536,6 +1548,7 @@ module Benry::CmdApp
       sb = []
       sb << build_preamble_part(metadata)
       sb << build_usage_part(metadata, all: all)
+      sb << build_description_part(metadata)
       sb << build_options_part(metadata, all: all)
       sb << build_aliases_part(metadata, all: all)
       sb << build_postamble_part(metadata)
@@ -1578,6 +1591,14 @@ module Benry::CmdApp
       end
       #; [!iuctx] returns 'Usage:' section of action help message.
       return build_section(_header(:HEADER_USAGE), sb.join())  # "Usage:"
+    end
+
+    def build_description_part(metadata)
+      #; [!zeujz] returns 'Description:' section if action description is set.
+      #; [!0zffw] returns nil if action description is nil.
+      md = metadata
+      return nil unless md.description
+      return build_section(_header(:HEADER_DESCRIPTION), md.description)
     end
 
     def build_options_part(metadata, all: false)
