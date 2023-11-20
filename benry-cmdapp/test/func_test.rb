@@ -318,7 +318,7 @@ Options:
   -h, --help         : print help message (of action if specified)
   -V, --version      : print version
   -l, --list         : list actions and aliases
-  -L <topic>         : list of a topic (action|alias|category|abbrev)
+  -L <topic>         : topic list (actions|aliases|categories|abbrevs)
   -a, --all          : list hidden actions/options, too
   -v, --verbose      : verbose mode
       --debug        : debug mode
