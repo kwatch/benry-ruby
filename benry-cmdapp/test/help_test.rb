@@ -309,7 +309,7 @@ END
     before do
       @config = Benry::CmdApp::Config.new("test app", "1.2.3",
                                           app_name: "TestApp", app_command: "testapp",
-                                          app_description: "This is a description of application.",
+                                          help_description: "This is a description of application.",
                                           option_verbose: true, option_quiet: true,
                                           option_color: true, #option_debug: true,
                                           option_trace: true)
@@ -470,8 +470,8 @@ END
 
     topic '#build_description_part()' do
 
-      spec "[!qarrk] returns 'Description:' section if `config.app_description` is set." do
-        @config.app_description = "This is a description of application."
+      spec "[!qarrk] returns 'Description:' section if `config.help_description` is set." do
+        @config.help_description = "This is a description of application."
         str = @builder.__send__(:build_description_part)
         ok {str} == <<~"END"
         \e[1;34mDescription:\e[0m
@@ -479,8 +479,8 @@ END
         END
       end
 
-      spec "[!ealol] returns nil if `config.app_description` is nil." do
-        @config.app_description = nil
+      spec "[!ealol] returns nil if `config.help_description` is nil." do
+        @config.help_description = nil
         str = @builder.__send__(:build_description_part)
         ok {str} == nil
       end

@@ -1136,9 +1136,9 @@ module Benry::CmdApp
     APP_USAGE             = "<action> [<arguments>...]"
 
     def initialize(app_desc, app_version=nil,
-                   app_name: nil, app_command: nil, app_usage: nil, app_detail: nil, app_description: nil,
+                   app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
                    default_action: nil,
-                   help_postamble: nil,
+                   help_description: nil, help_postamble: nil,
                    format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_category: nil,
                    deco_command: nil, deco_header: nil, deco_extra: nil,
                    deco_strong: nil, deco_weak: nil, deco_hidden: nil, deco_debug: nil, deco_error: nil,
@@ -1155,8 +1155,8 @@ module Benry::CmdApp
       @app_command        = app_command || File.basename($0)
       @app_usage          = app_usage
       @app_detail         = app_detail
-      @app_description    = app_description
       @default_action     = default_action
+      @help_description   = help_description
       @help_postamble     = help_postamble
       @format_option      = format_option || FORMAT_OPTION
       @format_action      = format_action || FORMAT_ACTION
@@ -1191,11 +1191,11 @@ module Benry::CmdApp
       @trace_mode         = nil
     end
 
-    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail, :app_description
+    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
     attr_accessor :default_action
     attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_category
     attr_accessor :deco_command, :deco_header, :deco_extra
-    attr_accessor :help_postamble
+    attr_accessor :help_description, :help_postamble
     attr_accessor :deco_strong, :deco_weak, :deco_hidden, :deco_debug, :deco_error
     attr_accessor :option_help, :option_version, :option_list, :option_topic, :option_all
     attr_accessor :option_verbose, :option_quiet, :option_color
@@ -1382,10 +1382,10 @@ module Benry::CmdApp
 
     def build_description_part()
       c = @config
-      #; [!qarrk] returns 'Description:' section if `config.app_description` is set.
-      #; [!ealol] returns nil if `config.app_description` is nil.
-      return nil unless c.app_description
-      return build_section(_header(:HEADER_DESCRIPTION), c.app_description)
+      #; [!qarrk] returns 'Description:' section if `config.help_description` is set.
+      #; [!ealol] returns nil if `config.help_description` is nil.
+      return nil unless c.help_description
+      return build_section(_header(:HEADER_DESCRIPTION), c.help_description)
     end
 
     def build_options_part(gschema, all: false)
