@@ -490,9 +490,9 @@ END
     topic '#render_item_list()' do
 
       class FakeAppHelpBuilder < Benry::CmdApp::ApplicationHelpBuilder
-        def build_availables_part(include=true, all: false); return nil; end
-        def build_candidates_part(prefix, all: false); return nil; end
-        def build_categories_part(depth=1, all: false); return nil; end
+        def build_availables_section(include=true, all: false); return nil; end
+        def build_candidates_section(prefix, all: false); return nil; end
+        def build_categories_section(depth=1, all: false); return nil; end
       end
 
       def fake_app_help_builder(&b)
