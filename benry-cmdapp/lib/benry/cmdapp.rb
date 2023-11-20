@@ -1335,6 +1335,7 @@ module Benry::CmdApp
       sb = []
       sb << build_preamble_part()
       sb << build_usage_part()
+      sb << build_description_part()
       sb << build_options_part(gschema, all: all)
       sb << build_actions_part(true, all: all)
       #sb << build_aliases_part(all: all)

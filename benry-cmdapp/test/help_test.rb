@@ -309,6 +309,7 @@ END
     before do
       @config = Benry::CmdApp::Config.new("test app", "1.2.3",
                                           app_name: "TestApp", app_command: "testapp",
+                                          app_description: "This is a description of application.",
                                           option_verbose: true, option_quiet: true,
                                           option_color: true, #option_debug: true,
                                           option_trace: true)
@@ -326,6 +327,9 @@ END
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+
+\e[1;34mDescription:\e[0m
+This is a description of application.
 
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -352,6 +356,9 @@ END
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
+
+\e[1;34mDescription:\e[0m
+This is a description of application.
 
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
