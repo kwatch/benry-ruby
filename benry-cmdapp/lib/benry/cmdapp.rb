@@ -1269,7 +1269,7 @@ module Benry::CmdApp
       return sb.empty? ? nil : sb.join("\n")
     end
 
-    def build_option_help(schema, format, all: false)
+    def render_option_help(schema, format, all: false)
       #; [!muhem] returns option part of help message.
       #; [!4z70n] includes hidden options when `all: true` passed.
       #; [!hxy1f] includes `detail:` kwarg value with indentation.
@@ -1333,21 +1333,21 @@ module Benry::CmdApp
       #; [!ezcs4] returns help message string of application.
       #; [!ntj2y] includes hidden actions and options if `all: true` passed.
       sb = []
-      sb << build_preamble_section()
-      sb << build_usage_section()
-      sb << build_description_section()
-      sb << build_options_section(gschema, all: all)
-      sb << build_actions_section(true, all: all)
-      #sb << build_aliases_section(all: all)
-      #sb << build_abbrevs_section(all: all)
-      #sb << build_categories_section(0, all: all)
-      sb << build_postamble_section()
+      sb << render_preamble_section()
+      sb << render_usage_section()
+      sb << render_description_section()
+      sb << render_options_section(gschema, all: all)
+      sb << render_actions_section(true, all: all)
+      #sb << render_aliases_section(all: all)
+      #sb << render_abbrevs_section(all: all)
+      #sb << render_categories_section(0, all: all)
+      sb << render_postamble_section()
       return sb.compact().join("\n")
     end
 
     protected
 
-    def build_preamble_section()
+    def render_preamble_section()
       #; [!51v42] returns preamble part of application help message.
       #; [!bmh17] includes `config.app_name` or `config.app_command` into preamble.
       #; [!opii8] includes `config.app_versoin` into preamble if it is set.
@@ -1364,13 +1364,13 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def build_postamble_section()
+    def render_postamble_section()
       #; [!64hj1] returns postamble of application help message.
       #; [!z5k2w] returns nil if postamble not set.
       return render_sections(@config.help_postamble, 'config.help_postamble')
     end
 
-    def build_usage_section()
+    def render_usage_section()
       #; [!h98me] returns 'Usage:' section of application help message.
       c = @config
       s = c.deco_command % c.app_command
@@ -1380,7 +1380,7 @@ module Benry::CmdApp
       return render_section(header(:HEADER_USAGE), usage + "\n")  # "Usage:"
     end
 
-    def build_description_section()
+    def render_description_section()
       c = @config
       #; [!qarrk] returns 'Description:' section if `config.help_description` is set.
       #; [!ealol] returns nil if `config.help_description` is nil.
@@ -1388,22 +1388,22 @@ module Benry::CmdApp
       return render_section(header(:HEADER_DESCRIPTION), c.help_description)
     end
 
-    def build_options_section(gschema, all: false)
+    def render_options_section(gschema, all: false)
       #; [!f2n70] returns 'Options:' section of application help message.
       #; [!0bboq] includes hidden options into help message if `all: true` passed.
       #; [!fjhow] returns nil if no options.
       format = @config.format_option
-      s = build_option_help(gschema, format, all: all)
+      s = render_option_help(gschema, format, all: all)
       return nil if s == nil
       return render_section(header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
     public
 
-    def build_actions_section(include_aliases=true, all: false)
+    def render_actions_section(include_aliases=true, all: false)
       c = @config
       #; [!yn8ea] includes hidden actions into help message if `all: true` passed.
-      str = _build_metadata_list(c.format_action, include_aliases, all: all) {|md|
+      str = _render_metadata_list(c.format_action, include_aliases, all: all) {|md|
         #; [!10qp0] includes aliases if the 1st argument is true.
         ! md.alias?
       }
@@ -1415,7 +1415,7 @@ module Benry::CmdApp
       return render_section(header(:HEADER_ACTIONS), str, extra)  # "Actions:"
     end
 
-    def _build_metadata_list(format, include_aliases=true, all: false, &filter)
+    def _render_metadata_list(format, include_aliases=true, all: false, &filter)
       registry = @_registry || REGISTRY
       #; [!iokkp] builds list of actions or aliases.
       sb = []
@@ -1441,21 +1441,21 @@ module Benry::CmdApp
       end
       return sb.join()
     end
-    private :_build_metadata_list
+    private :_render_metadata_list
 
-    def build_availables_section(include_aliases=true, all: false)
+    def render_availables_section(include_aliases=true, all: false)
       #; [!pz0cu] includes 'Actions:' and 'Aliases:' sections.
-      s1 = build_actions_section(include_aliases, all: all)
-      s2 = build_aliases_section(all: all)
+      s1 = render_actions_section(include_aliases, all: all)
+      s2 = render_aliases_section(all: all)
       return [s1, s2].compact.join("\n")
     end
 
-    def build_candidates_section(prefix, all: false)
+    def render_candidates_section(prefix, all: false)
       c = @config
       registry = @_registry || REGISTRY
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
-      str = _build_metadata_list(c.format_action, all: all) {|metadata|
+      str = _render_metadata_list(c.format_action, all: all) {|metadata|
         #; [!duhyd] includes actions which name is same as prefix.
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         _category_action?(metadata, prefix)
@@ -1464,7 +1464,7 @@ module Benry::CmdApp
       s1 = render_section(header(:HEADER_ACTIONS), str)
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
-      str = _build_metadata_list(c.format_action, all: all) {|metadata|
+      str = _render_metadata_list(c.format_action, all: all) {|metadata|
         metadata.alias? && metadata.action.start_with?(prefix)
       }
       #; [!80t51] alias names are displayed in separated section from actions.
@@ -1483,7 +1483,7 @@ module Benry::CmdApp
     end
     private :_category_action?
 
-    def build_aliases_section(all: false)
+    def render_aliases_section(all: false)
       registry = @_registry || REGISTRY
       sb = []
       format = @config.format_action
@@ -1499,7 +1499,7 @@ module Benry::CmdApp
       return render_section(header(:HEADER_ALIASES), sb.join())  # "Aliases:"
     end
 
-    def build_abbrevs_section(all: false)
+    def render_abbrevs_section(all: false)
       registry = @_registry || REGISTRY
       format = @config.format_abbrev
       _ = all   # not used
@@ -1512,7 +1512,7 @@ module Benry::CmdApp
       return render_section(header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
 
-    def build_categories_section(depth=0, all: false)
+    def render_categories_section(depth=0, all: false)
       registry = @_registry || REGISTRY
       c = @config
       #; [!30l2j] includes number of actions per prefix.
@@ -1546,18 +1546,18 @@ module Benry::CmdApp
       #; [!vcg9w] not include 'Options:' section if action has no options.
       #; [!1auu5] not include '[<options>]' in 'Usage:'section if action has no options.
       sb = []
-      sb << build_preamble_section(metadata)
-      sb << build_usage_section(metadata, all: all)
-      sb << build_description_section(metadata)
-      sb << build_options_section(metadata, all: all)
-      sb << build_aliases_section(metadata, all: all)
-      sb << build_postamble_section(metadata)
+      sb << render_preamble_section(metadata)
+      sb << render_usage_section(metadata, all: all)
+      sb << render_description_section(metadata)
+      sb << render_options_section(metadata, all: all)
+      sb << render_aliases_section(metadata, all: all)
+      sb << render_postamble_section(metadata)
       return sb.compact().join("\n")
     end
 
     protected
 
-    def build_preamble_section(metadata)
+    def render_preamble_section(metadata)
       #; [!a6nk4] returns preamble of action help message.
       #; [!imxdq] includes `config.app_command`, not `config.app_name`, into preamble.
       #; [!7uy4f] includes `detail:` kwarg value of `@action.()` if specified.
@@ -1573,7 +1573,7 @@ module Benry::CmdApp
       return sb.join()
     end
 
-    def build_usage_section(metadata, all: false)
+    def render_usage_section(metadata, all: false)
       md = metadata
       c = @config
       s = c.deco_command % "#{c.app_command} #{md.name}"
@@ -1593,7 +1593,7 @@ module Benry::CmdApp
       return render_section(header(:HEADER_USAGE), sb.join())  # "Usage:"
     end
 
-    def build_description_section(metadata)
+    def render_description_section(metadata)
       #; [!zeujz] returns 'Description:' section if action description is set.
       #; [!0zffw] returns nil if action description is nil.
       md = metadata
@@ -1601,16 +1601,16 @@ module Benry::CmdApp
       return render_section(header(:HEADER_DESCRIPTION), md.description)
     end
 
-    def build_options_section(metadata, all: false)
+    def render_options_section(metadata, all: false)
       #; [!pafgs] returns 'Options:' section of help message.
       #; [!85wus] returns nil if action has no options.
       format = @config.format_option
-      s = build_option_help(metadata.schema, format, all: all)
+      s = render_option_help(metadata.schema, format, all: all)
       return nil if s == nil
       return render_section(header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
-    def build_aliases_section(metadata, all: false)
+    def render_aliases_section(metadata, all: false)
       #; [!kjpt9] returns 'Aliases:' section of help message.
       #; [!cjr0q] returns nil if action has no options.
       format = @config.format_action
@@ -1631,7 +1631,7 @@ module Benry::CmdApp
       return render_section(header(:HEADER_ALIASES), sb.join())  # "Aliases:"
     end
 
-    def build_postamble_section(metadata)
+    def render_postamble_section(metadata)
       #; [!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`.
       #; [!jajse] returns nil if postamble is not set.
       return render_sections(metadata.postamble, '@action.(postamble: "...")')
@@ -1894,7 +1894,7 @@ module Benry::CmdApp
       when nil
         #; [!36vz6] returns action list string if any actions defined.
         #; [!znuy4] raises CommandError if no actions defined.
-        s = builder.build_availables_section(all: all)  or
+        s = builder.render_availables_section(all: all)  or
           raise CommandError.new("No actions defined.")
         return s
       #; [!jcq4z] when separator is specified...
@@ -1903,14 +1903,14 @@ module Benry::CmdApp
         #; [!bgput] returns two depth prefix list if '::' specified.
         #; [!tiihg] raises CommandError if no actions found having prefix.
         depth = prefix.length
-        s = builder.build_categories_section(depth, all: all)  or
+        s = builder.render_categories_section(depth, all: all)  or
           raise CommandError.new("Prefix of actions not found.")
         return s
       #; [!xut9o] when prefix is specified...
       when /:\z/
         #; [!z4dqn] filters action list by prefix if specified.
         #; [!1834c] raises CommandError if no actions found with names starting with that prefix.
-        s = builder.build_candidates_section(prefix, all: all)  or
+        s = builder.render_candidates_section(prefix, all: all)  or
           raise CommandError.new("No actions found with names starting with '#{prefix}'.")
         return s
       #; [!xjdrm] else...
@@ -1926,10 +1926,10 @@ module Benry::CmdApp
       builder = get_app_help_builder()
       return (
         case topic
-        when "action", "actions"; builder.build_actions_section(false, all: all)
-        when "alias" , "aliases"; builder.build_aliases_section(all: all)
-        when "abbrev", "abbrevs"; builder.build_abbrevs_section(all: all)
-        when /\Acategor(?:y|ies)(\d+)?\z/ ; builder.build_categories_section(($1 || 0).to_i, all: all)
+        when "action", "actions"; builder.render_actions_section(false, all: all)
+        when "alias" , "aliases"; builder.render_aliases_section(all: all)
+        when "abbrev", "abbrevs"; builder.render_abbrevs_section(all: all)
+        when /\Acategor(?:y|ies)(\d+)?\z/ ; builder.render_categories_section(($1 || 0).to_i, all: all)
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )
