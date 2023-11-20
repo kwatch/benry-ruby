@@ -2294,26 +2294,26 @@ end
   def <strong>build_help_message</strong>(gschema, all: false)
     super
   end
-  def <strong>build_preamble_part</strong>()
+  def <strong>section_preamble</strong>()
     super
   end
-  def <strong>build_usage_part</strong>()
+  def <strong>section_usage</strong>()
     super
   end
-  def <strong>build_options_part</strong>(global_opts_schema, all: false)
+  def <strong>section_options</strong>(global_opts_schema, all: false)
     super
   end
-  def <strong>build_actions_part</strong>(include_aliases=true, all: false)
+  def <strong>section_actions</strong>(include_aliases=true, all: false)
     super
   end
-  def <strong>build_postamble_part</strong>()
+  def <strong>section_postamble</strong>()
     super
   end
   ### optional (for `-L &lttopic&gt;` option)
-  #def build_candidates_part(prefix, all: false); super; end
-  #def build_aliases_part(all: false); super; end
-  #def build_abbrevs_part(all: false); super; end
-  #def build_categories_part(depth=0, all: false); super; end
+  #def section_candidates(prefix, all: false); super; end
+  #def section_aliases(all: false); super; end
+  #def section_abbrevs(all: false); super; end
+  #def section_categories(depth=0, all: false); super; end
 end
 
 ## (3) Create an instance object of the class.
@@ -2348,32 +2348,29 @@ end
 
 ## (1) Create a module and override methods of ``ApplicationHelpBuilder`` class.
 <strong>module MyHelpBuilderMod</strong>
-  def build_help_message(all=false, format=nil)
-    super
-  end
   def build_help_message(gschema, all: false)
     super
   end
-  def build_preamble_part()
+  def section_preamble()
     super
   end
-  def build_usage_part()
+  def section_usage()
     super
   end
-  def build_options_part(global_opts_schema, all: false)
+  def section_options(global_opts_schema, all: false)
     super
   end
-  def build_actions_part(include_aliases=true, all: false)
+  def section_actions(include_aliases=true, all: false)
     super
   end
-  def build_postamble_part()
+  def section_postamble()
     super
   end
   ### optional (for `-L &lttopic&gt;` option)
-  #def build_candidates_part(prefix, all: false); super; end
-  #def build_aliases_part(all: false); super; end
-  #def build_abbrevs_part(all: false); super; end
-  #def build_categories_part(depth=0, all: false); super; end
+  #def section_candidates(prefix, all: false); super; end
+  #def section_aliases(all: false); super; end
+  #def section_abbrevs(all: false); super; end
+  #def section_categories(depth=0, all: false); super; end
 end
 
 ## (2) Prepend it to ``Benry::CmdApp::ApplicationHelpBuilder`` class.
@@ -2453,19 +2450,19 @@ end
   def <strong>build_help_message</strong>(metadata, all: false)
     super
   end
-  def <strong>build_preamble_part</strong>(metadata)
+  def <strong>section_preamble</strong>(metadata)
     super
   end
-  def <strong>build_usage_part</strong>(metadata, all: false)
+  def <strong>section_usage</strong>(metadata, all: false)
     super
   end
-  def <strong>build_description_part</strong>(metadata)
+  def <strong>section_description</strong>(metadata)
     super
   end
-  def <strong>build_options_part</strong>(metadata, all: false)
+  def <strong>section_options</strong>(metadata, all: false)
     super
   end
-  def <strong>build_postamble_part</strong>(metadata)
+  def <strong>section_postamble</strong>(metadata)
     super
   end
 end
@@ -2504,19 +2501,19 @@ end
   def <strong>build_help_message</strong>(metadata, all: false)
     super
   end
-  def <strong>build_preamble_part</strong>(metadata)
+  def <strong>section_preamble</strong>(metadata)
     super
   end
-  def <strong>build_usage_part</strong>(metadata, all: false)
+  def <strong>section_usage</strong>(metadata, all: false)
     super
   end
-  def <strong>build_description_part</strong>(metadata)
+  def <strong>section_description</strong>(metadata)
     super
   end
-  def <strong>build_options_part</strong>(metadata, all: false)
+  def <strong>section_options</strong>(metadata, all: false)
     super
   end
-  def <strong>build_postamble_part</strong>(metadata)
+  def <strong>section_postamble</strong>(metadata)
     super
   end
 end
