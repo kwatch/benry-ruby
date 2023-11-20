@@ -495,13 +495,13 @@ module Benry::CmdApp
         @__actiondef__ = nil
         @__prefixdef__ = nil
         #; [!8cck9] sets Proc object to `@action` in subclass.
-        @action = lambda do |desc, usage: nil, detail: nil, postamble: nil, tag: nil, important: nil, hidden: nil|
+        @action = lambda do |desc, usage: nil, detail: nil, description: nil, postamble: nil, tag: nil, important: nil, hidden: nil|
           #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
           @__actiondef__ == nil  or
             raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
           schema = new_option_schema()
           #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
-          kws = {usage: usage, detail: detail, postamble: postamble, tag: tag, important: important, hidden: hidden}
+          kws = {usage: usage, detail: detail, description: description, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
         end
         #; [!en6n0] sets Proc object to `@option` in subclass.
