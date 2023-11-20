@@ -461,6 +461,26 @@ END
     end
 
 
+    topic '#build_description_part()' do
+
+      spec "[!qarrk] returns 'Description:' section if `config.app_description` is set." do
+        @config.app_description = "This is a description of application."
+        str = @builder.__send__(:build_description_part)
+        ok {str} == <<~"END"
+        \e[1;34mDescription:\e[0m
+        This is a description of application.
+        END
+      end
+
+      spec "[!ealol] returns nil if `config.app_description` is nil." do
+        @config.app_description = nil
+        str = @builder.__send__(:build_description_part)
+        ok {str} == nil
+      end
+
+    end
+
+
     topic '#build_options_part()' do
 
       spec "[!f2n70] returns 'Options:' section of application help message." do

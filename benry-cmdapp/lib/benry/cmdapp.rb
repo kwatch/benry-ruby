@@ -1228,6 +1228,7 @@ module Benry::CmdApp
     end
 
     HEADER_USAGE    = "Usage:"
+    HEADER_DESCRIPTION = "Description:"
     HEADER_OPTIONS  = "Options:"
     HEADER_ACTIONS  = "Actions:"
     HEADER_ALIASES  = "Aliases:"
@@ -1376,6 +1377,14 @@ module Benry::CmdApp
       #; [!i9d4r] includes `config.app_usage` into help message if it is set.
       usage = s + (c.app_usage || @config.class.const_get(:APP_USAGE))
       return build_section(_header(:HEADER_USAGE), usage + "\n")  # "Usage:"
+    end
+
+    def build_description_part()
+      c = @config
+      #; [!qarrk] returns 'Description:' section if `config.app_description` is set.
+      #; [!ealol] returns nil if `config.app_description` is nil.
+      return nil unless c.app_description
+      return build_section(_header(:HEADER_DESCRIPTION), c.app_description)
     end
 
     def build_options_part(gschema, all: false)
