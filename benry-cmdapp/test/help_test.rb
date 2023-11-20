@@ -845,10 +845,10 @@ END
         ok {x} =~ /^  g25: +=> +git:\n/
       end
 
-      spec "[!dnt12] returns header string if no abbrevs found." do
+      spec "[!dnt12] returns nil if no abbrevs found." do
         registry = Benry::CmdApp::Registry.new()
         @builder.instance_variable_set(:@_registry, registry)
-        ok {@builder.section_abbrevs()} == "\e[1;34mAbbreviations:\e[0m\n\n"
+        ok {@builder.section_abbrevs()} == nil
         registry.abbrev_add("g26:", "git:")
         ok {@builder.section_abbrevs()} == <<END
 \e[1;34mAbbreviations:\e[0m

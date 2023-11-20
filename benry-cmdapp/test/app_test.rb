@@ -379,6 +379,14 @@ END
       end
 
       spec "[!ooiaf] prints topic list if global option '-L <topic>' specified." do
+        Benry::CmdApp.define_alias('h0053', 'hello')
+        Benry::CmdApp.define_abbrev('g0053:', 'git:')
+        at_end {
+          Benry::CmdApp.undef_alias('h0053')
+          #Benry::CmdApp.undef_abbrev('g0053:')
+          Benry::CmdApp::REGISTRY.instance_eval { @abbrev_dict.delete('g0053:') }
+        }
+        #
         chead = '\e\[1;34mCategories:\e\[0m'
         data = [
           [/\A\e\[1;34mActions:\e\[0m$/            , ["action" , "actions"  ]],

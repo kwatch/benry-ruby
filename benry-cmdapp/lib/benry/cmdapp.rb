@@ -1508,7 +1508,8 @@ module Benry::CmdApp
       registry.abbrev_each do |abbrev, prefix|
         sb << format % [abbrev, prefix] << "\n"
       end
-      #; [!dnt12] returns header string if no abbrevs found.
+      #; [!dnt12] returns nil if no abbrevs found.
+      return nil if sb.empty?
       #; [!00ice] returns abbrev list string.
       return render_section(header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
