@@ -118,16 +118,16 @@ Oktest.scope do
     end
 
 
-    topic '#build_section()' do
+    topic '#render_section()' do
 
       spec "[!61psk] returns section string with decorating header." do
-        s = @builder.__send__(:build_section, "Document:", "http://example.com/doc/\n")
+        s = @builder.__send__(:render_section, "Document:", "http://example.com/doc/\n")
         ok {s} == ("\e[1;34mDocument:\e[0m\n" \
                    "http://example.com/doc/\n")
       end
 
       spec "[!0o8w4] appends '\n' to content if it doesn't end with '\n'." do
-        s = @builder.__send__(:build_section, "Document:", "http://...")
+        s = @builder.__send__(:render_section, "Document:", "http://...")
         ok {s} == ("\e[1;34mDocument:\e[0m\n" \
                    "http://...\n")
         ok {s}.end_with?("\n")
@@ -136,26 +136,26 @@ Oktest.scope do
     end
 
 
-    topic '#build_sections()' do
+    topic '#render_sections()' do
 
       spec "[!tqau1] returns nil if value is nil or empty." do
-        ok {@builder.__send__(:build_sections, nil, 'config.app_postamble')} == nil
-        ok {@builder.__send__(:build_sections, [] , 'config.app_postamble')} == nil
+        ok {@builder.__send__(:render_sections, nil, 'config.app_postamble')} == nil
+        ok {@builder.__send__(:render_sections, [] , 'config.app_postamble')} == nil
       end
 
       spec "[!ezb0d] returns value unchanged if value is a string." do
-        ok {@builder.__send__(:build_sections, "ABC\n", 'xxx')} == "ABC\n"
+        ok {@builder.__send__(:render_sections, "ABC\n", 'xxx')} == "ABC\n"
       end
 
       spec "[!gipxn] builds sections of help message if value is a hash object." do
-        ok {@builder.__send__(:build_sections, {"Doc:"=>"ABC\n"}, 'xxx')} == <<"END"
+        ok {@builder.__send__(:render_sections, {"Doc:"=>"ABC\n"}, 'xxx')} == <<"END"
 \e[1;34mDoc:\e[0m
 ABC
 END
       end
 
       spec "[!944rt] raises ActionError if unexpected value found in value." do
-        pr = proc { @builder.__send__(:build_sections, 123, 'xxx') }
+        pr = proc { @builder.__send__(:render_sections, 123, 'xxx') }
         ok {pr}.raise?(Benry::CmdApp::ActionError,
                        "123: Unexpected value found in `xxx`.")
       end
