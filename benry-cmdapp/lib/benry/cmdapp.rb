@@ -1318,7 +1318,7 @@ module Benry::CmdApp
       end
     end
 
-    def _header(symbol)
+    def header(symbol)
       #; [!ep064] returns constant value defined in the class.
       #; [!viwtn] constant value defined in child class is prior to one defined in parent class.
       return self.class.const_get(symbol)
@@ -1377,7 +1377,7 @@ module Benry::CmdApp
       s = c.format_usage % s + " [<options>] "
       #; [!i9d4r] includes `config.app_usage` into help message if it is set.
       usage = s + (c.app_usage || @config.class.const_get(:APP_USAGE))
-      return build_section(_header(:HEADER_USAGE), usage + "\n")  # "Usage:"
+      return build_section(header(:HEADER_USAGE), usage + "\n")  # "Usage:"
     end
 
     def build_description_part()
@@ -1385,7 +1385,7 @@ module Benry::CmdApp
       #; [!qarrk] returns 'Description:' section if `config.help_description` is set.
       #; [!ealol] returns nil if `config.help_description` is nil.
       return nil unless c.help_description
-      return build_section(_header(:HEADER_DESCRIPTION), c.help_description)
+      return build_section(header(:HEADER_DESCRIPTION), c.help_description)
     end
 
     def build_options_part(gschema, all: false)
@@ -1395,7 +1395,7 @@ module Benry::CmdApp
       format = @config.format_option
       s = build_option_help(gschema, format, all: all)
       return nil if s == nil
-      return build_section(_header(:HEADER_OPTIONS), s)  # "Options:"
+      return build_section(header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
     public
@@ -1412,7 +1412,7 @@ module Benry::CmdApp
       #; [!8qz6a] adds default action name after header if it is set.
       extra = c.default_action ? "(default: #{c.default_action})" : nil
       #; [!typ67] returns 'Actions:' section of help message.
-      return build_section(_header(:HEADER_ACTIONS), str, extra)  # "Actions:"
+      return build_section(header(:HEADER_ACTIONS), str, extra)  # "Actions:"
     end
 
     def _build_metadata_list(format, include_aliases=true, all: false, &filter)
@@ -1460,15 +1460,15 @@ module Benry::CmdApp
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         _category_action?(metadata, prefix)
       }
-      #s1 = str.empty? ? nil : build_section(_header(:HEADER_ACTIONS), str)
-      s1 = build_section(_header(:HEADER_ACTIONS), str)
+      #s1 = str.empty? ? nil : build_section(header(:HEADER_ACTIONS), str)
+      s1 = build_section(header(:HEADER_ACTIONS), str)
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       str = _build_metadata_list(c.format_action, all: all) {|metadata|
         metadata.alias? && metadata.action.start_with?(prefix)
       }
       #; [!80t51] alias names are displayed in separated section from actions.
-      s2 = str.empty? ? nil : build_section(_header(:HEADER_ALIASES), str)
+      s2 = str.empty? ? nil : build_section(header(:HEADER_ALIASES), str)
       #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
       #; [!3c3f1] returns list of actions which name starts with prefix specified.
       return [s1, s2].compact().join("\n")
@@ -1496,7 +1496,7 @@ module Benry::CmdApp
       end
       #; [!fj1c7] returns header string if no aliases found.
       #; [!496qq] renders alias list.
-      return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
+      return build_section(header(:HEADER_ALIASES), sb.join())  # "Aliases:"
     end
 
     def build_abbrevs_part(all: false)
@@ -1509,7 +1509,7 @@ module Benry::CmdApp
       end
       #; [!dnt12] returns header string if no abbrevs found.
       #; [!00ice] returns abbrev list string.
-      return build_section(_header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
+      return build_section(header(:HEADER_ABBREVS), sb.join())  # "Abbreviations:"
     end
 
     def build_categories_part(depth=0, all: false)
@@ -1531,7 +1531,7 @@ module Benry::CmdApp
         desc ? (format % [s, desc]) : "#{indent}#{s}\n"
       }.join()
       #; [!crbav] returns top prefix list.
-      return build_section(_header(:HEADER_CATEGORIES), str, "(depth=#{depth})")  # "Categories:"
+      return build_section(header(:HEADER_CATEGORIES), str, "(depth=#{depth})")  # "Categories:"
     end
 
   end
@@ -1590,7 +1590,7 @@ module Benry::CmdApp
         sb << Util.method2help(md.klass.new(c), md.meth) << "\n"
       end
       #; [!iuctx] returns 'Usage:' section of action help message.
-      return build_section(_header(:HEADER_USAGE), sb.join())  # "Usage:"
+      return build_section(header(:HEADER_USAGE), sb.join())  # "Usage:"
     end
 
     def build_description_part(metadata)
@@ -1598,7 +1598,7 @@ module Benry::CmdApp
       #; [!0zffw] returns nil if action description is nil.
       md = metadata
       return nil unless md.description
-      return build_section(_header(:HEADER_DESCRIPTION), md.description)
+      return build_section(header(:HEADER_DESCRIPTION), md.description)
     end
 
     def build_options_part(metadata, all: false)
@@ -1607,7 +1607,7 @@ module Benry::CmdApp
       format = @config.format_option
       s = build_option_help(metadata.schema, format, all: all)
       return nil if s == nil
-      return build_section(_header(:HEADER_OPTIONS), s)  # "Options:"
+      return build_section(header(:HEADER_OPTIONS), s)  # "Options:"
     end
 
     def build_aliases_part(metadata, all: false)
@@ -1628,7 +1628,7 @@ module Benry::CmdApp
         sb << decorate_str(s, md.hidden?, md.important?) << "\n"
       end
       return nil if sb.empty?
-      return build_section(_header(:HEADER_ALIASES), sb.join())  # "Aliases:"
+      return build_section(header(:HEADER_ALIASES), sb.join())  # "Aliases:"
     end
 
     def build_postamble_part(metadata)

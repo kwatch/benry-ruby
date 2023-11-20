@@ -286,16 +286,16 @@ END
     end
 
 
-    topic '#_header()' do
+    topic '#header()' do
 
       spec "[!ep064] returns constant value defined in the class." do
         b = Benry::CmdApp::BaseHelpBuilder.new(nil)
-        ok {b.__send__(:_header, :HEADER_ACTIONS)} == "Actions:"
+        ok {b.__send__(:header, :HEADER_ACTIONS)} == "Actions:"
       end
 
       spec "[!viwtn] constant value defined in child class is prior to one defined in parent class." do
         b = HelpTestBuilder.new(nil)
-        ok {b.__send__(:_header, :HEADER_ACTIONS)} == "<ACTIONS>"
+        ok {b.__send__(:header, :HEADER_ACTIONS)} == "<ACTIONS>"
       end
 
     end
