@@ -1592,6 +1592,14 @@ module Benry::CmdApp
       return build_section(_header(:HEADER_USAGE), sb.join())  # "Usage:"
     end
 
+    def build_description_part(metadata)
+      #; [!zeujz] returns 'Description:' section if action description is set.
+      #; [!0zffw] returns nil if action description is nil.
+      md = metadata
+      return nil unless md.description
+      return build_section(_header(:HEADER_DESCRIPTION), md.description)
+    end
+
     def build_options_part(metadata, all: false)
       #; [!pafgs] returns 'Options:' section of help message.
       #; [!85wus] returns nil if action has no options.

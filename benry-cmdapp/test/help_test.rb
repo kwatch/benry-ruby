@@ -1099,6 +1099,32 @@ END
     end
 
 
+    topic '#build_descriptin_part()' do
+
+      spec "[!zeujz] returns 'Description:' section if action description is set." do
+        metadata = @registry.metadata_get("hello")
+        bkup = nil
+        metadata.instance_eval {
+          bkup = @description; @description = "Example of description."
+        }
+        at_end { metadata.instance_eval { @description = bkup } }
+        str = @builder.__send__(:build_description_part, metadata)
+        ok {str} == <<~"END"
+        \e[1;34mDescription:\e[0m
+        Example of description.
+        END
+      end
+
+      spec "[!0zffw] returns nil if action description is nil." do
+        metadata = @registry.metadata_get("hello")
+        metadata.instance_eval { @description = nil }
+        str = @builder.__send__(:build_description_part, metadata)
+        ok {str} == nil
+      end
+
+    end
+
+
     topic '#build_options_part()' do
 
       spec "[!pafgs] returns 'Options:' section of help message." do
