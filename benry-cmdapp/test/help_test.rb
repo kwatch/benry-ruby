@@ -380,37 +380,37 @@ END
     end
 
 
-    topic '#render_preamble_section()' do
+    topic '#section_preamble()' do
 
       spec "[!51v42] returns preamble part of application help message." do
-        x = @builder.__send__(:render_preamble_section)
+        x = @builder.__send__(:section_preamble)
         ok {x} == "\e[1mTestApp\e[0m \e[2m(1.2.3)\e[0m --- test app\n"
       end
 
       spec "[!bmh17] includes `config.app_name` or `config.app_command` into preamble." do
         @config.app_name = "TestApp"
         @config.app_command = "testapp"
-        x = @builder.__send__(:render_preamble_section)
+        x = @builder.__send__(:section_preamble)
         ok {x} == "\e[1mTestApp\e[0m \e[2m(1.2.3)\e[0m --- test app\n"
         #
         @config.app_name = nil
-        x = @builder.__send__(:render_preamble_section)
+        x = @builder.__send__(:section_preamble)
         ok {x} == "\e[1mtestapp\e[0m \e[2m(1.2.3)\e[0m --- test app\n"
       end
 
       spec "[!opii8] includes `config.app_versoin` into preamble if it is set." do
         @config.app_version = "3.4.5"
-        x = @builder.__send__(:render_preamble_section)
+        x = @builder.__send__(:section_preamble)
         ok {x} == "\e[1mTestApp\e[0m \e[2m(3.4.5)\e[0m --- test app\n"
         #
         @config.app_version = nil
-        x = @builder.__send__(:render_preamble_section)
+        x = @builder.__send__(:section_preamble)
         ok {x} == "\e[1mTestApp\e[0m --- test app\n"
       end
 
       spec "[!3h380] includes `config.app_detail` into preamble if it is set." do
         @config.app_detail = "https://www.example.com/"
-        x = @builder.__send__(:render_preamble_section)
+        x = @builder.__send__(:section_preamble)
         ok {x} == <<"END"
 \e[1mTestApp\e[0m \e[2m(1.2.3)\e[0m --- test app
 
@@ -421,14 +421,14 @@ END
     end
 
 
-    topic '#render_postamble_section()' do
+    topic '#section_postamble()' do
 
       spec "[!64hj1] returns postamble of application help message." do
         @config.help_postamble = [
           {"Examples:" => "  $ echo yes\n  yes\n"},
           "(Tips: blablabla)",
         ]
-        x = @builder.__send__(:render_postamble_section)
+        x = @builder.__send__(:section_postamble)
         ok {x} == <<"END"
 \e[1;34mExamples:\e[0m
   $ echo yes
@@ -439,17 +439,17 @@ END
       end
 
       spec "[!z5k2w] returns nil if postamble not set." do
-        x = @builder.__send__(:render_postamble_section)
+        x = @builder.__send__(:section_postamble)
         ok {x} == nil
       end
 
     end
 
 
-    topic '#render_usage_section()' do
+    topic '#section_usage()' do
 
       spec "[!h98me] returns 'Usage:' section of application help message." do
-        x = @builder.__send__(:render_usage_section)
+        x = @builder.__send__(:section_usage)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <action> [<arguments>...]
@@ -458,7 +458,7 @@ END
 
       spec "[!i9d4r] includes `config.app_usage` into help message if it is set." do
         @config.app_usage = "<command> [<args>...]"
-        x = @builder.__send__(:render_usage_section)
+        x = @builder.__send__(:section_usage)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp\e[0m [<options>] <command> [<args>...]
@@ -468,11 +468,11 @@ END
     end
 
 
-    topic '#render_description_section()' do
+    topic '#section_description()' do
 
       spec "[!qarrk] returns 'Description:' section if `config.help_description` is set." do
         @config.help_description = "This is a description of application."
-        str = @builder.__send__(:render_description_section)
+        str = @builder.__send__(:section_description)
         ok {str} == <<~"END"
         \e[1;34mDescription:\e[0m
         This is a description of application.
@@ -481,18 +481,18 @@ END
 
       spec "[!ealol] returns nil if `config.help_description` is nil." do
         @config.help_description = nil
-        str = @builder.__send__(:render_description_section)
+        str = @builder.__send__(:section_description)
         ok {str} == nil
       end
 
     end
 
 
-    topic '#render_options_section()' do
+    topic '#section_options()' do
 
       spec "[!f2n70] returns 'Options:' section of application help message." do
         gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
-        x = @builder.__send__(:render_options_section, gschema)
+        x = @builder.__send__(:section_options, gschema)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -509,7 +509,7 @@ END
 
       spec "[!0bboq] includes hidden options into help message if `all: true` passed." do
         gschema = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(@config)
-        x = @builder.__send__(:render_options_section, gschema, all: true)
+        x = @builder.__send__(:section_options, gschema, all: true)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
   -h, --help         : print help message (of action if specified)
@@ -528,34 +528,34 @@ END
 
       spec "[!fjhow] returns nil if no options." do
         gschema = Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS.new
-        x = @builder.__send__(:render_options_section, gschema)
+        x = @builder.__send__(:section_options, gschema)
         ok {x} == nil
       end
 
     end
 
 
-    topic '#render_actions_section()' do
+    topic '#section_actions()' do
 
       spec "[!typ67] returns 'Actions:' section of help message." do
-        x = @builder.__send__(:render_actions_section)
+        x = @builder.__send__(:section_actions)
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m$/
       end
 
       spec "[!yn8ea] includes hidden actions into help message if `all: true` passed." do
-        x = @builder.__send__(:render_actions_section, all: true)
+        x = @builder.__send__(:section_actions, all: true)
         ok {x} =~ /debuginfo/
         ok {x} =~ /^\e\[2m  debuginfo          : hidden action\e\[0m$/
         #
-        x = @builder.__send__(:render_actions_section)
+        x = @builder.__send__(:section_actions)
         ok {x} !~ /debuginfo/
       end
 
       spec "[!10qp0] includes aliases if the 1st argument is true." do
-        x = @builder.__send__(:render_actions_section, true, all: true)
+        x = @builder.__send__(:section_actions, true, all: true)
         ok {x} =~ /\(alias: /
         #
-        x = @builder.__send__(:render_actions_section, false, all: true)
+        x = @builder.__send__(:section_actions, false, all: true)
         ok {x} !~ /\(alias: /
       end
 
@@ -565,25 +565,25 @@ END
         registry = Benry::CmdApp::Registry.new()
         with_dummy_registry(registry) do
           #
-          x = @builder.__send__(:render_actions_section)
+          x = @builder.__send__(:section_actions)
           ok {x} == nil
           #
           registry.metadata_add(debuginfo_md)
-          x = @builder.__send__(:render_actions_section)
+          x = @builder.__send__(:section_actions)
           ok {x} == nil
-          x = @builder.__send__(:render_actions_section, all: true)
+          x = @builder.__send__(:section_actions, all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
 END
           #
           registry.metadata_add(hello_md)
-          x = @builder.__send__(:render_actions_section)
+          x = @builder.__send__(:section_actions)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   hello              : greeting message
 END
-          x = @builder.__send__(:render_actions_section, all: true)
+          x = @builder.__send__(:section_actions, all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
@@ -594,11 +594,11 @@ END
 
       spec "[!8qz6a] adds default action name after header if it is set." do
         @config.default_action = "help"
-        x = @builder.__send__(:render_actions_section)
+        x = @builder.__send__(:section_actions)
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m \e\[2m\(default: help\)\e\[0m$/
         #
         @config.default_action = "hello"
-        x = @builder.__send__(:render_actions_section)
+        x = @builder.__send__(:section_actions)
         ok {x} =~ /\A\e\[1;34mActions:\e\[0m \e\[2m\(default: hello\)\e\[0m$/
       end
 
@@ -635,10 +635,10 @@ END
     end
 
 
-    topic '#render_availables_section()' do
+    topic '#section_availables()' do
 
       spec "[!pz0cu] includes 'Actions:' and 'Aliases:' sections." do
-        output = @builder.render_availables_section()
+        output = @builder.section_availables()
         ok {output} =~ /\A\e\[1;34mActions:\e\[0m\n/
         ok {output} =~ /\n\n\e\[1;34mAliases:\e\[0m\n/
       end
@@ -646,10 +646,10 @@ END
     end
 
 
-    topic '#render_candidates_section()' do
+    topic '#section_candidates()' do
 
       spec "[!3c3f1] returns list of actions which name starts with prefix specified." do
-        x = @builder.render_candidates_section("git:")
+        x = @builder.section_candidates("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -659,7 +659,7 @@ END
       end
 
       spec "[!idm2h] includes hidden actions when `all: true` passed." do
-        x = @builder.render_candidates_section("git:", all: true)
+        x = @builder.section_candidates("git:", all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  git:correct        : same as `git commit --amend`\e[0m
@@ -683,7 +683,7 @@ END
           def p8572x()
           end
         end
-        x = @builder.render_candidates_section("p8572:")
+        x = @builder.section_candidates("p8572:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   p8572              : AAA
@@ -694,7 +694,7 @@ END
       spec "[!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section." do
         Benry::CmdApp.define_alias("git", "git:stage")
         at_end { Benry::CmdApp.undef_alias("git") }
-        x = @builder.render_candidates_section("git:")
+        x = @builder.section_candidates("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -710,7 +710,7 @@ END
       spec "[!otvbt] includes name of alias which corresponds to action starting with prefix." do
         Benry::CmdApp.define_alias("add", "git:stage")
         at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.render_candidates_section("git:")
+        x = @builder.section_candidates("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -726,7 +726,7 @@ END
       spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
         Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
         at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.render_candidates_section("git:", all: true)
+        x = @builder.section_candidates("git:", all: true)
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  git:correct        : same as `git commit --amend`\e[0m
@@ -739,7 +739,7 @@ END
 \e[2m  add                : alias for 'git:stage'\e[0m
 END
         #
-        x = @builder.render_candidates_section("git:")
+        x = @builder.section_candidates("git:")
         ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : same as `git add -p`
@@ -752,23 +752,23 @@ END
       spec "[!80t51] alias names are displayed in separated section from actions." do
         Benry::CmdApp.define_alias("add", "git:stage")
         at_end { Benry::CmdApp.undef_alias("add") }
-        x = @builder.render_candidates_section("git:")
+        x = @builder.section_candidates("git:")
         ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
       end
 
       spec "[!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix." do
-        x = @builder.render_candidates_section("blabla:")
+        x = @builder.section_candidates("blabla:")
         ok {x} == "\e[1;34mActions:\e[0m\n\n"
       end
 
     end
 
 
-    topic '#render_aliases_section()' do
+    topic '#section_aliases()' do
 
       spec "[!496qq] renders alias list." do
         Benry::CmdApp.define_alias("a9208", "hello")
-        x = @builder.render_aliases_section()
+        x = @builder.section_aliases()
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
         ok {x} =~ /^  a9208 +: alias for 'hello'$/
       end
@@ -776,11 +776,11 @@ END
       spec "[!fj1c7] returns header string if no aliases found." do
         registry = Benry::CmdApp::Registry.new()
         @builder.instance_variable_set(:@_registry, registry)
-        x = @builder.render_aliases_section()
+        x = @builder.section_aliases()
         ok {x} == "\e[1;34mAliases:\e[0m\n\n"
         registry.metadata_add(Benry::CmdApp::REGISTRY.metadata_get("hello"))
         registry.metadata_add(Benry::CmdApp::AliasMetadata.new("h1", "hello", []))
-        x = @builder.render_aliases_section()
+        x = @builder.section_aliases()
         ok {x} != nil
         ok {x} == <<"END"
 \e[1;34mAliases:\e[0m
@@ -790,14 +790,14 @@ END
 
       spec "[!d7vee] ignores hidden aliases in default." do
         Benry::CmdApp.define_alias("a4904", "hello", hidden: true)
-        x = @builder.render_aliases_section()
+        x = @builder.section_aliases()
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
         ok {x} !~ /a4904/
       end
 
       spec "[!4vvrs] include hidden aliases if `all: true` specifieid." do
         Benry::CmdApp.define_alias("a4612", "hello", hidden: true)
-        x = @builder.render_aliases_section(all: true)
+        x = @builder.section_aliases(all: true)
         ok {x} =~ /\A\e\[1;34mAliases:\e\[0m\n/
         ok {x} =~ /^\e\[2m  a4612 +: alias for 'hello'\e\[0m$/
       end
@@ -817,7 +817,7 @@ END
           Benry::CmdApp.define_alias("a7", "testerr1")
           Benry::CmdApp.define_alias("a8", "debuginfo")
           Benry::CmdApp.define_alias("a9", "hello")
-          output = @builder.render_aliases_section()
+          output = @builder.section_aliases()
         end
         ok {output} == <<"END"
 \e[1;34mAliases:\e[0m
@@ -836,11 +836,11 @@ END
     end
 
 
-    topic '#render_abbrevs_section()' do
+    topic '#section_abbrevs()' do
 
       spec "[!00ice] returns abbrev list string." do
         Benry::CmdApp.define_abbrev("g25:", "git:")
-        x = @builder.render_abbrevs_section()
+        x = @builder.section_abbrevs()
         ok {x} =~ /\A\e\[1;34mAbbreviations:\e\[0m\n/
         ok {x} =~ /^  g25: +=> +git:\n/
       end
@@ -848,9 +848,9 @@ END
       spec "[!dnt12] returns header string if no abbrevs found." do
         registry = Benry::CmdApp::Registry.new()
         @builder.instance_variable_set(:@_registry, registry)
-        ok {@builder.render_abbrevs_section()} == "\e[1;34mAbbreviations:\e[0m\n\n"
+        ok {@builder.section_abbrevs()} == "\e[1;34mAbbreviations:\e[0m\n\n"
         registry.abbrev_add("g26:", "git:")
-        ok {@builder.render_abbrevs_section()} == <<END
+        ok {@builder.section_abbrevs()} == <<END
 \e[1;34mAbbreviations:\e[0m
   g26:       =>  git:
 END
@@ -859,18 +859,18 @@ END
     end
 
 
-    topic '#render_categories_section()' do
+    topic '#section_categories()' do
 
       spec "[!crbav] returns top prefix list." do
-        x = @builder.render_categories_section(1)
+        x = @builder.section_categories(1)
         ok {x} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m\n/
         ok {x} =~ /^  git: \(\d+\)\n/
       end
 
       spec "[!alteh] includes prefix of hidden actions if `all: true` passed." do
-        x = @builder.render_categories_section(1, all: true)
+        x = @builder.section_categories(1, all: true)
         ok {x} =~ /^  secret:/
-        x = @builder.render_categories_section(1)
+        x = @builder.section_categories(1)
         ok {x} !~ /^  secret:/
       end
 
@@ -881,32 +881,32 @@ END
         end
         #
         with_dummy_registry(registry) do
-          x = @builder.render_categories_section()
+          x = @builder.section_categories()
           ok {x} == nil
-          x = @builder.render_categories_section(all: true)
+          x = @builder.section_categories(all: true)
           ok {x} != nil
         end
       end
 
       spec "[!30l2j] includes number of actions per prefix." do
-        x = @builder.render_categories_section(all: true)
+        x = @builder.section_categories(all: true)
         ok {x} =~ /^  git: \(\d+\)\n/
         ok {x} =~ /^  secret: \(\d+\)\n/
       end
 
       spec "[!qxoja] includes category description if registered." do
-        x = @builder.render_categories_section(all: true)
+        x = @builder.section_categories(all: true)
         ok {x} =~ /^  descdemo: \(2\)      : category description demo$/
       end
 
       spec "[!k3y6q] uses `config.format_category` or `config.format_action`." do
         @config.format_category = "  %-15s # %s"
-        x = @builder.render_categories_section(all: true)
+        x = @builder.section_categories(all: true)
         ok {x} =~ /^  descdemo: \(2\)   # category description demo\n/
         #
         @config.format_category = nil
         @config.format_category = "    %-15s -- %s"
-        x = @builder.render_categories_section(all: true)
+        x = @builder.section_categories(all: true)
         ok {x} =~ /^    descdemo: \(2\)   -- category description demo$/
       end
 
@@ -1017,11 +1017,11 @@ END
     end
 
 
-    topic '#render_preamble_section()' do
+    topic '#section_preamble()' do
 
       spec "[!a6nk4] returns preamble of action help message." do
         metadata = @registry.metadata_get("hello")
-        x = @builder.__send__(:render_preamble_section, metadata)
+        x = @builder.__send__(:section_preamble, metadata)
         ok {x} == <<"END"
 \e[1mtestapp hello\e[0m --- greeting message
 END
@@ -1031,7 +1031,7 @@ END
         @config.app_name    = "TestApp1"
         @config.app_command = "testapp1"
         metadata = @registry.metadata_get("hello")
-        x = @builder.__send__(:render_preamble_section, metadata)
+        x = @builder.__send__(:section_preamble, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 hello\e[0m --- greeting message
 END
@@ -1040,7 +1040,7 @@ END
       spec "[!7uy4f] includes `detail:` kwarg value of `@action.()` if specified." do
         @config.app_command = "testapp1"
         metadata = @registry.metadata_get("prepostamble")
-        x = @builder.__send__(:render_preamble_section, metadata)
+        x = @builder.__send__(:section_preamble, metadata)
         ok {x} == <<"END"
 \e[1mtestapp1 prepostamble\e[0m --- preamble and postamble
 
@@ -1051,11 +1051,11 @@ END
     end
 
 
-    topic '#render_usage_section()' do
+    topic '#section_usage()' do
 
       spec "[!jca5d] not add '[<options>]' if action has no options." do
         metadata = @registry.metadata_get("noopt")
-        x = @builder.__send__(:render_usage_section, metadata)
+        x = @builder.__send__(:section_usage, metadata)
         ok {x}.NOT.include?("[<options>]")
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -1063,7 +1063,7 @@ END
 END
         #
         metadata = @registry.metadata_get("debuginfo")   # has a hidden option
-        x = @builder.__send__(:render_usage_section, metadata)
+        x = @builder.__send__(:section_usage, metadata)
         ok {x}.NOT.include?("[<options>]")
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
@@ -1073,7 +1073,7 @@ END
 
       spec "[!h5bp4] if `usage:` kwarg specified in `@action.()`, use it as usage string." do
         metadata = @registry.metadata_get("usagesample1")
-        x = @builder.__send__(:render_usage_section, metadata)
+        x = @builder.__send__(:section_usage, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp usagesample1\e[0m input.txt > output.txt
@@ -1082,7 +1082,7 @@ END
 
       spec "[!nfuxz] `usage:` kwarg can be a string or an array of string." do
         metadata = @registry.metadata_get("usagesample2")
-        x = @builder.__send__(:render_usage_section, metadata)
+        x = @builder.__send__(:section_usage, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp usagesample2\e[0m [<options>] input.txt | less
@@ -1092,13 +1092,13 @@ END
 
       spec "[!z3lh9] if `usage:` kwarg not specified in `@action.()`, generates usage string from method parameters." do
         metadata = @registry.metadata_get("argsample")
-        x = @builder.__send__(:render_usage_section, metadata)
+        x = @builder.__send__(:section_usage, metadata)
         ok {x}.include?("[<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]")
       end
 
       spec "[!iuctx] returns 'Usage:' section of action help message." do
         metadata = @registry.metadata_get("argsample")
-        x = @builder.__send__(:render_usage_section, metadata)
+        x = @builder.__send__(:section_usage, metadata)
         ok {x} == <<"END"
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp argsample\e[0m [<options>] <aa> <bb> [<cc> [<dd> [<rest>...]]]
@@ -1108,7 +1108,7 @@ END
     end
 
 
-    topic '#render_descriptin_section()' do
+    topic '#section_descriptin()' do
 
       spec "[!zeujz] returns 'Description:' section if action description is set." do
         metadata = @registry.metadata_get("hello")
@@ -1117,7 +1117,7 @@ END
           bkup = @description; @description = "Example of description."
         }
         at_end { metadata.instance_eval { @description = bkup } }
-        str = @builder.__send__(:render_description_section, metadata)
+        str = @builder.__send__(:section_description, metadata)
         ok {str} == <<~"END"
         \e[1;34mDescription:\e[0m
         Example of description.
@@ -1127,18 +1127,18 @@ END
       spec "[!0zffw] returns nil if action description is nil." do
         metadata = @registry.metadata_get("hello")
         metadata.instance_eval { @description = nil }
-        str = @builder.__send__(:render_description_section, metadata)
+        str = @builder.__send__(:section_description, metadata)
         ok {str} == nil
       end
 
     end
 
 
-    topic '#render_options_section()' do
+    topic '#section_options()' do
 
       spec "[!pafgs] returns 'Options:' section of help message." do
         metadata = @registry.metadata_get("hello")
-        x = @builder.__send__(:render_options_section, metadata)
+        x = @builder.__send__(:section_options, metadata)
         ok {x} == <<"END"
 \e[1;34mOptions:\e[0m
   -l, --lang=<lang>  : language name (en/fr/it)
@@ -1147,14 +1147,14 @@ END
 
       spec "[!85wus] returns nil if action has no options." do
         metadata = @registry.metadata_get("noopt")
-        x = @builder.__send__(:render_options_section, metadata)
+        x = @builder.__send__(:section_options, metadata)
         ok {x} == nil
       end
 
     end
 
 
-    topic '#render_aliases_section()' do
+    topic '#section_aliases()' do
 
       spec "[!kjpt9] returns 'Aliases:' section of help message." do
         action = "alitest1"
@@ -1162,7 +1162,7 @@ END
         ok {x} == true
         #
         metadata = @registry.metadata_get("alitest1")
-        output = @builder.__send__(:render_aliases_section, metadata)
+        output = @builder.__send__(:section_aliases, metadata)
         ok {output} == <<"END"
 \e[1;34mAliases:\e[0m
   alitest1x          : alias for 'alitest1'
@@ -1177,18 +1177,18 @@ END
         ok {x} == false
         #
         metadata = @registry.metadata_get(action)
-        output = @builder.__send__(:render_aliases_section, metadata)
+        output = @builder.__send__(:section_aliases, metadata)
         ok {output} == nil
       end
 
     end
 
 
-    topic '#render_postamble_section()' do
+    topic '#section_postamble()' do
 
       spec "[!q1jee] returns postamble of help message if `postamble:` kwarg specified in `@action.()`." do
         metadata = @registry.metadata_get("prepostamble")
-        x = @builder.__send__(:render_postamble_section, metadata)
+        x = @builder.__send__(:section_postamble, metadata)
         ok {x} == <<"END"
 \e[1;34mExamples:\e[0m
   $ echo
@@ -1199,7 +1199,7 @@ END
 
       spec "[!jajse] returns nil if postamble is not set." do
         metadata = @registry.metadata_get("hello")
-        x = @builder.__send__(:render_postamble_section, metadata)
+        x = @builder.__send__(:section_postamble, metadata)
         ok {x} == nil
       end
 
