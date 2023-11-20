@@ -1548,6 +1548,7 @@ module Benry::CmdApp
       sb = []
       sb << build_preamble_part(metadata)
       sb << build_usage_part(metadata, all: all)
+      sb << build_description_part(metadata)
       sb << build_options_part(metadata, all: all)
       sb << build_aliases_part(metadata, all: all)
       sb << build_postamble_part(metadata)

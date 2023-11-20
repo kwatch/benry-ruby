@@ -932,12 +932,21 @@ END
 
       spec "[!f3436] returns help message of an action." do
         metadata = @registry.metadata_get("hello")
+        bkup = nil
+        metadata.instance_eval {
+          bkup = @description; @description = "Example of description."
+        }
+        at_end { metadata.instance_eval { @description = bkup } }
+        #
         x = @builder.build_help_message(metadata)
         ok {x}.start_with?(<<"END")
 \e[1mtestapp hello\e[0m --- greeting message
 
 \e[1;34mUsage:\e[0m
   $ \e[1mtestapp hello\e[0m [<options>] [<name>]
+
+\e[1;34mDescription:\e[0m
+Example of description.
 
 \e[1;34mOptions:\e[0m
   -l, --lang=<lang>  : language name (en/fr/it)
