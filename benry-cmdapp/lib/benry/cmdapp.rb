@@ -262,17 +262,18 @@ module Benry::CmdApp
 
   class ActionMetadata < BaseMetadata
 
-    def initialize(name, desc, schema, klass, meth, usage: nil, detail: nil, postamble: nil, tag: nil, important: nil, hidden: nil)
+    def initialize(name, desc, schema, klass, meth, usage: nil, detail: nil, description: nil, postamble: nil, tag: nil, important: nil, hidden: nil)
       super(name, desc, tag: tag, important: important, hidden: hidden)
       @schema    = schema
       @klass     = klass
       @meth      = meth
       @usage     = usage       if nil != usage
       @detail    = detail      if nil != detail
+      @description = description if nil != description
       @postamble = postamble   if nil != postamble
     end
 
-    attr_reader :schema, :klass, :meth, :usage, :detail, :postamble
+    attr_reader :schema, :klass, :meth, :usage, :detail, :description, :postamble
 
     def hidden?()
       #; [!stied] returns true/false if `hidden:` kwarg provided.
