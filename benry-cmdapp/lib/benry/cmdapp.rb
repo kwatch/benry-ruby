@@ -1136,7 +1136,7 @@ module Benry::CmdApp
     APP_USAGE             = "<action> [<arguments>...]"
 
     def initialize(app_desc, app_version=nil,
-                   app_name: nil, app_command: nil, app_usage: nil, app_detail: nil,
+                   app_name: nil, app_command: nil, app_usage: nil, app_detail: nil, app_description: nil,
                    default_action: nil,
                    help_postamble: nil,
                    format_option: nil, format_action: nil, format_abbrev: nil, format_usage: nil, format_category: nil,
@@ -1155,6 +1155,7 @@ module Benry::CmdApp
       @app_command        = app_command || File.basename($0)
       @app_usage          = app_usage
       @app_detail         = app_detail
+      @app_description    = app_description
       @default_action     = default_action
       @help_postamble     = help_postamble
       @format_option      = format_option || FORMAT_OPTION
@@ -1190,7 +1191,7 @@ module Benry::CmdApp
       @trace_mode         = nil
     end
 
-    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail
+    attr_accessor :app_desc, :app_version, :app_name, :app_command, :app_usage, :app_detail, :app_description
     attr_accessor :default_action
     attr_accessor :format_option, :format_action, :format_abbrev, :format_usage, :format_category
     attr_accessor :deco_command, :deco_header, :deco_extra
