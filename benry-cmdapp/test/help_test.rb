@@ -749,6 +749,43 @@ END
 END
       end
 
+      spec "[!9lnn2] alias names in candidate list are sorted by action name." do
+        HelpTestAction.class_eval do
+          category "c7784:" do
+            @action.("#5")
+            def a7784_5(); end
+            @action.("#3")
+            def a7784_3(); end
+            @action.("#1")
+            def a7784_1(); end
+            @action.("#2")
+            def a7784_2(); end
+            @action.("#4")
+            def a7784_4(); end
+          end
+          define_alias("a7784e", "c7784:a7784-5")
+          define_alias("a7784d", "c7784:a7784-3")
+          define_alias("a7784c", "c7784:a7784-1")
+          define_alias("a7784b", "c7784:a7784-2")
+          define_alias("a7784a", "c7784:a7784-4")
+          define_alias("a7784y", "c7784:a7784-4")
+          define_alias("a7784x", "c7784:a7784-4")
+        end
+        #
+        output = @builder.section_candidates("c7784:")
+        alias_section = output.split(/(?=\e\[1;34mAliases:\e\[0m\n)/, 2)[1]
+        ok {alias_section} == <<~"END"
+        \e[1;34mAliases:\e[0m
+          a7784c             : alias for 'c7784:a7784-1'
+          a7784b             : alias for 'c7784:a7784-2'
+          a7784d             : alias for 'c7784:a7784-3'
+          a7784a             : alias for 'c7784:a7784-4'
+          a7784x             : alias for 'c7784:a7784-4'
+          a7784y             : alias for 'c7784:a7784-4'
+          a7784e             : alias for 'c7784:a7784-5'
+        END
+      end
+
       spec "[!80t51] alias names are displayed in separated section from actions." do
         Benry::CmdApp.define_alias("add", "git:stage")
         at_end { Benry::CmdApp.undef_alias("add") }
