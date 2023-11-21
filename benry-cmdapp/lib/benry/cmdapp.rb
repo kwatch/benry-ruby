@@ -997,7 +997,7 @@ module Benry::CmdApp
 
     def initialize(config, _registry: REGISTRY)
       @config        = config
-      @registry      = _registry
+      @_registry     = _registry
       #@scope_objects = {}     # {action_name => ActionScope}
       @status_dict   = {}      # {action_name => (:done|:doing)}
       @curr_action   = nil     # ActionMetadata
@@ -1027,7 +1027,7 @@ module Benry::CmdApp
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
       #; [!2mnh7] looks up action metadata with action or alias name.
-      metadata, alias_args = @registry.metadata_lookup(action_name)
+      metadata, alias_args = @_registry.metadata_lookup(action_name)
       #; [!0ukvb] raises CommandError if action nor alias not found.
       metadata != nil  or
         raise CommandError.new("#{action_name}: Action nor alias not found.")
@@ -1052,11 +1052,11 @@ module Benry::CmdApp
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
         prefix = $1
-        metadata = @registry.metadata_get(prefix + action)
+        metadata = @_registry.metadata_get(prefix + action)
         action = prefix + action if metadata
       end
       #; [!ygpsw] raises ActionError if action not found.
-      metadata ||= @registry.metadata_get(action)
+      metadata ||= @_registry.metadata_get(action)
       metadata != nil  or
         raise ActionError.new("#{action}: Action not found.")
       #; [!de6a9] raises ActionError if alias name specified.
