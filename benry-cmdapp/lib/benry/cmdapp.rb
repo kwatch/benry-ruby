@@ -1732,7 +1732,7 @@ module Benry::CmdApp
     def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _registry: REGISTRY)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
-      @registry      = _registry
+      @_registry     = _registry
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
     end
@@ -1883,7 +1883,7 @@ module Benry::CmdApp
 
     def render_action_help(action, all: false)
       #; [!c510c] returns action help message.
-      metadata, _alias_args = @registry.metadata_lookup(action)
+      metadata, _alias_args = @_registry.metadata_lookup(action)
       metadata  or
         raise CommandError.new("#{action}: Action not found.")
       builder = get_action_help_builder()
@@ -1963,12 +1963,12 @@ module Benry::CmdApp
 
     def start_action(action_name, args)
       #; [!6htva] supports abbreviation of prefix.
-      if ! REGISTRY.metadata_exist?(action_name)
-        resolved = REGISTRY.abbrev_resolve(action_name)
+      if ! @_registry.metadata_exist?(action_name)
+        resolved = @_registry.abbrev_resolve(action_name)
         action_name = resolved if resolved
       end
       #; [!vbymd] runs action with args and returns `0`.
-      REGISTRY.metadata_get(action_name)  or
+      @_registry.metadata_get(action_name)  or
         raise CommandError.new("#{action_name}: Action not found.")
       new_context().start_action(action_name, args)
       return 0
