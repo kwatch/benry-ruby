@@ -1230,8 +1230,9 @@ module Benry::CmdApp
 
   class BaseHelpBuilder
 
-    def initialize(config)
-      @config = config
+    def initialize(config, _registry: REGISTRY)
+      @config    = config
+      @_registry = _registry
     end
 
     HEADER_USAGE       = "Usage:"
@@ -1423,7 +1424,7 @@ module Benry::CmdApp
     end
 
     def _render_metadata_list(format, include_aliases=true, all: false, &filter)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       #; [!iokkp] builds list of actions or aliases.
       sb = []
       action2aliases = nil  # {action_name => [alias_metadata]}
@@ -1459,7 +1460,7 @@ module Benry::CmdApp
 
     def section_candidates(prefix, all: false)
       c = @config
-      registry = @_registry || REGISTRY
+      registry = @_registry
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       str = _render_metadata_list(c.format_action, all: all) {|metadata|
@@ -1496,7 +1497,7 @@ module Benry::CmdApp
     private :_category_action?
 
     def section_aliases(all: false)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       sb = []
       format = @config.format_action
       #; [!d7vee] ignores hidden aliases in default.
@@ -1513,7 +1514,7 @@ module Benry::CmdApp
     end
 
     def section_abbrevs(all: false)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       format = @config.format_abbrev
       _ = all   # not used
       sb = []
@@ -1527,7 +1528,7 @@ module Benry::CmdApp
     end
 
     def section_categories(depth=0, all: false)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
@@ -1628,7 +1629,7 @@ module Benry::CmdApp
       #; [!kjpt9] returns 'Aliases:' section of help message.
       #; [!cjr0q] returns nil if action has no options.
       format = @config.format_action
-      registry = @_registry || REGISTRY
+      registry = @_registry
       action_name = metadata.name
       sb = []
       registry.metadata_each(all: all) do |md|
