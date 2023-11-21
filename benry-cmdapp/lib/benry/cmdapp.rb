@@ -1474,6 +1474,11 @@ module Benry::CmdApp
       str = _render_metadata_list(c.format_action, all: all) {|metadata|
         metadata.alias? && metadata.action.start_with?(prefix)
       }
+      #; [!9lnn2] alias names in candidate list are sorted by action name.
+      str = str.each_line.sort_by {|line|
+        line =~ /'([^']+)'/
+        [$1, line]
+      }.join()
       #; [!80t51] alias names are displayed in separated section from actions.
       s2 = str.empty? ? nil : render_section(header(:HEADER_ALIASES), str)
       #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
