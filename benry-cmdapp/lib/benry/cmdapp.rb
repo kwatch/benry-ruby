@@ -521,8 +521,15 @@ module Benry::CmdApp
         end
         #; [!aiwns] `@copy_options.()` copies options from other action.
         @copy_options = lambda do |action_name, except: []|
+          #; [!bfxye] `@copy_options.()` tries to find an action with current prefix.
+          metadata = nil
+          curr_prefix = current_prefix()
+          if curr_prefix
+            metadata = REGISTRY.metadata_get(curr_prefix + action_name)
+          end
           #; [!mhhn2] `@copy_options.()` raises DefinitionError when action not found.
-          metadata = REGISTRY.metadata_get(action_name)  or
+          metadata ||= REGISTRY.metadata_get(action_name)
+          metadata != nil  or
             raise DefinitionError.new("@copy_options.(#{action_name.inspect}): Action not found.")
           #; [!0slo8] raises DefinitionError if `@copy_options.()` called without `@action.()`.
           @__actiondef__ != nil  or

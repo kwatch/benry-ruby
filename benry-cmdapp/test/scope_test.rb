@@ -172,6 +172,33 @@ Oktest.scope do
 END
       end
 
+      spec "[!bfxye] `@copy_options.()` tries to find an action with current prefix." do
+        MyAction.class_eval do
+          category "c9588:" do
+            @action.("test action")
+            @option.(:foo, "--foo", "foo option")
+            def action9588(foo: nil)
+            end
+            #
+            @action.("test action")
+            @copy_options.("action9588")
+            @option.(:bar, "--bar", "bar option")
+            def action9588x(foo: nil, bar: nil)
+            end
+          end
+        end
+        at_end {
+          Benry::CmdApp.undef_action("c9588:action9588")
+          Benry::CmdApp.undef_action("c9588:action9588x")
+        }
+        #
+        md = Benry::CmdApp::REGISTRY.metadata_get("c9588:action9588x")
+        ok {md.schema.option_help()} == <<END
+  --foo          : foo option
+  --bar          : bar option
+END
+      end
+
       spec "[!mhhn2] `@copy_options.()` raises DefinitionError when action not found." do
         pr = proc do
           MyAction.class_eval do
