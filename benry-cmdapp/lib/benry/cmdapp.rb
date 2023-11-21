@@ -1234,13 +1234,13 @@ module Benry::CmdApp
       @config = config
     end
 
-    HEADER_USAGE    = "Usage:"
+    HEADER_USAGE       = "Usage:"
     HEADER_DESCRIPTION = "Description:"
-    HEADER_OPTIONS  = "Options:"
-    HEADER_ACTIONS  = "Actions:"
-    HEADER_ALIASES  = "Aliases:"
-    HEADER_ABBREVS  = "Abbreviations:"
-    HEADER_CATEGORIES = "Categories:"
+    HEADER_OPTIONS     = "Options:"
+    HEADER_ACTIONS     = "Actions:"
+    HEADER_ALIASES     = "Aliases:"
+    HEADER_ABBREVS     = "Abbreviations:"
+    HEADER_CATEGORIES  = "Categories:"
 
     def build_help_message(x, all: false)
       #; [!0hy81] this is an abstract method.
