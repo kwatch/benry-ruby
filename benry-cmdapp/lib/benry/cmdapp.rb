@@ -997,7 +997,7 @@ module Benry::CmdApp
 
     def initialize(config, _registry: REGISTRY)
       @config        = config
-      @registry      = _registry
+      @_registry     = _registry
       #@scope_objects = {}     # {action_name => ActionScope}
       @status_dict   = {}      # {action_name => (:done|:doing)}
       @curr_action   = nil     # ActionMetadata
@@ -1027,7 +1027,7 @@ module Benry::CmdApp
 
     def start_action(action_name, cmdline_args)  ## called from Application#run()
       #; [!2mnh7] looks up action metadata with action or alias name.
-      metadata, alias_args = @registry.metadata_lookup(action_name)
+      metadata, alias_args = @_registry.metadata_lookup(action_name)
       #; [!0ukvb] raises CommandError if action nor alias not found.
       metadata != nil  or
         raise CommandError.new("#{action_name}: Action nor alias not found.")
@@ -1052,11 +1052,11 @@ module Benry::CmdApp
       metadata = nil
       if action !~ /:/ && @curr_action && @curr_action.name =~ /\A(.*:)/
         prefix = $1
-        metadata = @registry.metadata_get(prefix + action)
+        metadata = @_registry.metadata_get(prefix + action)
         action = prefix + action if metadata
       end
       #; [!ygpsw] raises ActionError if action not found.
-      metadata ||= @registry.metadata_get(action)
+      metadata ||= @_registry.metadata_get(action)
       metadata != nil  or
         raise ActionError.new("#{action}: Action not found.")
       #; [!de6a9] raises ActionError if alias name specified.
@@ -1230,17 +1230,18 @@ module Benry::CmdApp
 
   class BaseHelpBuilder
 
-    def initialize(config)
-      @config = config
+    def initialize(config, _registry: REGISTRY)
+      @config    = config
+      @_registry = _registry
     end
 
-    HEADER_USAGE    = "Usage:"
+    HEADER_USAGE       = "Usage:"
     HEADER_DESCRIPTION = "Description:"
-    HEADER_OPTIONS  = "Options:"
-    HEADER_ACTIONS  = "Actions:"
-    HEADER_ALIASES  = "Aliases:"
-    HEADER_ABBREVS  = "Abbreviations:"
-    HEADER_CATEGORIES = "Categories:"
+    HEADER_OPTIONS     = "Options:"
+    HEADER_ACTIONS     = "Actions:"
+    HEADER_ALIASES     = "Aliases:"
+    HEADER_ABBREVS     = "Abbreviations:"
+    HEADER_CATEGORIES  = "Categories:"
 
     def build_help_message(x, all: false)
       #; [!0hy81] this is an abstract method.
@@ -1423,7 +1424,7 @@ module Benry::CmdApp
     end
 
     def _render_metadata_list(format, include_aliases=true, all: false, &filter)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       #; [!iokkp] builds list of actions or aliases.
       sb = []
       action2aliases = nil  # {action_name => [alias_metadata]}
@@ -1459,7 +1460,7 @@ module Benry::CmdApp
 
     def section_candidates(prefix, all: false)
       c = @config
-      registry = @_registry || REGISTRY
+      registry = @_registry
       #; [!idm2h] includes hidden actions when `all: true` passed.
       prefix2 = prefix.chomp(':')
       str = _render_metadata_list(c.format_action, all: all) {|metadata|
@@ -1496,7 +1497,7 @@ module Benry::CmdApp
     private :_category_action?
 
     def section_aliases(all: false)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       sb = []
       format = @config.format_action
       #; [!d7vee] ignores hidden aliases in default.
@@ -1513,7 +1514,7 @@ module Benry::CmdApp
     end
 
     def section_abbrevs(all: false)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       format = @config.format_abbrev
       _ = all   # not used
       sb = []
@@ -1527,7 +1528,7 @@ module Benry::CmdApp
     end
 
     def section_categories(depth=0, all: false)
-      registry = @_registry || REGISTRY
+      registry = @_registry
       c = @config
       #; [!30l2j] includes number of actions per prefix.
       #; [!alteh] includes prefix of hidden actions if `all: true` passed.
@@ -1628,7 +1629,7 @@ module Benry::CmdApp
       #; [!kjpt9] returns 'Aliases:' section of help message.
       #; [!cjr0q] returns nil if action has no options.
       format = @config.format_action
-      registry = @_registry || REGISTRY
+      registry = @_registry
       action_name = metadata.name
       sb = []
       registry.metadata_each(all: all) do |md|
@@ -1732,7 +1733,7 @@ module Benry::CmdApp
     def initialize(config, global_option_schema=nil, app_help_builder=nil, action_help_builder=nil, _registry: REGISTRY)
       @config        = config
       @option_schema = global_option_schema || GLOBAL_OPTION_SCHEMA_CLASS.new(config)
-      @registry      = _registry
+      @_registry     = _registry
       @app_help_builder    = app_help_builder
       @action_help_builder = action_help_builder
     end
@@ -1883,7 +1884,7 @@ module Benry::CmdApp
 
     def render_action_help(action, all: false)
       #; [!c510c] returns action help message.
-      metadata, _alias_args = @registry.metadata_lookup(action)
+      metadata, _alias_args = @_registry.metadata_lookup(action)
       metadata  or
         raise CommandError.new("#{action}: Action not found.")
       builder = get_action_help_builder()
@@ -1963,12 +1964,12 @@ module Benry::CmdApp
 
     def start_action(action_name, args)
       #; [!6htva] supports abbreviation of prefix.
-      if ! REGISTRY.metadata_exist?(action_name)
-        resolved = REGISTRY.abbrev_resolve(action_name)
+      if ! @_registry.metadata_exist?(action_name)
+        resolved = @_registry.abbrev_resolve(action_name)
         action_name = resolved if resolved
       end
       #; [!vbymd] runs action with args and returns `0`.
-      REGISTRY.metadata_get(action_name)  or
+      @_registry.metadata_get(action_name)  or
         raise CommandError.new("#{action_name}: Action not found.")
       new_context().start_action(action_name, args)
       return 0
