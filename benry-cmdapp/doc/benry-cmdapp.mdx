@@ -225,6 +225,7 @@ In addition, positional parameters are printed in different way according to its
 * If parameter ``foo`` is required (= doesn't have default value), it will be printed as ``<foo>``.
 * If parameter ``foo`` is optional (= has default value), it will be printed as ``[<foo>]``.
 * If parameter ``foo`` is variable length (= ``*foo`` style), it will be printed as ``[<foo>...]``.
+* If parameter ``foo`` is required or optional and ``foo_`` is variable length, it will be printed as ``<foo>...``.
 
 
 File: ex03.rb
@@ -242,6 +243,12 @@ class SampleAction < Benry::CmdApp::Action
 
   @action.("parameter kind test")
   def test2({{*aaa, bbb, ccc=nil, ddd=nil, *eee*}})  # !!!!
+    # ...
+  end
+
+  @action.("parameter combination test")
+  def test3({{*file, *file_*}})  # !!!!
+    files = [file] + file_
     # ...
   end
 
@@ -264,7 +271,13 @@ Usage:
 ex03.rb test2 --- parameter kind test
 
 Usage:
-  $ ex03.rb test2 {{*<aaa> <bbb> [<ccc> [<ddd> [<eee>...]]]*}}    # !!!!
+  $ ex03.rb test2 {{*<aaa> <bbb> [<ccc> [<ddd> [<eee>...]]]*}}  # !!!!
+
+[bash]$ ruby ex03.rb -h test3
+ex03.rb test3 --- parameter combination test
+
+Usage:
+  $ ex03.rb test3 {{*<file>...*}}                           # !!!!
 ```
 
 
