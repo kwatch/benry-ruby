@@ -25,8 +25,11 @@ namespace :readme do
 
   def do_readme_retrieve()
     dir = README_DESTDIR
-    rm_rf dir if File.exist?(dir)
-    mkdir_p dir
+    if File.exist?(dir)
+      rm_rf "#{dir}/*"
+    else
+      mkdir_p dir
+    end
     s = File.read(README_FILE, encoding: 'utf-8')
     filename = nil
     buf = nil
