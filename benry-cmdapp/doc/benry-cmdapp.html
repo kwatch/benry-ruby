@@ -288,6 +288,7 @@ foo__bar__baz
 <li>If parameter <code>foo</code> is required (= doesn't have default value), it will be printed as <code>&ltfoo&gt;</code>.</li>
 <li>If parameter <code>foo</code> is optional (= has default value), it will be printed as <code>[&ltfoo&gt;]</code>.</li>
 <li>If parameter <code>foo</code> is variable length (= <code>*foo</code> style), it will be printed as <code>[&ltfoo&gt;...]</code>.</li>
+<li>If parameter <code>foo</code> is required or optional and <code>foo_</code> is variable length, it will be printed as <code>&ltfoo&gt;...</code>.</li>
 </ul>
 <p>File: ex03.rb</p>
 <pre class="language-ruby">
@@ -303,6 +304,12 @@ class SampleAction &lt Benry::CmdApp::Action
 
   @action.("parameter kind test")
   def test2(<strong>aaa, bbb, ccc=nil, ddd=nil, *eee</strong>)  # !!!!
+    # ...
+  end
+
+  @action.("parameter combination test")
+  def test3(<strong>file, *file_</strong>)  # !!!!
+    files = [file] + file_
     # ...
   end
 
@@ -323,7 +330,13 @@ Usage:
 ex03.rb test2 --- parameter kind test
 
 Usage:
-  $ ex03.rb test2 <strong>&ltaaa&gt; &ltbbb&gt; [&ltccc&gt; [&ltddd&gt; [&lteee&gt;...]]]</strong>    # !!!!
+  $ ex03.rb test2 <strong>&ltaaa&gt; &ltbbb&gt; [&ltccc&gt; [&ltddd&gt; [&lteee&gt;...]]]</strong>  # !!!!
+
+[bash]$ ruby ex03.rb -h test3
+ex03.rb test3 --- parameter combination test
+
+Usage:
+  $ ex03.rb test3 <strong>&ltfile&gt;...</strong>                           # !!!!
 </pre>
 </section>
 <section class="subsection" id="options">
