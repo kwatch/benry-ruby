@@ -12,6 +12,10 @@ class UtilTestObject
   def foo3(*x); end
   def foo4(x, y=0, *z); end
   def foo5(x: 0, y: nil); end
+  def foo6a(file, *file_); end
+  def foo6b(file=nil, *file_); end
+  def foo7a(file, *file2); end
+  def foo7b(file=nil, *file2); end
 end
 
 
@@ -76,6 +80,16 @@ Oktest.scope do
 
       spec "[!0342t] ignores keyword parameters." do
         ok {Benry::CmdApp::Util.method2help(@obj, :foo5)} == ""
+      end
+
+      spec "[!mbxy5] converts `.foo(x, *x_)` into `' <x>...'`." do
+        ok {Benry::CmdApp::Util.method2help(@obj, :foo6a)} == " <file>..."
+        ok {Benry::CmdApp::Util.method2help(@obj, :foo6b)} == " [<file>...]"
+      end
+
+      spec "[!mh9ni] converts `.foo(x, *x2)` into `' <x>...'`." do
+        ok {Benry::CmdApp::Util.method2help(@obj, :foo7a)} == " <file>..."
+        ok {Benry::CmdApp::Util.method2help(@obj, :foo7b)} == " [<file>...]"
       end
 
     end
