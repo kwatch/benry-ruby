@@ -313,7 +313,11 @@ END
                                           option_verbose: true, option_quiet: true,
                                           option_color: true, #option_debug: true,
                                           option_trace: true)
-      @builder = Benry::CmdApp::ApplicationHelpBuilder.new(@config)
+      @builder = new_builder()
+    end
+
+    def new_builder(config=nil)
+      return Benry::CmdApp::ApplicationHelpBuilder.new(config || @config)
     end
 
 
@@ -564,26 +568,27 @@ END
         hello_md     = Benry::CmdApp::REGISTRY.metadata_get("hello")
         registry = Benry::CmdApp::Registry.new()
         with_dummy_registry(registry) do
+          builder = new_builder()
           #
-          x = @builder.__send__(:section_actions)
+          x = builder.__send__(:section_actions)
           ok {x} == nil
           #
           registry.metadata_add(debuginfo_md)
-          x = @builder.__send__(:section_actions)
+          x = builder.__send__(:section_actions)
           ok {x} == nil
-          x = @builder.__send__(:section_actions, all: true)
+          x = builder.__send__(:section_actions, all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
 END
           #
           registry.metadata_add(hello_md)
-          x = @builder.__send__(:section_actions)
+          x = builder.__send__(:section_actions)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
   hello              : greeting message
 END
-          x = @builder.__send__(:section_actions, all: true)
+          x = builder.__send__(:section_actions, all: true)
           ok {x} == <<"END"
 \e[1;34mActions:\e[0m
 \e[2m  debuginfo          : hidden action\e[0m
@@ -854,7 +859,8 @@ END
           Benry::CmdApp.define_alias("a7", "testerr1")
           Benry::CmdApp.define_alias("a8", "debuginfo")
           Benry::CmdApp.define_alias("a9", "hello")
-          output = @builder.section_aliases()
+          builder = new_builder()
+          output = builder.section_aliases()
         end
         ok {output} == <<"END"
 \e[1;34mAliases:\e[0m
@@ -918,9 +924,10 @@ END
         end
         #
         with_dummy_registry(registry) do
-          x = @builder.section_categories()
+          builder = new_builder()
+          x = builder.section_categories()
           ok {x} == nil
-          x = @builder.section_categories(all: true)
+          x = builder.section_categories(all: true)
           ok {x} != nil
         end
       end
