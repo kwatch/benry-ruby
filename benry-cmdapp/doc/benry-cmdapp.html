@@ -107,6 +107,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-change-the-order-of-options-in-help-message">Q: How to change the order of options in help message?</a></li>
 <li><a href="#q-how-to-add-metadata-to-actions-or-options">Q: How to add metadata to actions or options?</a></li>
 <li><a href="#q-how-to-remove-common-help-option-from-all-actions">Q: How to remove common help option from all actions?</a></li>
+<li><a href="#q-is-it-possible-to-show-details-of-actions-and-aliases">Q: Is it possible to show details of actions and aliases?</a></li>
 <li><a href="#q-how-to-make-error-messages-i18ned">Q: How to make error messages I18Ned?</a></li>
 </ul></li>
 <li><a href="#license-and-copyright">License and Copyright</a></li>
@@ -124,28 +125,36 @@ $ gem install benry-cmdapp
 <h2>Basic Usage</h2>
 <section class="subsection" id="action">
 <h3>Action</h3>
+<p>How to define actions:</p>
 <ul>
-<li>Inherit action class and define action methods in it.</li>
+<li>(1) Inherit action class.</li>
+<li>(2) Define action methods with <code>@action.()</code>.</li>
+<li>(3) Create an application object and run it.</li>
+</ul>
+<p>Note:</p>
+<ul>
+<li>Use <code>@action.()</code>, not <code>@action()</code>.</li>
+<li>Command-line arguments are passed to action method as positional arguments.</li>
 <li>An action class can have several action methods.</li>
 <li>It is ok to define multiple action classes.</li>
-<li>Command-line arguments are passed to action method as positional arguments.</li>
 </ul>
 <p>File: ex01.rb</p>
 <pre class="language-ruby">
 # coding: utf-8
 <strong>require 'benry/cmdapp'</strong>
 
-## action
+## (1) Inherit action class.
 class MyAction &lt <strong>Benry::CmdApp::Action</strong>    # !!!!
 
+  ## (2) Define action methods with `@action.()`.
   <strong>@action.("print greeting message")</strong>      # !!!!
-  <strong>def hello(user="world")</strong>                 # !!!!
-    puts "Hello, #{user}!"
+  <strong>def hello(name="world")</strong>                 # !!!!
+    puts "Hello, #{name}!"
   end
 
 end
 
-## run application
+## (3) Create an application object and run it.
 status_code = <strong>Benry::CmdApp.main("sample app", "1.0.0")</strong>
 exit status_code
 ## or:
@@ -186,7 +195,7 @@ Actions:
 ex01.rb hello --- print greeting message
 
 Usage:
-  $ ex01.rb hello [&ltuser&gt;]
+  $ ex01.rb hello [&ltname&gt;]
 </pre>
 <ul>
 <li>Benry-CmdApp adds <code>-h</code> and <code>--help</code> options to each action automatically.
@@ -197,11 +206,12 @@ Usage:
 ex01.rb hello --- print greeting message
 
 Usage:
-  $ ex01.rb hello [&ltuser&gt;]
+  $ ex01.rb hello [&ltname&gt;]
 </pre>
 </section>
 <section class="subsection" id="method-name-and-action-name">
 <h3>Method Name and Action Name</h3>
+<p>Rules between method name and action name:</p>
 <ul>
 <li>Method name <code>print_</code> results in action name <code>print</code>.
   This is useful to define actions which name is same as Ruby keyword or popular functions.</li>
@@ -2948,7 +2958,7 @@ exit Benry::CmdApp.main("sample app")
 </section>
 <section class="subsection" id="q-how-to-remove-common-help-option-from-all-actions">
 <h3>Q: How to remove common help option from all actions?</h3>
-<p>A: Clears `Benry::CmdApp::ACTION_SHARED_OPTIONS` which is an array of option item.</p>
+<p>A: Clears <code>Benry::CmdApp::ACTION_SHARED_OPTIONS</code> which is an array of option item.</p>
 <p>File: ex70.rb</p>
 <pre class="language-ruby">
 require 'benry/cmdapp'
@@ -2956,6 +2966,11 @@ require 'benry/cmdapp'
 arr = <strong>Benry::CmdApp::ACTION_SHARED_OPTIONS</strong>
 arr.clear()
 </pre>
+</section>
+<section class="subsection" id="q-is-it-possible-to-show-details-of-actions-and-aliases">
+<h3>Q: Is it possible to show details of actions and aliases?</h3>
+<p>A: Try global option <code>-L metadata</code>.
+It prints detailed data of actions and aliases in YAML format.</p>
 </section>
 <section class="subsection" id="q-how-to-make-error-messages-i18ned">
 <h3>Q: How to make error messages I18Ned?</h3>
