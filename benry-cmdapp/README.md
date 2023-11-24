@@ -84,6 +84,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to change the order of options in help message?](#q-how-to-change-the-order-of-options-in-help-message)
   * [Q: How to add metadata to actions or options?](#q-how-to-add-metadata-to-actions-or-options)
   * [Q: How to remove common help option from all actions?](#q-how-to-remove-common-help-option-from-all-actions)
+  * [Q: Is it possible to show details of actions and aliases?](#q-is-it-possible-to-show-details-of-actions-and-aliases)
   * [Q: How to make error messages I18Ned?](#q-how-to-make-error-messages-i18ned)
 * [License and Copyright](#license-and-copyright)
 
@@ -104,10 +105,18 @@ $ gem install benry-cmdapp
 
 ### Action
 
-* Inherit action class and define action methods in it.
+How to define actions:
+
+* (1) Inherit action class.
+* (2) Define action methods with `@action.()`.
+* (3) Create an application object and run it.
+
+Note:
+
+* Use `@action.()`, not `@action()`.
+* Command-line arguments are passed to action method as positional arguments.
 * An action class can have several action methods.
 * It is ok to define multiple action classes.
-* Command-line arguments are passed to action method as positional arguments.
 
 File: ex01.rb
 
@@ -115,17 +124,18 @@ File: ex01.rb
 # coding: utf-8
 require 'benry/cmdapp'
 
-## action
+## (1) Inherit action class.
 class MyAction < Benry::CmdApp::Action    # !!!!
 
+  ## (2) Define action methods with `@action.()`.
   @action.("print greeting message")      # !!!!
-  def hello(user="world")                 # !!!!
-    puts "Hello, #{user}!"
+  def hello(name="world")                 # !!!!
+    puts "Hello, #{name}!"
   end
 
 end
 
-## run application
+## (3) Create an application object and run it.
 status_code = Benry::CmdApp.main("sample app", "1.0.0")
 exit status_code
 ## or:
@@ -172,7 +182,7 @@ Help message of action:
 ex01.rb hello --- print greeting message
 
 Usage:
-  $ ex01.rb hello [<user>]
+  $ ex01.rb hello [<name>]
 ```
 
 * Benry-CmdApp adds `-h` and `--help` options to each action automatically.
@@ -183,11 +193,13 @@ Usage:
 ex01.rb hello --- print greeting message
 
 Usage:
-  $ ex01.rb hello [<user>]
+  $ ex01.rb hello [<name>]
 ```
 
 
 ### Method Name and Action Name
+
+Rules between method name and action name:
 
 * Method name `print_` results in action name `print`.
   This is useful to define actions which name is same as Ruby keyword or popular functions.
@@ -3283,6 +3295,12 @@ require 'benry/cmdapp'
 arr = Benry::CmdApp::ACTION_SHARED_OPTIONS
 arr.clear()
 ```
+
+
+### Q: Is it possible to show details of actions and aliases?
+
+A: Try global option `-L metadata`.
+It prints detailed data of actions and aliases in YAML format.
 
 
 ### Q: How to make error messages I18Ned?

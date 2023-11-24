@@ -1676,7 +1676,8 @@ module Benry::CmdApp
       topics = ["action", "actions", "alias", "aliases",
                 "category", "categories", "abbrev", "abbrevs",
                 "category1", "categories1", "category2", "categories2",
-                "category3", "categories3", "category4", "categories4"]
+                "category3", "categories3", "category4", "categories4",
+                "metadata"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions and aliases")
@@ -1940,6 +1941,7 @@ module Benry::CmdApp
     def render_topic_list(topic, all: false)
       #; [!uzmml] renders topic list.
       #; [!vrzu0] topic 'category1' or 'categories2' is acceptable.
+      #; [!xyn5g] global option '-L metadata' renders registry data in YAML format.
       builder = get_app_help_builder()
       return (
         case topic
@@ -1947,6 +1949,7 @@ module Benry::CmdApp
         when "alias" , "aliases"; builder.section_aliases(all: all)
         when "abbrev", "abbrevs"; builder.section_abbrevs(all: all)
         when /\Acategor(?:y|ies)(\d+)?\z/ ; builder.section_categories(($1 || 0).to_i, all: all)
+        when "metadata"; MetadataRenderer.new(@_registry).render_metadata()
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )
@@ -2058,6 +2061,132 @@ module Benry::CmdApp
     def should_rescue?(exc)
       #; [!8lwyn] returns trueif exception is a BaseError.
       return exc.is_a?(BaseError)
+    end
+
+  end
+
+
+  class MetadataRenderer
+
+    def initialize(registry)
+      @registry = registry
+    end
+
+    def render_metadata(all: false)
+      #; [!gduge] renders registry data in YAML format.
+      sb = []
+      sb << "actions:\n"
+      render_actions(all: all) {|s| sb << s }
+      sb << "\n"
+      sb << "aliases:\n"
+      render_aliases(all: all) {|s| sb << s }
+      sb << "\n"
+      sb << "categories:\n"
+      render_categories(all: all) {|s| sb << s }
+      sb << "\n"
+      sb << "abbreviations:\n"
+      render_abbrevs() {|s| sb << s }
+      return sb.join()
+    end
+
+    protected
+
+    def render_actions(all: false, &b)
+      @registry.metadata_each(all: all) do |metadata|
+        md = metadata
+        if ! md.alias?
+          yield "  - action:    #{md.name}\n"
+          yield "    desc:      #{qq(md.desc)}\n"
+          yield "    class:     #{md.klass.name}\n"
+          yield "    method:    #{md.meth}\n"
+          yield "    usage:     #{md.usage.inspect}\n" if md.usage
+          yield "    detail:    #{md.detail.inspect}\n" if md.detail
+          yield "    description: #{md.description.inspect}\n" if md.description
+          yield "    postamble: #{md.postamble.inspect.gsub(/"=>"/, '": "')}\n" if md.postamble
+          yield "    tag:       #{md.tag}\n" if md.tag
+          yield "    important: #{md.important}\n" if md.important? != nil
+          yield "    hidden:    #{md.hidden?}\n" if md.hidden? != nil
+          obj = md.klass.new(nil)
+          paramstr = Util.method2help(obj, md.meth).strip
+          if ! paramstr.empty?
+            yield "    paramstr:  #{qq(paramstr)}\n"
+            yield "    parameters:\n"
+            render_parameters(md, all: all, &b)
+          end
+          if ! md.schema.empty?
+            yield "    options:\n"
+            render_options(md, all: all, &b)
+          end
+        end
+      end
+    end
+
+    def render_parameters(metadata, all: false)
+      obj = metadata.klass.new(nil)
+      obj.method(metadata.meth).parameters.each do |ptype, pname|
+        yield "      - param:   #{pname}\n"
+        yield "        type:    #{ptype}\n"
+      end
+    end
+
+    def render_options(metadata, all: false)
+      metadata.schema.each() do |item|
+        next if all == false && item.hidden?
+        yield "      - key:     #{item.key}\n"
+        yield "        desc:    #{qq(item.desc)}\n"
+        yield "        optdef:  #{qq(item.optdef)}\n"
+        yield "        short:   #{item.short}\n" if item.short
+        yield "        long:    #{item.long}\n"  if item.long
+        yield "        param:   #{qq(item.param)}\n" if item.param
+        yield "        paramreq: #{item.arg_requireness}\n"
+        yield "        type:    #{item.type.name}\n" if item.type
+        yield "        rexp:    #{item.rexp.inspect}\n" if item.rexp
+        yield "        enum:    #{item.enum.inspect}\n" if item.enum
+        yield "        range:   #{item.range.inspect}\n" if item.range
+        yield "        value:   #{item.value.inspect}\n" if item.value != nil
+        yield "        detail:  #{item.detail.inspect}\n" if item.detail != nil
+        yield "        tag:     #{item.tag}\n" if item.tag
+        yield "        important: #{item.important}\n" if item.important? != nil
+        yield "        hidden:  #{item.hidden?}\n" if item.hidden? != nil
+      end
+    end
+
+    def render_aliases(all: false)
+      @registry.metadata_each(all: all) do |metadata|
+        md = metadata
+        if md.alias?
+          yield "  - alias:     #{md.name}\n"
+          yield "    desc:      #{qq(md.desc)}\n"
+          yield "    action:    #{md.action}\n"
+          yield "    args:      #{md.args.inspect}\n" if md.args && ! md.args.empty?
+          yield "    tag:       #{md.tag}\n" if md.tag
+          yield "    important: #{md.important}\n" if md.important != nil
+          yield "    hidden:    #{md.hidden?}\n" if md.hidden? != nil
+        end
+      end
+    end
+
+    def render_categories(all: false)
+      dict = @registry.category_count_actions(0, all: all)
+      @registry.category_each do |prefix, desc|
+        yield "  - prefix:    \"#{prefix}\"\n"
+        yield "    count:     #{dict[prefix] || 0}\n"
+        yield "    desc:      #{qq(desc)}\n" if desc
+      end
+    end
+
+    def render_abbrevs()
+      @registry.abbrev_each do |abbrev, prefix|
+        yield "  - abbrev:    \"#{abbrev}\"\n"
+        yield "    prefix:    \"#{prefix}\"\n"
+      end
+    end
+
+    private
+
+    def qq(s)
+      return "" if s.nil?
+      return '"' + s.gsub(/"/, '\\"') + '"'
     end
 
   end

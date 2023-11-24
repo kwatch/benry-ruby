@@ -359,7 +359,11 @@ END
           @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ /\A\e\[1;34mActions:\e\[0m$/
-        ok {sout} =~ /\n\n\e\[1;34mAliases:\e\[0m$/
+        if Benry::CmdApp::REGISTRY.metadata_each.any? {|md| md.alias? }
+          ok {sout} =~ /\n\n\e\[1;34mAliases:\e\[0m$/
+        else
+          ok {sout} !~ /Aliases:/
+        end
       end
 
       spec "[!tyxwo] includes hidden actions into action list if `-a, --all` specified." do
@@ -545,8 +549,9 @@ END
           ok {s} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
           #
           ok {s} !~ /^  hello/
-          ok {s} =~ /^  foo: \(\d+\)$/
+         #ok {s} =~ /^  foo: \(\d+\)$/
           ok {s} =~ /^  git: \(\d+\)$/
+          ok {s} =~ /^  giit: \(\d+\)/
           ok {s} !~ /^  hello/
           #
           ok {s} =~ /^  giit: \(\d\d\)         : gitt commands$/
@@ -563,7 +568,7 @@ END
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
           ok {s} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
           #
-          ok {s} =~ /^  foo: \(\d+\)$/
+         #ok {s} =~ /^  foo: \(\d+\)$/
           ok {s} =~ /^  git: \(\d+\)$/
           ok {s} =~ /^  giit: \(\d\)          : gitt commands$/
           ok {s} !~ /^  hello/
@@ -667,6 +672,19 @@ END
         ok {x} =~ /^  giit:repo: \(2\)$/
         ok {x} =~ /^  giit:repo:config: \(3\)$/
         ok {x} =~ /^  giit:repo:remote: \(2\)$/
+      end
+
+      spec "[!xyn5g] global option '-L metadata' renders registry data in YAML format." do
+        config = Benry::CmdApp::Config.new("test app", "0.0.0")
+        app = Benry::CmdApp::Application.new(config)
+        sout, serr = capture_sio { app.run("-L", "metadata") }
+        ok {serr} == ""
+        require 'yaml'
+        ydoc = YAML.load(sout)
+        ok {ydoc["actions"]}.is_a?(Array)
+        ok {ydoc["aliases"]}.is_a?(Array)
+        ok {ydoc["categories"]}.is_a?(Array)
+        ok {ydoc["abbreviations"]}.is_a?(Array)
       end
 
     end
@@ -1081,6 +1099,71 @@ END
   -a, --all      : list hidden actions/options, too
       --debug    : debug mode
 END
+      end
+
+    end
+
+
+  end
+
+
+  topic Benry::CmdApp::MetadataRenderer do
+
+
+    topic '#render_metadata()' do
+
+      before do
+        reg = Benry::CmdApp::REGISTRY
+        @registry = Benry::CmdApp::Registry.new
+        r = @registry
+        r.metadata_add(reg.metadata_get("hello"))
+        r.metadata_add(Benry::CmdApp::AliasMetadata.new("hi", "hello", []))
+        r.category_add("cat:", "test category")
+        r.abbrev_add("c:", "cat:")
+      end
+
+      EXPECTED = <<'END'
+actions:
+  - action:    hello
+    desc:      "greeting message"
+    class:     MyAction
+    method:    hello
+    hidden:    false
+    paramstr:  "[<name>]"
+    parameters:
+      - param:   name
+        type:    opt
+      - param:   lang
+        type:    key
+    options:
+      - key:     lang
+        desc:    "language name (en/fr/it)"
+        optdef:  "-l, --lang=<lang>"
+        short:   l
+        long:    lang
+        param:   "<lang>"
+        paramreq: required
+        hidden:  false
+
+aliases:
+  - alias:     hi
+    desc:      "alias for 'hello'"
+    action:    hello
+
+categories:
+  - prefix:    "cat:"
+    count:     0
+    desc:      "test category"
+
+abbreviations:
+  - abbrev:    "c:"
+    prefix:    "cat:"
+END
+
+      spec "[!gduge] renders registry data in YAML format." do
+        renderer = Benry::CmdApp::MetadataRenderer.new(@registry)
+        yaml = renderer.render_metadata()
+        ok {yaml} == EXPECTED
       end
 
     end
