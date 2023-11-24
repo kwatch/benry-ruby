@@ -1676,7 +1676,8 @@ module Benry::CmdApp
       topics = ["action", "actions", "alias", "aliases",
                 "category", "categories", "abbrev", "abbrevs",
                 "category1", "categories1", "category2", "categories2",
-                "category3", "categories3", "category4", "categories4"]
+                "category3", "categories3", "category4", "categories4",
+                "metadata"]
       _add(c, :help   , "-h, --help"   , "print help message (of action if specified)")
       _add(c, :version, "-V, --version", "print version")
       _add(c, :list   , "-l, --list"   , "list actions and aliases")
@@ -1940,6 +1941,7 @@ module Benry::CmdApp
     def render_topic_list(topic, all: false)
       #; [!uzmml] renders topic list.
       #; [!vrzu0] topic 'category1' or 'categories2' is acceptable.
+      #; [!xyn5g] global option '-L metadata' renders registry data in YAML format.
       builder = get_app_help_builder()
       return (
         case topic
@@ -1947,6 +1949,7 @@ module Benry::CmdApp
         when "alias" , "aliases"; builder.section_aliases(all: all)
         when "abbrev", "abbrevs"; builder.section_abbrevs(all: all)
         when /\Acategor(?:y|ies)(\d+)?\z/ ; builder.section_categories(($1 || 0).to_i, all: all)
+        when "metadata"; MetadataRenderer.new(@_registry).render_metadata()
         else raise "** assertion failed: topic=#{topic.inspect}"
         end
       )

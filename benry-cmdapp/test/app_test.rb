@@ -674,6 +674,19 @@ END
         ok {x} =~ /^  giit:repo:remote: \(2\)$/
       end
 
+      spec "[!xyn5g] global option '-L metadata' renders registry data in YAML format." do
+        config = Benry::CmdApp::Config.new("test app", "0.0.0")
+        app = Benry::CmdApp::Application.new(config)
+        sout, serr = capture_sio { app.run("-L", "metadata") }
+        ok {serr} == ""
+        require 'yaml'
+        ydoc = YAML.load(sout)
+        ok {ydoc["actions"]}.is_a?(Array)
+        ok {ydoc["aliases"]}.is_a?(Array)
+        ok {ydoc["categories"]}.is_a?(Array)
+        ok {ydoc["abbreviations"]}.is_a?(Array)
+      end
+
     end
 
 
@@ -1109,10 +1122,7 @@ END
         r.abbrev_add("c:", "cat:")
       end
 
-      spec "[!gduge] renders registry data in YAML format." do
-        renderer = Benry::CmdApp::MetadataRenderer.new(@registry)
-        yaml = renderer.render_metadata()
-        ok {yaml} == <<'END'
+      EXPECTED = <<'END'
 actions:
   - action:    hello
     desc:      "greeting message"
@@ -1149,6 +1159,11 @@ abbreviations:
   - abbrev:    "c:"
     prefix:    "cat:"
 END
+
+      spec "[!gduge] renders registry data in YAML format." do
+        renderer = Benry::CmdApp::MetadataRenderer.new(@registry)
+        yaml = renderer.render_metadata()
+        ok {yaml} == EXPECTED
       end
 
     end
