@@ -1094,4 +1094,67 @@ END
   end
 
 
+  topic Benry::CmdApp::MetadataRenderer do
+
+
+    topic '#render_metadata()' do
+
+      before do
+        reg = Benry::CmdApp::REGISTRY
+        @registry = Benry::CmdApp::Registry.new
+        r = @registry
+        r.metadata_add(reg.metadata_get("hello"))
+        r.metadata_add(Benry::CmdApp::AliasMetadata.new("hi", "hello", []))
+        r.category_add("cat:", "test category")
+        r.abbrev_add("c:", "cat:")
+      end
+
+      spec "[!gduge] renders registry data in YAML format." do
+        renderer = Benry::CmdApp::MetadataRenderer.new(@registry)
+        yaml = renderer.render_metadata()
+        ok {yaml} == <<'END'
+actions:
+  - action:    hello
+    desc:      "greeting message"
+    class:     MyAction
+    method:    hello
+    hidden:    false
+    paramstr:  "[<name>]"
+    parameters:
+      - param:   name
+        type:    opt
+      - param:   lang
+        type:    key
+    options:
+      - key:     lang
+        desc:    "language name (en/fr/it)"
+        optdef:  "-l, --lang=<lang>"
+        short:   l
+        long:    lang
+        param:   "<lang>"
+        paramreq: required
+        hidden:  false
+
+aliases:
+  - alias:     hi
+    desc:      "alias for 'hello'"
+    action:    hello
+
+categories:
+  - prefix:    "cat:"
+    count:     0
+    desc:      "test category"
+
+abbreviations:
+  - abbrev:    "c:"
+    prefix:    "cat:"
+END
+      end
+
+    end
+
+
+  end
+
+
 end
