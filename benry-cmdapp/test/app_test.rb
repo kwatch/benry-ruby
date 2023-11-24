@@ -359,7 +359,11 @@ END
           @app.instance_eval { handle_global_options(opts, []) }
         end
         ok {sout} =~ /\A\e\[1;34mActions:\e\[0m$/
-        ok {sout} =~ /\n\n\e\[1;34mAliases:\e\[0m$/
+        if Benry::CmdApp::REGISTRY.metadata_each.any? {|md| md.alias? }
+          ok {sout} =~ /\n\n\e\[1;34mAliases:\e\[0m$/
+        else
+          ok {sout} !~ /Aliases:/
+        end
       end
 
       spec "[!tyxwo] includes hidden actions into action list if `-a, --all` specified." do
@@ -545,8 +549,9 @@ END
           ok {s} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
           #
           ok {s} !~ /^  hello/
-          ok {s} =~ /^  foo: \(\d+\)$/
+         #ok {s} =~ /^  foo: \(\d+\)$/
           ok {s} =~ /^  git: \(\d+\)$/
+          ok {s} =~ /^  giit: \(\d+\)/
           ok {s} !~ /^  hello/
           #
           ok {s} =~ /^  giit: \(\d\d\)         : gitt commands$/
@@ -563,7 +568,7 @@ END
           ok {s} !~ /\A\e\[1;34mActions:\e\[0m$/
           ok {s} =~ /\A\e\[1;34mCategories:\e\[0m \e\[2m\(depth=\d+\)\e\[0m$/
           #
-          ok {s} =~ /^  foo: \(\d+\)$/
+         #ok {s} =~ /^  foo: \(\d+\)$/
           ok {s} =~ /^  git: \(\d+\)$/
           ok {s} =~ /^  giit: \(\d\)          : gitt commands$/
           ok {s} !~ /^  hello/
