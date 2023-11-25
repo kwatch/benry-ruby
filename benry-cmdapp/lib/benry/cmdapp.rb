@@ -555,13 +555,14 @@ module Benry::CmdApp
       nil
     end
 
-    def self.new_option_schema()
+    def self.new_option_schema()  ## :nodoc:
       #; [!zuxmj] creates new option schema object.
       schema = ACTION_OPTION_SCHEMA_CLASS.new()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
       ACTION_SHARED_OPTIONS.each {|item| schema.add_item(item) }
       return schema
     end
+    private_class_method :new_option_schema
 
     def self.method_added(method_symbol)
       #; [!6frgx] do nothing if `@action.()` is not called.
