@@ -346,133 +346,149 @@ module Benry::CmdApp
   end
 
 
-  def self.define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
-    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_for_alias: false)
-  end
+  module ClassMethodModule
 
-  def self.define_alias!(alias_name, action_name, tag: nil, important: nil, hidden: nil)  # :nodoc:
-    return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_for_alias: true)
-  end
+    def define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil)
+      return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_for_alias: false)
+    end
 
-  def self.__define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil, alias_for_alias: false)  # :nodoc:
-    #; [!zawcd] action arg can be a string or an array of string.
-    action_arg = action_name
-    if action_arg.is_a?(Array)
-      action_name, *args = action_arg
-    else
-      args = []
+    def define_alias!(alias_name, action_name, tag: nil, important: nil, hidden: nil)  # :nodoc:
+      return __define_alias(alias_name, action_name, tag: tag, important: important, hidden: hidden, alias_for_alias: true)
     end
-    #; [!hqc27] raises DefinitionError if something error exists in alias or action.
-    errmsg = __validate_alias_and_action(alias_name, action_name, alias_for_alias)
-    errmsg == nil  or
-      raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
-    #; [!oo91b] registers new metadata of alias.
-    alias_metadata = AliasMetadata.new(alias_name, action_name, args, tag: tag, important: important, hidden: hidden)
-    REGISTRY.metadata_add(alias_metadata)
-    #; [!wfbqu] returns alias metadata.
-    return alias_metadata
-  end
-  private_class_method :__define_alias
 
-  def self.__validate_alias_and_action(alias_name, action_name, alias_for_alias=false)  # :nodoc:
-    #; [!2x1ew] returns error message if alias name is not a string.
-    #; [!galce] returns error message if action name is not a string.
-    if ! alias_name.is_a?(String)
-      return "Alias name should be a string, but got #{alias_name.class.name} object."
-    elsif ! action_name.is_a?(String)
-      return "Action name should be a string, but got #{action_name.class.name} object."
-    end
-    #; [!zh0a9] returns error message if other alias already exists.
-    #; [!ohow0] returns error message if other action exists with the same name as alias.
-    alias_md = REGISTRY.metadata_get(alias_name)
-    if    alias_md == nil  ; nil   # ok: new alias should be not defined
-    elsif alias_md.alias?  ; return "Alias '#{alias_name}' already defined."
-    else                   ; return "Can't define new alias '#{alias_name}' because already defined as an action."
-    end
-    #; [!r24qn] returns error message if action doesn't exist.
-    #; [!lxolh] returns error message if action is an alias name.
-    action_md = REGISTRY.metadata_get(action_name)
-    if    action_md == nil ; return "Action '#{action_name}' not found."
-    elsif alias_for_alias  ; nil   # ok: alias for alias is allowed
-    elsif action_md.alias? ; return "'#{action_name}' should be an action, but is an alias."
-    else                   ; nil   # ok: action should be defined
-    end
-    #; [!b6my2] returns nil if no errors found.
-    return nil
-  end
-  private_class_method :__validate_alias_and_action
-
-  def self.undef_alias(alias_name)
-    #; [!pk3ya] raises DefinitionError if alias name is not a string.
-    Util.name_should_be_a_string(alias_name, 'Alias', DefinitionError)
-    #; [!krdkt] raises DefinitionError if alias not exist.
-    #; [!juykx] raises DefinitionError if action specified instead of alias.
-    md = REGISTRY.metadata_get(alias_name)
-    errmsg = (
-      if    md == nil ; "Alias not exist."
-      elsif md.alias? ; nil
-      else            ; "Alias expected but action name specified."
+    def __define_alias(alias_name, action_name, tag: nil, important: nil, hidden: nil, alias_for_alias: false)  # :nodoc:
+      #; [!zawcd] action arg can be a string or an array of string.
+      action_arg = action_name
+      if action_arg.is_a?(Array)
+        action_name, *args = action_arg
+      else
+        args = []
       end
-    )
-    errmsg == nil  or
-      raise DefinitionError.new("undef_alias(#{alias_name.inspect}): #{errmsg}")
-    #; [!ocyso] deletes existing alias.
-    REGISTRY.metadata_del(alias_name)
-    nil
-  end
+      #; [!hqc27] raises DefinitionError if something error exists in alias or action.
+      errmsg = __validate_alias_and_action(alias_name, action_name, alias_for_alias)
+      errmsg == nil  or
+        raise DefinitionError.new("define_alias(#{alias_name.inspect}, #{action_arg.inspect}): #{errmsg}")
+      #; [!oo91b] registers new metadata of alias.
+      alias_metadata = AliasMetadata.new(alias_name, action_name, args, tag: tag, important: important, hidden: hidden)
+      REGISTRY.metadata_add(alias_metadata)
+      #; [!wfbqu] returns alias metadata.
+      return alias_metadata
+    end
+    private :__define_alias
 
-  def self.undef_action(action_name)
-    #; [!bcyn3] raises DefinitionError if action name is not a string.
-    Util.name_should_be_a_string(action_name, 'Action', DefinitionError)
-    #; [!bvu95] raises error if action not exist.
-    #; [!717fw] raises error if alias specified instead of action.
-    md = REGISTRY.metadata_get(action_name)
-    errmsg = (
-      if    md == nil ; "Action not exist."
-      elsif md.alias? ; "Action expected but alias name specified."
-      else            ; nil
+    def __validate_alias_and_action(alias_name, action_name, alias_for_alias=false)  # :nodoc:
+      #; [!2x1ew] returns error message if alias name is not a string.
+      #; [!galce] returns error message if action name is not a string.
+      if ! alias_name.is_a?(String)
+        return "Alias name should be a string, but got #{alias_name.class.name} object."
+      elsif ! action_name.is_a?(String)
+        return "Action name should be a string, but got #{action_name.class.name} object."
       end
-    )
-    errmsg == nil  or
-      raise DefinitionError.new("undef_action(#{action_name.inspect}): #{errmsg}")
-    #; [!01sx1] deletes existing action.
-    REGISTRY.metadata_del(action_name)
-    #; [!op8z5] deletes action method from action class.
-    md.klass.class_eval { remove_method(md.meth) }
-    nil
-  end
+      #; [!zh0a9] returns error message if other alias already exists.
+      #; [!ohow0] returns error message if other action exists with the same name as alias.
+      alias_md = REGISTRY.metadata_get(alias_name)
+      if    alias_md == nil  ; nil   # ok: new alias should be not defined
+      elsif alias_md.alias?  ; return "Alias '#{alias_name}' already defined."
+      else                   ; return "Can't define new alias '#{alias_name}' because already defined as an action."
+      end
+      #; [!r24qn] returns error message if action doesn't exist.
+      #; [!lxolh] returns error message if action is an alias name.
+      action_md = REGISTRY.metadata_get(action_name)
+      if    action_md == nil ; return "Action '#{action_name}' not found."
+      elsif alias_for_alias  ; nil   # ok: alias for alias is allowed
+      elsif action_md.alias? ; return "'#{action_name}' should be an action, but is an alias."
+      else                   ; nil   # ok: action should be defined
+      end
+      #; [!b6my2] returns nil if no errors found.
+      return nil
+    end
+    private :__validate_alias_and_action
 
-  def self.define_abbrev(abbrev, prefix)
-    #; [!e1fob] raises DefinitionError if error found.
-    errmsg = __validate_abbrev(abbrev, prefix)
-    errmsg == nil  or
-      raise DefinitionError.new(errmsg)
-    #; [!ed6hr] registers abbrev with prefix.
-    REGISTRY.abbrev_add(abbrev, prefix)
-    nil
-  end
+    def undef_alias(alias_name)
+      #; [!pk3ya] raises DefinitionError if alias name is not a string.
+      Util.name_should_be_a_string(alias_name, 'Alias', DefinitionError)
+      #; [!krdkt] raises DefinitionError if alias not exist.
+      #; [!juykx] raises DefinitionError if action specified instead of alias.
+      md = REGISTRY.metadata_get(alias_name)
+      errmsg = (
+        if    md == nil ; "Alias not exist."
+        elsif md.alias? ; nil
+        else            ; "Alias expected but action name specified."
+        end
+      )
+      errmsg == nil  or
+        raise DefinitionError.new("undef_alias(#{alias_name.inspect}): #{errmsg}")
+      #; [!ocyso] deletes existing alias.
+      REGISTRY.metadata_del(alias_name)
+      nil
+    end
 
-  def self.__validate_abbrev(abbrev, prefix, _registry: REGISTRY)  # :nodoc:
-    #; [!qfzbp] abbrev should be a string.
-    abbrev.is_a?(String)            or return "#{abbrev.inspect}: Abbreviation should be a string, but got #{abbrev.class.name} object."
-    #; [!f5isx] abbrev should end with ':'.
-    abbrev.end_with?(":")           or return "'#{abbrev}': Abbreviation should end with ':'."
-    #; [!r673p] abbrev should not contain unexpected symbol.
-    abbrev =~ /\A\w[-\w]*:/         or return "'#{abbrev}': Invalid abbreviation."
-    #; [!dckvt] abbrev should not exist.
-    ! _registry.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
-    #; [!5djjt] abbrev should not be the same name with existing prefix.
-    ! _registry.category_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
-    #; [!mq4ki] prefix should be a string.
-    prefix.is_a?(String)            or return "#{prefix.inspect}: Prefix should be a string, but got #{prefix.class.name} object."
-    #; [!a82z3] prefix should end with ':'.
-    prefix.end_with?(":")           or return "'#{prefix}': Prefix should end with ':'."
-    #; [!eq5iu] prefix should exist.
-    _registry.category_exist?(prefix)    or return "'#{prefix}': No such prefix."
-    #; [!jzkhc] returns nil if no error found.
-    return nil
+    def undef_action(action_name)
+      #; [!bcyn3] raises DefinitionError if action name is not a string.
+      Util.name_should_be_a_string(action_name, 'Action', DefinitionError)
+      #; [!bvu95] raises error if action not exist.
+      #; [!717fw] raises error if alias specified instead of action.
+      md = REGISTRY.metadata_get(action_name)
+      errmsg = (
+        if    md == nil ; "Action not exist."
+        elsif md.alias? ; "Action expected but alias name specified."
+        else            ; nil
+        end
+      )
+      errmsg == nil  or
+        raise DefinitionError.new("undef_action(#{action_name.inspect}): #{errmsg}")
+      #; [!01sx1] deletes existing action.
+      REGISTRY.metadata_del(action_name)
+      #; [!op8z5] deletes action method from action class.
+      md.klass.class_eval { remove_method(md.meth) }
+      nil
+    end
+
+    def define_abbrev(abbrev, prefix)
+      #; [!e1fob] raises DefinitionError if error found.
+      errmsg = __validate_abbrev(abbrev, prefix)
+      errmsg == nil  or
+        raise DefinitionError.new(errmsg)
+      #; [!ed6hr] registers abbrev with prefix.
+      REGISTRY.abbrev_add(abbrev, prefix)
+      nil
+    end
+
+    def __validate_abbrev(abbrev, prefix, _registry: REGISTRY)  # :nodoc:
+      #; [!qfzbp] abbrev should be a string.
+      abbrev.is_a?(String)            or return "#{abbrev.inspect}: Abbreviation should be a string, but got #{abbrev.class.name} object."
+      #; [!f5isx] abbrev should end with ':'.
+      abbrev.end_with?(":")           or return "'#{abbrev}': Abbreviation should end with ':'."
+      #; [!r673p] abbrev should not contain unexpected symbol.
+      abbrev =~ /\A\w[-\w]*:/         or return "'#{abbrev}': Invalid abbreviation."
+      #; [!dckvt] abbrev should not exist.
+      ! _registry.abbrev_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is already defined."
+      #; [!5djjt] abbrev should not be the same name with existing prefix.
+      ! _registry.category_exist?(abbrev)  or return "'#{abbrev}': Abbreviation is not available because a prefix with the same name already exists."
+      #; [!mq4ki] prefix should be a string.
+      prefix.is_a?(String)            or return "#{prefix.inspect}: Prefix should be a string, but got #{prefix.class.name} object."
+      #; [!a82z3] prefix should end with ':'.
+      prefix.end_with?(":")           or return "'#{prefix}': Prefix should end with ':'."
+      #; [!eq5iu] prefix should exist.
+      _registry.category_exist?(prefix)    or return "'#{prefix}': No such prefix."
+      #; [!jzkhc] returns nil if no error found.
+      return nil
+    end
+    private :__validate_abbrev
+
+    def current_app()   # :nodoc:
+      #; [!xdjce] returns current application.
+      return @current_app
+    end
+
+    def _set_current_app(app)   # :nodoc:
+      #; [!1yqwl] sets current application.
+      @current_app = app
+      nil
+    end
+
   end
-  private_class_method :__validate_abbrev
+  extend ClassMethodModule
 
 
   class ActionScope
@@ -501,7 +517,7 @@ module Benry::CmdApp
           #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
           @__actiondef__ == nil  or
             raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
-          schema = new_option_schema()
+          schema = _new_option_schema()
           #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
           kws = {usage: usage, detail: detail, description: description, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
@@ -555,13 +571,14 @@ module Benry::CmdApp
       nil
     end
 
-    def self.new_option_schema()
+    def self._new_option_schema()  # :nodoc:
       #; [!zuxmj] creates new option schema object.
       schema = ACTION_OPTION_SCHEMA_CLASS.new()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
       ACTION_SHARED_OPTIONS.each {|item| schema.add_item(item) }
       return schema
     end
+    private_class_method :_new_option_schema
 
     def self.method_added(method_symbol)
       #; [!6frgx] do nothing if `@action.()` is not called.
@@ -1717,18 +1734,6 @@ module Benry::CmdApp
 
   GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
   GLOBAL_OPTION_PARSER_CLASS = OptionParser
-
-
-  def self.current_app()   # :nodoc:
-    #; [!xdjce] returns current application.
-    return @current_app
-  end
-
-  def self._set_current_app(app)   # :nodoc:
-    #; [!1yqwl] sets current application.
-    @current_app = app
-    nil
-  end
 
 
   class Application
