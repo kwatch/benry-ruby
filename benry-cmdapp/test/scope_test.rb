@@ -305,15 +305,15 @@ END
     end
 
 
-    topic '.new_option_schema()' do
+    topic '._new_option_schema()' do
 
       spec "[!zuxmj] creates new option schema object." do
-        x = Benry::CmdApp::ActionScope.class_eval { new_option_schema() }
+        x = Benry::CmdApp::ActionScope.class_eval { _new_option_schema() }
         ok {x}.is_a?(Benry::CmdApp::ACTION_OPTION_SCHEMA_CLASS)
       end
 
       spec "[!rruxi] adds '-h, --help' option as hidden automatically." do
-        schema = Benry::CmdApp::ActionScope.class_eval { new_option_schema() }
+        schema = Benry::CmdApp::ActionScope.class_eval { _new_option_schema() }
         item = schema.get(:help)
         ok {item} != nil
         ok {item.key} == :help

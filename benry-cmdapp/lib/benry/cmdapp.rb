@@ -501,7 +501,7 @@ module Benry::CmdApp
           #; [!r07i7] `@action.()` raises DefinitionError if called consectively.
           @__actiondef__ == nil  or
             raise DefinitionError.new("`@action.()` called without method definition (please define method for this action).")
-          schema = new_option_schema()
+          schema = _new_option_schema()
           #; [!34psw] `@action.()` stores arguments into `@__actiondef__`.
           kws = {usage: usage, detail: detail, description: description, postamble: postamble, tag: tag, important: important, hidden: hidden}
           @__actiondef__ = [desc, schema, kws]
@@ -555,14 +555,14 @@ module Benry::CmdApp
       nil
     end
 
-    def self.new_option_schema()  ## :nodoc:
+    def self._new_option_schema()  ## :nodoc:
       #; [!zuxmj] creates new option schema object.
       schema = ACTION_OPTION_SCHEMA_CLASS.new()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
       ACTION_SHARED_OPTIONS.each {|item| schema.add_item(item) }
       return schema
     end
-    private_class_method :new_option_schema
+    private_class_method :_new_option_schema
 
     def self.method_added(method_symbol)
       #; [!6frgx] do nothing if `@action.()` is not called.
