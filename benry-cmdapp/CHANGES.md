@@ -2,6 +2,12 @@ CHANGES
 =======
 
 
+Release 1.0.0 (2023-11-25)
+--------------------------
+
+* Rewrited entirely. Many breaking changes exist. See document for details.
+
+
 Release 0.2.0 (2023-10-18)
 --------------------------
 
