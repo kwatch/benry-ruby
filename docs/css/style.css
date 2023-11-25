@@ -74,12 +74,12 @@ pre > strong {
 	font-weight: bold;
 	color: #900;
 }
-pre.language-terminal {
+pre.language-terminal, pre.language-console {
 	background: #333;
 	color: #fff;
 	border-color: #000;
 }
-pre.language-terminal > strong {
+pre.language-terminal > strong, pre.language-console > strong {
 	color: #f66;
 }
 code {
