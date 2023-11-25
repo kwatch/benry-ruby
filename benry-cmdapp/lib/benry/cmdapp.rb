@@ -476,6 +476,17 @@ module Benry::CmdApp
     end
     private :__validate_abbrev
 
+    def current_app()   # :nodoc:
+      #; [!xdjce] returns current application.
+      return @current_app
+    end
+
+    def _set_current_app(app)   # :nodoc:
+      #; [!1yqwl] sets current application.
+      @current_app = app
+      nil
+    end
+
   end
   extend ClassMethodModule
 
@@ -560,7 +571,7 @@ module Benry::CmdApp
       nil
     end
 
-    def self._new_option_schema()  ## :nodoc:
+    def self._new_option_schema()  # :nodoc:
       #; [!zuxmj] creates new option schema object.
       schema = ACTION_OPTION_SCHEMA_CLASS.new()
       #; [!rruxi] adds '-h, --help' option as hidden automatically.
@@ -1723,18 +1734,6 @@ module Benry::CmdApp
 
   GLOBAL_OPTION_SCHEMA_CLASS = GlobalOptionSchema
   GLOBAL_OPTION_PARSER_CLASS = OptionParser
-
-
-  def self.current_app()   # :nodoc:
-    #; [!xdjce] returns current application.
-    return @current_app
-  end
-
-  def self._set_current_app(app)   # :nodoc:
-    #; [!1yqwl] sets current application.
-    @current_app = app
-    nil
-  end
 
 
   class Application
