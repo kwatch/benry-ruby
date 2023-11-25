@@ -1767,30 +1767,30 @@ File: ex34.rb
 require 'benry/cmdapp'
 
 class GitAction < Benry::CmdApp::Action
-  category "git:"
+  {{*category "git:"*}}
 
-  category "staging:" do
+  {{*category "staging:"*}} do
     @action.("...");  def add(); end
     @action.("...");  def show(); end
     @action.("...");  def delete(); end
   end
 
-  category "branch:" do
+  {{*category "branch:"*}} do
     @action.("...");  def list(); end
     @action.("...");  def switch(name); end
   end
 
-  category "repo:" do
+  {{*category "repo:"*}} do
     @action.("...");  def create(); end
     @action.("...");  def init(); end
 
-    category "config:" do
+    {{*category "config:"*}} do
       @action.("...");  def add(); end
       @action.("...");  def delete(); end
       @action.("...");  def list(); end
     end
 
-    category "remote:" do
+    {{*category "remote:"*}} do
       @action.("...");  def list(); end
       @action.("...");  def set(); end
     end

@@ -1672,30 +1672,30 @@ Of course, <code>:::</code> displays more level category prefixes.</p>
 require 'benry/cmdapp'
 
 class GitAction &lt Benry::CmdApp::Action
-  category "git:"
+  <strong>category "git:"</strong>
 
-  category "staging:" do
+  <strong>category "staging:"</strong> do
     @action.("...");  def add(); end
     @action.("...");  def show(); end
     @action.("...");  def delete(); end
   end
 
-  category "branch:" do
+  <strong>category "branch:"</strong> do
     @action.("...");  def list(); end
     @action.("...");  def switch(name); end
   end
 
-  category "repo:" do
+  <strong>category "repo:"</strong> do
     @action.("...");  def create(); end
     @action.("...");  def init(); end
 
-    category "config:" do
+    <strong>category "config:"</strong> do
       @action.("...");  def add(); end
       @action.("...");  def delete(); end
       @action.("...");  def list(); end
     end
 
-    category "remote:" do
+    <strong>category "remote:"</strong> do
       @action.("...");  def list(); end
       @action.("...");  def set(); end
     end
