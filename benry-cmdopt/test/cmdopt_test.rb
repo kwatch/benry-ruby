@@ -258,6 +258,26 @@ Oktest.scope do
 
     topic '#add_item()' do
 
+      spec "[!qyjp9] raises SchemaError if invalid item added." do
+        sc = Benry::CmdOpt::Schema.new
+        sc.add(:quiet, "-q, --quiet", "quiet mode")
+        #
+        item1 = Benry::CmdOpt::SchemaItem.new(:quiet, "-q", "quiet", "q", nil, nil, false)
+        pr = proc { sc.add_item(item1) }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       ":quiet: Option key duplicated.")
+        #
+        item2 = Benry::CmdOpt::SchemaItem.new(:quiet2, "-q", "quiet", "q", nil, nil, false)
+        pr = proc { sc.add_item(item2) }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "-q: Short option duplicated (key: :quiet2 and :quiet).")
+        #
+        item3 = Benry::CmdOpt::SchemaItem.new(:quiet3, "--quiet", "quiet", nil, "quiet", nil, false)
+        pr = proc { sc.add_item(item3) }
+        ok {pr}.raise?(Benry::CmdOpt::SchemaError,
+                       "--quiet: Long option duplicated (key: :quiet3 and :quiet).")
+      end
+
       spec "[!a693h] adds option item into current schema." do
         item = Benry::CmdOpt::SchemaItem.new(:quiet, "-q", "quiet", "q", nil, nil, false)
         sc = Benry::CmdOpt::Schema.new
@@ -268,6 +288,35 @@ END
       end
 
     end
+
+
+    topic '#_validate_item()' do
+
+      before do
+        @schema = Benry::CmdOpt::Schema.new
+        @schema.add(:quiet, "-q, --quiet", "quiet mode")
+      end
+
+      spec "[!ewl20] returns error message if option key duplicated." do
+        item = Benry::CmdOpt::SchemaItem.new(:quiet, "-q", "quiet mode", "q", nil, nil, false)
+        ret = @schema.__send__(:_validate_item, item)
+        ok {ret} == ":quiet: Option key duplicated."
+      end
+
+      spec "[!xg56v] returns error message if short option duplicated." do
+        item = Benry::CmdOpt::SchemaItem.new(:quiet2, "-q", "quiet mode", "q", nil, nil, false)
+        ret = @schema.__send__(:_validate_item, item)
+        ok {ret} == "-q: Short option duplicated (key: :quiet2 and :quiet)."
+      end
+
+      spec "[!izezi] returns error message if long option duplicated." do
+        item = Benry::CmdOpt::SchemaItem.new(:quiet3, "--quiet", "quiet mode", nil, "quiet", nil, false)
+        ret = @schema.__send__(:_validate_item, item)
+        ok {ret} == "--quiet: Long option duplicated (key: :quiet3 and :quiet)."
+      end
+
+    end
+
 
     topic '#option_help()' do
 
