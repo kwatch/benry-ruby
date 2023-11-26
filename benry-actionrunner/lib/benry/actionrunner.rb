@@ -79,7 +79,7 @@ END
     schema.add(:verbose  , "-v"        , "verbose mode")
     schema.add(:quiet    , "-q"        , "quiet mode")
     schema.add(:color    , "-c"        , "enable color mode")
-    schema.add(:color2   , "-C"        , "disable color mode", value: false)
+    schema.add(:nocolor  , "-C"        , "disable color mode")
     schema.add(:debug    , "-D"        , "debug mode")
     schema.add(:trace    , "-T"        , "trace mode")
     schema.add(:dryrun   , "-X"        , "dry-run mode (not run; just echoback)")
@@ -143,13 +143,11 @@ END
         @global_vars[name] = value
       end
       global_opts = parser.parse(args, all: false)  # raises OptionError
-      if global_opts[:color2]
-        global_opts[:color] = global_opts.delete(:color2)
-      end
       return global_opts
     end
 
     def toggle_global_options(global_opts)  # override
+      global_opts[:color] = false if global_opts[:nocolor]
       super
       d = global_opts
       @flag_search = true if d[:search] || d[:searchdir]
