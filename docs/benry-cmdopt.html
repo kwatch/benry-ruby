@@ -21,7 +21,7 @@
   <ul class="nav">
   </ul>
 </nav>
-<p>($Release: 2.2.0 $)</p>
+<p>($Release: 2.3.0 $)</p>
 <section class="section" id="whats-this">
 <h2>What's This?</h2>
 <p>Benry-CmdOpt is a command option parser library, like <code>optparse.rb</code>
@@ -153,6 +153,23 @@ parser.on('-n &ltN&gt;', "number", Integer, <strong>['1','2','3']</strong>)  # o
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
 cmdopt.add(:number, "-n &ltN&gt;", "number", type: Integer, <strong>enum: [1, 2, 3]</strong>) # very intuitive
+</pre>
+<ul>
+<li><code>optparse.rb</code> doesn't report error even when options are duplicated.
+  This specification makes debugging hard.
+<p></p>
+  <code>benry/cmdopt.rb</code> reports error when options are duplicated.</li>
+</ul>
+<pre class="language-ruby">
+require 'optparse'
+
+options = {}
+parser = OptionParser.new
+parser.on(<strong>'-v'</strong>, '--version') { options[:version] = true }
+parser.on(<strong>'-v'</strong>, '--verbose') { options[:verbose] = true }  # !!!!
+argv = ["-v"]
+parser.parse!(argv)
+p options     #=&gt; {:verbose=&gt;true}, not {:version=&gt;true}
 </pre>
 <ul>
 <li><code>optparse.rb</code> adds <code>-h</code> and <code>--help</code> options automatically, and
