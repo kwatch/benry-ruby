@@ -76,7 +76,7 @@ END
     schema.add(:verbose  , "-v"        , "verbose mode")
     schema.add(:quiet    , "-q"        , "quiet mode")
     schema.add(:color    , "-c"        , "enable color mode")
-    schema.add(:color    , "-C"        , "disable color mode", value: false)
+    schema.add(:color2   , "-C"        , "disable color mode", value: false)
    #schema.add(:dryrun   , "-N"        , "dry-run")
     schema.add(:debug    , "-D"        , "debug mode")
     schema.add(:trace    , "-T"        , "trace mode")
@@ -84,7 +84,7 @@ END
 
 
   module ApplicationHelpBuilderModule
-    def build_options_part(*args, **kwargs)
+    def section_options(*args, **kwargs)
       arr = ["--<name>=<value>", "set a global variable (value can be in JSON format)"]
       s = super
       s += (@config.format_option % arr) + "\n"
@@ -140,6 +140,9 @@ END
         @global_vars[name] = value
       end
       global_opts = parser.parse(args, all: false)  # raises OptionError
+      if global_opts[:color2]
+        global_opts[:color] = global_opts.delete(:color2)
+      end
       return global_opts
     end
 
@@ -418,7 +421,7 @@ PRODUCT_FILES = ["*.gem"]           # will be deleted by `arun clean --all`
 class GitAction < Action
   #prefix "git:"
   #prefix "git:", action: "status:here"    # rename 'git:status:here' action to 'git'
-  prefix "git:", alias_of: "status:here"   # define 'git' as an alias of 'git:status:here' action
+  category "git:", alias_for: "status:here"   # define 'git' as an alias of 'git:status:here' action
 
   @action.("show status in compact format")
   def status(*files)
@@ -466,7 +469,7 @@ $project = "example"
 $release = "1.0.0"
 
 class BuildAction < Action
-  prefix "build:", action: "all"
+  category "build:", action: "all"
   #prefix "build:", alias_of: "all"
 
   def target_name()

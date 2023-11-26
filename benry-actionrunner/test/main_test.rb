@@ -39,17 +39,17 @@ Oktest.scope do
 \e[2m  build:prepare      : prepare directory\e[0m
   build:zip          : create zip file
   clean              : delete garbage files (and product files too if '-a')
-  git                : alias of 'git:status:here'
   git:stage          : put changes of files into staging area
+\e[2m                       (alias: stage)\e[0m
   git:staged         : show changes in staging area
+\e[2m                       (alias: staged)\e[0m
   git:status         : show status in compact format
   git:status:here    : show status of current directory
+\e[2m                       (alias: git)\e[0m
   git:unstage        : remove changes from staging area
+\e[2m                       (alias: unstage)\e[0m
   hello              : print greeting message
   help               : print help message (of action if specified)
-  stage              : alias of 'git:stage'
-  staged             : alias of 'git:staged'
-  unstage            : alias of 'git:unstage'
 
 \e[1;34mExample:\e[0m
   $ arun -h | less		# print help message
@@ -67,31 +67,44 @@ Oktest.scope do
 \e[1;34mDocument:\e[0m
   https://kwatch.github.io/benry-ruby/benry-actionrunner.html
 END
-  HELP_MESSAGE      = HELP_MESSAGE_FULL.gsub(/^\e\[2m.*\e\[0m\n/, '')
+  HELP_MESSAGE      = HELP_MESSAGE_FULL.gsub(/^\e\[2m  \S.*\e\[0m\n/, '')
 
   HELP_NOFILE_FULL  = HELP_MESSAGE_FULL\
                         .split(/^\e\[1;34mActions:\e\[0m\n.*?\n\n/m)\
                         .join("\e[1;34mActions:\e[0m\n"\
                               "  help               : print help message (of action if specified)\n"\
                               "\n")
-  HELP_NOFILE       = HELP_NOFILE_FULL.gsub(/^\e\[2m.*\e\[0m\n/, '')
+  HELP_NOFILE       = HELP_NOFILE_FULL.gsub(/^\e\[2m  \S.*\e\[0m\n/, '')
 
-  ACTION_LIST_FULL  = (HELP_MESSAGE_FULL =~ /^(\e\[1;34mActions:\e\[0m\n.*?\n)\n/m) && $1
-  ACTION_LIST       = ACTION_LIST_FULL.gsub(/^\e\[2m.*\e\[0m\n/, '')
+  alias_list        = <<"END"
+
+\e[1;34mAliases:\e[0m
+  stage              : alias for 'git:stage'
+  staged             : alias for 'git:staged'
+  git                : alias for 'git:status:here'
+  unstage            : alias for 'git:unstage'
+END
+
+  ACTION_LIST_FULL  = (HELP_MESSAGE_FULL =~ /^(\e\[1;34mActions:\e\[0m\n.*?\n)\n/m) && ($1 + alias_list)
+  ACTION_LIST       = ACTION_LIST_FULL.gsub(/^\e\[2m  \S.*\e\[0m\n/, '')
 
   ACTION_LIST_WITH_PREFIX = <<"END"
 \e[1;34mActions:\e[0m
   git:stage          : put changes of files into staging area
+\e[2m                       (alias: stage)\e[0m
   git:staged         : show changes in staging area
+\e[2m                       (alias: staged)\e[0m
   git:status         : show status in compact format
   git:status:here    : show status of current directory
+\e[2m                       (alias: git)\e[0m
   git:unstage        : remove changes from staging area
+\e[2m                       (alias: unstage)\e[0m
 
 \e[1;34mAliases:\e[0m
-  git                : alias of 'git:status:here'
-  stage              : alias of 'git:stage'
-  staged             : alias of 'git:staged'
-  unstage            : alias of 'git:unstage'
+  stage              : alias for 'git:stage'
+  staged             : alias for 'git:staged'
+  git                : alias for 'git:status:here'
+  unstage            : alias for 'git:unstage'
 END
 
   HELP_OF_HELP_ACTION = <<"END"
@@ -136,7 +149,7 @@ END
     end
 
 
-    topic '.main()' do
+    topic('.main()') {
 
       def main(*args)
         sout, serr = capture_sio(tty: true) do
@@ -294,7 +307,7 @@ END
 
       end
 
-    end
+    }
 
 
   end
