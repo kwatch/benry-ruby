@@ -847,7 +847,6 @@ END
               @schema.add(:indent1, "-i <N>", "indent", type: Integer, range: range1)
               @schema.add(:indent2, "-j <N>", "indent", type: Integer, range: range2)
             }
-            pr.call
             ok {pr}.NOT.raise?(Exception)
           end
         end
