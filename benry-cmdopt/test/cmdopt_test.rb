@@ -774,10 +774,10 @@ END
 
         spec "[!melyd] raises SchemaError when enum is not an Array nor Set." do
           sc = @schema
-          sc.add(:indent, "-i <N>", "indent width", enum: ["2", "4", "8"])
-          sc.add(:indent, "-i <N>", "indent width", enum: Set.new(["2", "4", "8"]))
+          sc.add(:indent1, "-i <N>", "indent width", enum: ["2", "4", "8"])
+          sc.add(:indent2, "-j <N>", "indent width", enum: Set.new(["2", "4", "8"]))
           pr = proc {
-            sc.add(:indent, "-i <N>", "indent width", enum: "2,4,8")
+            sc.add(:indent3, "-k <N>", "indent width", enum: "2,4,8")
           }
           ok {pr}.raise?(Benry::CmdOpt::SchemaError,
                          '"2,4,8": Array or set expected.')
