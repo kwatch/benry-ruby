@@ -157,13 +157,13 @@ module Benry::CmdOpt
       for x in @items
         #; [!ewl20] returns error message if option key duplicated.
         key != x.key  or
-          return "#{key.inspect}: Option key duplicated."
+          return "#{key}: Option key duplicated."
         #; [!xg56v] returns error message if short option duplicated.
         short == nil || short != x.short  or
-          return "-#{short}: Short option duplicated (key: #{key.inspect} and #{x.key.inspect})."
+          return "-#{short}: Short option duplicated (key: #{key} and #{x.key})."
         #; [!izezi] returns error message if long option duplicated.
         long == nil || long != x.long  or
-          return "--#{long}: Long option duplicated (key: #{key.inspect} and #{x.key.inspect})."
+          return "--#{long}: Long option duplicated (key: #{key} and #{x.key})."
       end
       return nil
     end
