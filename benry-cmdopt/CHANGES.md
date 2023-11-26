@@ -2,10 +2,16 @@ CHANGES
 =======
 
 
+Release 2.3.0 (2023-11-26)
+--------------------------
+
+* [change] `Schema#add()` raises SchemaError if option key, short or long option duplicated.
+
+
 Release 2.2.0 (2023-10-28)
 --------------------------
 
-* [enhance] Define `SchemaItem#add_item()` which adds option item into the schema. This is for Benry-CmdApp framework.
+* [enhance] Define `Schema#add_item()` which adds option item into the schema. This is for Benry-CmdApp framework.
 * [change] (EXPERIMENTAL) Make `desc`, `detail`, `hidden`, `important`, `tag` attrubtes of `SchemaItem` object to be writable. This is for Benry-CmdApp framework.
 
 
