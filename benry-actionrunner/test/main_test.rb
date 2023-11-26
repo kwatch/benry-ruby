@@ -19,7 +19,7 @@ Oktest.scope do
   -h, --help         : print help message (of action if specified)
   -V                 : print version
   -l                 : list actions
-  -L <topic>         : list of a topic (action|alias|prefix|abbrev)
+  -L <topic>         : topic list (actions|aliases|prefixes|abbrevs)
   -a                 : list all actions/options including hidden ones
   -f <file>          : actionfile name (default: 'Actionfile.rb')
   -u                 : search for actionfile in parent or upper dir
@@ -32,6 +32,7 @@ Oktest.scope do
   -C                 : disable color mode
   -D                 : debug mode
   -T                 : trace mode
+  -X                 : dry-run mode (not run; just echoback)
   --<name>=<value>   : set a global variable (value can be in JSON format)
 
 \e[1;34mActions:\e[0m

@@ -61,12 +61,15 @@ END
 
 
   GLOBAL_OPTION_SCHEMA = Benry::CmdApp::GLOBAL_OPTION_SCHEMA_CLASS.new(nil).tap do |schema|
-    topics = ["action", "alias", "prefix", "abbrev",
-              "prefix1", "prefix2", "prefix3", "prefix4"]
+    topics = ["action", "actions", "alias", "aliases",
+              "category", "categories", "abbrev", "abbrevs",
+              "category1", "categories1", "category2", "categories2",
+              "category3", "categories3", "category4", "categories4",
+              "metadata"]
     schema.add(:help     , "-h, --help", "print help message (of action if specified)")
     schema.add(:version  , "-V"        , "print version")
     schema.add(:list     , "-l"        , "list actions")
-    schema.add(:topic    , "-L <topic>", "list of a topic (action|alias|prefix|abbrev)", enum: topics)
+    schema.add(:topic    , "-L <topic>", "topic list (actions|aliases|prefixes|abbrevs)", enum: topics)
     schema.add(:all      , "-a"        , "list all actions/options including hidden ones")
     schema.add(:file     , "-f <file>" , "actionfile name (default: '#{DEFAULT_FILENAME}')")
     schema.add(:search   , "-u"        , "search for actionfile in parent or upper dir")
@@ -77,9 +80,9 @@ END
     schema.add(:quiet    , "-q"        , "quiet mode")
     schema.add(:color    , "-c"        , "enable color mode")
     schema.add(:color2   , "-C"        , "disable color mode", value: false)
-   #schema.add(:dryrun   , "-N"        , "dry-run")
     schema.add(:debug    , "-D"        , "debug mode")
     schema.add(:trace    , "-T"        , "trace mode")
+    schema.add(:dryrun   , "-X"        , "dry-run mode (not run; just echoback)")
   end
 
 
