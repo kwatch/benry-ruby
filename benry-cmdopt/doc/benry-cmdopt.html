@@ -155,6 +155,23 @@ cmdopt = Benry::CmdOpt.new
 cmdopt.add(:number, "-n &ltN&gt;", "number", type: Integer, <strong>enum: [1, 2, 3]</strong>) # very intuitive
 </pre>
 <ul>
+<li><code>optparse.rb</code> doesn't report error even when options are duplicated.
+  This specification makes debugging hard.
+<p></p>
+  <code>benry/cmdopt.rb</code> reports error when options are duplicated.</li>
+</ul>
+<pre class="language-ruby">
+require 'optparse'
+
+options = {}
+parser = OptionParser.new
+parser.on(<strong>'-v'</strong>, '--version') { options[:version] = true }
+parser.on(<strong>'-v'</strong>, '--verbose') { options[:verbose] = true }  # !!!!
+argv = ["-v"]
+parser.parse!(argv)
+p options     #=&gt; {:verbose=&gt;true}, not {:version=&gt;true}
+</pre>
+<ul>
 <li><code>optparse.rb</code> adds <code>-h</code> and <code>--help</code> options automatically, and
   terminates current process when <code>-h</code> or <code>--help</code> specified in command-line.
   It is hard to remove these options.
