@@ -138,15 +138,36 @@ module Benry::CmdOpt
       #; [!yht0v] keeps command option definitions.
       item = SchemaItem.new(key, optdef, desc, short, long, param, required,
                  type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
-      @items << item
+      add_item(item)
       item
     end
 
     def add_item(item)
+      #; [!qyjp9] raises SchemaError if invalid item added.
+      errmsg = _validate_item(item)
+      errmsg == nil  or
+        raise SchemaError.new(errmsg)
       #; [!a693h] adds option item into current schema.
       @items << item
       self
     end
+
+    def _validate_item(item)
+      key = item.key; short = item.short; long = item.long
+      for x in @items
+        #; [!ewl20] returns error message if option key duplicated.
+        key != x.key  or
+          return "#{key}: Option key duplicated."
+        #; [!xg56v] returns error message if short option duplicated.
+        short == nil || short != x.short  or
+          return "-#{short}: Short option duplicated (key: #{key} and #{x.key})."
+        #; [!izezi] returns error message if long option duplicated.
+        long == nil || long != x.long  or
+          return "--#{long}: Long option duplicated (key: #{key} and #{x.key})."
+      end
+      return nil
+    end
+    private :_validate_item
 
     def option_help(width_or_format=nil, all: false)
       #; [!0aq0i] can take integer as width.
