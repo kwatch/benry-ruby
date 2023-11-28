@@ -658,10 +658,10 @@ See the document of Benry-UnixCommand for details:
 ### Search Actionfile in Parent or Higher Directory
 
 In contrast to Rake, Benry-ActionRunner doesn't automatically look for action file in the parent or higher directory (this is for security reason).
-If you want Benry-ActionRunner to behave like Rake, add `-u` and `-p` options.
+If you want Benry-ActionRunner to behave like Rake, add `-u` and `-w` options.
 
 * `-u` --- search for action file in parent or upper directory.
-* `-p` --- change current directory to where action file exists.
+* `-w` --- change current directory to where action file exists.
 
 If you want to add these options always, set environment variable `$ACTIONRUNNER_OPTION`.
 
@@ -674,13 +674,13 @@ Actionfile.rb
 [bash]$ arun -l               # Error because action file not found here.
 [ERROR] Action file ('Actionfile.rb') not found. Create it by `arun -g` command firstly.
 
-[bash]$ arun -l -up           # Search 'Actionfile.rb' and change current directory.
+[bash]$ arun -l -wu           # Search 'Actionfile.rb' and change current directory.
 Actions:
   hello              : print greeting message
   help               : print help message (of action if specified)
 
 [bash]$ export ACTIONRUNNER_OPTION="-up"
-[bash]$ arun -l               # No need to add `-up`.
+[bash]$ arun -l               # No need to add `-wu`.
 $ cd ../..
 Actions:
   build              : build something
