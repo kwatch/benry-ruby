@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 
-$0 = "arun"
-
-require 'oktest'
-
-require 'benry/actionrunner'
+require_relative './shared'
 
 
 Oktest.scope do
+
+  before_all do
+    TestHelperModule.setup_all()
+  end
+
+  after_all do
+    TestHelperModule.teardown_all()
+  end
+
 
   HELP_MESSAGE_FULL = <<"END"
 \e[1marun\e[0m \e[2m(0.0.0)\e[0m --- Action runner (or task runner), much better than Rake
@@ -168,7 +173,7 @@ END
         return serr
       end
 
-      case_when "when action file not exist..." do
+      case_when("when action file not exist...") {
 
         before do
           @fname = Benry::ActionRunner::DEFAULT_FILENAME
@@ -217,9 +222,9 @@ END
           ok {main!("git:")} == "\e[31m[ERROR]\e[0m Action file ('#{@fname}') not found. Create it by `arun -g` command firstly.\n"
         end
 
-      end
+      }
 
-      case_else "else..." do
+      case_else("else...") {
 
         before do
           @fname = Benry::ActionRunner::DEFAULT_FILENAME
@@ -306,7 +311,7 @@ END
 END
         end
 
-      end
+      }
 
     }
 
