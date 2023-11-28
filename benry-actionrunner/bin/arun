@@ -4,4 +4,4 @@
 
 require 'benry/actionrunner'
 
-Benry::ActionRunner.main()
+exit Benry::ActionRunner.main()
