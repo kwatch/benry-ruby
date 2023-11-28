@@ -88,6 +88,7 @@ END
 
   module ApplicationHelpBuilderModule
     def section_options(*args, **kwargs)
+      #; [!xsfzi] adds '--<name>=<value>' to help message.
       arr = ["--<name>=<value>", "set a global variable (value can be in JSON format)"]
       s = super
       s += (@config.format_option % arr) + "\n"
@@ -114,12 +115,14 @@ END
 
 
   def self.main(argv=ARGV)
+    #; [!wmcup] handles '$ACRIONRUNNER_OPTION' value.
     envstr = ENV["ACTIONRUNNER_OPTION"]
     if envstr && ! envstr.empty?
       argv = envstr.split() + argv
     end
     app = MainApplication.new(CONFIG, GLOBAL_OPTION_SCHEMA)
     status_code = app.main(argv)
+    #; [!hujvl] returns status code.
     return status_code
   end
 
@@ -138,89 +141,127 @@ END
     protected
 
     def parse_global_options(args)
+      #; [!bpedh] parses `--<name>=<val>` as global variables.
       @global_vars = {}
       parser = GlobalOptionParser.new(@option_schema) do |name, value, _optstr|
         @global_vars[name] = value
       end
+      #; [!0tz4j] stops parsing options when any argument found.
       global_opts = parser.parse(args, all: false)  # raises OptionError
+      #; [!gkp9b] returns global options.
       return global_opts
     end
 
     def toggle_global_options(global_opts)  # override
+      #; [!3kdds] global option '-C' sets `$COLOR_mode = false`.
       global_opts[:color] = false if global_opts[:nocolor]
       super
       d = global_opts
+      #; [!1882x] global option '-u' sets instance var.
+      #; [!bokge] global option '-w' sets instance var.
       @flag_search = true if d[:search] || d[:searchdir]
       @flag_chdir  = true if d[:chdir]  || d[:searchdir]
+      #; [!4sk24] global option '-f' changes filename.
       @action_file = d[:file] if d[:file]
+      #; [!9u400] sets `$BENRY_ECHOBACK = true` if option `-v` specified.
+      #; [!jp2mw] sets `$BENRY_ECHOBACK = false` if option `-q` specified.
       $BENRY_ECHOBACK = true  if d[:verbose]
       $BENRY_ECHOBACK = false if d[:quiet]
-     #$DRYRUN_MODE    = true  if d[:dryrun]
       nil
     end
 
     def handle_global_options(global_opts, args)  # override
+      #; [!psrmp] loads action file (if exists) before displaying help message.
       if global_opts[:help]
         load_action_file(required: false)
         return super
       end
+      #; [!9wfaw] loads action file before listing actions by '-l' or '-L' option.
+      #; [!qanx2] option '-l' and '-L' requires action file.
       if global_opts[:list] || global_opts[:topic]
-        load_action_file()
+        load_action_file(required: true)
         return super
       end
+      #; [!7995e] option '-g' generates action file.
       if global_opts[:generate]
         generate_action_file()
         return 0
       end
+      #; [!k5nuk] option '-h' or '--help' prints help message.
+      #; [!dmxt2] option '-V' prints version number.
+      #; [!i4qm5] option '-v' sets `$VERBOSE_MODE = true`.
+      #; [!5nwnv] option '-q' sets `$QUIET_MODE = true`.
+      #; [!klxkr] option '-c' sets `$COLOR_MODE = true`.
+      #; [!kqbwd] option '-C' sets `$COLOR_MODE = false`.
+      #; [!oce46] option '-D' sets `$DEBUG_MODE = true`.
+      #; [!mq5ko] option '-T' enables trace mode.
+      #; [!jwah3] option '-X' sets `$DRYRUN_MODE = true`.
       return super
     end
 
     def handle_action(args, global_opts)
+      #; [!qdrui] loads action file before performing actions.
+      #; [!4992c] raises error if action specified but action file not exist.
       load_action_file(required: (args[0] != "help"))
       return super
     end
 
     def skip_backtrace?(bt)  # override
+      #; [!k8ddu] ignores backtrace of 'actionrunner.rb'.
+      #; [!89mz3] ignores backtrace of 'kernel_require.rb'.
+      #; [!ttt98] ignores backtrace of 'arun'.
       return true if bt.include?(__FILE__)
       return true if bt.include?('/core_ext/kernel_require.rb')
       return true if bt.include?('/arun:')
+      #; [!z72yj] not ignore backtrace of others.
       return false
     end
 
     private
 
     def load_action_file(required: true)
+      #; [!nx22j] returns false if action file already loaded.
       return false if @_loaded
-      #
+      #; [!aov55] loads action file if exists.
       filename = @action_file  or raise "** internal error"
       brownie  = Brownie.new(@config)
       filepath = brownie.search_and_load_action_file(filename, @flag_search, @flag_chdir)
+      #; [!ssmww] raises error when `required: true` and action file not exist.
       filepath != nil || ! required  or
         raise Benry::CmdApp::CommandError,
               "Action file ('#{filename}') not found." \
               " Create it by `#{@config.app_command} -g` command firstly."
-      #
+      #; [!vwtwe] it is AFTER loading action file to set global variables.
       brownie.populate_global_variables(@global_vars)
       @global_vars.clear()
-      #
+      #; [!8i55a] prevents to load action file more than once.
       @_loaded = true
+      #; [!f68yv] returns true if action file loaded successfully.
       return true
     end
 
     def generate_action_file(quiet: $QUIET_MODE)
+      #; [!dta7r] generates action file.
       filename = @action_file  or raise "** internal error"
       brownie  = Brownie.new(@config)
       content  = brownie.render_action_file_content(filename)
+      #; [!tmlqt] prints action file content if filename is '-'.
+      #; [!ymrjh] prints action file content if stdout is not a tty.
       if filename == "-" || ! $stdout.tty?
         print content
+        #; [!9e3c0] returns nil if action file is not generated.
         return nil
       end
+      #; [!685cq] raises error if action file already exist.
       ! File.exist?(filename)  or
         raise Benry::CmdApp::CommandError,
               "Action file ('#{filename}') already exists." \
               " If you want to generate a new one, delete it first."
       File.write(filename, content, encoding: 'utf-8')
+      #; [!n09pl] reports result if action file generated successfully.
+      #; [!iq0p2] reports nothing if option '-q' specified.
       puts "[OK] Action file '#{filename}' generated." unless quiet
+      #; [!bf60l] returns action file name if generated.
       return filename
     end
 
@@ -234,19 +275,24 @@ END
     end
 
     def search_and_load_action_file(filename, flag_search, flag_chdir, _pwd: Dir.pwd())
+      #; [!c9e1h] if action file exists in current dir, load it regardless of options.
+      #; [!m5oj7] if action file exists in parent dir, find and load it if option '-s' specified.
       if File.exist?(filename) ; dir = "."
       elsif flag_search        ; dir = _search_dir_where_file_exist(filename, _pwd)
       else                     ; dir = nil
       end
-      #
+      #; [!079xs] returns nil if action file not found.
+      #; [!7simq] changes current dir to where action file exists if option '-w' specified.
+      #; [!dg2qv] action file can has directory path.
       if    dir == nil ; return nil
       elsif dir == "." ; fpath = filename
       elsif flag_chdir ; fpath = filename ; _chdir(dir)
       else             ; fpath = File.join(dir, filename)
       end
-      #
+      #; [!d987b] loads action file if exists.
       abspath = File.absolute_path(fpath)
       require abspath
+      #; [!x9xxl] returns absolute path of action file if exists.
       return abspath
     end
 
@@ -274,7 +320,10 @@ END
     public
 
     def populate_global_variables(global_vars)
-      return nil if global_vars.empty?
+      #; [!cr2ph] sets global variables.
+      #; [!3kow3] normalizes global variable names.
+      #; [!03x7t] decodes JSON string into Ruby object.
+      #; [!1ol4a] print global variables if debug mode is on.
       global_vars.each do |name, str|
         var = name.gsub(/[^\w]/, '_')
         val = _decode_value(str)
@@ -287,13 +336,17 @@ END
     private
 
     def _decode_value(str)
+      #; [!omxyf] decodes string as JSON format.
       require 'json' unless defined?(JSON)
       return JSON.load(str)
     rescue JSON::ParserError
+      #; [!tvwvn] returns string as it is if failed to parse as JSON.
       return str
     end
 
     def _debug_global_var(var, val)
+      #; [!05l5f] prints var name and it's value.
+      #; [!7lwvz] colorizes output if color mode enabled.
       msg = "[DEBUG] $#{var} = #{val.inspect}"
       msg = @config.deco_debug % msg if Benry::CmdApp::Util.color_mode?
       puts msg
@@ -303,6 +356,7 @@ END
     public
 
     def render_action_file_content(filename)
+      #; [!oc03q] returns content of action file.
       #content = DATA.read()
       content = File.read(__FILE__, encoding: 'utf-8').split(/\n__END__\n/)[-1]
       content = content.gsub('%COMMAND%', @config.app_command)
