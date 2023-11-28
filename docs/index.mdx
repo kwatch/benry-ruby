@@ -8,6 +8,7 @@
 * [Benry-Config](#benry-config) ... Application configuration library
 * [Benry-Recorder](#benry-recorder) ... Test double helper (spy, stub, mock)
 * [Benry-UnixCommand](#benry-unixcommand) ... UNIX command implementation
+* [Benry-ActionRunner](#benry-actionrunner) ... Action (or task) Runner
 
 
 ## Benry-CmdOpt
@@ -54,3 +55,19 @@ Similar to ``FileUtils.rb``, but much better than it.
 (NOTICE: Gem package is renamed from [benry-unixcmd](https://rubygems.org/gems/benry-unixcmd) to [benry-unixcommand](https://rubygems.org/gems/benry-unixcommand) since release 1.0.0.)
 
 [READ MORE >>](benry-unixcommand.html)
+
+
+## Benry-ActionRunner
+
+Action (or task) Runner, like Rake or Gulp.
+
+Benry-ActionRunner is much better than Rake, because it allows to define
+actions (= tasks) which can take arguments and/or options.
+For example:
+
+* (Rake) ``rake hello name="world" lang="en"``
+* (ActionRunner) ``arun hello --lang=en world``
+
+Benry-ActionRunner is also an example program of [Benry-CmdApp](benry-cmdapp.html) framework.
+
+[READ MORE >>](benry-actionrunner.html)
