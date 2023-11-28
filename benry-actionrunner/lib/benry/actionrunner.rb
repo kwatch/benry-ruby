@@ -306,6 +306,7 @@ END
       #content = DATA.read()
       content = File.read(__FILE__, encoding: 'utf-8').split(/\n__END__\n/)[-1]
       content = content.gsub('%COMMAND%', @config.app_command)
+      content = content.gsub('%ACTIONFILE%', filename)
       return content
     end
 
@@ -365,8 +366,8 @@ __END__
 ## Example:
 ##
 ##   $ %COMMAND% -h | less      # print help message
-##   $ %COMMAND% -g             # generate action file ('Actions.rb')
-##   $ less Actions.rb     # confirm action file
+##   $ %COMMAND% -g             # generate action file ('%ACTIONFILE%')
+##   $ less %ACTIONFILE%  # confirm action file
 ##   $ %COMMAND%                # list actions (or: `%COMMAND% -l`)
 ##
 ##   $ %COMMAND% -h hello       # show help message for 'hello' action
