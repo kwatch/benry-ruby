@@ -1,0 +1,712 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="">
+  <meta name="theme-color" content="#fafafa">
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+  <title></title>
+  <link rel="stylesheet" href="lib/sanitize.css/2.0.0/sanitize.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+<section class="chapter" id="benry-actionrunner">
+<h1>Benry-ActionRunner</h1>
+<nav class="nav">
+  <ul class="nav">
+  </ul>
+</nav>
+<p>($Release: 0.1.0 $)</p>
+<section class="section" id="whats-this">
+<h2>What's this?</h2>
+<p>Benry-ActionRunner is a task runner.
+Similar to Rake, but much improved over Rake.</p>
+<p>The main feature of Benry-ActionRunner compared to Rake is that each actions can take options and arguments.
+For example, <code>arun hello -l fr Alice</code> runs <code>hello</code> action with an option <code>-l fr</code> and an argument <code>Alice</code>.</p>
+<ul>
+<li>Document: <a href="https://kwatch.github.io/benry-ruby/benry-actionrunner.html">https://kwatch.github.io/benry-ruby/benry-actionrunner.html</a></li>
+<li>GitHub: <a href="https://github.com/kwatch/benry-ruby/tree/main/benry-actionrunner">https://github.com/kwatch/benry-ruby/tree/main/benry-actionrunner</a></li>
+<li>Changes: <a href="https://github.com/kwatch/benry-ruby/blob/main/benry-actionrunner/CHANGES.md">https://github.com/kwatch/benry-ruby/blob/main/benry-actionrunner/CHANGES.md</a></li>
+</ul>
+<p>(Benry-ActionRunner requires Ruby &gt;= 2.3)</p>
+<section class="subsection" id="table-of-contents">
+<h3>Table of Contents</h3>
+<div class="toc">
+<ul>
+<li><a href="#whats-this">What's this?</a></li>
+<li><a href="#install">Install</a></li>
+<li><a href="#example">Example</a></li>
+<li><a href="#basic-features">Basic Features</a>
+<ul>
+<li><a href="#action">Action</a></li>
+<li><a href="#arguments">Arguments</a></li>
+<li><a href="#options">Options</a></li>
+<li><a href="#validation-for-option-value">Validation for Option Value</a></li>
+<li><a href="#boolean-option">Boolean Option</a></li>
+<li><a href="#prefix-of-actions">Prefix of Actions</a></li>
+<li><a href="#nested-prefix">Nested Prefix</a></li>
+<li><a href="#alias-of-action">Alias of Action</a></li>
+<li><a href="#prefix-action-and-prefix-alias">Prefix Action and Prefix Alias</a></li>
+<li><a href="#prerequisite-action">Prerequisite Action</a></li>
+<li><a href="#global-variable">Global Variable</a></li>
+<li><a href="#available-commands">Available Commands</a></li>
+</ul></li>
+<li><a href="#more-features">More Features</a>
+<ul>
+<li><a href="#search-actionfile-in-parent-or-higher-directory">Search Actionfile in Parent or Higher Directory</a></li>
+<li><a href="#hidden-action-alias-or-option">Hidden Action, Alias or Option</a></li>
+<li><a href="#important-action-alias-or-option">Important Action, Alias or Option</a></li>
+<li><a href="#delete-actionalias">Delete Action/Alias</a></li>
+<li><a href="#default-action">Default Action</a></li>
+<li><a href="#more-topics">More Topics</a></li>
+</ul></li>
+<li><a href="#license-and-copyright">License and Copyright</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section class="section" id="install">
+<h2>Install</h2>
+<pre class="language-console">
+$ gem install benry-actionrunner
+$ arun --version
+1.0.0
+</pre>
+</section>
+<section class="section" id="example">
+<h2>Example</h2>
+<pre class="language-console">
+[bash]$ arun -h | less          # print help message
+[bash]$ arun -g                 # generate action file ('Actionfile.rb')
+[bash]$ less Actionfile.rb      # read content of action file
+[bash]$ arun                    # list actions (or: `arun -l`)
+[bash]$ arun -h hello           # show help message of 'hello' action
+[bash]$ arun hello Alice        # run 'hello' action with arguments
+Hello, Alice!
+[bash]$ arun hello Alice -l fr  # run 'hello' action with args and options
+Bonjour, Alice!
+[bash]$ arun xxxx:              # list actions starting with 'xxxx:'
+[bash]$ arun :                  # list prefixes of actions (or '::', ':::')
+</pre>
+</section>
+<section class="section" id="basic-features">
+<h2>Basic Features</h2>
+<section class="subsection" id="action">
+<h3>Action</h3>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+<strong>require 'benry/actionrunner'</strong>
+<strong>include Benry::ActionRunner::Export</strong>
+
+<strong>class MyAction &lt Action</strong>
+
+  <strong>@action.("print greeting message")</strong>
+  def hello()
+    puts "Hello, world!"
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ls Actionfile.rb
+Actionfile.rb
+
+[bash]$ arun <strong>hello</strong>
+Hello, world!
+</pre>
+<p>It is not allowed to override existing method by action method.
+For example, you can't define <code>print()</code> or <code>test()</code> method as action method
+because these methods are defined in parent or ancestor class.
+In this case, please rename action methods to <code>print_()</code> or <code>test_()</code>.
+These action methods are treated as action name <code>print</code> or <code>test</code>.</p>
+</section>
+<section class="subsection" id="arguments">
+<h3>Arguments</h3>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class MyAction &lt Action
+
+  @action.("print greeting message")
+  def hello(<strong>name="world"</strong>)
+    puts "Hello, #{name}!"
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun hello <strong>Alice</strong>
+Hello, <strong>Alice</strong>!
+</pre>
+<p>Arguments are displayed in help message of actions.</p>
+<pre class="language-console">
+[bash]$ arun <strong>-h hello</strong>
+arun hello --- print greeting message
+
+Usage:
+  $ arun hello [&ltoptions&gt;] <strong>[&ltname&gt;]</strong>
+</pre>
+</section>
+<section class="subsection" id="options">
+<h3>Options</h3>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class MyAction &lt Action
+
+  @action.("print greeting message")
+  <strong>@option.(:lang, "-l, --lang=&ltlang&gt;", "language (en/fr/it)")</strong>
+  <strong>@option.(:repeat, "-n &ltN&gt;", "repeat N times")</strong>
+  def hello(name="world", <strong>lang: "en"</strong>, <strong>repeat: 1</strong>)
+    repeat.times do
+      case lang
+      when "en" ; puts "Hello, #{name}!"
+      when "fr" ; puts "Bonjour, #{name}!"
+      when "it" ; puts "Chao, #{name}!"
+      else      ; raise "#{lang}: Unknown language."
+      end
+    end
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun hello <strong>-l fr</strong> Alice        # or: arun hello Alice -l fr
+Bonjour, Alice!
+
+[bash]$ arun hello <strong>--lang=it</strong> Alice    # or: arun hello Alice --lang=it
+Chao, Alice!
+</pre>
+<p>Available option formats:</p>
+<ul>
+<li>No arguments
+<ul>
+<li><code>-h</code> --- short</li>
+<li><code>--help</code>  --- long</li>
+<li><code>-h, --help</code> --- both</li>
+</ul></li>
+<li>Argument required
+<ul>
+<li><code>-f &ltfile&gt;</code>  --- short</li>
+<li><code>--file=&ltfile&gt;</code>  --- long</li>
+<li><code>-f, --file=&ltfile&gt;</code>  --- both</li>
+</ul></li>
+<li>Optional argument
+<ul>
+<li><code>-i[&ltwidth&gt;]</code> --- short</li>
+<li><code>--indent[=&ltwidth&gt;]</code> --- long</li>
+<li><code>-i, --indent[=&ltwidth&gt;]</code> --- both</li>
+</ul></li>
+</ul>
+<p>Notice: <code>--lang it</code> style option is not supported for usability reason.
+Use <code>--lang=it</code> style instead.</p>
+</section>
+<section class="subsection" id="validation-for-option-value">
+<h3>Validation for Option Value</h3>
+<p>Keyword arguments of <code>@option.()</code>:</p>
+<ul>
+<li><code>type: Integer</code> --- Option value should be an integer.</li>
+<li>``rexp: /^\d+$/   --- Option value should match to pattern.</li>
+<li><code>enum: ["A", "B", "C"]</code> --- Option value should be one of "A", "B", or "C".</li>
+<li>``range: 1..10    --- Option value should be between 1 and 10.</li>
+</ul>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class MyAction &lt Action
+
+  @action.("print greeting message")
+  @option.(:lang, "-l, --lang=&ltlang&gt;", "language", <strong>enum: ["en", "fr", "it"]</strong>)
+  @option.(:repeat, "-n &ltN&gt;", "repeat N times", <strong>type: Integer</strong>, <strong>range: 1..5</strong>)
+  def hello(name="world", lang: "en", repeat: 1)
+    repeat.times do
+      case lang
+      when "en" ; puts "Hello, #{name}!"
+      when "fr" ; puts "Bonjour, #{name}!"
+      when "it" ; puts "Chao, #{name}!"
+      else      ; raise "#{lang}: Unknown language."
+      end
+    end
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun hello <strong>-l po</strong> Alice
+[ERROR] -l po: Expected one of en/fr/it.
+
+[bash]$ arun hello -n 99 Alice
+[ERROR] -n 99: Too large (max: 5)
+</pre>
+</section>
+<section class="subsection" id="boolean-option">
+<h3>Boolean Option</h3>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class MyAction &lt Action
+
+  @action.("print greeting message")
+  @option.(:lang, "-l, --lang=&ltlang&gt;", "language", enum: ["en", "fr", "it"])
+  @option.(:repeat, "-n &ltN&gt;", "repeat N times", type: Integer, range: 1..5)
+  @option.(:color, "-c, --color[=&lton|off&gt;]", "color mode", <strong>type: TrueClass</strong>)
+  def hello(name="world", lang: "en", repeat: 1, <strong>color: false</strong>)
+    if color
+      name = "\e[32m#{name}\e[0m"
+    end
+    repeat.times do
+      case lang
+      when "en" ; puts "Hello, #{name}!"
+      when "fr" ; puts "Bonjour, #{name}!"
+      when "it" ; puts "Chao, #{name}!"
+      else      ; raise "#{lang}: Unknown language."
+      end
+    end
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun hello <strong>--color=on</strong> Alice
+Hello, Alice!                          # displayed with color
+
+[bash]$ arun hello <strong>--color</strong> Alice
+Hello, Alice!                          # displayed with color
+</pre>
+</section>
+<section class="subsection" id="prefix-of-actions">
+<h3>Prefix of Actions</h3>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class GitAction &lt Action
+  <strong>prefix "git:"</strong>     # should be "git:", not "git" !!!
+
+  @action.("show current status in compact format")
+  def status(path=".")
+    sys "git status -sb #{path}"     # `sys` is like `system` or `sh`.
+  end
+
+end
+
+### or:
+#class GitAction &lt Action
+#  @action.("show current status in compact format")
+#  def <strong>git__</strong>status(path=".")
+#    sys "git status -sb #{path}"
+#  end
+#end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun -l
+Actions:
+  <strong>git:</strong>status         : show current status in compact format
+  help               : print help message (of action if specified)
+
+[bash]$ arun <strong>git:</strong>status
+$ git status -sb .
+</pre>
+<p>Prefix name should be a string which ends with ":".
+Symbol is not avaiable.</p>
+<pre class="language-ruby">
+class GitAction &lt Action
+  prefix <strong>:git</strong>       #=&gt; error because Symbol is specified
+</pre>
+</section>
+<section class="subsection" id="nested-prefix">
+<h3>Nested Prefix</h3>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class GitAction &lt Action
+
+  <strong>prefix "git:" do</strong>
+
+    <strong>prefix "commit:" do</strong>
+
+      @action.("create a commit of current changes")
+      def create(msg); sys "git commit -m '#{msg}'"; end
+
+    end
+
+    <strong>prefix "branch:" do</strong>
+
+      @action.("create a new branch")
+      def create(name); sys "git checkout -b #{name}" ; end
+
+      @action.("switch current branch")
+      def switch(name); sys "git checkout #{name}"; end
+
+    end
+
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun -l
+Actions:
+  <strong>git:branch:</strong>create  : create a new branch
+  <strong>git:branch:</strong>switch  : switch current branch
+  <strong>git:commit:</strong>create  : create a commit of current changes
+  help               : print help message (of action if specified)
+</pre>
+</section>
+<section class="subsection" id="alias-of-action">
+<h3>Alias of Action</h3>
+<p>Alias is a shortcut of action.</p>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class GitAction &lt Action
+
+  prefix "git:" do
+
+    prefix "commit:" do
+
+      @action.("create a commit of current changes")
+      def create(msg); sys "git commit -m '#{msg}'"; end
+
+    end
+
+    prefix "branch:" do
+
+      @action.("create a new branch")
+      def create(name); sys "git checkout -b #{name}" ; end
+
+      @action.("switch current branch")
+      def switch(name); sys "git checkout #{name}"; end
+
+    end
+
+  end
+
+end
+
+## define aliases
+<strong>define_alias "ci"   , "git:commit:create"</strong>
+<strong>define_alias "fork" , "git:branch:create"</strong>
+<strong>define_alias "sw"   , "git:branch:switch"</strong>
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun -l
+Actions:
+  <strong>ci                 : alias of 'git:commit:create'</strong>
+  <strong>fork               : alias of 'git:branch:create'</strong>
+  git:branch:create  : create a new branch
+  git:branch:switch  : switch current branch
+  git:commit:create  : create a commit of current changes
+  help               : print help message (of action if specified)
+  <strong>sw                 : alias of 'git:branch:switch'</strong>
+
+[bash]$ arun fork topic-foo      # same as `arun git:branch:create topic-foo`
+[bash]$ arun sw topic-foo        # same as `arun git:branch:switch topic-foo`
+</pre>
+<p>Alias definition can include options and arguments.
+For example, <code>define_alias "correct", ["git:commit", "--amend"]</code> defines an alias <code>correct</code> which invokes <code>git:commit</code> action with <code>--amend</code> option.</p>
+</section>
+<section class="subsection" id="prefix-action-and-prefix-alias">
+<h3>Prefix Action and Prefix Alias</h3>
+<p>Rename <code>git:status</code> action to <code>git</code> (= prefix name):</p>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class GitAction &lt Action
+  prefix "git:", <strong>action: "status"</strong>
+
+  @action.("show current status in compact format")
+  def status(path=".")
+    sys "git status -sb #{path}"     # `sys` is like `system` or `sh`.
+  end
+
+end
+</pre>
+<p>Output: (<code>git:status</code> is renamed to <code>git</code>)</p>
+<pre class="language-console">
+[bash]$ arun -l
+Actions:
+  <strong>git                : show current status in compact format</strong>
+  help               : print help message (of action if specified)
+</pre>
+<p>Define an alias of <code>git:status</code> task as <code>git</code> (= prefix name):</p>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class GitAction &lt Action
+  prefix "git:", <strong>alias_of: "status"</strong>
+
+  @action.("show current status in compact format")
+  def status(path=".")
+    sys "git status -sb #{path}"     # `sys` is like `system` or `sh`.
+  end
+
+end
+</pre>
+<p>Output: (<code>git</code> is an alias of <code>git:status</code>)</p>
+<pre class="language-console">
+[bash]$ arun -l
+Actions:
+  <strong>git                : alias of 'git:status'</strong>
+  git:status         : show current status in compact format
+  help               : print help message (of action if specified)
+</pre>
+</section>
+<section class="subsection" id="prerequisite-action">
+<h3>Prerequisite Action</h3>
+<p>Prerequisite Action is not supported.
+Instead, use <code>run_once()</code> which invokes other action only once.</p>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+class BuildAction &lt Action
+
+  @action.("setup something")
+  def setup()
+    puts ".... setup ...."
+    ## register teardown block which will be invoked at end of process.
+    <strong>at_end</strong> {
+      puts ".... teardown ...."
+    }
+  end
+
+  @action.("build something")
+  def build()
+    <strong>run_once</strong> "setup"        # invoke other action only once
+    <strong>run_once</strong> "setup"        # !!! not invoked !!!
+    #<strong>run_action</strong> "setup"     # run anyway
+    puts ".... build ...."
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun <strong>build</strong>
+<strong>.... setup ....</strong>
+.... build ....
+<strong>.... teardown ....</strong>
+</pre>
+</section>
+<section class="subsection" id="global-variable">
+<h3>Global Variable</h3>
+<p>Global long option such as <code>--release=1.2.3</code> is recognized as global variable name and value.</p>
+<p>File: Actionfile.rb</p>
+<pre class="language-ruby">
+# coding: utf-8
+require 'benry/actionrunner'
+include Benry::ActionRunner::Export
+
+## global variables
+<strong>$project = "exmaple"</strong>
+<strong>$release = "1.0.0"</strong>
+
+class MyAction &lt Action
+
+  @action.("show global variables")
+  def gvars()
+    puts "$project=#{<strong>$project</strong>.inspect}, $release=#{<strong>$release</strong>.inspect}"
+  end
+
+end
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ arun <strong>--project=myapp --release=1.2.3</strong> gvars
+$project=<strong>"myapp"</strong>, $release=<strong>"1.2.3"</strong>
+</pre>
+<p>Debug option <code>-D</code> prints global variables specified in commiand-line.
+This is useful to debug values of global variables.</p>
+<pre class="language-console">
+[bash]$ arun -l <strong>-D</strong> --project=myapp --release=1.2.3
+<strong>[DEBUG] $project = "myapp"</strong>
+<strong>[DEBUG] $release = "1.2.3"</strong>
+Actions:
+  gvars              : show global variables
+  help               : print help message (of action if specified)
+</pre>
+<p>Values of global variables in command-line are parsed as JSON string.
+If failed to parse as JSON string, it is handled as string value.</p>
+<pre class="language-console">
+### parsed as JSON format
+[bash]$ arun -l -D <strong>--data='["abc",123,true]'</strong> | grep DEBUG
+[DEBUG] $data = <strong>["abc", 123, true]</strong>
+
+### 'null' in JSON results in 'nil' in Ruby
+[bash]$ arun -l -D <strong>--data="null"</strong> | grep DEBUG
+[DEBUG] $data = <strong>nil</strong>
+
+### parsed as JSON quoted string
+[bash]$ arun -l -D <strong>--data='"foo"'</strong> | grep DEBUG
+[DEBUG] $data = <strong>"foo"</strong>
+
+### failed to parse, because single quotation is not available in JSON
+[bash]$ arun -l -D <strong>--data="'foo'"</strong> | grep DEBUG
+[DEBUG] $data = <strong>"'foo'"</strong>
+
+### failed to parse as JSON, therefore handled as just a string
+[bash]$ arun -l -D <strong>--data="foo"</strong> | grep DEBUG
+[DEBUG] $data = <strong>"foo"</strong>
+</pre>
+</section>
+<section class="subsection" id="available-commands">
+<h3>Available Commands</h3>
+<p>In action methods, UNIX-like commands are available.
+These commands are implemented in <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">Benry-UnixCommand</a> and different from FileUtils.rb.
+For example:</p>
+<ul>
+<li><code>mv "*.txt", to: "dir"</code> instead of <code>mv Dir["*.txt"], "dir"</code>.</li>
+<li><code>cp :p, "*.txt", to: "dir"</code> instead of <code>cp_p Dir["*.txt"], "dir"</code>.</li>
+<li><code>rm :rf, "dir/*"</code> instead of <code>rm_rf Dir["dir/*"]</code>.</li>
+<li><code>mkdir :p, "dir"</code> instead of <code>mkdir_p "dir"</code>.</li>
+<li><code>sys "command"</code> instead of <code>sh "command"</code> or <code>system "command"</code>.</li>
+</ul>
+<p>See the document of Benry-UnixCommand for details:
+ <a href="https://kwatch.github.io/benry-ruby/benry-unixcommand.html">https://kwatch.github.io/benry-ruby/benry-unixcommand.html</a></p>
+</section>
+</section>
+<section class="section" id="more-features">
+<h2>More Features</h2>
+<section class="subsection" id="search-actionfile-in-parent-or-higher-directory">
+<h3>Search Actionfile in Parent or Higher Directory</h3>
+<p>In contrast to Rake, Benry-ActionRunner doesn't automatically look for action file in the parent or higher directory (this is for security reason).
+If you want Benry-ActionRunner to behave like Rake, add <code>-u</code> and ``-w` options.</p>
+<ul>
+<li><code>-u</code> --- search for action file in parent or upper directory.</li>
+<li><code>-w</code> --- change current directory to where action file exists.</li>
+</ul>
+<p>If you want to add these options always, set environment variable <code>$ACTIONRUNNER_OPTION</code>.</p>
+<pre class="language-console">
+[bash]$ ls Actionfile.rb
+Actionfile.rb
+
+[bash]$ mkdir -p foo/bar/
+[bash]$ cd foo/bar/           # Change current directory.
+[bash]$ arun -l               # Error because action file not found here.
+[ERROR] Action file ('Actionfile.rb') not found. Create it by `arun -g` command firstly.
+
+[bash]$ arun -l <strong>-wu</strong>           # Search 'Actionfile.rb' and change current directory.
+Actions:
+  hello              : print greeting message
+  help               : print help message (of action if specified)
+
+[bash]$ <strong>export ACTIONRUNNER_OPTION="-up"</strong>
+[bash]$ arun -l               # No need to add `-wu`.
+$ cd ../..
+Actions:
+  build              : build something
+  help               : print help message (of action if specified)
+  setup              : setup something
+</pre>
+</section>
+<section class="subsection" id="hidden-action-alias-or-option">
+<h3>Hidden Action, Alias or Option</h3>
+<p>It is possible to make visibility of actions/aliases/options as hidden.</p>
+<pre class="language-ruby">
+  @action.("preparation", <strong>hidden: true</strong>)
+  @option.(:debug, "--debug", "enable debug mode", <strong>hidden: true</strong>)
+  def preparation()
+    ....
+  end
+
+  define_alias "prep", "preparation", <strong>hidden: true</strong>
+</pre>
+<p>Hidden actions and options are not displayed in help message.
+If you want to display hidden actions or options, add <code>-a</code> or <code>--all</code> option.</p>
+<pre class="language-console">
+[bash]$ arun -la          # show all actions including hidden ones
+[bash]$ arun -la hello    # show all options of action including hidden ones
+</pre>
+</section>
+<section class="subsection" id="important-action-alias-or-option">
+<h3>Important Action, Alias or Option</h3>
+<p>It is possible to mark actions/aliases/options as important or not.</p>
+<ul>
+<li>Actions/aliases/options marked as important are displayed in bold font in help message.</li>
+<li>Actions/aliases/options marked as not important are displayed in gray color in help message.</li>
+</ul>
+<pre class="language-ruby">
+  @action.("print greeting message", <strong>important: true</strong>)
+  @option.(:lang, "-l, --lang=&ltlang&gt;", "language", <strong>important: true</strong>)
+  @option.(:repeat, "--repeat=&ltN&gt;", "repeat N times", <strong>important: false</strong>)
+  def hello(name="world", lang: "en", repeat: 1)
+    # ....
+  end
+
+  define_alias "hi", "hello", <strong>important: false</strong>
+</pre>
+</section>
+<section class="subsection" id="delete-actionalias">
+<h3>Delete Action/Alias</h3>
+<pre class="language-ruby">
+undef_alias("fork")                    ## delete an alias
+undef_action("git:branch:create")      ## delete an action
+</pre>
+</section>
+<section class="subsection" id="default-action">
+<h3>Default Action</h3>
+<pre class="language-ruby">
+CONFIG.default_action = "xxxx"
+</pre>
+</section>
+<section class="subsection" id="more-topics">
+<h3>More Topics</h3>
+<p>Benry-ActionRunner is empowerd by Benry-CmdApp.
+Many features of Benry-ActionRunner is derived from Benry-CmdApp.</p>
+<p>If you are looking for any features not written in this document,
+see the document of Benry-CmdApp framework:
+ <a href="https://kwatch.github.io/benry-ruby/benry-cmdapp.html">https://kwatch.github.io/benry-ruby/benry-cmdapp.html</a></p>
+</section>
+</section>
+<section class="section" id="license-and-copyright">
+<h2>License and Copyright</h2>
+<p>$License: MIT License $</p>
+<p>$Copyright: copyright(c) 2023 kwatch@gmail.com $</p>
+</section>
+</section>
+</main>
+</body>
+</html>
