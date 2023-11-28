@@ -23,7 +23,7 @@ Oktest.scope do
   -a                 : list all actions/options including hidden ones
   -f <file>          : actionfile name (default: 'Actionfile.rb')
   -u                 : search for actionfile in parent or upper dir
-  -p                 : change current dir to where action file exists
+  -w                 : change current dir to where action file exists
 \e[2m  -s                 : same as '-up'\e[0m
   -g                 : generate actionfile ('Actionfile.rb') with example code
   -v                 : verbose mode

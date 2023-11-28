@@ -73,7 +73,7 @@ END
     schema.add(:all      , "-a"        , "list all actions/options including hidden ones")
     schema.add(:file     , "-f <file>" , "actionfile name (default: '#{DEFAULT_FILENAME}')")
     schema.add(:search   , "-u"        , "search for actionfile in parent or upper dir")
-    schema.add(:chdir    , "-p"        , "change current dir to where action file exists")
+    schema.add(:chdir    , "-w"        , "change current dir to where action file exists")
     schema.add(:searchdir, "-s"        , "same as '-up'", hidden: true)
     schema.add(:generate , "-g"        , "generate actionfile ('#{DEFAULT_FILENAME}') with example code")
     schema.add(:verbose  , "-v"        , "verbose mode")
