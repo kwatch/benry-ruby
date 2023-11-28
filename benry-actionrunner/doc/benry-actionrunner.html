@@ -613,10 +613,10 @@ For example:</p>
 <section class="subsection" id="search-actionfile-in-parent-or-higher-directory">
 <h3>Search Actionfile in Parent or Higher Directory</h3>
 <p>In contrast to Rake, Benry-ActionRunner doesn't automatically look for action file in the parent or higher directory (this is for security reason).
-If you want Benry-ActionRunner to behave like Rake, add <code>-u</code> and ``-p` options.</p>
+If you want Benry-ActionRunner to behave like Rake, add <code>-u</code> and ``-w` options.</p>
 <ul>
 <li><code>-u</code> --- search for action file in parent or upper directory.</li>
-<li><code>-p</code> --- change current directory to where action file exists.</li>
+<li><code>-w</code> --- change current directory to where action file exists.</li>
 </ul>
 <p>If you want to add these options always, set environment variable <code>$ACTIONRUNNER_OPTION</code>.</p>
 <pre class="language-console">
@@ -628,13 +628,13 @@ Actionfile.rb
 [bash]$ arun -l               # Error because action file not found here.
 [ERROR] Action file ('Actionfile.rb') not found. Create it by `arun -g` command firstly.
 
-[bash]$ arun -l <strong>-up</strong>           # Search 'Actionfile.rb' and change current directory.
+[bash]$ arun -l <strong>-wu</strong>           # Search 'Actionfile.rb' and change current directory.
 Actions:
   hello              : print greeting message
   help               : print help message (of action if specified)
 
 [bash]$ <strong>export ACTIONRUNNER_OPTION="-up"</strong>
-[bash]$ arun -l               # No need to add `-up`.
+[bash]$ arun -l               # No need to add `-wu`.
 $ cd ../..
 Actions:
   build              : build something
