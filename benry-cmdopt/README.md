@@ -277,7 +277,7 @@ end
 
   In fact, file `optparse.rb` and `optparse/*.rb` (in Ruby 3.2)
   contains total 1298 lines (except comments and blanks), while
-  `benry/cmdopt.rb` (v2.0.0) contains only 429 lines (except both, too).
+  `benry/cmdopt.rb` (v2.3.0) contains only 467 lines (except both, too).
 
 
 
