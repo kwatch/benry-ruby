@@ -22,8 +22,8 @@ END
   spec.files           = Dir[
                            "README.md", "MIT-LICENSE", "CHANGES.md",
                            "#{spec.name}.gemspec",
-                           "lib/**/*.rb", "test/**/*.rb", "bin/*", # "examples/**/*",
-                           "doc/*.html", "doc/css/*.css",
+                           "lib/**/*.rb", "test/**/*.rb", "bin/*",
+                           #"doc/*.html", "doc/css/*.css",
                          ]
   #spec.executables     = []
   spec.bindir          = "bin"
@@ -32,6 +32,7 @@ END
   #spec.extra_rdoc_files = ["README.md", "CHANGES.md"]
 
   spec.required_ruby_version = ">= 2.3"
-  spec.add_runtime_dependency     "benry-cmdapp"    , "~> 0", "=> 0.3"
-  spec.add_development_dependency "oktest"          , "~> 1"
+  spec.add_runtime_dependency     "benry-cmdapp"      , "~> 1"
+  spec.add_runtime_dependency     "benry-unixcommand" , "~> 1"
+  spec.add_development_dependency "oktest"            , "~> 1"
 end
