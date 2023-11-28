@@ -81,8 +81,9 @@ module TestHelperModule
   end
 
   def teardown_all()
-    Dir.chdir @_pwd
     fname = Benry::ActionRunner::DEFAULT_FILENAME
+    File.unlink(fname) if File.exist?(fname)
+    Dir.chdir @_pwd
     if File.exist?("__" + fname)
       File.rename("__" + fname, fname)
     end
