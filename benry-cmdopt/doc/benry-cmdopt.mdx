@@ -446,11 +446,24 @@ p options[:flag2]   #=> {{*false*}} (!!!!!)
 
 === Multiple Value Option
 
+Release 2.4 or later supports ``multiple: true`` keyword arg.
+
 ```ruby
 require 'benry/cmdopt'
 cmdopt = Benry::CmdOpt.new
 
-cmdopt.add(:lib , '-I <NAME>', "library name") {{*{|options, key, val|*}}
+cmdopt.add(:inc , '-I <path>', "include path", {{*multiple: true*}})  # !!!!
+options = cmdopt.parse(["-I", "/foo", "-I", "/bar", "-I/baz"])
+p options   #=> {{*{:inc=>["/foo", "/bar", "/baz"]}*}}
+```
+
+On older version:
+
+```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::CmdOpt.new
+
+cmdopt.add(:inc , '-I <path>', "include path") {{*{|options, key, val|*}}
   {{*arr = options[key] || []*}}
   {{*arr << val*}}
   {{*arr*}}
@@ -458,8 +471,8 @@ cmdopt.add(:lib , '-I <NAME>', "library name") {{*{|options, key, val|*}}
   #(options[key] || []) << val
 {{*}*}}
 
-options = cmdopt.parse(["-I", "foo", "-I", "bar", "-Ibaz"])
-p options   #=> {{*{:lib=>["foo", "bar", "baz"]}*}}
+options = cmdopt.parse(["-I", "/foo", "-I", "/bar", "-I/baz"])
+p options   #=> {{*{:inc=>["/foo", "/bar", "/baz"]}*}}
 ```
 
 
