@@ -322,7 +322,7 @@ module Benry::CmdOpt
 
   class SchemaItem    # avoid Struct
 
-    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, multiple: nil, detail: nil, value: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       _init_validation(param, required, type, rexp, enum, range, value)
       @key      = key       unless nil == key
@@ -336,6 +336,7 @@ module Benry::CmdOpt
       @rexp     = rexp      unless nil == rexp
       @enum     = enum      unless nil == enum
       @range    = range     unless nil == range
+      @multiple = multiple  unless nil == multiple
       @detail   = detail    unless nil == detail
       @value    = value     unless nil == value
       @hidden   = hidden    unless nil == hidden
