@@ -368,6 +368,12 @@ module Benry::CmdOpt
       return :optional
     end
 
+    def multiple?()
+      #; [!1lj8v] returns true if @multiple is truthy.
+      #; [!cun23] returns false if @multiple is falthy.
+      return !! @multiple
+    end
+
     def hidden?()
       #; [!no6ov] returns true if @hidden is true.
       #; [!ej8ot] returns false if @hidden is false.

@@ -993,6 +993,25 @@ END
     end
 
 
+    topic '#multiple?()' do
+
+      spec "[!1lj8v] returns true if @multiple is truthy." do
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: true)
+        ok {item.multiple?} == true
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: 123)
+        ok {item.multiple?} == true
+      end
+
+      spec "[!cun23] returns false if @multiple is falthy." do
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: false)
+        ok {item.multiple?} == false
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: nil)
+        ok {item.multiple?} == false
+      end
+
+    end
+
+
     topic '#hidden?()' do
 
       spec "[!no6ov] returns true if @hidden is true." do
