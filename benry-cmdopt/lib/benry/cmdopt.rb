@@ -103,7 +103,7 @@ module Benry::CmdOpt
       self
     end
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, multiple: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
       rest.each do |x|
@@ -137,7 +137,7 @@ module Benry::CmdOpt
       end
       #; [!yht0v] keeps command option definitions.
       item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                 type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
+                 type: type, rexp: rexp, enum: enum, range: range, value: value, multiple: multiple, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       add_item(item)
       item
     end
