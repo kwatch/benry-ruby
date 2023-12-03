@@ -15,7 +15,8 @@ Oktest.scope do
     sc.add(:file   , "-f, --file=<FILE>"     , "filename")
     sc.add(:indent , "-i, --indent[=<WIDTH>]", "enable indent", type: Integer)
     sc.add(:mode   , "-m, --mode=<MODE>"     , "mode", enum: ['verbose', 'quiet'])
-    sc.add(:libpath, "-I, --path=<PATH>"     , "library path (multiple ok)") do |optdef, key, val|
+    sc.add(:include, "-I, --include=<PATH>"  , "include path (multiple ok)", multiple: true)
+    sc.add(:libpath, "-L, --path=<PATH>"     , "library path (multiple ok)") do |optdef, key, val|
       File.directory?(val)  or raise "Directory not exist."
       arr = optdef[key] || []
       arr << val
@@ -1326,7 +1327,13 @@ END
         argv = ["--path=/foo/bar"]
         pr = proc { @parser.parse(argv) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError, "--path=/foo/bar: Directory not exist.")
+      end
 
+      spec "[!1m87b] supports multiple option." do
+        argv = ["--include=/foo", "--include=/bar"]
+        opts = @parser.parse(argv)
+        ok {opts} == {:include=>["/foo", "/bar"]}
+        ok {argv} == []
       end
 
     end
@@ -1376,9 +1383,16 @@ END
         pr = proc { @parser.parse(argv) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError, "-iaaa: Integer expected.")
         #
-        argv = ["-I", "/foo/bar"]
+        argv = ["-L", "/foo/bar"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-I /foo/bar: Directory not exist.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-L /foo/bar: Directory not exist.")
+      end
+
+      spec "[!187r2] supports multiple option." do
+        argv = ["-I", "/foo", "-I/bar"]
+        opts = @parser.parse(argv)
+        ok {opts} == {:include=>["/foo", "/bar"]}
+        ok {argv} == []
       end
 
     end

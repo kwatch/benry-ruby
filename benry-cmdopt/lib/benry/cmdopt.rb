@@ -636,7 +636,8 @@ module Benry::CmdOpt
       rescue RuntimeError => ex
         raise _error("#{optstr}: #{ex.message}")
       end
-      optdict[item.key] = val
+      #; [!1m87b] supports multiple option.
+      store_option_value(optdict, item, val)
     end
 
     def parse_short_options(optstr, optdict, &block)
@@ -676,7 +677,8 @@ module Benry::CmdOpt
             raise _error("-#{char}#{sp}#{val}: #{ex.message}")
           end
         end
-        optdict[item.key] = val
+        #; [!187r2] supports multiple option.
+        store_option_value(optdict, item, val)
       end
     end
 
