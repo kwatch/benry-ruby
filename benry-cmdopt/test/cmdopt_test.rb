@@ -1396,6 +1396,35 @@ END
     end
 
 
+    topic '#store_option_value()' do
+
+      spec "[!my86j] stores multiple values if multiple option item." do
+        schema = Benry::CmdOpt::Schema.new()
+        item = schema.add(:includes, "-I <path>", "include path", multiple: true)
+        parser = Benry::CmdOpt::Parser.new(schema)
+        optdict = {}
+        parser.instance_eval do
+          store_option_value(optdict, item, "/usr/include")
+          store_option_value(optdict, item, "/usr/local/include")
+        end
+        ok {optdict} == {:includes => ["/usr/include", "/usr/local/include"]}
+      end
+
+      spec "[!tm7xw] stores singile value if not multiple option item." do
+        schema = Benry::CmdOpt::Schema.new()
+        item = schema.add(:include, "-I <path>", "include path")
+        parser = Benry::CmdOpt::Parser.new(schema)
+        optdict = {}
+        parser.instance_eval do
+          store_option_value(optdict, item, "/usr/include")
+          store_option_value(optdict, item, "/usr/local/include")
+        end
+        ok {optdict} == {:include => "/usr/local/include"}
+      end
+
+    end
+
+
     topic '#handle_unknown_long_option()' do
 
       spec "[!0q78a] raises OptionError." do

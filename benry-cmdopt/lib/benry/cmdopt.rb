@@ -685,6 +685,16 @@ module Benry::CmdOpt
       return OPTIONS_CLASS.new
     end
 
+    def store_option_value(optdict, item, val)
+      #; [!my86j] stores multiple values if multiple option item.
+      if item.multiple?
+        (optdict[item.key] ||= []) << val
+      #; [!tm7xw] stores singile value if not multiple option item.
+      else
+        optdict[item.key] = val
+      end
+    end
+
     def handle_unknown_long_option(optstr, name, val)
       #; [!0q78a] raises OptionError.
       raise _error("#{optstr}: Unknown long option.")
