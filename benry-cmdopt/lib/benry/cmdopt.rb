@@ -40,11 +40,11 @@ module Benry::CmdOpt
 
     attr_reader :schema
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, multiple: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!vmb3r] defines command option.
       #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
-      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
+      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, multiple: multiple, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       #; [!tu4k3] returns self.
       self
     end
