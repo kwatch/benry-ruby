@@ -31,6 +31,6 @@ END
   #spec.extra_rdoc_files = ["README.md", "CHANGES.md"]
 
   spec.required_ruby_version = ">= 2.3"
-  spec.add_runtime_dependency     "benry-cmdopt"    , "~> 2", ">= 2.2.0"
+  spec.add_runtime_dependency     "benry-cmdopt"    , "~> 2", ">= 2.4.0"
   spec.add_development_dependency "oktest"          , "~> 1"
 end
