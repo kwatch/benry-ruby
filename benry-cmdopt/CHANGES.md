@@ -2,6 +2,12 @@ CHANGES
 =======
 
 
+Release 2.4.0 (????-??-??)
+--------------------------
+
+* [enhance] `Schema.add()` supports `multiple: true` keyword arg which enables to specify option multiple times.
+
+
 Release 2.3.0 (2023-11-26)
 --------------------------
 

@@ -40,11 +40,12 @@ module Benry::CmdOpt
 
     attr_reader :schema
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, multiple: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!vmb3r] defines command option.
       #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
-      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
+      @schema.add(key, optdef, desc, *rest,
+                  type: type, rexp: rexp, enum: enum, range: range, value: value, multiple: multiple, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       #; [!tu4k3] returns self.
       self
     end
@@ -103,7 +104,7 @@ module Benry::CmdOpt
       self
     end
 
-    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def add(key, optdef, desc, *rest, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, multiple: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       #; [!kuhf9] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
       rest.each do |x|
@@ -137,7 +138,7 @@ module Benry::CmdOpt
       end
       #; [!yht0v] keeps command option definitions.
       item = SchemaItem.new(key, optdef, desc, short, long, param, required,
-                 type: type, rexp: rexp, enum: enum, range: range, value: value, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
+                 type: type, rexp: rexp, enum: enum, range: range, value: value, multiple: multiple, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       add_item(item)
       item
     end
@@ -322,7 +323,7 @@ module Benry::CmdOpt
 
   class SchemaItem    # avoid Struct
 
-    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, detail: nil, value: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, multiple: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       _init_validation(param, required, type, rexp, enum, range, value)
       @key      = key       unless nil == key
@@ -336,8 +337,9 @@ module Benry::CmdOpt
       @rexp     = rexp      unless nil == rexp
       @enum     = enum      unless nil == enum
       @range    = range     unless nil == range
-      @detail   = detail    unless nil == detail
       @value    = value     unless nil == value
+      @multiple = multiple  unless nil == multiple
+      @detail   = detail    unless nil == detail
       @hidden   = hidden    unless nil == hidden
       @important = important unless nil == important
       @tag      = tag       unless nil == tag
@@ -346,7 +348,7 @@ module Benry::CmdOpt
       @enum.freeze() if @enum
     end
 
-    attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :detail, :value, :tag, :callback
+    attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :value, :detail, :tag, :callback
     attr_writer :desc, :detail, :hidden, :important, :tag    # !!experimental!!
     alias pattern rexp   # for backward compatibility
     alias help desc      # for backward compatibility
@@ -365,6 +367,12 @@ module Benry::CmdOpt
       return :none     if ! @param
       return :required if @required
       return :optional
+    end
+
+    def multiple?()
+      #; [!1lj8v] returns true if @multiple is truthy.
+      #; [!cun23] returns false if @multiple is falthy.
+      return !! @multiple
     end
 
     def hidden?()
@@ -629,7 +637,8 @@ module Benry::CmdOpt
       rescue RuntimeError => ex
         raise _error("#{optstr}: #{ex.message}")
       end
-      optdict[item.key] = val
+      #; [!1m87b] supports multiple option.
+      store_option_value(optdict, item, val)
     end
 
     def parse_short_options(optstr, optdict, &block)
@@ -669,13 +678,24 @@ module Benry::CmdOpt
             raise _error("-#{char}#{sp}#{val}: #{ex.message}")
           end
         end
-        optdict[item.key] = val
+        #; [!187r2] supports multiple option.
+        store_option_value(optdict, item, val)
       end
     end
 
     def new_options_dict()
       #; [!vm6h0] returns new hash object.
       return OPTIONS_CLASS.new
+    end
+
+    def store_option_value(optdict, item, val)
+      #; [!my86j] stores multiple values if multiple option item.
+      if item.multiple?
+        (optdict[item.key] ||= []) << val
+      #; [!tm7xw] stores singile value if not multiple option item.
+      else
+        optdict[item.key] = val
+      end
     end
 
     def handle_unknown_long_option(optstr, name, val)

@@ -15,7 +15,8 @@ Oktest.scope do
     sc.add(:file   , "-f, --file=<FILE>"     , "filename")
     sc.add(:indent , "-i, --indent[=<WIDTH>]", "enable indent", type: Integer)
     sc.add(:mode   , "-m, --mode=<MODE>"     , "mode", enum: ['verbose', 'quiet'])
-    sc.add(:libpath, "-I, --path=<PATH>"     , "library path (multiple ok)") do |optdef, key, val|
+    sc.add(:include, "-I, --include=<PATH>"  , "include path (multiple ok)", multiple: true)
+    sc.add(:libpath, "-L, --path=<PATH>"     , "library path (multiple ok)") do |optdef, key, val|
       File.directory?(val)  or raise "Directory not exist."
       arr = optdef[key] || []
       arr << val
@@ -993,6 +994,25 @@ END
     end
 
 
+    topic '#multiple?()' do
+
+      spec "[!1lj8v] returns true if @multiple is truthy." do
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: true)
+        ok {item.multiple?} == true
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: 123)
+        ok {item.multiple?} == true
+      end
+
+      spec "[!cun23] returns false if @multiple is falthy." do
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: false)
+        ok {item.multiple?} == false
+        item = Benry::CmdOpt::SchemaItem.new(:includes, "-I <path>", "include path", "I", nil, nil, nil, multiple: nil)
+        ok {item.multiple?} == false
+      end
+
+    end
+
+
     topic '#hidden?()' do
 
       spec "[!no6ov] returns true if @hidden is true." do
@@ -1307,7 +1327,13 @@ END
         argv = ["--path=/foo/bar"]
         pr = proc { @parser.parse(argv) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError, "--path=/foo/bar: Directory not exist.")
+      end
 
+      spec "[!1m87b] supports multiple option." do
+        argv = ["--include=/foo", "--include=/bar"]
+        opts = @parser.parse(argv)
+        ok {opts} == {:include=>["/foo", "/bar"]}
+        ok {argv} == []
       end
 
     end
@@ -1357,9 +1383,16 @@ END
         pr = proc { @parser.parse(argv) }
         ok {pr}.raise?(Benry::CmdOpt::OptionError, "-iaaa: Integer expected.")
         #
-        argv = ["-I", "/foo/bar"]
+        argv = ["-L", "/foo/bar"]
         pr = proc { @parser.parse(argv) }
-        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-I /foo/bar: Directory not exist.")
+        ok {pr}.raise?(Benry::CmdOpt::OptionError, "-L /foo/bar: Directory not exist.")
+      end
+
+      spec "[!187r2] supports multiple option." do
+        argv = ["-I", "/foo", "-I/bar"]
+        opts = @parser.parse(argv)
+        ok {opts} == {:include=>["/foo", "/bar"]}
+        ok {argv} == []
       end
 
     end
@@ -1372,6 +1405,35 @@ END
         ret = parser.__send__(:new_options_dict)
         ok {ret}.is_a?(Hash)
         ok {ret} == {}
+      end
+
+    end
+
+
+    topic '#store_option_value()' do
+
+      spec "[!my86j] stores multiple values if multiple option item." do
+        schema = Benry::CmdOpt::Schema.new()
+        item = schema.add(:includes, "-I <path>", "include path", multiple: true)
+        parser = Benry::CmdOpt::Parser.new(schema)
+        optdict = {}
+        parser.instance_eval do
+          store_option_value(optdict, item, "/usr/include")
+          store_option_value(optdict, item, "/usr/local/include")
+        end
+        ok {optdict} == {:includes => ["/usr/include", "/usr/local/include"]}
+      end
+
+      spec "[!tm7xw] stores singile value if not multiple option item." do
+        schema = Benry::CmdOpt::Schema.new()
+        item = schema.add(:include, "-I <path>", "include path")
+        parser = Benry::CmdOpt::Parser.new(schema)
+        optdict = {}
+        parser.instance_eval do
+          store_option_value(optdict, item, "/usr/include")
+          store_option_value(optdict, item, "/usr/local/include")
+        end
+        ok {optdict} == {:include => "/usr/local/include"}
       end
 
     end
