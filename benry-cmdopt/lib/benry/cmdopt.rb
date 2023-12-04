@@ -44,7 +44,8 @@ module Benry::CmdOpt
       rexp ||= pattern    # for backward compatibility
       #; [!vmb3r] defines command option.
       #; [!71cvg] type, rexp, enum, and range are can be passed as positional args as well as keyword args.
-      @schema.add(key, optdef, desc, *rest, type: type, rexp: rexp, enum: enum, range: range, value: value, multiple: multiple, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
+      @schema.add(key, optdef, desc, *rest,
+                  type: type, rexp: rexp, enum: enum, range: range, value: value, multiple: multiple, detail: detail, hidden: hidden, important: important, tag: tag, &callback)
       #; [!tu4k3] returns self.
       self
     end
@@ -322,7 +323,7 @@ module Benry::CmdOpt
 
   class SchemaItem    # avoid Struct
 
-    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, multiple: nil, detail: nil, value: nil, hidden: nil, important: nil, tag: nil, &callback)
+    def initialize(key, optdef, desc, short, long, param, required, type: nil, rexp: nil, pattern: nil, enum: nil, range: nil, value: nil, multiple: nil, detail: nil, hidden: nil, important: nil, tag: nil, &callback)
       rexp ||= pattern    # for backward compatibility
       _init_validation(param, required, type, rexp, enum, range, value)
       @key      = key       unless nil == key
@@ -336,9 +337,9 @@ module Benry::CmdOpt
       @rexp     = rexp      unless nil == rexp
       @enum     = enum      unless nil == enum
       @range    = range     unless nil == range
+      @value    = value     unless nil == value
       @multiple = multiple  unless nil == multiple
       @detail   = detail    unless nil == detail
-      @value    = value     unless nil == value
       @hidden   = hidden    unless nil == hidden
       @important = important unless nil == important
       @tag      = tag       unless nil == tag
@@ -347,7 +348,7 @@ module Benry::CmdOpt
       @enum.freeze() if @enum
     end
 
-    attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :detail, :value, :tag, :callback
+    attr_reader :key, :optdef, :desc, :short, :long, :param, :type, :rexp, :enum, :range, :value, :detail, :tag, :callback
     attr_writer :desc, :detail, :hidden, :important, :tag    # !!experimental!!
     alias pattern rexp   # for backward compatibility
     alias help desc      # for backward compatibility
