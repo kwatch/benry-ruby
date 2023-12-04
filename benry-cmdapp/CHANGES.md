@@ -2,6 +2,12 @@ CHANGES
 =======
 
 
+Release 1.1.0 (2023-12-04)
+--------------------------
+
+* [enhance] Supports multiple option by `@options.(..., multiple: true)`.
+
+
 Release 1.0.0 (2023-11-25)
 --------------------------
 
