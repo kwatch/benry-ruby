@@ -57,6 +57,11 @@ and easy to understahnd.</p>
 <li><a href="#not-supported">Not Supported</a></li>
 </ul></li>
 <li><a href="#internal-classes">Internal Classes</a></li>
+<li><a href="#faq">FAQ</a>
+<ul>
+<li><a href="#q-how-to-change-or-customize-error-messages">Q: How to change or customize error messages?</a></li>
+<li><a href="#q-is-it-possible-to-support--vvv-style-option">Q: Is it possible to support <code>-vvv</code> style option?</a></li>
+</ul></li>
 <li><a href="#license-and-copyright">License and Copyright</a></li>
 </ul>
 </div>
@@ -293,12 +298,12 @@ end
 <p></p>
   In fact, file <code>optparse.rb</code> and <code>optparse/*.rb</code> (in Ruby 3.2)
   contains total 1298 lines (except comments and blanks), while
-  <code>benry/cmdopt.rb</code> (v2.3.0) contains only 467 lines (except both, too).</li>
+  <code>benry/cmdopt.rb</code> (v2.4.0) contains only 479 lines (except both, too).</li>
 </ul>
 </section>
 <section class="section" id="install">
 <h2>Install</h2>
-<pre>
+<pre class="language-console">
 $ gem install benry-cmdopt
 </pre>
 </section>
@@ -687,6 +692,30 @@ opts = <strong>cmdopt.parse</strong>(ARGV)                # same as <strong>pars
 </pre>
 <p>Notice that <code>cmdopt.is_a?(Benry::CmdOpt)</code> results in false.
 Use <code>cmdopt.is_a?(Benry::CmdOpt::Facade)</code> instead if necessary.</p>
+</section>
+<section class="section" id="faq">
+<h2>FAQ</h2>
+<section class="subsection" id="q-how-to-change-or-customize-error-messages">
+<h3>Q: How to change or customize error messages?</h3>
+<p>A: Currently not supported. Maybe supported in the future.</p>
+</section>
+<section class="subsection" id="q-is-it-possible-to-support--vvv-style-option">
+<h3>Q: Is it possible to support <code>-vvv</code> style option?</h3>
+<p>A: Yes.</p>
+<pre class="language-ruby">
+require 'benry/cmdopt'
+cmdopt = Benry::CmdOpt.new
+
+cmdopt.add(:verbose , '-v', "verbose level") {|opts, key, val|
+  opts[key] ||= 0
+  opts[key] += 1
+}
+
+p cmdopt.parse(["-v"])     #=&gt; {:verbose=&gt;1}
+p cmdopt.parse(["-vv"])    #=&gt; {:verbose=&gt;2}
+p cmdopt.parse(["-vvv"])   #=&gt; {:verbose=&gt;3}
+</pre>
+</section>
 </section>
 <section class="section" id="license-and-copyright">
 <h2>License and Copyright</h2>

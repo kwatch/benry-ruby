@@ -41,6 +41,9 @@ Benry-CmdOpt requires Ruby >= 2.3.
   * [Important Options](#important-options)
   * [Not Supported](#not-supported)
 * [Internal Classes](#internal-classes)
+* [FAQ](#faq)
+  * [Q: How to change or customize error messages?](#q-how-to-change-or-customize-error-messages)
+  * [Q: Is it possible to support `-vvv` style option?](#q-is-it-possible-to-support--vvv-style-option)
 * [License and Copyright](#license-and-copyright)
 
 <!-- /TOC -->
@@ -277,13 +280,13 @@ end
 
   In fact, file `optparse.rb` and `optparse/*.rb` (in Ruby 3.2)
   contains total 1298 lines (except comments and blanks), while
-  `benry/cmdopt.rb` (v2.3.0) contains only 467 lines (except both, too).
+  `benry/cmdopt.rb` (v2.4.0) contains only 479 lines (except both, too).
 
 
 
 ## Install
 
-```
+```console
 $ gem install benry-cmdopt
 ```
 
@@ -714,6 +717,34 @@ opts = cmdopt.parse(ARGV)                # same as parser.parse(...)
 
 Notice that `cmdopt.is_a?(Benry::CmdOpt)` results in false.
 Use `cmdopt.is_a?(Benry::CmdOpt::Facade)` instead if necessary.
+
+
+
+## FAQ
+
+
+### Q: How to change or customize error messages?
+
+A: Currently not supported. Maybe supported in the future.
+
+
+### Q: Is it possible to support `-vvv` style option?
+
+A: Yes.
+
+```ruby
+require 'benry/cmdopt'
+cmdopt = Benry::CmdOpt.new
+
+cmdopt.add(:verbose , '-v', "verbose level") {|opts, key, val|
+  opts[key] ||= 0
+  opts[key] += 1
+}
+
+p cmdopt.parse(["-v"])     #=> {:verbose=>1}
+p cmdopt.parse(["-vv"])    #=> {:verbose=>2}
+p cmdopt.parse(["-vvv"])   #=> {:verbose=>3}
+```
 
 
 
