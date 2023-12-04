@@ -80,6 +80,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#hidden-action">Hidden Action</a></li>
 <li><a href="#hidden-option">Hidden Option</a></li>
 <li><a href="#important-actions-or-options">Important Actions or Options</a></li>
+<li><a href="#multiple-option">Multiple Option</a></li>
 </ul></li>
 <li><a href="#configuratoin-and-customization">Configuratoin and Customization</a>
 <ul>
@@ -100,7 +101,7 @@ like <code>git</code>, <code>docker</code>, or <code>npm</code>, Benry-CmdApp is
 <li><a href="#q-how-to-re-define-an-existing-action">Q: How to re-define an existing action?</a></li>
 <li><a href="#q-how-to-show-entering-into-or-exitting-from-actions">Q: How to show entering into or exitting from actions?</a></li>
 <li><a href="#q-how-to-enabledisable-color-mode">Q: How to enable/disable color mode?</a></li>
-<li><a href="#q-how-to-define-a-multiple-option-like--i-option-of-ruby">Q: How to define a multiple option, like <code>-I</code> option of Ruby?</a></li>
+<li><a href="#q-how-to-define--vvv-style-option">Q: How to define <code>-vvv</code> style option?</a></li>
 <li><a href="#q-how-to-show-global-option--l-topic-in-help-message">Q: How to show global option <code>-L &lttopic&gt;</code> in help message?</a></li>
 <li><a href="#q-how-to-specify-detailed-description-of-options">Q: How to specify detailed description of options?</a></li>
 <li><a href="#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-">Q: How to list only aliases (or actions) excluding actions (or aliases) ?</a></li>
@@ -1925,6 +1926,32 @@ Options:
   <strong>--bar              : not important option</strong>  # !!!! gray color !!!!
 </pre>
 </section>
+<section class="subsection" id="multiple-option">
+<h3>Multiple Option</h3>
+<p>If you need multiple options like <code>-I</code> option of Ruby,
+pass <code>multiple: true</code> to <code>@option.()</code>.</p>
+<p>File: ex39.rb</p>
+<pre class="language-ruby">
+require 'benry/cmdapp'
+
+class TestAction &lt Benry::CmdApp::Action
+
+  @action.("multiple option test")
+  @option.(:path, "-I &ltpath&gt;", "path", <strong>multiple: true</strong>)
+  def test_(path: [])
+    puts "path=#{path.inspect}"     #=&gt; path=["/tmp", "/var/tmp"]
+  end
+
+end
+
+exit Benry::CmdApp.main("test app")
+</pre>
+<p>Output:</p>
+<pre class="language-console">
+[bash]$ ruby ex39.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
+path=<strong>["/tmp", "/var/tmp"]</strong>                         # !!!!
+</pre>
+</section>
 </section>
 <section class="section" id="configuratoin-and-customization">
 <h2>Configuratoin and Customization</h2>
@@ -2779,8 +2806,8 @@ Actions:
 [bash]$ ruby ex64.rb -h <strong>--color</strong>                  # !!!!
 </pre>
 </section>
-<section class="subsection" id="q-how-to-define-a-multiple-option-like--i-option-of-ruby">
-<h3>Q: How to define a multiple option, like <code>-I</code> option of Ruby?</h3>
+<section class="subsection" id="q-how-to-define--vvv-style-option">
+<h3>Q: How to define <code>-vvv</code> style option?</h3>
 <p>A: Provide block parameter on <code>@option.()</code>.</p>
 <p>File: ex65.rb</p>
 <pre class="language-ruby">
@@ -2788,16 +2815,13 @@ require 'benry/cmdapp'
 
 class TestAction &lt Benry::CmdApp::Action
 
-  @action.("multiple option test")
-  @option.(:path, "-I &ltpath&gt;", "path") <strong>{|options, key, val|</strong>  # !!!!
-    <strong>arr = options[key] || []</strong>                                 # !!!!
-    <strong>arr &lt&lt val</strong>                                               # !!!!
-    <strong>arr</strong>                                                      # !!!!
-    ## or:                                                   # !!!!
-    #<strong>(options[key] || []) &lt&lt val</strong>                             # !!!!
-  <strong>}</strong>                                                          # !!!!
-  def test_(path: [])
-    puts "path=#{path.inspect}"     #=&gt; path=["/tmp", "/var/tmp"]
+  @action.("set verbose level")
+  @option.(:verbose, "-v", "verbose level") <strong>{|opts, key, val|</strong>  # !!!!
+    <strong>opts[key] ||= 0</strong>                                            # !!!!
+    <strong>opts[key] += 1</strong>                                             # !!!!
+  <strong>}</strong>                                                            # !!!!
+  def test_(verbose: 0)
+    puts "verbose=#{verbose}"
   end
 
 end
@@ -2806,8 +2830,12 @@ exit Benry::CmdApp.main("test app")
 </pre>
 <p>Output:</p>
 <pre class="language-console">
-[bash]$ ruby ex65.rb test <strong>-I /tmp -I /var/tmp</strong>     # !!!!
-path=["/tmp", "/var/tmp"]                         # !!!!
+[bash]$ ruby ex65.rb test <strong>-v</strong>              # !!!!
+verbose=<strong>1</strong>
+[bash]$ ruby ex65.rb test <strong>-vv</strong>             # !!!!
+verbose=<strong>2</strong>
+[bash]$ ruby ex65.rb test <strong>-vvv</strong>            # !!!!
+verbose=<strong>3</strong>
 </pre>
 </section>
 <section class="subsection" id="q-how-to-show-global-option--l-topic-in-help-message">

@@ -61,6 +61,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Hidden Action](#hidden-action)
   * [Hidden Option](#hidden-option)
   * [Important Actions or Options](#important-actions-or-options)
+  * [Multiple Option](#multiple-option)
 * [Configuratoin and Customization](#configuratoin-and-customization)
   * [Application Configuration](#application-configuration)
   * [Customization of Global Options](#customization-of-global-options)
@@ -77,7 +78,7 @@ Benry-CmdApp requires Ruby >= 2.3.
   * [Q: How to re-define an existing action?](#q-how-to-re-define-an-existing-action)
   * [Q: How to show entering into or exitting from actions?](#q-how-to-show-entering-into-or-exitting-from-actions)
   * [Q: How to enable/disable color mode?](#q-how-to-enabledisable-color-mode)
-  * [Q: How to define a multiple option, like `-I` option of Ruby?](#q-how-to-define-a-multiple-option-like--i-option-of-ruby)
+  * [Q: How to define `-vvv` style option?](#q-how-to-define--vvv-style-option)
   * [Q: How to show global option `-L <topic>` in help message?](#q-how-to-show-global-option--l-topic-in-help-message)
   * [Q: How to specify detailed description of options?](#q-how-to-specify-detailed-description-of-options)
   * [Q: How to list only aliases (or actions) excluding actions (or aliases) ?](#q-how-to-list-only-aliases-or-actions-excluding-actions-or-aliases-)
@@ -2100,6 +2101,37 @@ Options:
 ```
 
 
+### Multiple Option
+
+If you need multiple options like `-I` option of Ruby,
+pass `multiple: true` to `@option.()`.
+
+File: ex39.rb
+
+```ruby
+require 'benry/cmdapp'
+
+class TestAction < Benry::CmdApp::Action
+
+  @action.("multiple option test")
+  @option.(:path, "-I <path>", "path", multiple: true)
+  def test_(path: [])
+    puts "path=#{path.inspect}"     #=> path=["/tmp", "/var/tmp"]
+  end
+
+end
+
+exit Benry::CmdApp.main("test app")
+```
+
+Output:
+
+```console
+[bash]$ ruby ex39.rb test -I /tmp -I /var/tmp     # !!!!
+path=["/tmp", "/var/tmp"]                         # !!!!
+```
+
+
 
 ## Configuratoin and Customization
 
@@ -3025,7 +3057,7 @@ Actions:
 ```
 
 
-### Q: How to define a multiple option, like `-I` option of Ruby?
+### Q: How to define `-vvv` style option?
 
 A: Provide block parameter on `@option.()`.
 
@@ -3036,16 +3068,13 @@ require 'benry/cmdapp'
 
 class TestAction < Benry::CmdApp::Action
 
-  @action.("multiple option test")
-  @option.(:path, "-I <path>", "path") {|options, key, val|  # !!!!
-    arr = options[key] || []                                 # !!!!
-    arr << val                                               # !!!!
-    arr                                                      # !!!!
-    ## or:                                                   # !!!!
-    #(options[key] || []) << val                             # !!!!
-  }                                                          # !!!!
-  def test_(path: [])
-    puts "path=#{path.inspect}"     #=> path=["/tmp", "/var/tmp"]
+  @action.("set verbose level")
+  @option.(:verbose, "-v", "verbose level") {|opts, key, val|  # !!!!
+    opts[key] ||= 0                                            # !!!!
+    opts[key] += 1                                             # !!!!
+  }                                                            # !!!!
+  def test_(verbose: 0)
+    puts "verbose=#{verbose}"
   end
 
 end
@@ -3056,8 +3085,12 @@ exit Benry::CmdApp.main("test app")
 Output:
 
 ```console
-[bash]$ ruby ex65.rb test -I /tmp -I /var/tmp     # !!!!
-path=["/tmp", "/var/tmp"]                         # !!!!
+[bash]$ ruby ex65.rb test -v              # !!!!
+verbose=1
+[bash]$ ruby ex65.rb test -vv             # !!!!
+verbose=2
+[bash]$ ruby ex65.rb test -vvv            # !!!!
+verbose=3
 ```
 
 
