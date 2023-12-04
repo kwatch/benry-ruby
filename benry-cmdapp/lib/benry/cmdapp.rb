@@ -525,7 +525,7 @@ module Benry::CmdApp
         #; [!en6n0] sets Proc object to `@option` in subclass.
         @option = lambda do |key, optstr, desc,
                              type: nil, rexp: nil, pattern: nil, enum: nil,
-                             range: nil, value: nil, detail: nil,
+                             range: nil, value: nil, multiple: nil, detail: nil,
                              tag: nil, important: nil, hidden: nil, &callback|
           #; [!68hf8] raises DefinitionError if `@option.()` called without `@action.()`.
           @__actiondef__ != nil  or
@@ -534,7 +534,7 @@ module Benry::CmdApp
           schema = @__actiondef__[1]
           schema.add(key, optstr, desc,
                      type: type, rexp: rexp, pattern: pattern, enum: enum,
-                     range: range, value: value, detail: detail,
+                     range: range, value: value, multiple: multiple, detail: detail,
                      tag: tag, important: important, hidden: hidden, &callback)
         end
         #; [!aiwns] `@copy_options.()` copies options from other action.
