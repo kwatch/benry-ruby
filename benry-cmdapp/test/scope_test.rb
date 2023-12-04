@@ -116,8 +116,9 @@ Oktest.scope do
           @action.("foobar")
           @option.(:lang, "-l <lang>", "language", detail: "blabla", hidden: true) {|val| val }
           @option.(:color, "--color[=<on|off>]", "color mode", type: TrueClass)
+          @option.(:ints, "-n <N>", "integers", multiple: true, type: Integer)
           tuple = @__actiondef__
-          def s2055(help: false, lang: nil, color: nil)
+          def s2055(help: false, lang: nil, color: nil, ints: nil)
           end
         end
         schema = tuple[1]
@@ -130,6 +131,7 @@ Oktest.scope do
         ok {x.desc} == "language"
         ok {x.type} == nil
         ok {x.detail} == "blabla"
+        ok {x.multiple?} == false
         ok {x.hidden?} == true
         ok {x.callback}.is_a?(Proc)
         #
@@ -140,8 +142,15 @@ Oktest.scope do
         ok {x.desc} == "color mode"
         ok {x.type} == TrueClass
         ok {x.detail} == nil
+        ok {x.multiple?} == false
         ok {x.hidden?} == false
         ok {x.callback} == nil
+        #
+        x = schema.get(:ints)
+        ok {x.key} == :ints
+        ok {x.short} == "n"
+        ok {x.long} == nil
+        ok {x.multiple?} == true
       end
 
       spec "[!aiwns] `@copy_options.()` copies options from other action." do
