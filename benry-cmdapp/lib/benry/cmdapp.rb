@@ -91,7 +91,7 @@ module Benry::CmdApp
       sb << ("]" * n) if n > 0
       #; [!mbxy5] converts `.foo(x, *x_)` into `' <x>...'`.
       #; [!mh9ni] converts `.foo(x, *x2)` into `' <x>...'`.
-      return sb.join().sub(/<([^>]+)> \[<\1[-_2]>\.\.\.\]/, "<\\1>...")
+      return sb.join().sub(/<([^>]+)> \[<\1[-_2]?>\.\.\.\]/, "<\\1>...")
     end
 
     def param2arg(param)
