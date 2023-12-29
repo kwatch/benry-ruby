@@ -117,6 +117,10 @@ Oktest.scope do
         ok {Benry::CmdApp::Util.param2arg(:aa_bb_cc)} == "aa-bb-cc"
       end
 
+      spec "[!5d0qf] lefts `:_aa` as `'_aa'`." do
+        ok {Benry::CmdApp::Util.param2arg(:_aa_bb_cc_)} == "_aa-bb-cc"
+      end
+
     end
 
 
