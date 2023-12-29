@@ -2,6 +2,12 @@ CHANGES
 =======
 
 
+Release 1.1.1 (2023-12-29)
+--------------------------
+
+* [bugfix] Fix to print method parameter 'foo_' as 'foo' in help message.
+
+
 Release 1.1.0 (2023-12-04)
 --------------------------
 
