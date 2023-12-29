@@ -98,10 +98,12 @@ module Benry::CmdApp
       #; [!ahvsn] converts parameter name (Symbol) into argument name (String).
       #; [!27dpw] converts `:aa_or_bb_or_cc` into `'aa|bb|cc'`.
       #; [!to41h] converts `:aa__bb__cc` into `'aa.bb.cc'`.
+      #; [!cldax] converts `:aa_` into `'aa'`.
       #; [!2ma08] converts `:aa_bb_cc` into `'aa-bb-cc'`.
       s = param.to_s
       s = s.gsub('_or_', '|')    # ex: 'file_or_dir' => 'file|dir'
       s = s.gsub('__'  , '.')    # ex: 'file__html'  => 'file.html'
+      s = s.gsub(/_+\z/, '')     # ex: 'end_'        => 'end'
       s = s.gsub('_'   , '-')    # ex: 'foo_bar_baz' => 'foo-bar-baz'
       return s
     end

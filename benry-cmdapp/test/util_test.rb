@@ -109,6 +109,10 @@ Oktest.scope do
         ok {Benry::CmdApp::Util.param2arg(:aa__bb__cc)} == "aa.bb.cc"
       end
 
+      spec "[!cldax] converts `:aa_` into `'aa'`." do
+        ok {Benry::CmdApp::Util.param2arg(:aa_)} == "aa"
+      end
+
       spec "[!2ma08] converts `:aa_bb_cc` into `'aa-bb-cc'`." do
         ok {Benry::CmdApp::Util.param2arg(:aa_bb_cc)} == "aa-bb-cc"
       end
