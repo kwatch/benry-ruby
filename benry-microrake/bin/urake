@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+require 'benry/microrake'
+
+include Benry::MicroRake::Export
+exit Benry::MicroRake.main()
