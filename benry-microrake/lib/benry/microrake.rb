@@ -904,11 +904,18 @@ module Benry::MicroRake
     end
 
     def append_to_task(task_name, &block)
-      existing_task = find_task(task_name)  or
-        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
-      new_task = Task.new(existing_task.name, nil, &block)
-      existing_task.append_task(new_task)
-      return new_task
+      location = caller(1, 1).first
+      if task_name.is_a?(Hash)
+        dict = task_name
+        dict.each {|k, _| t_name = k; break }
+      else
+        t_name = task_name
+      end
+      existing_task = find_task(t_name)  or
+        raise TaskDefinitionError, "append_to_task(#{t_name.inspect}): Task not found."
+      @_task_desc == nil  or
+        raise TaskDefinitionError, "`append_to_task(#{t_name.inspect})` cannot be called with `desc()`."
+      return __task(task_name, nil, location, :append_to_task, &block)
     end
 
     def file(*args, **kwargs, &block)
