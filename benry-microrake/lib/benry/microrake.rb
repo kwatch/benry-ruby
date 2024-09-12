@@ -915,19 +915,15 @@ module Benry::MicroRake
 
     def append_to_task(task_name, &block)
       location = caller(1, 1).first
-      if task_name.is_a?(Hash)
-        dict = task_name
-        dict.each {|k, _| t_name = k; break }
-      else
-        t_name = task_name
-      end
-      mgr = TASK_MANAGER
-      existing_task = mgr.get_task(t_name)  or
-        raise TaskDefinitionError, "append_to_task(#{t_name.inspect}): Task not found."
       @_task_desc == nil  or
-        raise TaskDefinitionError, "`append_to_task(#{t_name.inspect})` cannot be called with `desc()`."
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
       task = __create_task(task_name, nil, location, :append_to_task, &block)
-      existing_task.append_task(task)
+      mgr = TASK_MANAGER
+      if (existing_task = mgr.get_task(name))
+        existing_task.append_task(task)
+      else
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
+      end
       return task
     end
 
