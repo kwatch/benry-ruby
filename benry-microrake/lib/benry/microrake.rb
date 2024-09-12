@@ -1076,7 +1076,7 @@ module Benry::MicroRake
       task_name = args.shift()
       task = mgr.get_task(task_name)  or
         raise "#{task_name}: Task not defined."
-      while args.empty? && args[0] =~ /\A(\w+)=(.*)\z/
+      while ! args.empty? && args[0] =~ /\A(\w+)=(.*)\z/
         ENV[$1] = $2
         args.shift()
       end
