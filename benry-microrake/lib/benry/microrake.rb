@@ -850,23 +850,18 @@ module Benry::MicroRake
       return task
     end
 
-    def __create_task(name, argnames, location, func, &block)
-      if @_task_desc
-        desc, schema, hidden, important = @_task_desc
-        @_task_desc = nil
-      else
-        desc = schema = hidden = important = nil
-      end
+    def __retrieve_prerequisite(task_name, argnames, func)
+      t_name = task_name
       prerequisite = nil
-      if name.is_a?(Hash)
-        dict = name
+      if task_name.is_a?(Hash)
+        dict = task_name
         if dict.length < 1
           raise TaskDefinitionError, "#{func}() requires task name."
         elsif dict.length > 1
           raise TaskDefinitionError, "#{func}() cannot accept too much argument."
         end
         dict.each do |k, v|
-          name = k
+          t_name = k
           prerequisite = v
         end
       end
@@ -880,6 +875,17 @@ module Benry::MicroRake
           prerequisite = v
         end
       end
+      return t_name, argnames, prerequisite
+    end
+
+    def __create_task(name, argnames, location, func, &block)
+      if @_task_desc
+        desc, schema, hidden, important = @_task_desc
+        @_task_desc = nil
+      else
+        desc = schema = hidden = important = nil
+      end
+      name, argnames, prerequisite = __retrieve_prerequisite(name, argnames, func)
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
         name = (@_task_namespace + [name]).join(":")
       end
