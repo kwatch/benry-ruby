@@ -894,13 +894,11 @@ module Benry::MicroRake
     end
 
     def append_to_task(task_name, &block)
-      task = find_task(task_name)  or
+      existing_task = find_task(task_name)  or
         raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
-      task2 = Task.new(task.name, nil, &block)
-      tsk = task
-      tsk = tsk.next_task while tsk.next_task != nil
-      tsk.next_task = task2
-      return task2
+      new_task = Task.new(existing_task.name, nil, &block)
+      existing_task.append_task(new_task)
+      return new_task
     end
 
     def file(*args, **kwargs, &block)
