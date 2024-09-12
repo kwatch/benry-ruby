@@ -892,12 +892,18 @@ module Benry::MicroRake
     end
     private :__create_task
 
-    def task!(name, argnames=nil, &block)
+    def task!(task_name, argnames=nil, &block)
       location = caller(1, 1).first
+      if task_name.is_a?(Hash)
+        dict = task_name
+        dict.each {|k, _| t_name = k; break }
+      else
+        t_name = task_name
+      end
       mgr = TASK_MANAGER
-      mgr.delete_task(name)  or
-        raise TaskDefinitionError, "#{name}: Task not found, so failed to overwrite the existing task."
-      task = __create_task(name, argnames, location, :'task!', &block)
+      mgr.delete_task(t_name)  or
+        raise TaskDefinitionError, "task!(#{t_name.inspect}): Task not defined."
+      task = __create_task(task_name, nil, location, :task!, &block)
       name = task.name
       mgr.add_task(name, task)
       return task
