@@ -838,10 +838,10 @@ module Benry::MicroRake
 
     def task(name, argnames=nil, &block)
       location = caller(1, 1).first
-      return __task(name, argnames, location, &block)
+      return __task(name, argnames, location, :task, &block)
     end
 
-    def __task(name, argnames, location, &block)
+    def __task(name, argnames, location, func, &block)
       if @_task_desc
         desc, schema, hidden, important = @_task_desc
         @_task_desc = nil
@@ -852,9 +852,9 @@ module Benry::MicroRake
       if name.is_a?(Hash)
         dict = name
         if dict.length < 1
-          raise TaskDefinitionError, "task() requires task name."
+          raise TaskDefinitionError, "#{func}() requires task name."
         elsif dict.length > 1
-          raise TaskDefinitionError, "task() cannot accept too much argument."
+          raise TaskDefinitionError, "#{func}() cannot accept too much argument."
         end
         dict.each do |k, v|
           name = k
@@ -864,7 +864,7 @@ module Benry::MicroRake
       if argnames && argnames.is_a?(Hash)
         dict = argnames
         if dict.length > 1
-          raise TaskDefinitionError, "task() cannot accept too much argnames."
+          raise TaskDefinitionError, "#{func}() cannot accept too much argnames."
         end
         dict.each do |k, v|
           argnames = k
@@ -890,12 +890,12 @@ module Benry::MicroRake
     end
     private :__task
 
-    def task!(name, prerequisite=nil, &block)
+    def task!(name, argnames=nil, &block)
       location = caller(1, 1).first
       mgr = TASK_MANAGER
       mgr.delete_task(name)  or
         raise TaskDefinitionError, "#{name}: Task not found, so failed to overwrite the existing task."
-      return __task(name, prerequisite, location, &block)
+      return __task(name, argnames, location, :'task!', &block)
     end
 
     def find_task(task_name)
