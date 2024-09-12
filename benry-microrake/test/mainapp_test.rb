@@ -26,6 +26,30 @@ Oktest.scope do
     end
 
 
+    topic '#main()' do
+
+      spec "[!dtl8y] adds `$URAKE_OPTS` to command-line arguments." do
+        |main|
+        libpath = "/opt/lib/boo"
+        ok {$LOAD_PATH}.NOT.include?(libpath)
+        ok {$DRYRUN_MODE} == false
+        #
+        ENV["URAKE_OPTS"] = "-I #{libpath} -e nil --dry-run"
+        at_end {
+          ENV.delete("URAKE_OPTS")
+          $LOAD_PATH.delete(libpath)
+          $DRYRUN_MODE = false
+        }
+        #
+        sout = capture_sout { main.main(["hello"]) }
+        ok {sout} == ""
+        ok {$LOAD_PATH}.include?(libpath)
+        ok {$DRYRUN_MODE} == true
+      end
+
+    end
+
+
     topic '#handle_global_opts()' do
 
       spec "[!pcn0t] '-h' or '--help' option prints help message." do |main|
