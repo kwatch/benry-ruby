@@ -356,10 +356,11 @@ module Benry::MicroRake
 
   class Task
 
-    def initialize(name, desc=nil, prerequisite=nil, location=nil, schema=nil, hidden: nil, important: nil, &block)
+    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, hidden: nil, important: nil, &block)
       @name      = name
       @desc      = desc
       @prerequisites = (prerequisite ? [prerequisite].flatten : []).freeze
+      @argnames  = argnames ? argnames.collect {|x| x.to_s.intern }.freeze : nil
       @location  = location
       @hidden    = hidden
       @important = important
@@ -374,7 +375,7 @@ module Benry::MicroRake
       @schema    = schema
       @next_task = nil
     end
-    attr_reader :name, :desc, :prerequisites, :location, :block, :schema
+    attr_reader :name, :desc, :prerequisites, :argnames, :location, :block, :schema
     attr_accessor :next_task
 
     def hidden?()
@@ -431,6 +432,39 @@ module Benry::MicroRake
       end
       t.next_task = other_task
       nil
+    end
+
+  end
+
+
+  class TaskWrapper
+
+    def initialize(task)
+      @task = task
+    end
+
+    def name          ; return @task.name                ; end
+    def desc          ; return @task.desc                ; end
+    def prerequisites ; return @task.prerequisites       ; end
+    def prerequisite  ; return @task.prerequisites.first ; end
+
+  end
+
+
+  class TaskArgVals
+
+    def initialize(argnames=nil, argvals)
+      argnames.zip(argvals) do |k, v|
+        instance_variable_set("@#{k}", v)
+      end
+      #class <<self
+      self.class.class_eval do
+        attr_reader *argnames
+      end
+    end
+
+    def [](key)
+      return instance_variable_get("@#{key}")
     end
 
   end
@@ -554,6 +588,9 @@ module Benry::MicroRake
     end
 
     def _invoke_task(task, args, opts)
+      if task.argnames
+        args = [TaskWrapper.new(task), TaskArgVals.new(task.argnames, args)]
+      end
       self.instance_exec(*args, **opts, &task.block) if task.block
     end
 
@@ -788,7 +825,7 @@ module Benry::MicroRake
       @_task_desc = [desc, schema, hidden, important]
     end
 
-    def task(name, prerequisite=nil, &block)
+    def task(name, argnames=nil, &block)
       location = caller(1, 1).first
       if @_task_desc
         desc, schema, hidden, important = @_task_desc
@@ -796,6 +833,7 @@ module Benry::MicroRake
       else
         desc = schema = hidden = important = nil
       end
+      prerequisite = nil
       if name.is_a?(Hash)
         dict = name
         if dict.length < 1
@@ -808,10 +846,20 @@ module Benry::MicroRake
           prerequisite = v
         end
       end
+      if argnames && argnames.is_a?(Hash)
+        dict = argnames
+        if dict.length > 1
+          raise TaskDefinitionError, "task() cannot accept too much argnames."
+        end
+        dict.each do |k, v|
+          argnames = k
+          prerequisite = v
+        end
+      end
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
         name = (@_task_namespace + [name]).join(":")
       end
-      task = Task.new(name, desc, prerequisite, location, schema,
+      task = Task.new(name, desc, prerequisite, argnames, location, schema,
                       hidden: hidden, important: important, &block)
       mgr = TASK_MANAGER
       if mgr.has_task?(name)
@@ -867,7 +915,7 @@ module Benry::MicroRake
           raise NamespaceError, "#{alias_for}: No such task."
         desc = "same as '#{full_name}'"
         hidden = alias_task.hidden?
-        task = Task.new(full_ns, desc, nil, location, hidden: hidden, &alias_task.block)
+        task = Task.new(full_ns, desc, nil, nil, location, hidden: hidden, &alias_task.block)
         mgr.add_task(full_ns, task)
       end
     ensure
@@ -1114,8 +1162,15 @@ module Benry::MicroRake
         @action_handler.do_when_no_tasks_specified(true)
         return
       end
-      #; [!nhvus] raises error when task not defined.
+      #; [!vfn69] handles `task[var1,var2]` style argument.
       task_name = args.shift()
+      if task_name =~ /\[(.*)\]\z/
+        task_name = $`
+        task_argvals = $1.split(',')
+      else
+        task_argvals = nil
+      end
+      #; [!nhvus] raises error when task not defined.
       task = mgr.get_task(task_name)  or
         raise CommandLineError, "#{task_name}: Task not defined."
       #; [!o9ouk] handles 'name=val' style arg as environment variables.
@@ -1135,6 +1190,7 @@ module Benry::MicroRake
         return
       end
       #; [!wqfjl] runs the task with args and options if task name specified.
+      args = task_argvals if task_argvals
       mgr.run_task(task, *args, **task_opts)
     end
 

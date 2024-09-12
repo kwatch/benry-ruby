@@ -262,6 +262,32 @@ Usage: urake2 [<options>] <task>
 END
       end
 
+      spec "[!vfn69] handles `task[var1,var2]` style argument." do
+        |main|
+        create_taskfile(<<-END)
+          task :rakestyle1, [:a1, :a2] do |t, args|
+            puts "== rakestyle1 =="
+            p [args.a1, args.a2]
+          end
+          task :rakestyle2, [:b1, :b2] => [:rakestyle1] do |t, args|
+            puts "== rakestyle2 =="
+            p [args[:b1], args[:b2]]
+          end
+        END
+        sout = capture_sout { main.run("rakestyle1[foo,bar]") }
+        ok {sout} == <<END
+== rakestyle1 ==
+["foo", "bar"]
+END
+        sout = capture_sout { main.run("rakestyle2[123,true]") }
+        ok {sout} == <<END
+== rakestyle1 ==
+[nil, nil]
+== rakestyle2 ==
+["123", "true"]
+END
+      end
+
       spec "[!nhvus] raises error when task not defined." do
         |main|
         pr = proc { main.run("blabla") }
