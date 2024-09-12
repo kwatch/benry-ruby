@@ -360,7 +360,7 @@ module Benry::MicroRake
       @name      = name
       @desc      = desc
       @prerequisites = (prerequisite ? [prerequisite].flatten : []).freeze
-      @argnames  = argnames ? argnames.collect {|x| x.to_s.intern }.freeze : nil
+      @argnames  = argnames ? argnames.freeze : nil
       @location  = location
       @hidden    = hidden
       @important = important
@@ -858,6 +858,9 @@ module Benry::MicroRake
       end
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
         name = (@_task_namespace + [name]).join(":")
+      end
+      if argnames
+        argnames = [argnames].flatten.collect {|x| x.to_s.intern }
       end
       task = Task.new(name, desc, prerequisite, argnames, location, schema,
                       hidden: hidden, important: important, &block)
