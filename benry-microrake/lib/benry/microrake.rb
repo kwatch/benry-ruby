@@ -24,6 +24,7 @@ module Benry::MicroRake
   VERSION   = '$Release: 0.0.0 $'.split()[1]
   APP_NAME  = "MicroRake"
   DEFAULT_TASKFILE = "Taskfile.rb"
+  ENV_VAR   = "URAKE_OPTS"
 
 
   class InternalError < Exception
@@ -974,6 +975,12 @@ module Benry::MicroRake
     end
 
     def main(argv=ARGV)
+      #; [!dtl8y] adds `$URAKE_OPTS` to command-line arguments.
+      envvar = ENV[ENV_VAR]
+      if envvar && ! envvar.empty?
+        argv = envvar.split() + argv
+      end
+      #
       begin
         status_code = run(*argv)
         return status_code
