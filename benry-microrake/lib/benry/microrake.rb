@@ -26,6 +26,28 @@ module Benry::MicroRake
   DEFAULT_TASKFILE = "Taskfile.rb"
 
 
+  class InternalError < Exception
+    def initialize()
+      super "** internal error: #{msg}"
+    end
+  end
+
+  class BaseError < StandardError
+  end
+
+  class TaskDefinitionError < BaseError
+  end
+
+  class TaskExecutionError < BaseError
+  end
+
+  class CyclicTaskError < BaseError
+  end
+
+  class CommandLineError < BaseError
+  end
+
+
   module Util
     module_function
 
@@ -295,7 +317,9 @@ module Benry::MicroRake
         end
         #$stdout.flush()
         answer = $stdin.readline().strip()
-        if ! answer.empty?
+        if answer == nil
+          raise RuntimeError, "question(): Failed to read answer because I/O closed."
+        elsif ! answer.empty?
           return answer
         elsif required
           $stderr.puts "** Answer required." if i < max
@@ -303,7 +327,7 @@ module Benry::MicroRake
           return default
         end
       end
-      raise "Answer expected but not entered."
+      raise RuntimeError, "Answer expected but not entered."
     end
 
     def confirm(message, default: nil, max: 3)
@@ -317,14 +341,14 @@ module Benry::MicroRake
         #$stdout.flush()
         input = $stdin.readline().strip()
         case input
-        when nil      ; raise "confirm(): Failed to read answer because I/O closed."
+        when nil      ; raise RuntimeError, "confirm(): Failed to read answer because I/O closed."
         when /\A[yY]/ ; return true
         when /\A[nN]/ ; return false
         when ""       ; return default if default != nil
         end
         $stderr.puts "** Please enter 'y' or 'n'." if i < max
       end
-      raise "Expected 'y' or 'n', but not answered correctly."
+      raise RuntimeError, "Expected 'y' or 'n', but not answered correctly."
     end
 
   end
@@ -342,7 +366,7 @@ module Benry::MicroRake
       @block     = block
       if schema
         block != nil  or
-          raise "Task option schema cannot be specified when task block is empty."
+          raise TaskDefinitionError, "Task option schema cannot be specified when task block is empty."
         _validate_block_params(block, schema)
       else
         schema = TaskOptionSchema.new(block)
@@ -369,32 +393,32 @@ module Benry::MicroRake
       block.parameters.each do |(ptype, pname)|
         case ptype
         when :req
-          raise "** internal error: line #{__LINE__}: ptype :req appeared."
+          raise InternalError.new("ptype :req appeared.")
         when :opt
           if schema.opt_defined?(pname)
-            raise "Block parameter `#{pname}` is declared as an positional parameter, but defined as keyword parameter in schema."
+            raise TaskDefinitionError, "Block parameter `#{pname}` is declared as an positional parameter, but defined as keyword parameter in schema."
           #elsif ! cmdopt.arg_defined?(pname)
-          #  raise "Block parameter `#{pname}` is not defined in schema."
+          #  raise TaskDefinitionError, "Block parameter `#{pname}` is not defined in schema."
           end
         when :rest
           if schema.opt_defined?(pname)
-            raise "Block parameter `#{pname}` is declared as an variable parameter, but defined as keyword parameter in schema."
+            raise TaskDefinitionError, "Block parameter `#{pname}` is declared as an variable parameter, but defined as keyword parameter in schema."
           end
         when :key
           if ! schema.opt_defined?(pname)
-            raise "Block parameter `#{pname}` is declared as a keyword parameter, but not defined in schema."
+            raise TaskDefinitionError, "Block parameter `#{pname}` is declared as a keyword parameter, but not defined in schema."
           end
           key_params << pname
         when :keyrest
-          raise "Block parameter `#{pname}` is a variable keyword parameter which is not supported in MicroRuby."
+          raise TaskDefinitionError, "Block parameter `#{pname}` is a variable keyword parameter which is not supported in MicroRake."
         else
-          raise "** internal error: line #{__LINE__}: ptype=#{ptye.inspect}"
+          raise InternalError.new("ptype=#{ptye.inspect}")
         end
       end
       schema.each do |item|
         next if item.key == :help
         key_params.include?(item.key)  or
-          raise "Option `#{item.key}` is defined in schema, but not declared as a keyword parameter of the task block."
+          raise TaskDefinitionError, "Option `#{item.key}` is defined in schema, but not declared as a keyword parameter of the task block."
       end
     end
 
@@ -462,7 +486,7 @@ module Benry::MicroRake
         when :key  ; opt_names << pname
         when :keyrest
         else
-          raise "** internal error: line #{__LINE__}: ptype=#{ptype.inspect}"
+          raise InternalError.new("ptype=#{ptype.inspect}")
         end
       end if block
       return arg_names, opt_names, has_restarg
@@ -490,7 +514,7 @@ module Benry::MicroRake
         task = task_name
       else
         task = mgr.find_task(task_name, self)  or
-          raise "run_task(#{task_name.ispect}): Task not found."
+          raise TaskExecutionError, "run_task(#{task_name.ispect}): Task not found."
       end
       backup = @__curr_task
       begin
@@ -517,7 +541,7 @@ module Benry::MicroRake
         _with_running(tsk) do
           tsk.prerequisites.each do |pre_name|
             pre_task = mgr.find_task(pre_name, tsk)  or
-              raise "#{pre_name}: Prerequisite task not found."
+              raise TaskExecutionError, "#{pre_name}: Prerequisite task not found."
             run_task(pre_task)  # run prerequisite task with no args nor opts
           end
           _invoke_task(tsk, args, opts)  # run task block with args and opts
@@ -542,8 +566,7 @@ module Benry::MicroRake
       yield
       popped = @__running.pop()
       popped == task  or
-        raise "** internal error: line #{__LINE__}: " + \
-              "task=#{task.inspect}, popped=#{popped.inspect}"
+        raise InternalError.new("task=#{task.inspect}, popped=#{popped.inspect}")
     end
 
     def _report_trace(msg)
@@ -648,7 +671,7 @@ module Benry::MicroRake
           "    %-20s : %s" % [t.name, location]
         }.join("\n")
         s2 = Util.colorize_unimportant(s2) if $stdout.tty?
-        raise "Cyclic task detected. (#{s1})\n#{s2}"
+        raise CyclicTaskError, "Cyclic task detected. (#{s1})\n#{s2}"
       end
     end
 
@@ -678,9 +701,9 @@ module Benry::MicroRake
             else                  ; add(pname, "--#{pname}[=<val>]", "")
             end
           when :keyrest
-            #raise "#{pname}: Variable keyword parameter of task block is not supported."
+            #raise TaskDefinitionError, "#{pname}: Variable keyword parameter of task block is not supported."
           else
-            raise "** internal error: line #{__LINE__}: ptype=#{ptype.inspect}"
+            raise InternalError.new("ptype=#{ptype.inspect}")
           end
         end
       end
@@ -752,7 +775,7 @@ module Benry::MicroRake
       cmdopt = nil
       if option_schema
         option_schema.is_a?(Hash)  or
-          raise "desc(): Second argument should be a Hash object, but got #{option_schema.class} object (#{option_schema.inspect})."
+          raise TaskDefinitionError, "desc(): Second argument should be a Hash object, but got #{option_schema.class} object (#{option_schema.inspect})."
         schema = TaskOptionSchema.new
         option_schema.each do |sym, arr|
           #if arr[0] =~ /\A\s*-/
@@ -776,9 +799,9 @@ module Benry::MicroRake
       if name.is_a?(Hash)
         dict = name
         if dict.length < 1
-          raise "task() requires task name."
+          raise TaskDefinitionError, "task() requires task name."
         elsif dict.length > 1
-          raise "task() cannot accept too much argument."
+          raise TaskDefinitionError, "task() cannot accept too much argument."
         end
         dict.each do |k, v|
           name = k
@@ -803,7 +826,7 @@ module Benry::MicroRake
     def task!(name, prerequisite=nil, &block)
       mgr = TASK_MANAGER
       mgr.delete_task(name)  or
-        raise "#{name}: Task not found, so failed to overwrite the existing task."
+        raise TaskDefinitionError, "#{name}: Task not found, so failed to overwrite the existing task."
       return task(name, prerequisite, &block)
     end
 
@@ -814,7 +837,7 @@ module Benry::MicroRake
 
     def append_to_task(task_name, &block)
       task = find_task(task_name)  or
-        raise "append_to_task(#{task_name.inspect}): Task not found."
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
       task2 = Task.new(task.name, nil, &block)
       tsk = task
       tsk = tsk.next_task while tsk.next_task != nil
@@ -823,15 +846,15 @@ module Benry::MicroRake
     end
 
     def file(*args, **kwargs, &block)
-      raise NotImplementedError.new("'file()' is not implemented in MicroRuby.")
+      raise NotImplementedError.new("'file()' is not implemented in MicroRake.")
     end
 
     def namespace(name, alias_for: nil, &block)
       name_ = name.to_s
       name_ =~ /\A[:\w]+\z/  or
-        raise "#{name}: Namespace name contains invalid character."
+        raise NamespaceError, "#{name}: Namespace name contains invalid character."
       ! (name_ =~ /\A:/ || name_ =~ /:\z/ || name_ =~ /::/)  or
-        raise "#{name}: Invalid namespace name."
+        raise NamespaceError, "#{name}: Invalid namespace name."
       ns_name = Util.normalize_task_name(name)
       (@_task_namespace ||= []) << ns_name
       yield
@@ -841,7 +864,7 @@ module Benry::MicroRake
         full_ns = @_task_namespace.join(":")
         full_name = "#{full_ns}:#{alias_for}"
         alias_task = mgr.get_task(full_name)  or
-          raise "#{alias_for}: No such task."
+          raise NamespaceError, "#{alias_for}: No such task."
         desc = "same as '#{full_name}'"
         hidden = alias_task.hidden?
         task = Task.new(full_ns, desc, nil, location, hidden: hidden, &alias_task.block)
@@ -850,7 +873,7 @@ module Benry::MicroRake
     ensure
       popped = @_task_namespace.pop()
       popped == ns_name  or
-        raise "** internal error: popped=#{popped.inspect}, ns_name=#{ns_name.inspect}"
+        raise InternalError.new("popped=#{popped.inspect}, ns_name=#{ns_name.inspect}")
     end
 
     def use_commands_instead_of_fileutils(module_)
@@ -926,7 +949,7 @@ module Benry::MicroRake
           @action_handler.do_when_no_tasks_specified(false)
           return 0
         end
-        raise "#{filename}: Task file not found."
+        raise CommandLineError, "#{filename}: Task file not found."
       end
       #
       change_dir_if_necessary(g_opts[:dir], filepath, filename, g_opts[:silent]) do
@@ -1049,7 +1072,7 @@ module Benry::MicroRake
       filename = determine_task_filename(g_opts)
       filepath = find_task_file(filename, g_opts[:nosearch])
       filepath != nil  or
-        raise "#{filename}: Task file not found."
+        raise CommandLineError, "#{filename}: Task file not found."
       require_rubyscript(filepath)
     end
 
@@ -1094,7 +1117,7 @@ module Benry::MicroRake
       #; [!nhvus] raises error when task not defined.
       task_name = args.shift()
       task = mgr.get_task(task_name)  or
-        raise "#{task_name}: Task not defined."
+        raise CommandLineError, "#{task_name}: Task not defined."
       #; [!o9ouk] handles 'name=val' style arg as environment variables.
       while ! args.empty? && args[0] =~ /\A(\w+)=(.*)\z/
         ENV[$1] = $2
@@ -1137,9 +1160,10 @@ module Benry::MicroRake
 
     def skip_backtrace?(exc)
       case exc
-      #when Benry::CmdOpt::SchemaError
-      when Benry::CmdOpt::OptionError
-        return true
+      #when Benry::CmdOpt::SchemaError     ; return true
+      when Benry::CmdOpt::OptionError     ; return true
+      when CommandLineError               ; return true
+      when CyclicTaskError                ; return true
       end
       return false
     end
@@ -1298,11 +1322,11 @@ END
         stack.push(tsk)
         tsk.prerequisites.each do |pre_name|
           pre_task = mgr.find_task(pre_name, tsk)  or
-            raise "#{pre_name}: Prerequsite task not found."
+            raise TaskDefinitionError, "#{pre_name}: Prerequsite task not found."
           _traverse_prerequeistes(pre_task, depth+1, buf, stack)
         end
         (popped = stack.pop()) == tsk  or
-          raise "** internal error: line #{__LINE__}: popped=#{popped.inspect}, tsk=#{tsk.inspect}"
+          raise InternalError.new("popped=#{popped.inspect}, tsk=#{tsk.inspect}")
       end
     end
     private :_traverse_prerequeistes
