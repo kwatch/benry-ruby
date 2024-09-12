@@ -828,6 +828,10 @@ module Benry::MicroRake
 
     def task(name, argnames=nil, &block)
       location = caller(1, 1).first
+      return __task(name, argnames, location, &block)
+    end
+
+    def __task(name, argnames, location, &block)
       if @_task_desc
         desc, schema, hidden, important = @_task_desc
         @_task_desc = nil
@@ -874,12 +878,14 @@ module Benry::MicroRake
       end
       return task
     end
+    private :__task
 
     def task!(name, prerequisite=nil, &block)
+      location = caller(1, 1).first
       mgr = TASK_MANAGER
       mgr.delete_task(name)  or
         raise TaskDefinitionError, "#{name}: Task not found, so failed to overwrite the existing task."
-      return task(name, prerequisite, &block)
+      return __task(name, prerequisite, location, &block)
     end
 
     def find_task(task_name)
