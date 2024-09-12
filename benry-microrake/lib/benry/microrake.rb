@@ -983,9 +983,7 @@ module Benry::MicroRake
         handler.do_new_taskfile()
         return true
       end
-      if g_opts[:backtrace] || g_opts[:trace]
-        @backtrace_enabled = true
-      end
+      @backtrace_enabled = g_opts[:backtrace] || g_opts[:trace] || false
       return false
     end
 
