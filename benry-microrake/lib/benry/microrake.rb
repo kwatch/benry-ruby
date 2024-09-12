@@ -683,6 +683,7 @@ module Benry::MicroRake
       while ! items.empty?
         full_name = (items + [name]).join(":")  # ex: "a:b:foo"
         return get_task(full_name) if has_task?(full_name)
+        items.pop()
       end
       return get_task(name)                   # ex: "foo"
     end
