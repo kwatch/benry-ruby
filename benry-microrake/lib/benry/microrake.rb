@@ -929,7 +929,7 @@ module Benry::MicroRake
         mgr = TASK_MANAGER
         full_ns = @_task_namespace.join(":")
         full_name = "#{full_ns}:#{alias_for}"
-        alias_task = mgr.get_task(full_name)  or
+        alias_task = mgr.find_task(alias_for, full_ns)  or
           raise NamespaceError, "#{alias_for}: No such task."
         desc = "same as '#{full_name}'"
         hidden = alias_task.hidden?
