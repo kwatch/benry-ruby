@@ -1311,6 +1311,9 @@ END
         [name, task]
       }.sort_by {|pair| pair[0] }.each do |(name, task)|
         next if ! all && task.hidden?
+        if task.argnames
+          name = "%s[%s]" % [name, task.argnames.join(",")]
+        end
         yield name, task
       end
     end
