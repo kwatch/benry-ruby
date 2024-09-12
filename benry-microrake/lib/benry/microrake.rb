@@ -673,13 +673,19 @@ module Benry::MicroRake
       self
     end
 
-    def find_task(relative_name, base_task)
+    def find_task(relative_name, base_task_or_namespace)
       name = relative_name.to_s
       if name =~ /\A:/
         return get_task(name[1..-1])          # ex: ":a:b:foo" -> "a:b:foo"
       end
-      items = base_task.name.to_s.split(":")  # ex: "a:b:c" -> ["a","b","c"]
-      items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      base = base_task_or_namespace
+      case base
+      when Task
+        items = base.name.to_s.split(":")       # ex: "a:b:c" -> ["a","b","c"]
+        items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      else
+        items = base.to_s.split(":")
+      end
       while ! items.empty?
         full_name = (items + [name]).join(":")  # ex: "a:b:foo"
         return get_task(full_name) if has_task?(full_name)
