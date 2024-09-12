@@ -45,6 +45,9 @@ module Benry::MicroRake
   class CyclicTaskError < BaseError
   end
 
+  class NamespaceError < BaseError
+  end
+
   class CommandLineError < BaseError
   end
 
