@@ -45,6 +45,9 @@ module Benry::MicroRake
   class CyclicTaskError < BaseError
   end
 
+  class NamespaceError < BaseError
+  end
+
   class CommandLineError < BaseError
   end
 
@@ -670,16 +673,23 @@ module Benry::MicroRake
       self
     end
 
-    def find_task(relative_name, base_task)
+    def find_task(relative_name, base_task_or_namespace)
       name = relative_name.to_s
       if name =~ /\A:/
         return get_task(name[1..-1])          # ex: ":a:b:foo" -> "a:b:foo"
       end
-      items = base_task.name.to_s.split(":")  # ex: "a:b:c" -> ["a","b","c"]
-      items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      base = base_task_or_namespace
+      case base
+      when Task
+        items = base.name.to_s.split(":")       # ex: "a:b:c" -> ["a","b","c"]
+        items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      else
+        items = base.to_s.split(":")
+      end
       while ! items.empty?
         full_name = (items + [name]).join(":")  # ex: "a:b:foo"
         return get_task(full_name) if has_task?(full_name)
+        items.pop()
       end
       return get_task(name)                   # ex: "foo"
     end
@@ -919,7 +929,7 @@ module Benry::MicroRake
         mgr = TASK_MANAGER
         full_ns = @_task_namespace.join(":")
         full_name = "#{full_ns}:#{alias_for}"
-        alias_task = mgr.get_task(full_name)  or
+        alias_task = mgr.find_task(alias_for, full_ns)  or
           raise NamespaceError, "#{alias_for}: No such task."
         desc = "same as '#{full_name}'"
         hidden = alias_task.hidden?
@@ -1395,7 +1405,7 @@ END
         stack.push(tsk)
         tsk.prerequisites.each do |pre_name|
           pre_task = mgr.find_task(pre_name, tsk)  or
-            raise TaskDefinitionError, "#{pre_name}: Prerequsite task not found."
+            raise TaskDefinitionError, "#{pre_name}: Prerequisite task not found."
           _traverse_prerequeistes(pre_task, depth+1, buf, stack)
         end
         (popped = stack.pop()) == tsk  or
