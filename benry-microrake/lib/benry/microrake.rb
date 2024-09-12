@@ -660,7 +660,9 @@ module Benry::MicroRake
   class TaskOptionSchema < Benry::CmdOpt::Schema
 
     HELP_SCHEMA_ITEM = Benry::CmdOpt::SchemaItem.new(
-        :help, "-h, --help", "show help message", "h", "help", nil, false, hidden: true).freeze
+        :help, "-h, --help", "show help message",
+        "h", "help", nil, false, hidden: true
+    ).freeze
 
     def initialize(block=nil)
       super()
