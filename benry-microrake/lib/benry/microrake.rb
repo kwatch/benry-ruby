@@ -36,6 +36,12 @@ module Benry::MicroRake
       return str               # ex: "foo" -> "foo"
     end
 
+    def render_default_taskfile(command)
+      content = File.read(__FILE__, encoding: 'utf-8').split(/^__END__\n/, 2).last
+      content = content.gsub('%COMMAND%', command)
+      return content
+    end
+
     def normalize_task_name(name)
       return name.to_s.gsub(/-/, "_")
     end
@@ -1287,9 +1293,7 @@ END
     end
 
     def do_new_taskfile()
-      content = File.read(__FILE__, encoding: 'utf-8').split(/^__END__\n/, 2).last
-      content = content.gsub('%COMMAND%', @command)
-      print content
+      print Util.render_default_taskfile(@command)
     end
 
     def do_when_no_tasks_specified(taskfile_exist)
