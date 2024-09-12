@@ -945,15 +945,19 @@ module Benry::MicroRake
 
     def handle_global_opts(g_opts)
       handler = @action_handler
+      #; [!pcn0t] '-h' or '--help' option prints help message.
       if g_opts[:help]
         handler.do_help()
         return true
       end
+      #; [!d0hln] '-V' or '--version' option prints version.
       if g_opts[:version]
         handler.do_version()
         return true
       end
+      #; [!iw6ug] '-I' or '--libdir' option adds library path to `$LOAD_PATH`.
       if g_opts[:libdir]
+        #; [!f7729] skips if library path already exists in `$LOAD_PATH`.
         g_opts[:libdir].each do |x|
           ## same as Rake's behaviour (append to end of libpath)
           $LOAD_PATH << x unless $LOAD_PATH.include?(x)
@@ -961,31 +965,41 @@ module Benry::MicroRake
           #$LOAD_PATH.unshift(x) unless $LOAD_PATH.include?(x)
         end
       end
+      #; [!07yf1] '-T' or '--tasks' option lists task names with command name.
+      #; [!6t9fa] '-l' option lists task names without command name.
       if g_opts[:tasks] || g_opts[:list]
         load_task_file(g_opts)
         handler.do_list_tasks(all: g_opts[:all], with_command: g_opts[:tasks])
         return true
       end
+      #; [!yoqzz] '-D' or '--describe' option lists task names with description.
       if g_opts[:describe]
         load_task_file(g_opts)
         handler.do_list_descriptions(all: g_opts[:all])
         return true
       end
+      #; [!02xlo] '-P' or '--prereqs' option lists prerequisites of each task.
+      #; [!26hf6] '-P' or '--prereqs' option reports cyclic task dependency.
       if g_opts[:prereqs]
         load_task_file(g_opts)
         handler.do_list_prerequisites(all: g_opts[:all])
         return true
       end
+      #; [!s3jek] '-W' or '--where' option lists locations of each task.
       if g_opts[:where]
         load_task_file(g_opts)
         handler.do_list_locations(all: g_opts[:all])
         return true
       end
+      #; [!59ev8] '--new' option prints example code of taskfile.
       if g_opts[:new]
         handler.do_new_taskfile()
         return true
       end
+      #; [!vggoh] '--backtrace' option enables to print backtrace when error raised.
+      #; [!byhaa] '-t' or '--trace' option enables to print backtrace when error raised.
       @backtrace_enabled = g_opts[:backtrace] || g_opts[:trace] || false
+      #; [!jiixo] returns true if no need to do more, false if else.
       return false
     end
 
@@ -1068,27 +1082,36 @@ module Benry::MicroRake
 
     def run_the_task(args, g_opts)
       mgr = @task_manager
+      #; [!zw84u] runs 'default' task if defined and no task name specified.
       if ! args.empty?
       elsif mgr.has_task?("default")
         args = ["default"]
+      #; [!yq0sh] prints short usage if no task name specified nor 'default' task defined.
       else
         @action_handler.do_when_no_tasks_specified(true)
         return
       end
+      #; [!nhvus] raises error when task not defined.
       task_name = args.shift()
       task = mgr.get_task(task_name)  or
         raise "#{task_name}: Task not defined."
+      #; [!o9ouk] handles 'name=val' style arg as environment variables.
       while ! args.empty? && args[0] =~ /\A(\w+)=(.*)\z/
         ENV[$1] = $2
         args.shift()
       end
+      #; [!1cwjs] parses task options even after arguments.
+      #; [!8dn6t] not parse task options after '--'.
       parser = TaskOptionParser.new(task.schema)
       task_opts = parser.parse(args, all: true)
+      #; [!xs3gw] if '-h' or '--help' option specified for task, show help message of the task.
       if task_opts[:help]
+        #; [!4wzxj] global option '-A' or '--all' affects to task help message.
         s = TaskHelpBuilder.new(task).build_task_help(@command, all: g_opts[:all])
         print Util.uncolorize_unless_tty(s)
         return
       end
+      #; [!wqfjl] runs the task with args and options if task name specified.
       mgr.run_task(task, *args, **task_opts)
     end
 
