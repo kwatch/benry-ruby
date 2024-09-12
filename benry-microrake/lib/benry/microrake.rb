@@ -952,10 +952,12 @@ module Benry::MicroRake
         return true
       end
       if g_opts[:libdir]
-        ## same as Rake's behaviour
-        g_opts[:libdir].each {|x| $LOAD_PATH << x }   # append to end of libpath
-        ## but is it proper behaviour?
-        #g_opts[:libdir].reverse.each {|x| $LOAD_PATH.unshift(x) }  # insert into head
+        g_opts[:libdir].each do |x|
+          ## same as Rake's behaviour (append to end of libpath)
+          $LOAD_PATH << x unless $LOAD_PATH.include?(x)
+          ## but item should be inserted into the head of path list, shouldn't it?
+          #$LOAD_PATH.unshift(x) unless $LOAD_PATH.include?(x)
+        end
       end
       if g_opts[:tasks] || g_opts[:list]
         load_task_file(g_opts)
