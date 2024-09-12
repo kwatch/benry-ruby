@@ -838,10 +838,19 @@ module Benry::MicroRake
 
     def task(name, argnames=nil, &block)
       location = caller(1, 1).first
-      return __task(name, argnames, location, :task, &block)
+      task = __create_task(name, argnames, location, :task, &block)
+      name = task.name
+      mgr = TASK_MANAGER
+      if mgr.has_task?(name)
+        existing_task = mgr.get_task(name)
+        existing_task.append_task(task)
+      else
+        mgr.add_task(name, task)
+      end
+      return task
     end
 
-    def __task(name, argnames, location, func, &block)
+    def __create_task(name, argnames, location, func, &block)
       if @_task_desc
         desc, schema, hidden, important = @_task_desc
         @_task_desc = nil
@@ -879,23 +888,19 @@ module Benry::MicroRake
       end
       task = Task.new(name, desc, prerequisite, argnames, location, schema,
                       hidden: hidden, important: important, &block)
-      mgr = TASK_MANAGER
-      if mgr.has_task?(name)
-        existing_task = mgr.get_task(name)
-        existing_task.append_task(task)
-      else
-        mgr.add_task(name, task)
-      end
       return task
     end
-    private :__task
+    private :__create_task
 
     def task!(name, argnames=nil, &block)
       location = caller(1, 1).first
       mgr = TASK_MANAGER
       mgr.delete_task(name)  or
         raise TaskDefinitionError, "#{name}: Task not found, so failed to overwrite the existing task."
-      return __task(name, argnames, location, :'task!', &block)
+      task = __create_task(name, argnames, location, :'task!', &block)
+      name = task.name
+      mgr.add_task(name, task)
+      return task
     end
 
     def find_task(task_name)
@@ -911,11 +916,14 @@ module Benry::MicroRake
       else
         t_name = task_name
       end
-      existing_task = find_task(t_name)  or
+      mgr = TASK_MANAGER
+      existing_task = mgr.get_task(t_name)  or
         raise TaskDefinitionError, "append_to_task(#{t_name.inspect}): Task not found."
       @_task_desc == nil  or
         raise TaskDefinitionError, "`append_to_task(#{t_name.inspect})` cannot be called with `desc()`."
-      return __task(task_name, nil, location, :append_to_task, &block)
+      task = __create_task(task_name, nil, location, :append_to_task, &block)
+      existing_task.append_task(task)
+      return task
     end
 
     def file(*args, **kwargs, &block)
