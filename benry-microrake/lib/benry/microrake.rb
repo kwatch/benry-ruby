@@ -151,6 +151,8 @@ module Benry::MicroRake
 
       def _get_lines_of_file(filepath)
         return File.read(filepath, encoding: 'utf-8').split("\n")
+      rescue               # Errno::ENOENT
+        return []
       end
 
     end
