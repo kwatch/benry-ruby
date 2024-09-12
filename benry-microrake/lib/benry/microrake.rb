@@ -1405,7 +1405,7 @@ END
         stack.push(tsk)
         tsk.prerequisites.each do |pre_name|
           pre_task = mgr.find_task(pre_name, tsk)  or
-            raise TaskDefinitionError, "#{pre_name}: Prerequsite task not found."
+            raise TaskDefinitionError, "#{pre_name}: Prerequisite task not found."
           _traverse_prerequeistes(pre_task, depth+1, buf, stack)
         end
         (popped = stack.pop()) == tsk  or
