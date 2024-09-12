@@ -28,7 +28,7 @@ module Benry::MicroRake
 
 
   class InternalError < Exception
-    def initialize()
+    def initialize(msg)
       super "** internal error: #{msg}"
     end
   end
@@ -414,7 +414,7 @@ module Benry::MicroRake
         when :keyrest
           raise TaskDefinitionError, "Block parameter `#{pname}` is a variable keyword parameter which is not supported in MicroRake."
         else
-          raise InternalError.new("ptype=#{ptye.inspect}")
+          raise InternalError.new("ptype=#{ptype.inspect}")
         end
       end
       schema.each do |item|
