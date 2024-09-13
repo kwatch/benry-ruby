@@ -683,6 +683,8 @@ module Benry::MicroRake
       when Task
         items = base.name.to_s.split(":")       # ex: "a:b:c" -> ["a","b","c"]
         items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      when nil
+        items = []
       else
         items = base.to_s.split(":")
       end
@@ -921,8 +923,13 @@ module Benry::MicroRake
     private :__retrieve_prerequisite
 
     def find_task(task_name)
+      if defined?(@_task_namespace) && ! @_task_namespace.empty?
+        namespace = @_task_namespace.join(":")
+      else
+        namespace = nil
+      end
       mgr = TASK_MANAGER
-      return mgr.get_task(task_name)
+      return mgr.find_task(task_name, namespace)
     end
 
     def file(*args, **kwargs, &block)
