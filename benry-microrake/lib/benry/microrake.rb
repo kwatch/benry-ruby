@@ -191,7 +191,6 @@ module Benry::MicroRake
   $QUIET_MODE        = false    unless defined?($QUIET_MODE)
   $DRYRUN_MODE       = false    unless defined?($DRYRUN_MODE)
   $TRACE_MODE        = false    unless defined?($TRACE_MODE)
-  $urake_chdir_depth = 0
 
 
   module UnixUtils
@@ -233,15 +232,15 @@ module Benry::MicroRake
       if ! block_given?()
         return super dir, verbose: verbose
       else
-        backup = $urake_chdir_depth
+        backup = (@_urake_chdir_depth ||= 0)
         begin
           return super dir, verbose: verbose do
-            $urake_chdir_depth += 1
+            @_urake_chdir_depth += 1
             set_prompt()
             yield
           end
         ensure
-          $urake_chdir_depth = backup
+          @_urake_chdir_depth = backup
           set_prompt()
         end
       end
@@ -629,7 +628,7 @@ module Benry::MicroRake
     end
 
     def prompt()
-      space = " " * ($urake_chdir_depth + 1)
+      space = " " * ((@_urake_chdir_depth ||= 0) + 1)
       if $stdout.tty?
         ## 30: black, 31: red, 32: green, 33: yellow, 34: blue,
         ## 35: magenta, 36: cyan, 37: white, 90: gray
