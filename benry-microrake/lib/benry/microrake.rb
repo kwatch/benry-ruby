@@ -378,13 +378,12 @@ module Benry::MicroRake
 
   class Task
 
-    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, hidden: nil, important: nil, &block)
+    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, important: nil, &block)
       @name      = name
       @desc      = desc
       @prerequisites = (prerequisite ? [prerequisite].flatten : []).freeze
       @argnames  = argnames ? argnames.freeze : nil
       @location  = location
-      @hidden    = hidden
       @important = important
       @block     = block
       if schema
@@ -401,7 +400,7 @@ module Benry::MicroRake
     attr_accessor :next_task
 
     def hidden?()
-      return @hidden if @hidden != nil
+      return true if @important == false
       return @desc == nil
     end
 
@@ -459,7 +458,7 @@ module Benry::MicroRake
     def clone_task(new_name, new_desc=nil)
       return self.class.new(new_name, new_desc || @desc, @prerequisite,
                             @argnames, @location, @schema,
-                            hidden: @hidden, important: @important, &@block)
+                            important: @important, &@block)
     end
 
   end
