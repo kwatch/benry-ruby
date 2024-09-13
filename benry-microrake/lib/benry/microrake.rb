@@ -668,8 +668,8 @@ module Benry::MicroRake
       @tasks   = {}   # ex: {"test"=>Task.new("test", ...)}
     end
 
-    def add_task(name, task)
-      @tasks[_normalize(name)] = task
+    def add_task(task)
+      @tasks[_normalize(task.name)] = task
       self
     end
 
@@ -865,7 +865,7 @@ module Benry::MicroRake
         existing_task = mgr.get_task(name)
         existing_task.append_task(task)
       else
-        mgr.add_task(name, task)
+        mgr.add_task(task)
       end
       return task
     end
@@ -876,7 +876,7 @@ module Benry::MicroRake
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
         mgr.delete_task(task.name)
-        mgr.add_task(task.name, task)
+        mgr.add_task(task)
       else
         raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
       end
@@ -977,7 +977,7 @@ module Benry::MicroRake
         desc = "same as '#{full_name}'"
         hidden = alias_task.hidden?
         task = Task.new(full_ns, desc, nil, nil, location, hidden: hidden, &alias_task.block)
-        mgr.add_task(full_ns, task)
+        mgr.add_task(task)
       end
     ensure
       popped = @_task_namespace.pop()
