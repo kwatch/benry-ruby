@@ -849,25 +849,28 @@ module Benry::MicroRake
       return task
     end
 
-    def __retrieve_prerequisite(task_name, argnames, func)
-      prerequisite = nil
-      if task_name.is_a?(Hash)
-        dict = task_name
-        dict.each do |k, v|
-          task_name    = k
-          prerequisite = v
-          break
-        end
+    def task!(name, argnames=nil, &block)
+      location = caller(1, 1).first
+      task = __create_task(name, argnames, location, :task!, &block)
+      mgr = TASK_MANAGER
+      mgr.delete_task(task.name)  or
+        raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
+      mgr.add_task(task.name, task)
+      return task
+    end
+
+    def append_to_task(task_name, &block)
+      location = caller(1, 1).first
+      @_task_desc == nil  or
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
+      task = __create_task(task_name, nil, location, :append_to_task, &block)
+      mgr = TASK_MANAGER
+      if (existing_task = mgr.get_task(name))
+        existing_task.append_task(task)
+      else
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
       end
-      if argnames && argnames.is_a?(Hash)
-        dict = argnames
-        dict.each do |k, v|
-          argnames     = k
-          prerequisite = v
-          break
-        end
-      end
-      return task_name, argnames, prerequisite
+      return task
     end
 
     def __create_task(name, argnames, location, func, &block)
@@ -890,33 +893,31 @@ module Benry::MicroRake
     end
     private :__create_task
 
-    def task!(name, argnames=nil, &block)
-      location = caller(1, 1).first
-      task = __create_task(name, argnames, location, :task!, &block)
-      mgr = TASK_MANAGER
-      mgr.delete_task(task.name)  or
-        raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
-      mgr.add_task(task.name, task)
-      return task
+    def __retrieve_prerequisite(task_name, argnames, func)
+      prerequisite = nil
+      if task_name.is_a?(Hash)
+        dict = task_name
+        dict.each do |k, v|
+          task_name    = k
+          prerequisite = v
+          break
+        end
+      end
+      if argnames && argnames.is_a?(Hash)
+        dict = argnames
+        dict.each do |k, v|
+          argnames     = k
+          prerequisite = v
+          break
+        end
+      end
+      return task_name, argnames, prerequisite
     end
+    private :__retrieve_prerequisite
 
     def find_task(task_name)
       mgr = TASK_MANAGER
       return mgr.get_task(task_name)
-    end
-
-    def append_to_task(task_name, &block)
-      location = caller(1, 1).first
-      @_task_desc == nil  or
-        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
-      task = __create_task(task_name, nil, location, :append_to_task, &block)
-      mgr = TASK_MANAGER
-      if (existing_task = mgr.get_task(name))
-        existing_task.append_task(task)
-      else
-        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
-      end
-      return task
     end
 
     def file(*args, **kwargs, &block)
