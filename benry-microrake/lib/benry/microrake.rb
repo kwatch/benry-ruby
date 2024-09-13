@@ -456,7 +456,7 @@ module Benry::MicroRake
     end
 
     def clone_task(new_name, new_desc=nil)
-      return self.class.new(new_name, new_desc || @desc, @prerequisite,
+      return self.class.new(new_name, new_desc || @desc, @prerequisites,
                             @argnames, @location, @schema,
                             important: @important, &@block)
     end
