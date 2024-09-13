@@ -143,7 +143,7 @@ module Benry::MicroRake
         parent = File.dirname(here) + "/"
         home   = File.expand_path("~") + "/"
         root_abspath, root_relpath = _root_path(here)
-        if root_abspath
+        if root_abspath && root_abspath != here
           @dict = {here => "./", parent => "../", root_abspath => root_relpath, home => "~/"}
         else
           @dict = {here => "./", parent => "../", home => "~/"}
