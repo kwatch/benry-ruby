@@ -841,8 +841,7 @@ module Benry::MicroRake
       task = __create_task(name, argnames, location, :task, &block)
       name = task.name
       mgr = TASK_MANAGER
-      if mgr.has_task?(name)
-        existing_task = mgr.get_task(name)
+      if (existing_task = mgr.get_task(name))
         existing_task.append_task(task)
       else
         mgr.add_task(name, task)
