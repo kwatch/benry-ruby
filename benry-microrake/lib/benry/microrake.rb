@@ -977,13 +977,11 @@ module Benry::MicroRake
         location = caller(1, 1).first
         mgr = TASK_MANAGER
         full_ns = @_task_namespace.join(":")
-        full_name = "#{full_ns}:#{alias_for}"
-        alias_task = mgr.find_task(alias_for, full_ns)  or
+        original_task = mgr.find_task(alias_for, full_ns)  or
           raise NamespaceError, "#{alias_for}: No such task."
-        desc = "same as '#{full_name}'"
-        hidden = alias_task.hidden?
-        task = Task.new(full_ns, desc, nil, nil, location, hidden: hidden, &alias_task.block)
-        mgr.add_task(task)
+        desc = "alias for '#{original_task.name}'"
+        alias_task = original_task.clone_task(full_ns, desc)
+        mgr.add_task(alias_task)
       end
     ensure
       popped = @_task_namespace.pop()
