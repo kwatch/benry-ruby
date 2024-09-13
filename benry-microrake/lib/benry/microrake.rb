@@ -840,7 +840,7 @@ module Benry::MicroRake
     module_function
 
     def desc(desc, option_schema=nil, hidden: nil, important: nil)
-      cmdopt = nil
+      schema = nil
       if option_schema
         option_schema.is_a?(Hash)  or
           raise TaskDefinitionError, "desc(): Second argument should be a Hash object, but got #{option_schema.class} object (#{option_schema.inspect})."
@@ -849,7 +849,7 @@ module Benry::MicroRake
           #if arr[0] =~ /\A\s*-/
             schema.add_opt(sym, *arr)
           #else
-          #  cmdopt.add_arg(sym, *arr)
+          #  schema.add_arg(sym, *arr)
           #end
         end
       end
