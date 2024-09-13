@@ -841,7 +841,8 @@ module Benry::MicroRake
       task = __create_task(name, argnames, location, :task, &block)
       name = task.name
       mgr = TASK_MANAGER
-      if (existing_task = mgr.get_task(name))
+      if mgr.has_task?(task.name)
+        existing_task = mgr.get_task(name)
         existing_task.append_task(task)
       else
         mgr.add_task(name, task)
@@ -851,11 +852,14 @@ module Benry::MicroRake
 
     def task!(name, argnames=nil, &block)
       location = caller(1, 1).first
-      task = __create_task(name, argnames, location, :task!, &block)
+      task = __create_task(name, argnames, location, :'task!', &block)
       mgr = TASK_MANAGER
-      mgr.delete_task(task.name)  or
+      if mgr.has_task?(task.name)
+        mgr.delete_task(task.name)
+        mgr.add_task(task.name, task)
+      else
         raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
-      mgr.add_task(task.name, task)
+      end
       return task
     end
 
@@ -865,7 +869,8 @@ module Benry::MicroRake
         raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
       task = __create_task(task_name, nil, location, :append_to_task, &block)
       mgr = TASK_MANAGER
-      if (existing_task = mgr.get_task(name))
+      if mgr.has_task?(task.name)
+        existing_task = mgr.get_task(name)
         existing_task.append_task(task)
       else
         raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
