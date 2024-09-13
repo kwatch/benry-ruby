@@ -48,6 +48,23 @@ end
 
 Oktest.global_scope do
 
+  before_all do
+    MicroRakeTestHelper.setup_for_all()
+  end
+
+  after_all do
+    MicroRakeTestHelper.teardown_for_all()
+  end
+
+  before do
+    MicroRakeTestHelper.reset_microrake()
+  end
+
+  after do
+    #filepath = File.absolute_path("Taskfile.rb")
+    #$LOADED_FEATURES.delete(filepath)
+  end
+
   def capture_sout(tty: nil, &b)
     sout, serr = capture_sio(tty: tty, &b)
     ok {serr} == ""

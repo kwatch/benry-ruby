@@ -8,23 +8,6 @@ Oktest.scope do
 
   topic Benry::MicroRake::MainApp do
 
-    before_all do
-      MicroRakeTestHelper.setup_for_all()
-    end
-
-    after_all do
-      MicroRakeTestHelper.teardown_for_all()
-    end
-
-    before do
-      MicroRakeTestHelper.reset_microrake()
-    end
-
-    after do
-      #filepath = File.absolute_path("Taskfile.rb")
-      #$LOADED_FEATURES.delete(filepath)
-    end
-
 
     topic '#main()' do
 
