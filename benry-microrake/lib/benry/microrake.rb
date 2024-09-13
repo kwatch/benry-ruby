@@ -387,10 +387,13 @@ module Benry::MicroRake
       @important = important
       @block     = block
       if schema
+        #; [!gpsw6] raises error when schema is specified but block is nil.
         block != nil  or
           raise TaskDefinitionError, "Task option schema cannot be specified when task block is empty."
+        #; [!600yq] raises error if there is any contradiction between option schema and block parameters.
         _validate_block_params(block, schema)
       else
+        #; [!fi4j3] creates default schema object when option schema is not specified.
         schema = TaskOptionSchema.new(block)
       end
       @schema    = schema
@@ -400,11 +403,15 @@ module Benry::MicroRake
     attr_accessor :next_task
 
     def hidden?()
+      #; [!8kefc] 'important: false' means 'hidden: true'.
       return true if @important == false
+      #; [!kuapz] if description is nil then returns true if 'important: false' is not specified.
       return @desc == nil
     end
 
     def important?()
+      #; [!gg3gy] returns true or false if 'important:' kwarg specified.
+      #; [!lk1se] returns nil if 'important:' kwarg not specified.
       return @important
     end
 
@@ -415,8 +422,10 @@ module Benry::MicroRake
       block.parameters.each do |(ptype, pname)|
         case ptype
         when :req
+          #; [!tvuag] parameter type `:req` must not appear in block parameters.
           raise InternalError.new("ptype :req appeared.")
         when :opt
+          #; [!bsnmu] error when positional param of block is defined as a task option.
           if schema.opt_defined?(pname)
             raise TaskDefinitionError,
                   "Block parameter `#{pname}` is declared as a positional parameter,"+\
@@ -426,6 +435,7 @@ module Benry::MicroRake
           #  raise TaskDefinitionError, "Block parameter `#{pname}` is not defined in schema."
           end
         when :rest
+          #; [!7ube0] error when variable param of block is defined as a task option.
           if schema.opt_defined?(pname)
             raise TaskDefinitionError,
                   "Block parameter `#{pname}` is declared as a variable parameter,"+\
@@ -433,6 +443,7 @@ module Benry::MicroRake
                   " because it is defined as a task option in the schema."
           end
         when :key
+          #; [!t2x6s] error when keyword param of block is not defined as a task option.
           if ! schema.opt_defined?(pname)
             raise TaskDefinitionError,
                   "Block parameter `#{pname}` is declared as a keyword parameter,"+\
@@ -440,13 +451,16 @@ module Benry::MicroRake
           end
           key_params << pname
         when :keyrest
+          #; [!se4ol] variable keyword param of block is just ignored.
           #raise TaskDefinitionError, "Block parameter `#{pname}` is a variable keyword parameter which is not supported in MicroRake."
         else
           raise InternalError.new("ptype=#{ptype.inspect}")
         end
       end
       schema.each do |item|
+        #; [!q3ylg] not raise error when 'help:' keyword param not found in task block parameters.
         next if item.key == :help
+        #; [!ycykr] error when a task option is defined but there is no corresponding keyword param in the task block.
         key_params.include?(item.key)  or
           raise TaskDefinitionError,
                 "Option `#{item.key}` is defined in task option schema,"+\
@@ -457,6 +471,7 @@ module Benry::MicroRake
     public
 
     def append_task(other_task)
+      #; [!jg8h1] appends other task to the end of linked list of tasks.
       t = self
       while t.next_task != nil
         t = t.next_task
@@ -466,6 +481,7 @@ module Benry::MicroRake
     end
 
     def clone_task(new_name, new_desc=nil)
+      #; [!1cp1k] copies the task object with new name and description.
       return self.class.new(new_name, new_desc || @desc, @prerequisites,
                             @argnames, @location, @schema,
                             important: @important, &@block)
