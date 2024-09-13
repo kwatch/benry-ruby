@@ -187,6 +187,8 @@ module Benry::MicroRake
   end
 
 
+  $URAKE_TASKFILE_FULLPATH = nil
+
   $VERBOSE_MODE      = true     unless defined?($VERBOSE_MODE)
   $QUIET_MODE        = false    unless defined?($QUIET_MODE)
   $DRYRUN_MODE       = false    unless defined?($DRYRUN_MODE)
@@ -1169,6 +1171,7 @@ module Benry::MicroRake
     end
 
     def require_rubyscript(filepath)
+      $URAKE_TASKFILE_FULLPATH = filepath
       if filepath.end_with?(".rb")
         require filepath
       else
