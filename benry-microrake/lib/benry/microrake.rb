@@ -142,7 +142,12 @@ module Benry::MicroRake
         here   = Dir.pwd() + "/"
         parent = File.dirname(here) + "/"
         home   = File.expand_path("~") + "/"
-        @dict = {here => "./", parent => "../", home => "~/"}
+        root_abspath, root_relpath = _root_path(here)
+        if root_abspath
+          @dict = {here => "./", parent => "../", root_abspath => root_relpath, home => "~/"}
+        else
+          @dict = {here => "./", parent => "../", home => "~/"}
+        end
       end
 
       def shorten_filepath(filepath)
@@ -153,6 +158,18 @@ module Benry::MicroRake
           end
         end
         return filepath
+      end
+
+      private
+
+      def _root_path(here, taskfile_fullpath=nil)
+        taskfile_fullpath ||= $URAKE_TASKFILE_FULLPATH
+        return nil unless taskfile_fullpath
+        root_abspath = File.dirname(taskfile_fullpath) + "/"
+        return nil unless here.start_with?(root_abspath)
+        rest = here.sub(root_abspath, "")
+        root_relpath = rest.gsub(/[^\/]+/, "..")
+        return root_abspath, root_relpath
       end
 
     end
