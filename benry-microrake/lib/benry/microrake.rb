@@ -1009,6 +1009,7 @@ module Benry::MicroRake
       schema.add(:execcont , "-E, --execute-continuee=<code>", "execute Ruby code and NOT exit")
       schema.add(:taskfile , "-f, --taskfile=<file>" , "Taskfile name (default: #{DEFAULT_TASKFILE})")
       schema.add(:rakefile , "    --rakefile=<file>" , "same as '--taskfile' (for Rake compatibility)")
+      schema.add(:filter   , "-F <regexp>"    , "filter tasks for -T/-D/-P/-W")
       schema.add(:libdir   , "-I, --libdir=<dir>", "add dir to library path (multiple ok)", multiple: true)
       schema.add(:list     , "-l"             , "list tasks without command name")
       schema.add(:dryrun   , "-n, --dry-run"  , "dry-run mode (not execute)")
@@ -1090,6 +1091,7 @@ module Benry::MicroRake
         return true
       end
       #; [!iw6ug] '-I' or '--libdir' option adds library path to `$LOAD_PATH`.
+      regexp = _filter2regexp(g_opts[:filter])
       if g_opts[:libdir]
         #; [!f7729] skips if library path already exists in `$LOAD_PATH`.
         g_opts[:libdir].each do |x|
@@ -1103,26 +1105,26 @@ module Benry::MicroRake
       #; [!6t9fa] '-l' option lists task names without command name.
       if g_opts[:tasks] || g_opts[:list]
         load_task_file(g_opts)
-        handler.do_list_tasks(all: g_opts[:all], with_command: g_opts[:tasks])
+        handler.do_list_tasks(all: g_opts[:all], filter: regexp, with_command: g_opts[:tasks])
         return true
       end
       #; [!yoqzz] '-D' or '--describe' option lists task names with description.
       if g_opts[:describe]
         load_task_file(g_opts)
-        handler.do_list_descriptions(all: g_opts[:all])
+        handler.do_list_descriptions(all: g_opts[:all], filter: regexp)
         return true
       end
       #; [!02xlo] '-P' or '--prereqs' option lists prerequisites of each task.
       #; [!26hf6] '-P' or '--prereqs' option reports cyclic task dependency.
       if g_opts[:prereqs]
         load_task_file(g_opts)
-        handler.do_list_prerequisites(all: g_opts[:all])
+        handler.do_list_prerequisites(all: g_opts[:all], filter: regexp)
         return true
       end
       #; [!s3jek] '-W' or '--where' option lists locations of each task.
       if g_opts[:where]
         load_task_file(g_opts)
-        handler.do_list_locations(all: g_opts[:all])
+        handler.do_list_locations(all: g_opts[:all], filter: regexp)
         return true
       end
       #; [!59ev8] '--new' option prints example code of taskfile.
@@ -1136,6 +1138,14 @@ module Benry::MicroRake
       #; [!jiixo] returns true if no need to do more, false if else.
       return false
     end
+
+    def _filter2regexp(filter_pattern)
+      return nil unless filter_pattern
+      return Regexp.compile(filter_pattern)
+    rescue RegexpError
+      raise CommandLineError.new("#{filter_pattern}: Invalid regexp pattern.")
+    end
+    private :_filter2regexp
 
     def _handle(g_opts, flag, load_task_file_p=false, &b)  # not used
       return false unless flag
@@ -1380,11 +1390,12 @@ END
     end
     private :_colorize_according_to_task
 
-    def do_list_tasks(all: false, with_command: true)
+    def do_list_tasks(all: false, filter: nil, with_command: true)
       format = with_command ?    # true if '-T', false if '-l'
                "#{@command} %-16s # %s" : "%-20s # %s"
       sb = []
       _each_task_with_hyphenized_name(all) do |name, task|
+        next if filter && filter !~ name
         firstline = task.desc =~ /(.*)$/ ? $1 : nil
         s = format % [name, firstline]
         s = _colorize_according_to_task(s, task)
@@ -1393,10 +1404,11 @@ END
       print Util.uncolorize_unless_tty(sb.join())
     end
 
-    def do_list_descriptions(all: false)
+    def do_list_descriptions(all: false, filter: nil)
       format = "#{@command} %s"
       sb = []
       _each_task_with_hyphenized_name(all) do |name, task|
+        next if filter && filter !~ name
         s = format % name
         s = _colorize_according_to_task(s, task)
         sb << s << "\n"
@@ -1410,11 +1422,12 @@ END
       print Util.uncolorize_unless_tty(sb.join())
     end
 
-    def do_list_locations(all: false)
+    def do_list_locations(all: false, filter: nil)
       format = "%-25s"
       shortener = Util::FilepathShortener.new()
       sb = []
       _each_task_with_hyphenized_name(all) do |name, task|
+        next if filter && filter !~ name
         location = shortener.shorten_filepath(task.location)
         location = location.split(/:in `/).first if location
         s = format % name
@@ -1424,10 +1437,11 @@ END
       print Util.uncolorize_unless_tty(sb.join())
     end
 
-    def do_list_prerequisites(all: false)
+    def do_list_prerequisites(all: false, filter: nil)
       mgr = @task_manager
       buf = []
       mgr.each_task do |task|
+        next if filter && filter !~ task.name
         _traverse_task(task) do |tsk|
           _traverse_prerequeistes(tsk, 0, buf, [])
         end
