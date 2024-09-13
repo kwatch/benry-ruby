@@ -838,39 +838,54 @@ module Benry::MicroRake
 
     def task(name, argnames=nil, &block)
       location = caller(1, 1).first
-      return __task(name, argnames, location, &block)
+      task = __create_task(name, argnames, location, :task, &block)
+      name = task.name
+      mgr = TASK_MANAGER
+      if mgr.has_task?(task.name)
+        existing_task = mgr.get_task(name)
+        existing_task.append_task(task)
+      else
+        mgr.add_task(name, task)
+      end
+      return task
     end
 
-    def __task(name, argnames, location, &block)
+    def task!(name, argnames=nil, &block)
+      location = caller(1, 1).first
+      task = __create_task(name, argnames, location, :'task!', &block)
+      mgr = TASK_MANAGER
+      if mgr.has_task?(task.name)
+        mgr.delete_task(task.name)
+        mgr.add_task(task.name, task)
+      else
+        raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
+      end
+      return task
+    end
+
+    def append_to_task(task_name, &block)
+      location = caller(1, 1).first
+      @_task_desc == nil  or
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
+      task = __create_task(task_name, nil, location, :append_to_task, &block)
+      mgr = TASK_MANAGER
+      if mgr.has_task?(task.name)
+        existing_task = mgr.get_task(name)
+        existing_task.append_task(task)
+      else
+        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
+      end
+      return task
+    end
+
+    def __create_task(name, argnames, location, func, &block)
       if @_task_desc
         desc, schema, hidden, important = @_task_desc
         @_task_desc = nil
       else
         desc = schema = hidden = important = nil
       end
-      prerequisite = nil
-      if name.is_a?(Hash)
-        dict = name
-        if dict.length < 1
-          raise TaskDefinitionError, "task() requires task name."
-        elsif dict.length > 1
-          raise TaskDefinitionError, "task() cannot accept too much argument."
-        end
-        dict.each do |k, v|
-          name = k
-          prerequisite = v
-        end
-      end
-      if argnames && argnames.is_a?(Hash)
-        dict = argnames
-        if dict.length > 1
-          raise TaskDefinitionError, "task() cannot accept too much argnames."
-        end
-        dict.each do |k, v|
-          argnames = k
-          prerequisite = v
-        end
-      end
+      name, argnames, prerequisite = __retrieve_prerequisite(name, argnames, func)
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
         name = (@_task_namespace + [name]).join(":")
       end
@@ -879,36 +894,35 @@ module Benry::MicroRake
       end
       task = Task.new(name, desc, prerequisite, argnames, location, schema,
                       hidden: hidden, important: important, &block)
-      mgr = TASK_MANAGER
-      if mgr.has_task?(name)
-        existing_task = mgr.get_task(name)
-        existing_task.append_task(task)
-      else
-        mgr.add_task(name, task)
-      end
       return task
     end
-    private :__task
+    private :__create_task
 
-    def task!(name, prerequisite=nil, &block)
-      location = caller(1, 1).first
-      mgr = TASK_MANAGER
-      mgr.delete_task(name)  or
-        raise TaskDefinitionError, "#{name}: Task not found, so failed to overwrite the existing task."
-      return __task(name, prerequisite, location, &block)
+    def __retrieve_prerequisite(task_name, argnames, func)
+      prerequisite = nil
+      if task_name.is_a?(Hash)
+        dict = task_name
+        dict.each do |k, v|
+          task_name    = k
+          prerequisite = v
+          break
+        end
+      end
+      if argnames && argnames.is_a?(Hash)
+        dict = argnames
+        dict.each do |k, v|
+          argnames     = k
+          prerequisite = v
+          break
+        end
+      end
+      return task_name, argnames, prerequisite
     end
+    private :__retrieve_prerequisite
 
     def find_task(task_name)
       mgr = TASK_MANAGER
       return mgr.get_task(task_name)
-    end
-
-    def append_to_task(task_name, &block)
-      existing_task = find_task(task_name)  or
-        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
-      new_task = Task.new(existing_task.name, nil, &block)
-      existing_task.append_task(new_task)
-      return new_task
     end
 
     def file(*args, **kwargs, &block)
