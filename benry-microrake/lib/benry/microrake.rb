@@ -975,9 +975,8 @@ module Benry::MicroRake
         alias_task = mgr.find_task(alias_for, full_ns)  or
           raise NamespaceError, "#{alias_for}: No such task."
         desc = "same as '#{full_name}'"
-        important = alias_task.important?
-        task = Task.new(full_ns, desc, nil, nil, location, alias_task.schema,
-                        important: important, &alias_task.block)
+        hidden = alias_task.hidden?
+        task = Task.new(full_ns, desc, nil, nil, location, hidden: hidden, &alias_task.block)
         mgr.add_task(full_ns, task)
       end
     ensure
