@@ -456,6 +456,12 @@ module Benry::MicroRake
       nil
     end
 
+    def clone_task(new_name, new_desc=nil)
+      return self.class.new(new_name, new_desc || @desc, @prerequisite,
+                            @argnames, @location, @schema,
+                            hidden: @hidden, important: @important, &@block)
+    end
+
   end
 
 
@@ -668,8 +674,8 @@ module Benry::MicroRake
       @tasks   = {}   # ex: {"test"=>Task.new("test", ...)}
     end
 
-    def add_task(name, task)
-      @tasks[_normalize(name)] = task
+    def add_task(task)
+      @tasks[_normalize(task.name)] = task
       self
     end
 
@@ -865,7 +871,7 @@ module Benry::MicroRake
         existing_task = mgr.get_task(name)
         existing_task.append_task(task)
       else
-        mgr.add_task(name, task)
+        mgr.add_task(task)
       end
       return task
     end
@@ -876,7 +882,7 @@ module Benry::MicroRake
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
         mgr.delete_task(task.name)
-        mgr.add_task(task.name, task)
+        mgr.add_task(task)
       else
         raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
       end
@@ -971,13 +977,11 @@ module Benry::MicroRake
         location = caller(1, 1).first
         mgr = TASK_MANAGER
         full_ns = @_task_namespace.join(":")
-        full_name = "#{full_ns}:#{alias_for}"
-        alias_task = mgr.find_task(alias_for, full_ns)  or
+        original_task = mgr.find_task(alias_for, full_ns)  or
           raise NamespaceError, "#{alias_for}: No such task."
-        desc = "same as '#{full_name}'"
-        hidden = alias_task.hidden?
-        task = Task.new(full_ns, desc, nil, nil, location, hidden: hidden, &alias_task.block)
-        mgr.add_task(full_ns, task)
+        desc = "alias for '#{original_task.name}'"
+        alias_task = original_task.clone_task(full_ns, desc)
+        mgr.add_task(alias_task)
       end
     ensure
       popped = @_task_namespace.pop()
