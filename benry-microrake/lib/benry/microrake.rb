@@ -493,6 +493,7 @@ module Benry::MicroRake
   class TaskWrapper
 
     def initialize(task)
+      #; [!llobx] accepts a task object.
       @task = task
     end
 
@@ -507,9 +508,11 @@ module Benry::MicroRake
   class TaskArgVals
 
     def initialize(argnames=nil, argvals)
+      #; [!71ejo] stores argvals as instance variables.
       argnames.zip(argvals) do |k, v|
         instance_variable_set("@#{k}", v)
       end
+      #; [!4pzq2] defines setter methods for argvals.
       #class <<self
       self.class.class_eval do
         attr_reader *argnames
@@ -517,6 +520,7 @@ module Benry::MicroRake
     end
 
     def [](key)
+      #; [!qsi9j] returns argval corresponding to key.
       return instance_variable_get("@#{key}")
     end
 
@@ -530,6 +534,11 @@ module Benry::MicroRake
     end
 
     def build_task_help(command, all: false)
+      #; [!johw0] returns help message of the task.
+      #; [!mr7yw] adds '[<options>]' into 'Usage:' section only when the task has options.
+      #; [!bt8ut] adds '[<arg1> [<arg2>]]' into 'Usage:' section only when the task has args.
+      #; [!wua6b] adds 'Options:' section only when the task has options.
+      #; [!22q3f] includes hidden options when `all: true` specified.
       t = @task
       arg_names, opt_names, has_restarg = _retrieve_arg_and_opt_names(t.block)
       has_opt = ! t.schema.empty?(all: all)
@@ -555,13 +564,18 @@ module Benry::MicroRake
 
     def _build_arguments_str(arg_names, has_restarg)
       sb = []
+      #; [!h175w] arg name 'a_b_c' will be pritned as 'a-b-c'.
+      #; [!q7lwp] arg name 'a_or_b_or_c' will be printed as 'a|b|c'.
+      #; [!nyq2o] arg name 'file__html' will be printed as 'file.html'.
       sb << arg_names.collect {|x| " [<#{Util.format_argname(x)}>" }.join("")
+      #; [!xerus] variable arg name will be printed as '<var>...".
       sb << "..." if has_restarg
       sb << ("]" * arg_names.length)
       return sb.join()
     end
 
     def _retrieve_arg_and_opt_names(block)
+      #; [!axtdb] returns positional param names, keyword param names, and flag of rest arg.
       arg_names    = []
       opt_names    = []
       has_restarg  = false

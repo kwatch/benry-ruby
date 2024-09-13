@@ -222,4 +222,245 @@ Oktest.scope do
   end
 
 
+  topic Benry::MicroRake::TaskWrapper do
+
+
+    topic '#initialize()' do
+
+      spec "[!llobx] accepts a task object." do
+        desc "foo task"
+        tsk = task :foo, [:x, :y] => [:pre1, :pre2] do
+          nil
+        end
+        x = Benry::MicroRake::TaskWrapper.new(tsk)
+        ok {x.name} == :foo
+        ok {x.desc} == "foo task"
+        ok {x.prerequisites} == [:pre1, :pre2]
+        ok {x.prerequisite} == :pre1
+      end
+
+    end
+
+  end
+
+
+  topic Benry::MicroRake::TaskArgVals do
+
+
+    topic '#initialize()' do
+
+      spec "[!71ejo] stores argvals as instance variables." do
+        x = Benry::MicroRake::TaskArgVals.new([:foo, :bar], ["abc", 123])
+        ok {x.instance_variable_get(:@foo)} == "abc"
+        ok {x.instance_variable_get(:@bar)} == 123
+      end
+
+      spec "[!4pzq2] defines setter methods for argvals." do
+        x2 = Benry::MicroRake::TaskArgVals.new([:foo2, :bar2], ["xyz", 456])
+        ok {x2.foo2} == "xyz"
+        ok {x2.bar2} == 456
+      end
+
+    end
+
+
+    topic '#[]' do
+
+      spec "[!qsi9j] returns argval corresponding to key." do
+        x3 = Benry::MicroRake::TaskArgVals.new([:foo3, :bar3], [false, 789])
+        ok {x3[:foo3]} == false
+        ok {x3[:bar3]} == 789
+      end
+
+    end
+
+
+  end
+
+
+  topic Benry::MicroRake::TaskHelpBuilder do
+
+
+    topic '#build_task_help()' do
+
+      spec "[!johw0] returns help message of the task." do
+        desc "desc1", {:foo=>["-f, --foo", "foo flag"], :bar=>["-b, --bar", "bar flag"]}
+        tsk = task :ex1 do |src, dest, *rest, foo: nil, bar: nil|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        ok {b.build_task_help("urake3")} == <<END
+\e[1murake3 ex1\e[0m --- desc1
+
+\e[36mUsage:\e[0m
+  $ urake3 ex1 [<options>] [<src> [<dest> [<rest>...]]]
+
+\e[36mOptions:\e[0m
+  -f, --foo      : foo flag
+  -b, --bar      : bar flag
+
+END
+      end
+
+      spec "[!mr7yw] adds '[<options>]' into 'Usage:' section only when the task has options." do
+        desc "desc2"
+        tsk = task :ex2 do |src, dest, *rest|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        ok {b.build_task_help("urake3")} == <<END
+\e[1murake3 ex2\e[0m --- desc2
+
+\e[36mUsage:\e[0m
+  $ urake3 ex2 [<src> [<dest> [<rest>...]]]
+
+END
+      end
+
+      spec "[!bt8ut] adds '[<arg1> [<arg2>]]' into 'Usage:' section only when the task has args." do
+        desc "desc3", {:foo=>["-f, --foo", "foo flag"], :bar=>["-b, --bar", "bar flag"]}
+        tsk = task :ex3 do |foo: nil, bar: nil|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        ok {b.build_task_help("urake3")} == <<END
+\e[1murake3 ex3\e[0m --- desc3
+
+\e[36mUsage:\e[0m
+  $ urake3 ex3 [<options>]
+
+\e[36mOptions:\e[0m
+  -f, --foo      : foo flag
+  -b, --bar      : bar flag
+
+END
+      end
+
+      spec "[!wua6b] adds 'Options:' section only when the task has options." do
+        desc "desc4a", {:foo=>["-f, --foo", "foo flag"]}
+        tsk = task :ex4a do |foo: nil|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        ok {b.build_task_help("urake3")} == <<END
+\e[1murake3 ex4a\e[0m --- desc4a
+
+\e[36mUsage:\e[0m
+  $ urake3 ex4a [<options>]
+
+\e[36mOptions:\e[0m
+  -f, --foo      : foo flag
+
+END
+        #
+        desc "desc4b"
+        tsk = task :ex4b do |src, dst|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        ok {b.build_task_help("urake3")} == <<END
+\e[1murake3 ex4b\e[0m --- desc4b
+
+\e[36mUsage:\e[0m
+  $ urake3 ex4b [<src> [<dst>]]
+
+END
+      end
+
+      spec "[!22q3f] includes hidden options when `all: true` specified." do
+        desc "desc5", {:foo=>["-f, --foo", "foo flag", :hidden]}
+        tsk = task :ex5 do |foo: nil|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        ok {b.build_task_help("urake3")} == <<END
+\e[1murake3 ex5\e[0m --- desc5
+
+\e[36mUsage:\e[0m
+  $ urake3 ex5
+
+END
+        #
+        ok {b.build_task_help("urake3", all: true)} == <<END
+\e[1murake3 ex5\e[0m --- desc5
+
+\e[36mUsage:\e[0m
+  $ urake3 ex5 [<options>]
+
+\e[36mOptions:\e[0m
+  -h, --help     : show help message
+  -f, --foo      : foo flag
+
+END
+      end
+
+    end
+
+
+    topic '#_build_arguments_str()' do
+
+      spec "[!h175w] arg name 'a_b_c' will be pritned as 'a-b-c'." do
+        desc "desc1"
+        tsk = task :ex1 do |aa_bb_cc|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        s = b.build_task_help("urake3")
+        ok {s}.include?("  $ urake3 ex1 [<aa-bb-cc>]\n")
+      end
+
+      spec "[!q7lwp] arg name 'a_or_b_or_c' will be printed as 'a|b|c'." do
+        desc "desc2"
+        tsk = task :ex2 do |aa_or_bb_or_cc|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        s = b.build_task_help("urake3")
+        ok {s}.include?("  $ urake3 ex2 [<aa|bb|cc>]\n")
+      end
+
+      spec "[!nyq2o] arg name 'file__html' will be printed as 'file.html'." do
+        desc "desc3"
+        tsk = task :ex3 do |file__html|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        s = b.build_task_help("urake3")
+        ok {s}.include?("  $ urake3 ex3 [<file.html>]\n")
+      end
+
+      spec "[!xerus] variable arg name will be printed as '<var>...'." do
+        desc "desc4"
+        tsk = task :ex4 do |aa, bb=nil, *cc|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        s = b.build_task_help("urake3")
+        ok {s}.include?("  $ urake3 ex4 [<aa> [<bb> [<cc>...]]]\n")
+      end
+
+    end
+
+
+    topic '#_retrieve_arg_and_opt_names(block)' do
+
+      spec "[!axtdb] returns positional param names, keyword param names, and flag of rest arg." do
+        tsk = task :ex5 do |aa, bb=1, *cc, xx: nil, yy: nil, **zz|
+          nil
+        end
+        b = Benry::MicroRake::TaskHelpBuilder.new(tsk)
+        b.instance_exec(self) do |_|
+          anames, kwnames, rest_flag = _retrieve_arg_and_opt_names(tsk.block)
+          _.ok {anames} == [:aa, :bb, :cc]
+          _.ok {kwnames} == [:xx, :yy]
+          _.ok {rest_flag} == true
+        end
+      end
+
+    end
+
+
+  end
+
+
 end
