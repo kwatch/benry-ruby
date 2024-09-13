@@ -378,12 +378,13 @@ module Benry::MicroRake
 
   class Task
 
-    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, important: nil, &block)
+    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, hidden: nil, important: nil, &block)
       @name      = name
       @desc      = desc
       @prerequisites = (prerequisite ? [prerequisite].flatten : []).freeze
       @argnames  = argnames ? argnames.freeze : nil
       @location  = location
+      @hidden    = hidden
       @important = important
       @block     = block
       if schema
@@ -400,9 +401,8 @@ module Benry::MicroRake
     attr_accessor :next_task
 
     def hidden?()
-      return true if @important == false
-      return true if @important == nil && @desc == nil
-      return false
+      return @hidden if @hidden != nil
+      return @desc == nil
     end
 
     def important?()
