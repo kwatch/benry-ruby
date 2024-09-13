@@ -890,7 +890,7 @@ module Benry::MicroRake
       task = __create_task(task_name, nil, location, :append_to_task, &block)
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
-        existing_task = mgr.get_task(name)
+        existing_task = mgr.get_task(task.name)
         existing_task.append_task(task)
       else
         raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
