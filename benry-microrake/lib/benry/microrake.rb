@@ -378,13 +378,12 @@ module Benry::MicroRake
 
   class Task
 
-    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, hidden: nil, important: nil, &block)
+    def initialize(name, desc=nil, prerequisite=nil, argnames=nil, location=nil, schema=nil, important: nil, &block)
       @name      = name
       @desc      = desc
       @prerequisites = (prerequisite ? [prerequisite].flatten : []).freeze
       @argnames  = argnames ? argnames.freeze : nil
       @location  = location
-      @hidden    = hidden
       @important = important
       @block     = block
       if schema
@@ -401,7 +400,7 @@ module Benry::MicroRake
     attr_accessor :next_task
 
     def hidden?()
-      return @hidden if @hidden != nil
+      return true if @important == false
       return @desc == nil
     end
 
@@ -459,7 +458,7 @@ module Benry::MicroRake
     def clone_task(new_name, new_desc=nil)
       return self.class.new(new_name, new_desc || @desc, @prerequisite,
                             @argnames, @location, @schema,
-                            hidden: @hidden, important: @important, &@block)
+                            important: @important, &@block)
     end
 
   end
@@ -859,7 +858,12 @@ module Benry::MicroRake
           #end
         end
       end
-      @_task_desc = [desc, schema, hidden, important]
+      case hidden
+      when nil       ;
+      when true      ; important = false if important == nil
+      when false     ; desc ||= ""
+      end
+      @_task_desc = [desc, schema, important]
     end
 
     def task(name, argnames=nil, &block)
@@ -906,10 +910,10 @@ module Benry::MicroRake
 
     def __create_task(name, argnames, location, func, &block)
       if @_task_desc
-        desc, schema, hidden, important = @_task_desc
+        desc, schema, important = @_task_desc
         @_task_desc = nil
       else
-        desc = schema = hidden = important = nil
+        desc = schema = important = nil
       end
       name, argnames, prerequisite = __retrieve_prerequisite(name, argnames, func)
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
@@ -919,7 +923,7 @@ module Benry::MicroRake
         argnames = [argnames].flatten.collect {|x| x.to_s.intern }
       end
       task = Task.new(name, desc, prerequisite, argnames, location, schema,
-                      hidden: hidden, important: important, &block)
+                      important: important, &block)
       return task
     end
     private :__create_task
