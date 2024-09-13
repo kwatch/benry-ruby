@@ -418,21 +418,29 @@ module Benry::MicroRake
           raise InternalError.new("ptype :req appeared.")
         when :opt
           if schema.opt_defined?(pname)
-            raise TaskDefinitionError, "Block parameter `#{pname}` is declared as an positional parameter, but defined as keyword parameter in schema."
-          #elsif ! cmdopt.arg_defined?(pname)
+            raise TaskDefinitionError,
+                  "Block parameter `#{pname}` is declared as a positional parameter,"+\
+                  " but should be declared as a keyword parameter,"+\
+                  " because it is defined as a task option in the schema."
+          #elsif ! schema.arg_defined?(pname)
           #  raise TaskDefinitionError, "Block parameter `#{pname}` is not defined in schema."
           end
         when :rest
           if schema.opt_defined?(pname)
-            raise TaskDefinitionError, "Block parameter `#{pname}` is declared as an variable parameter, but defined as keyword parameter in schema."
+            raise TaskDefinitionError,
+                  "Block parameter `#{pname}` is declared as a variable parameter,"+\
+                  " but should be declared as a keyword parameter,"+\
+                  " because it is defined as a task option in the schema."
           end
         when :key
           if ! schema.opt_defined?(pname)
-            raise TaskDefinitionError, "Block parameter `#{pname}` is declared as a keyword parameter, but not defined in schema."
+            raise TaskDefinitionError,
+                  "Block parameter `#{pname}` is declared as a keyword parameter,"+\
+                  " but not defined in the task option schema."
           end
           key_params << pname
         when :keyrest
-          raise TaskDefinitionError, "Block parameter `#{pname}` is a variable keyword parameter which is not supported in MicroRake."
+          #raise TaskDefinitionError, "Block parameter `#{pname}` is a variable keyword parameter which is not supported in MicroRake."
         else
           raise InternalError.new("ptype=#{ptype.inspect}")
         end
@@ -440,7 +448,9 @@ module Benry::MicroRake
       schema.each do |item|
         next if item.key == :help
         key_params.include?(item.key)  or
-          raise TaskDefinitionError, "Option `#{item.key}` is defined in schema, but not declared as a keyword parameter of the task block."
+          raise TaskDefinitionError,
+                "Option `#{item.key}` is defined in task option schema,"+\
+                " but not declared as a keyword parameter of the task block."
       end
     end
 
