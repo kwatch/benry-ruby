@@ -563,7 +563,7 @@ module Benry::MicroRake
 
     def _retrieve_arg_and_opt_names(block)
       arg_names    = []
-      opt_names = []
+      opt_names    = []
       has_restarg  = false
       block.parameters.each do |(ptype, pname)|
         case ptype
