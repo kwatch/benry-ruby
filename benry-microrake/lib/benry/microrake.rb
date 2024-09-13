@@ -950,6 +950,10 @@ module Benry::MicroRake
       return mgr.find_task(task_name, namespace)
     end
 
+    def task?(task_name)
+      return find_task(task_name) != nil
+    end
+
     def file(*args, **kwargs, &block)
       raise NotImplementedError.new("'file()' is not implemented in MicroRake.")
     end
