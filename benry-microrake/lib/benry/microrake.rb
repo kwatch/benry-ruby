@@ -683,6 +683,8 @@ module Benry::MicroRake
       when Task
         items = base.name.to_s.split(":")       # ex: "a:b:c" -> ["a","b","c"]
         items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      when nil
+        items = []
       else
         items = base.to_s.split(":")
       end
