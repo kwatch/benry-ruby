@@ -232,7 +232,7 @@ module Benry::MicroRake
       FileUtils.commands.each do |cmd|
         eval <<-END, binding(), __FILE__, __LINE__ + 1
           def #{cmd}(*args, **kwargs, &block)
-            raise NotImplementedError.new("#{cmd}(): Cannot call this method because FileUtils is disabled.")
+            raise NotImplementedError.new("#{cmd}(): Cannot invoke this method because FileUtils has been disabled.")
           end
         END
       end
@@ -928,7 +928,9 @@ module Benry::MicroRake
         mgr.delete_task(task.name)
         mgr.add_task(task)
       else
-        raise TaskDefinitionError, "task!(#{name.inspect}): Task not defined."
+        raise TaskDefinitionError,
+              #"task!(#{name.inspect}): Overwriting non-existing task."
+              "task!(#{name.inspect}): Task to overwrite should exist, but not defined."
       end
       return task
     end
@@ -936,14 +938,16 @@ module Benry::MicroRake
     def append_to_task(task_name, &block)
       location = caller(1, 1).first
       @_task_desc == nil  or
-        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
+        raise TaskDefinitionError,
+              "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
       task = __create_task(task_name, nil, location, :append_to_task, &block)
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
         existing_task = mgr.get_task(task.name)
         existing_task.append_task(task)
       else
-        raise TaskDefinitionError, "append_to_task(#{task_name.inspect}): Task not found."
+        raise TaskDefinitionError,
+              "append_to_task(#{task_name.inspect}): Task should exist, but not defined."
       end
       return task
     end
