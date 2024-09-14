@@ -1021,21 +1021,23 @@ module Benry::MicroRake
       name_ = name_.sub(/\A:/, '').sub(/:\z/, '')
       ns_name = Util.normalize_task_name(name_)
       (@_task_namespace ||= []) << ns_name
-      yield
-      if alias_for
-        location = caller(1, 1).first
-        mgr = TASK_MANAGER
-        full_ns = @_task_namespace.join(":")
-        original_task = mgr.find_task(alias_for, full_ns)  or
-          raise NamespaceError, "#{alias_for}: No such task."
-        desc = "alias for '#{original_task.name}'"
-        alias_task = original_task.clone_task(full_ns, desc)
-        mgr.add_task(alias_task)
+      begin
+        yield
+        if alias_for
+          mgr = TASK_MANAGER
+          full_ns = @_task_namespace.join(":")
+          original_task = mgr.find_task(alias_for, full_ns)  or
+            raise NamespaceError, "'#{alias_for}': No such task."
+          desc = "alias for '#{original_task.name}'"
+          alias_task = original_task.clone_task(full_ns, desc)
+          mgr.add_task(alias_task)
+        end
+        return ns_name
+      ensure
+        popped = @_task_namespace.pop()
+        popped == ns_name  or
+          raise InternalError.new("popped=#{popped.inspect}, ns_name=#{ns_name.inspect}")
       end
-    ensure
-      popped = @_task_namespace.pop()
-      popped == ns_name  or
-        raise InternalError.new("popped=#{popped.inspect}, ns_name=#{ns_name.inspect}")
     end
 
     def use_commands_instead_of_fileutils(module_)
