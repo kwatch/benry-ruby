@@ -267,24 +267,21 @@ module Benry::MicroRake
     alias chdir cd
 
     def echoback(str, verbose: $VERBOSE_MODE, noop: $DRYRUN_MODE)
+      #; [!pslkx] prints nothing on dryrun mode.
       return if noop
+      #; [!ao39n] prints a string with command prompt.
       fu_output_message str if verbose
       nil
     end
 
     def echo(*args, verbose: $VERBOSE_MODE, noop: $DRYRUN_MODE)
       str = args.join(" ")
+      #; [!bxelq] prints echoback on verbose mode.
       fu_output_message "echo #{str}" if verbose
+      #; [!u8dsb] prints nothing on dryrun mode.
       return if noop
+      #; [!00sy3] prints arguments.
       puts str
-      nil
-    end
-
-    def echo_n(*args, verbose: $VERBOSE_MODE, noop: $DRYRUN_MODE)
-      str = args.join(" ")
-      fu_output_message "echo -n #{str}" if verbose
-      return if noop
-      print str
       nil
     end
 
