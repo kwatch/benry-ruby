@@ -285,7 +285,7 @@ module Benry::MicroRake
       nil
     end
 
-    def time(&block)
+    def time(verbose: $VERBOSE_MODE, &block)
       start_at = Time.now
       st       = Process.times
       yield
@@ -294,6 +294,7 @@ module Benry::MicroRake
       real_t = end_at - start_at
       user_t = (et.utime - st.utime) + (et.cutime - st.cutime)
       sys_t  = (et.stime - st.stime) + (et.cstime - st.cstime)
+      return unless verbose
       $stderr.puts "%12.3f real %12.3f user %12.3f sys" % [real_t, user_t, sys_t]
       nil
     end
