@@ -246,8 +246,7 @@ module Benry::MicroRake
       @fileutils_label = prompt()
     end
 
-    def cd(dir, verbose: nil, &block)
-      verbose = $VERBOSE_MODE if verbose == nil
+    def cd(dir, verbose: $VERBOSE_MODE, &block)
       if ! block_given?()
         return super dir, verbose: verbose
       else
