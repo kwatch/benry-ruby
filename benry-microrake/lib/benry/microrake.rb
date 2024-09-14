@@ -885,6 +885,7 @@ module Benry::MicroRake
     module_function
 
     def desc(desc, option_schema=nil, hidden: nil, important: nil)
+      #; [!sddvl] creates schema object according to option schema definition.
       schema = nil
       if option_schema
         option_schema.is_a?(Hash)  or
@@ -898,6 +899,8 @@ module Benry::MicroRake
           #end
         end
       end
+      #; [!f6b6g] `hidden: true` is regarded as `important: false` internally.
+      #; [!7fdl0] if `hidden: false` specified, description should not be nil.
       case hidden
       when nil       ;
       when true      ; important = false if important == nil
@@ -907,27 +910,35 @@ module Benry::MicroRake
     end
 
     def task(name, argnames=nil, &block)
+      #; [!cb1wg] records method call location into task object.
       location = caller(1, 1).first
+      #; [!bx3sr] creates a new task object and returns it.
       task = __create_task(name, argnames, location, :task, &block)
       name = task.name
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
+        #; [!z313l] if there is other task with same name, then appends new task to it.
         existing_task = mgr.get_task(name)
         existing_task.append_task(task)
       else
+        #; [!8qlbs] new task object should be registered.
         mgr.add_task(task)
       end
       return task
     end
 
     def task!(name, argnames=nil, &block)
+      #; [!7eeci] records method call location into task object.
       location = caller(1, 1).first
+      #; [!214kt] creates a new task object and returns it.
       task = __create_task(name, argnames, location, :'task!', &block)
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
+        #; [!29qo8] if there is other task with same name, then removes it and registers new one.
         mgr.delete_task(task.name)
         mgr.add_task(task)
       else
+        #; [!oodzr] raises error if there is no task with same name.
         raise TaskDefinitionError,
               #"task!(#{name.inspect}): Overwriting non-existing task."
               "task!(#{name.inspect}): Task to overwrite should exist, but not defined."
@@ -936,16 +947,21 @@ module Benry::MicroRake
     end
 
     def append_to_task(task_name, &block)
+      #; [!s8mib] records method call location into task object.
       location = caller(1, 1).first
+      #; [!bbmoy] raises error if `desc()` is called before this method.
       @_task_desc == nil  or
         raise TaskDefinitionError,
               "append_to_task(#{task_name.inspect}): Cannot be called with `desc()`."
+      #; [!km0n6] creates a new task object and returns it.
       task = __create_task(task_name, nil, location, :append_to_task, &block)
       mgr = TASK_MANAGER
       if mgr.has_task?(task.name)
+        #; [!9aq2i] appends new task object to existing task object.
         existing_task = mgr.get_task(task.name)
         existing_task.append_task(task)
       else
+        #; [!usmb1] raises error if other task with same name doesn't exist.
         raise TaskDefinitionError,
               "append_to_task(#{task_name.inspect}): Task should exist, but not defined."
       end
@@ -953,19 +969,25 @@ module Benry::MicroRake
     end
 
     def __create_task(name, argnames, location, func, &block)
+      #; [!277vd] retrieves data set by `desc()`.
       if @_task_desc
         desc, schema, important = @_task_desc
+        #; [!v3dvm] data should be cleared after retrieved.
         @_task_desc = nil
       else
         desc = schema = important = nil
       end
+      #; [!0jper] retrieves prerequisite names from task name or argnames.
       name, argnames, prerequisite = __retrieve_prerequisite(name, argnames, func)
+      #; [!14p62] considers namespace.
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
         name = (@_task_namespace + [name]).join(":")
       end
+      #; [!f9z9f] converts argnames into symbols.
       if argnames
         argnames = [argnames].flatten.collect {|x| x.to_s.intern }
       end
+      #; [!ydlra] creates new task object and returns it.
       task = Task.new(name, desc, prerequisite, argnames, location, schema,
                       important: important, &block)
       return task
@@ -973,6 +995,7 @@ module Benry::MicroRake
     private :__create_task
 
     def __retrieve_prerequisite(task_name, argnames, func)
+      #; [!nmbok] if task name is a Hash, then retrieves prerequisite names from it.
       prerequisite = nil
       if task_name.is_a?(Hash)
         dict = task_name
@@ -982,6 +1005,7 @@ module Benry::MicroRake
           break
         end
       end
+      #; [!yysmo] if argnames is a Hash, then retrieves prerequisite names from it.
       if argnames && argnames.is_a?(Hash)
         dict = argnames
         dict.each do |k, v|
@@ -990,50 +1014,65 @@ module Benry::MicroRake
           break
         end
       end
+      #; [!ujwvs] returns task name, argnamens, and prerequisite names.
       return task_name, argnames, prerequisite
     end
     private :__retrieve_prerequisite
 
     def find_task(task_name)
+      #; [!ja7vq] considers current namespace.
       if defined?(@_task_namespace) && ! @_task_namespace.empty?
         namespace = @_task_namespace.join(":")
       else
         namespace = nil
       end
+      #; [!39ufc] returns task object if task found.
+      #; [!kgp19] returns nil if task not found.
       mgr = TASK_MANAGER
       return mgr.find_task(task_name, namespace)
     end
 
     def task?(task_name)
+      #; [!2edan] returns true if the task is defined, false otherwise.
       return find_task(task_name) != nil
     end
 
     def file(*args, **kwargs, &block)
+      #; [!ro813] raises NotImplementedError if `file()` is called.
       raise NotImplementedError.new("'file()' is not implemented in MicroRake.")
     end
 
     def namespace(name, alias_for: nil, &block)
+      #; [!6986t] raises error if namespace name contains invalid char other than '\w' and ':'.
       name_ = name.to_s
       name_ =~ /\A[:\w]+\z/  or
         raise NamespaceError, "#{name}: Namespace name contains invalid character."
+      #; [!dbusz] raises error if namespace name contains '::'.
       ! (name_ =~ /::/)  or
         raise NamespaceError, "'#{name}': Invalid namespace name."
+      #; [!or5wf] converts namespace name ':foo' or 'foo:' to 'foo' automatically.
       name_ = name_.sub(/\A:/, '').sub(/:\z/, '')
+      #; [!gzrnb] stacks namespace name with normalized.
       ns_name = Util.normalize_task_name(name_)
       (@_task_namespace ||= []) << ns_name
       begin
         yield
+        #; [!80kn0] registers new alias task if `alias_for:` specified.
         if alias_for
+          #; [!v1z88] considers namespace when finding original task of alias.
+          #; [!elivv] raises error when original task of alias not found.
           mgr = TASK_MANAGER
           full_ns = @_task_namespace.join(":")
           original_task = mgr.find_task(alias_for, full_ns)  or
             raise NamespaceError, "'#{alias_for}': No such task."
+          #; [!bq3ol] creates an alias task which is a clone of original one with different description.
           desc = "alias for '#{original_task.name}'"
           alias_task = original_task.clone_task(full_ns, desc)
           mgr.add_task(alias_task)
         end
         return ns_name
       ensure
+        #; [!uxx3a] namespace name should be popped from namespace stack.
         popped = @_task_namespace.pop()
         popped == ns_name  or
           raise InternalError.new("popped=#{popped.inspect}, ns_name=#{ns_name.inspect}")
@@ -1041,7 +1080,9 @@ module Benry::MicroRake
     end
 
     def use_commands_instead_of_fileutils(module_)
+      #; [!9yfrl] disables FileUtils commands.
       UnixUtils.disable_fileutils_commands()
+      #; [!taukw] enables commands of the module.
       TaskContext.include(module_)   # ex: Benry::UnixCommand
     end
 
