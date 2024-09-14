@@ -1016,9 +1016,10 @@ module Benry::MicroRake
       name_ = name.to_s
       name_ =~ /\A[:\w]+\z/  or
         raise NamespaceError, "#{name}: Namespace name contains invalid character."
-      ! (name_ =~ /\A:/ || name_ =~ /:\z/ || name_ =~ /::/)  or
-        raise NamespaceError, "#{name}: Invalid namespace name."
-      ns_name = Util.normalize_task_name(name)
+      ! (name_ =~ /::/)  or
+        raise NamespaceError, "'#{name}': Invalid namespace name."
+      name_ = name_.sub(/\A:/, '').sub(/:\z/, '')
+      ns_name = Util.normalize_task_name(name_)
       (@_task_namespace ||= []) << ns_name
       yield
       if alias_for
