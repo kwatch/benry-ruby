@@ -1508,7 +1508,7 @@ module Benry::CmdApp
       #; [!jek9k] raises error when no actions nor aliases found starting with prefix.
       arr = [s1, s2].compact()
       ! arr.empty?  or
-        raise CommandError, "No actions or aliases starting with '#{prefix}' were found. (Hint: try ':' instead of '#{prefix}' to list all prefixes.)"
+        raise CommandError, "'#{prefix}' : Unknown prefix. (Hint: try ':' instead of '#{prefix}' to list all prefixes.)"
       #; [!3c3f1] returns list of actions which name starts with prefix specified.
       return arr.join("\n")
     end

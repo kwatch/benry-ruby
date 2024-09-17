@@ -801,7 +801,7 @@ END
       spec "[!jek9k] raises error when no actions nor aliases found starting with prefix." do
         pr = proc { @builder.section_candidates("blabla:") }
         ok {pr}.raise?(Benry::CmdApp::CommandError,
-                       "No actions or aliases starting with 'blabla:' were found."\
+                       "'blabla:' : Unknown prefix."\
                        " (Hint: try ':' instead of 'blabla:' to list all prefixes.)")
       end
 
