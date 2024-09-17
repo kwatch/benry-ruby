@@ -215,6 +215,8 @@ module Benry::MicroRake
   module UnixUtils
     include FileUtils
 
+    module_function
+
     proc do
       ## list up FileUtils commands verbosable
       verbosable_commands = FileUtils.commands.select {|cmd|
