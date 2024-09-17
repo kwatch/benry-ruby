@@ -798,9 +798,11 @@ END
         ok {x} =~ /^\e\[1;34mAliases:\e\[0m$/
       end
 
-      spec "[!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix." do
-        x = @builder.section_candidates("blabla:")
-        ok {x} == "\e[1;34mActions:\e[0m\n\n"
+      spec "[!jek9k] raises error when no actions nor aliases found starting with prefix." do
+        pr = proc { @builder.section_candidates("blabla:") }
+        ok {pr}.raise?(Benry::CmdApp::CommandError,
+                       "No actions or aliases starting with 'blabla:' were found."\
+                       " (Hint: try ':' instead of 'blabla:' to list all prefixes.)")
       end
 
     end
