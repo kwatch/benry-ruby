@@ -217,6 +217,8 @@ module Benry::MicroRake
 
     module_function
 
+    #; [!v1pbf] changes verbose mode of FileUtils commands to be controlled by `$VERBOSE_MODE`.
+    #; [!mm05w] changes dryrun mode of FileUtils commands to be controlled by `$DRYRUN_MODE`.
     proc do
       ## list up FileUtils commands verbosable
       verbosable_commands = FileUtils.commands.select {|cmd|
@@ -231,6 +233,7 @@ module Benry::MicroRake
     end.call()
 
     def self.disable_fileutils_commands()   # :nodoc:
+      #; [!rb0ii] disables FileUtils commands and raises NotImplementedError when called.
       FileUtils.commands.each do |cmd|
         eval <<-END, binding(), __FILE__, __LINE__ + 1
           def #{cmd}(*args, **kwargs, &block)
@@ -241,25 +244,33 @@ module Benry::MicroRake
     end
 
     def prompt()
+      #; [!k6l7m] `prompt()` is an abstract method.
       raise NotImplementedError.new("#{self.class.name}#prompt(): not implemented yet.")
     end
 
     def set_prompt()
+      #; [!grnd0] sets command prompt.
       @fileutils_label = prompt()
     end
 
     def cd(dir, verbose: $VERBOSE_MODE, &block)
+      #; [!o97er] when block not given...
       if ! block_given?()
+        #; [!vo70t] just change directory.
         return super dir, verbose: verbose
+      #; [!ggjut] else...
       else
+        #; [!gcfb6] change directory, yield block, and back to the original directory.
         backup = (@_urake_chdir_depth ||= 0)
         begin
           return super dir, verbose: verbose do
+            #; [!tpzd1] changes command prompt in block correctly.
             @_urake_chdir_depth += 1
             set_prompt()
             yield
           end
         ensure
+          #; [!qs34j] recovers command prompt after block yielded.
           @_urake_chdir_depth = backup
           set_prompt()
         end
@@ -288,6 +299,7 @@ module Benry::MicroRake
     end
 
     def time(verbose: $VERBOSE_MODE, &block)
+      #; [!6qroj] measures real, user, and system times.
       start_at = Time.now
       st       = Process.times
       yield
@@ -296,47 +308,66 @@ module Benry::MicroRake
       real_t = end_at - start_at
       user_t = (et.utime - st.utime) + (et.cutime - st.cutime)
       sys_t  = (et.stime - st.stime) + (et.cstime - st.cstime)
+      #; [!hllql] prints real, user, and system times.
+      #; [!omp36] prints nothing on quiet mode.
       return unless verbose
       $stderr.puts "%12.3f real %12.3f user %12.3f sys" % [real_t, user_t, sys_t]
       nil
     end
 
     def sh(command, verbose: $VERBOSE_MODE, noop: $DRYRUN_MODE, &callback)
+      #; [!91wbl] prints command echoback with prompt.
+      #; [!ulses] prints nothing on quiet mode.
       #print prompt(), command, "\n" if verbose
       fu_output_message command if verbose
+      #; [!4fl74] do nothing on dryrun mode.
       return if noop
+      #; [!dcann] executes command.
       ok = system(command)
+      #; [!8mfps] yields block if given.
+      #; [!i2b9g] yields block even if command failed.
       if block_given?()
         return yield ok, $?
+      #; [!bfjmd] returns true if command finished successfully.
       elsif ok
         return ok
+      #; [!tte4w] fails when command finished unsuccessfully.
       else
         fail "Command failed (status=#{$?.exitstatus}): [#{command}]"
       end
     end
 
     def sh!(command, verbose: $VERBOSE_MODE, noop: $DRYRUN_MODE, &callback)
+      #; [!u01e3] prints command echoback on verbose mode.
       #print prompt(), command, "\n" if verbose
       fu_output_message command if verbose
+      #; [!4tgx8] do nothing on dryrun mode.
       return if noop
+      #; [!hrw7q] exuectes command.
       ok = system(command)
+      #; [!ppnpj] yields block only when command failed.
       if ! ok && block_given?()
         return yield $?   # yield block only when the command failed
+      #; [!4ni9x] returns true when command finished successfully.
       else
         return ok
       end
     end
 
     def question(message, default: nil, required: false, max: 3)
+      #; [!1v63y] prints question message, reads user input, and returns result.
       answer = nil
       i = 0
       while (i += 1) <= max
+        #; [!9bqbz] prints default value as a part of message when given.
         if default == nil
           print message, ": "
         else
           print message, " (default: #{default}): "
         end
         #$stdout.flush()
+        #; [!4x9or] returns user input data when entered.
+        #; [!81k3h] repeats to print message when required data not entered nor default value provided.
         answer = $stdin.readline().strip()
         if answer == nil
           raise RuntimeError, "question(): Failed to read answer because I/O closed."
@@ -348,18 +379,27 @@ module Benry::MicroRake
           return default
         end
       end
+      #; [!6ckyu] raises error if repeated more than 3 times.
       raise RuntimeError, "Answer expected but not entered."
     end
 
     def confirm(message, default: nil, max: 3)
+      #; [!mkefm] prints messgae, reads yes/no input, and returns result.
       i = 0
       while (i += 1) <= max
+        #; [!xzera] prints '[y/n]:' if default value is not specified.
+        #; [!iia89] prints '[y/N]:' if default value is false.
+        #; [!ew57o] prints '[Y/n]:' if default value is truthy.
         case default
         when nil   ; print message, " [y/n]: "
         when false ; print message, " [y/N]: "
         else       ; print message, " [Y/n]: "
         end
         #$stdout.flush()
+        #; [!8xstk] if user data starts with 'y' or 'Y' then returns true.
+        #; [!feayf] if user data starts with 'n' or 'N' then returns false.
+        #; [!56qd9] if user data is empty then returns default value if provided.
+        #; [!skvl6] ignores invalid answer.
         input = $stdin.readline().strip()
         case input
         when nil      ; raise RuntimeError, "confirm(): Failed to read answer because I/O closed."
@@ -367,8 +407,10 @@ module Benry::MicroRake
         when /\A[nN]/ ; return false
         when ""       ; return default if default != nil
         end
+        #; [!zwlg4] repeats while user data is empty or invalid and default value is nil.
         $stderr.puts "** Please enter 'y' or 'n'." if i < max
       end
+      #; [!94380] raises error if repeated more than 3 times.
       raise RuntimeError, "Expected 'y' or 'n', but not answered correctly."
     end
 
