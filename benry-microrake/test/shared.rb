@@ -65,8 +65,8 @@ Oktest.global_scope do
     #$LOADED_FEATURES.delete(filepath)
   end
 
-  def capture_sout(tty: nil, &b)
-    sout, serr = capture_sio(tty: tty, &b)
+  def capture_sout(stdin="", tty: nil, &b)
+    sout, serr = capture_sio(stdin, tty: tty, &b)
     ok {serr} == ""
     return sout
   end
