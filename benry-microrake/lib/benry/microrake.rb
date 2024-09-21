@@ -554,8 +554,7 @@ module Benry::MicroRake
         instance_variable_set("@#{k}", v)
       end
       #; [!4pzq2] defines setter methods for argvals.
-      #class <<self
-      self.class.class_eval do
+      (class << self; self; end).class_eval do
         attr_reader *argnames
       end
     end
