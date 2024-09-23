@@ -435,7 +435,7 @@ module Benry::MicroRake
         _validate_block_params(block, schema)
       else
         #; [!fi4j3] creates default schema object when option schema is not specified.
-        schema = TaskOptionSchema.new(block)
+        schema = TaskOptionSchema.create_from(block)
       end
       @schema    = schema
       @next_task = nil
@@ -898,18 +898,23 @@ module Benry::MicroRake
         "h", "help", nil, false, hidden: true
     ).freeze
 
-    def initialize(block=nil)
+    def initialize(convert: false)
       super()
+      @should_convert_option_value = convert
       add_item(HELP_SCHEMA_ITEM)
+    end
+
+    def self.create_from(block)
+      schema = self.new(convert: true)
       if block
         block.parameters.each do |(ptype, pname)|
           case ptype
           when :req, :opt, :rest   # skip
           when :key
             case pname.to_s
-            when /\Aopt_(\w)\z/   ; add(pname, "-#{$1}", "")
-            when /\Aopt_(\w)_\z/  ; add(pname, "-#{$1} <val>", "")
-            else                  ; add(pname, "--#{pname}[=<val>]", "")
+            when /\Aopt_(\w)\z/   ; schema.add(pname, "-#{$1}", "")
+            when /\Aopt_(\w)_\z/  ; schema.add(pname, "-#{$1} <val>", "")
+            else                  ; schema.add(pname, "--#{pname}[=<val>]", "")
             end
           when :keyrest
             #raise TaskDefinitionError, "#{pname}: Variable keyword parameter of task block is not supported."
@@ -918,7 +923,7 @@ module Benry::MicroRake
           end
         end
       end
-      @should_convert_option_value = (block != nil)
+      return schema
     end
 
     def add_opt(key, optdef, desc, *rest, **kwargs)
