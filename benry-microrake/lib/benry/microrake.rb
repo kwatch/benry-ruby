@@ -808,7 +808,7 @@ module Benry::MicroRake
     def each_task(&block)
       return to_enum(:each_task) unless block_given?
       @tasks.values.each(&block)
-      self
+      nil
     end
 
     def find_task(relative_name, base_task_or_namespace)
