@@ -789,52 +789,68 @@ module Benry::MicroRake
     end
 
     def add_task(task)
+      #; [!8bzd4] registers a task.
       @tasks[_normalize(task.name)] = task
       self
     end
 
     def get_task(name)
+      #; [!hyit0] returns a task.
       return @tasks[_normalize(name)]
     end
 
     def has_task?(name)
+      #; [!587bq] returns true if a task exist, false if not.
       return @tasks.key?(_normalize(name))
     end
 
     def delete_task(name)
+      #; [!yftry] deletes a task.
       return @tasks.delete(_normalize(name))
     end
 
     def each_task(&block)
+      #; [!9033a] returns Enumerator object if block not given.
       return to_enum(:each_task) unless block_given?
+      #; [!z3vg1] yields block with each task object.
       @tasks.values.each(&block)
       nil
     end
 
     def find_task(relative_name, base_task_or_namespace)
+      #; [!120pp] can accepts Symbol as well as String.
       name = relative_name.to_s
+      #; [!z4w9l] regards task name starting with ':' as absolute name.
       if name =~ /\A:/
         return get_task(name[1..-1])          # ex: ":a:b:foo" -> "a:b:foo"
       end
+      #; [!co6ic] base task can be a task object.
       base = base_task_or_namespace
       case base
       when Task
         items = base.name.to_s.split(":")       # ex: "a:b:c" -> ["a","b","c"]
         items.pop()                             # ex: ["a","b","c"] -> ["a","b"]
+      #; [!2a4n5] base task may be nil.
       when nil
         items = []
+      #; [!k6lza] base task can be a namespace string.
       else
         items = base.to_s.split(":")
       end
+      #; [!mdge0] searches a task according to namespace of base task.
       while ! items.empty?
         full_name = (items + [name]).join(":")  # ex: "a:b:foo"
         return get_task(full_name) if has_task?(full_name)
         items.pop()
       end
+      #; [!mq6gk] find a task object when not found in namespace.
       return get_task(name)                   # ex: "foo"
     end
 
     def run_task(task, *args, **opts)
+      #; [!ay12h] invokes a task with new context object.
+      #; [!htt27] invokes a task with args and opts.
+      #; [!1bufa] retruns a context object in which task block invoked.
       ctx = TaskContext.new(self)
       ctx.run_task(task, *args, **opts)
       return ctx
@@ -843,22 +859,28 @@ module Benry::MicroRake
     private
 
     def _normalize(name)
+      #; [!emsee] converts a Symbol object to a String object.
+      #; [!ti173] converts "aa-bb-cc" to "aa_bb_cc".
       Util.normalize_task_name(name)
     end
 
     public
 
     def self.detect_cyclic_task(task, stack)
+      #; [!7yqf8] raises error if a task object found in a stack.
       i = stack.index(task)
       if i
+        #; [!lz5ap] cycled task names are joined with '->'.
         tasks = stack[i..-1] + [task]
         s1 = tasks.collect(&:name).join("->")
+        #; [!yeapj] task locations are included in error message.
         shortener = Util::FilepathShortener.new()
         s2 = tasks.collect {|t|
           location = shortener.shorten_filepath(t.location)
           location = location.split(/:in `/).first if location
           "    %-20s : %s" % [t.name, location]
         }.join("\n")
+        #; [!3lh5l] task locations are printed in gray color if stdout is a tty.
         s2 = Util.colorize_unimportant(s2) if $stdout.tty?
         raise CyclicTaskError, "Cyclic task detected. (#{s1})\n#{s2}"
       end
