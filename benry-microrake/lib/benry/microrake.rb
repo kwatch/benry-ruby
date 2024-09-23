@@ -658,6 +658,7 @@ module Benry::MicroRake
           raise TaskExecutionError, "run_task(#{task_name.ispect}): Task not found."
       end
       backup = @__curr_task
+      @__curr_task = task
       begin
         return _run_task(task, args, opts)
       ensure
