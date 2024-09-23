@@ -636,7 +636,7 @@ module Benry::MicroRake
   end
 
 
-  class TaskBaseContext
+  class BaseTaskContext
 
     def initialize(task_manager)
       @__task_manager = task_manager
@@ -723,7 +723,7 @@ module Benry::MicroRake
   end
 
 
-  class TaskContext < TaskBaseContext
+  class TaskContext < BaseTaskContext
     include UnixUtils
 
     def initialize(task_manager)
