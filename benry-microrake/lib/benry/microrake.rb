@@ -655,7 +655,7 @@ module Benry::MicroRake
         task = task_name
       else
         task = mgr.find_task(task_name, self)  or
-          raise TaskExecutionError, "run_task(#{task_name.ispect}): Task not found."
+          raise TaskExecutionError, "run_task(#{task_name.inspect}): Task not found."
       end
       backup = @__curr_task
       @__curr_task = task
