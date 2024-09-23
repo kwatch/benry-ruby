@@ -836,7 +836,8 @@ module Benry::MicroRake
 
     def run_task(task, *args, **opts)
       ctx = TaskContext.new(self)
-      return ctx.run_task(task, *args, **opts)
+      ctx.run_task(task, *args, **opts)
+      return ctx
     end
 
     private
