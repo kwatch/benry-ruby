@@ -646,10 +646,13 @@ module Benry::MicroRake
     end
 
     def current_task()
+      #; [!6ly31] returns current task object.
       return @__curr_task
     end
 
     def run_task(task_name, *args, **opts)
+      #; [!4gsle] accepts either a task name or a task object.
+      #; [!ngmx8] raises error when task not found corresponding the task name.
       mgr = @__task_manager
       if task_name.is_a?(Task)
         task = task_name
@@ -657,6 +660,9 @@ module Benry::MicroRake
         task = mgr.find_task(task_name, self)  or
           raise TaskExecutionError, "run_task(#{task_name.inspect}): Task not found."
       end
+      #; [!7iwdq] sets current task object.
+      #; [!bfo06] runs task object in this context with args and opts.
+      #; [!yi2du] recovers previous task object.
       backup = @__curr_task
       @__curr_task = task
       begin
@@ -669,44 +675,64 @@ module Benry::MicroRake
     private
 
     def _run_task(task, args, opts)
+      #; [!bu56r] task should not be run more than once.
       mgr = @__task_manager
       name = _normalize(task.name)
       if @__dones[task.object_id]
+        #; [!c9gie] when trace mode is on, skipped task will be reported.
         _report_trace("skip:  #{name}  (alrady done)") if $TRACE_MODE
+        #; [!mrqag] returns false if the task is skipped.
         return false
       end
+      #; [!jm3sj] when trace mode is on, entering task will be reported.
       _report_trace("enter: #{name}") if $TRACE_MODE
+      #; [!y9b9m] run tasks in liked list.
       tsk = task; ret = nil
       while tsk != nil
+        #; [!tyayh] when trace mode is on, next task name will be reported.
         _report_trace("next:  #{name}") if $TRACE_MODE && tsk != task
+        #; [!wz73x] detects cyclic task.
         TaskManager.detect_cyclic_task(tsk, @__running)
+        #; [!6026e] prerequisite tasks are invoked before the target task.
         _with_running(tsk) do
           tsk.prerequisites.each do |pre_name|
+            #; [!xp4d9] raises error when prerequisite task is not found.
             pre_task = mgr.find_task(pre_name, tsk)  or
               raise TaskExecutionError, "#{pre_name}: Prerequisite task not found."
+            #; [!1nzl9] prerequisite tasks are invoked without args nor opts.
             run_task(pre_task)  # run prerequisite task with no args nor opts
           end
           _invoke_task(tsk, args, opts)  # run task block with args and opts
         end
         tsk = tsk.next_task
       end
+      #; [!kc2jt] when trace mode is on, exiting task will be reported.
       _report_trace("exit:  #{name}") if $TRACE_MODE
+      #; [!n1amc] records the task as 'done'.
       @__dones[task.object_id] = true    # done
+      #; [!ejxdf] returns true if the task is invoked.
       return true
     end
 
     def _invoke_task(task, args, opts)
+      #; [!sahtx] simulates Rake when the task has argnames such as `task :foo, [:x, :y]`.
       if task.argnames
         args = [TaskWrapper.new(task), TaskArgVals.new(task.argnames, args)]
       end
+      #; [!tx0yq] task block will be invoked with this conext object as `self`.
+      #; [!86mhe] do nothing when task has no blocks.
       self.instance_exec(*args, **opts, &task.block) if task.block
     end
 
     def _normalize(name)
+      #; [!uhw1e] converts a symbol object to a string.
+      #; [!a7159] converts 'aa-bb-cc' to 'aa_bb_cc'.
       Util.normalize_task_name(name)
     end
 
     def _with_running(task, &b)
+      #; [!5roqu] pushs task object into a stack before running the task.
+      #; [!3iu4t] pops task object from a stack after running the task.
       @__running.push(task)
       yield
       popped = @__running.pop()
@@ -715,6 +741,10 @@ module Benry::MicroRake
     end
 
     def _report_trace(msg)
+      #; [!9ssp0] prints the message into stderr.
+      #; [!bb29o] prints the message in color if stderr is a tty.
+      #; [!ovbu9] prints the message without color if stderr is not a tty.
+      #; [!pah14] the message will be indented in prerequisite task.
       space = " " * (@__running.length + 1)
       s = "**#{space}#{msg}"
       s = Util.colorize_trace(s) if $stderr.tty?
@@ -729,10 +759,14 @@ module Benry::MicroRake
 
     def initialize(task_manager)
       super
+      #; [!bb8ua] prompt string should be set.
       set_prompt()
     end
 
     def prompt()
+      #; [!uj8em] returns colorized prompt string when stdout is a tty.
+      #; [!58pra] returns non-colorized prompt string when stdout is not a tty.
+      #; [!ipvqi] prompt string should be indented according to nest of 'cd()'.
       space = " " * ((@_urake_chdir_depth ||= 0) + 1)
       if $stdout.tty?
         ## 30: black, 31: red, 32: green, 33: yellow, 34: blue,
