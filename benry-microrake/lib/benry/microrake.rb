@@ -1274,7 +1274,7 @@ module Benry::MicroRake
       schema.add(:dir      , "-C, --directory=<dir>", "change directory (tips: '-C .' not change dir)")
       schema.add(:describe , "-D, --describe" , "list tasks with description")
       schema.add(:execexit , "-e, --execute=<code>", "execute Ruby code and exit")
-      schema.add(:execcont , "-E, --execute-continuee=<code>", "execute Ruby code and NOT exit")
+      schema.add(:execcont , "-E, --execute-continue=<code>", "execute Ruby code and NOT exit")
       schema.add(:taskfile , "-f, --taskfile=<file>" , "Taskfile name (default: #{DEFAULT_TASKFILE})")
       schema.add(:rakefile , "    --rakefile=<file>" , "same as '--taskfile' (for Rake compatibility)")
       schema.add(:filter   , "-F <regexp>"    , "filter tasks for -T/-D/-P/-W")
