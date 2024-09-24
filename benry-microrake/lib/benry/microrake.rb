@@ -1415,14 +1415,6 @@ module Benry::MicroRake
     end
     private :_filter2regexp
 
-    def _handle(g_opts, flag, load_task_file_p=false, &b)  # not used
-      return false unless flag
-      load_task_file(g_opts) if load_task_file_p
-      yield
-      return true
-    end
-    private :_handle
-
     def toggle_global_mode(g_opts)
       $VERBOSE_MODE = false if g_opts[:quiet] || g_opts[:silent]
       $QUIET_MODE   = true  if g_opts[:quiet] || g_opts[:silent]
