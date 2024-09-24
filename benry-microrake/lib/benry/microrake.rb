@@ -74,8 +74,8 @@ module Benry::MicroRake
 
     def hyphenize_task_name(name)
       name = name.to_s
-      name = name.gsub(/_/, '-')       # ex: "a_b_c" -> "a-b-c"
-      name = name.gsub(/(^|:)-/, '_')  # ex: "-a" -> "_", "b:-c" -> "b:_c"
+      name = name.gsub(/_/, '-')         # ex: "a_b_c" -> "a-b-c"
+      name = name.gsub(/(^|:)-/, '\1_')  # ex: "-a" -> "_a", "b:-c" -> "b:_c"
       return name
     end
 
