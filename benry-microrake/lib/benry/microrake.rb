@@ -893,6 +893,8 @@ module Benry::MicroRake
 
   class TaskOptionSchema < Benry::CmdOpt::Schema
 
+    #; [!b3pwr] common help option item should be immutable.
+    #; [!nhe46] common help option should be a hidden option.
     HELP_SCHEMA_ITEM = Benry::CmdOpt::SchemaItem.new(
         :help, "-h, --help", "show help message",
         "h", "help", nil, false, hidden: true
@@ -900,17 +902,25 @@ module Benry::MicroRake
 
     def initialize(convert: false)
       super()
+      #; [!526sc] option values should be converted when `convert: true` specified.
       @should_convert_option_value = convert
+      #; [!jd8ia] enables help option automatically.
       add_item(HELP_SCHEMA_ITEM)
     end
 
     def self.create_from(block)
       schema = self.new(convert: true)
+      #; [!qrw35] accepts a Proc object.
       if block
         block.parameters.each do |(ptype, pname)|
+          #; [!1etq1] required and optional params are ignored.
           case ptype
           when :req, :opt, :rest   # skip
           when :key
+            #; [!jrx0g] regards keyword param 'opt_<x>' as a short option with no args.
+            #; [!z0gee] regards keyword param 'opt_<x>_' as a short option with an arg.
+            #; [!m5qgk] regards keyword param as an arg-required long option when name ends with '_'.
+            #; [!js2dl] regards keyword param as a normal long option when name doesn't end with '_'.
             case pname.to_s
             when /\Aopt_(\w)\z/   ; schema.add(pname, "-#{$1}", "")
             when /\Aopt_(\w)_\z/  ; schema.add(pname, "-#{$1} <val>", "")
@@ -924,28 +934,34 @@ module Benry::MicroRake
           end
         end
       end
+      #; [!akhrr] returns new schema object.
       return schema
     end
 
     def add_opt(key, optdef, desc, *rest, **kwargs)
+      #; [!fkfds] regards `add_opt(..., :hidden)` as `add_opt(..., hidden: true)`.
       syms, rest2 = rest.partition {|x|
         x.is_a?(Symbol) && _boolean_key?(x)
       }
       syms.each {|x| kwargs[x] = true }
+      #; [!4j9jc] adds an option schema item.
       return add(key, optdef, desc, *rest2, **kwargs)
     end
 
     def opt_defined?(key)
+      #; [!e7wst] returns true if option defined, false if else.
       return get(key) != nil
     end
 
     def should_convert_option_value?()
+      #; [!0ec65] returns true if non-nil block passed to constructor.
       return @should_convert_option_value
     end
 
     private
 
     def _boolean_key?(key)
+      #; [!57tc3] returns true if key is :hidden, :important, or :multiple.
       return BOOLEAN_KEYS.key?(key)
     end
 
@@ -957,7 +973,9 @@ module Benry::MicroRake
   class TaskOptionParser < Benry::CmdOpt::Parser
 
     def parse(args, all: true)
+      #; [!dnywk] parses command options according to option schema.
       opts = super
+      #; [!nmbje] can convert option values such as `"1"`->`1`.
       if @schema.should_convert_option_value?
         opts2 = {}
         opts.each {|k, v| opts2[k] = _convert_value(v) }
@@ -970,6 +988,7 @@ module Benry::MicroRake
     protected
 
     def parse_long_option(optstr, optdict)
+      #; [!oj9l8] raises error when short option specified in long option style.
       if optstr =~ /\A--(opt[-_]\w[-_]?)(?:=(.*))?\z/
         return handle_unknown_long_option(optstr, $1, $2 || true)
       end
@@ -979,6 +998,12 @@ module Benry::MicroRake
     private
 
     def _convert_value(v)
+      #; [!xu992] converts `"123"` to `123`.
+      #; [!9bt0s] converts `"3.14"` to `3.14`.
+      #; [!wtzal] converts `"true"` and `"false"` to `true` and `false` respectively.
+      #; [!d64un] converts `"[1,2,3]"` to `[1,2,3]`.
+      #; [!6v2yu] converts `'{"a":1, "b":2}'` to `{"a"=>1, "b"=>2}`.
+      #; [!35cvp] returns the value as is if failed to convert it.
       return Util.convert_value(v)
     end
 
