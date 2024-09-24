@@ -915,7 +915,7 @@ module Benry::MicroRake
             when /\Aopt_(\w)\z/   ; schema.add(pname, "-#{$1}", "")
             when /\Aopt_(\w)_\z/  ; schema.add(pname, "-#{$1} <val>", "")
             when /_\z/            ; schema.add(pname, "--#{pname[0..-2]}=<val>", "")
-            else                  ; schema.add(pname, "--#{pname}[=<val>]", "")
+            else                  ; schema.add(pname, "--#{pname}", "")
             end
           when :keyrest
             #raise TaskDefinitionError, "#{pname}: Variable keyword parameter of task block is not supported."

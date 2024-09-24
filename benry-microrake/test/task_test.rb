@@ -32,12 +32,14 @@ Oktest.scope do
       end
 
       spec "[!fi4j3] creates default schema object when option schema is not specified." do
-        task = Benry::MicroRake::Task.new("foo", "desc") do |a, b, opt_x_: nil, foo: nil|
+        task = Benry::MicroRake::Task.new("foo", "desc") do |a, b, opt_x_: nil, foo: nil, bar_: nil|
         end
         ok {task.schema} != nil
         ok {task.schema}.is_a?(Benry::MicroRake::TaskOptionSchema)
         ok {task.schema.get(:foo).long} == "foo"
-        ok {task.schema.get(:foo).arg_requireness} == :optional
+        ok {task.schema.get(:foo).arg_requireness} == :none
+        ok {task.schema.get(:bar_).long} == "bar"
+        ok {task.schema.get(:bar_).arg_requireness} == :required
         ok {task.schema.get(:opt_x_).short} == "x"
         ok {task.schema.get(:opt_x_).arg_requireness} == :required
       end
