@@ -56,23 +56,35 @@ module Benry::MicroRake
     module_function
 
     def convert_value(str)
+      #; [!29j7q] returns true if arg is true.
+      #; [!5wzbr] returns true if arg is nil.
       return true if str == true || str == nil
+      #; [!fqzvn] parses arg as JSON string.
       return JSON.parse(str)   # ex: "1" -> 1, "true" -> true
     rescue JSON::ParserError
+      #; [!we5lh] returns arg string as is if failed to parse as JSON string.
       return str               # ex: "foo" -> "foo"
     end
 
     def render_default_taskfile(command)
+      #; [!73223] returns default template of task file.
       content = File.read(__FILE__, encoding: 'utf-8').split(/^__END__\n/, 2).last
+      #; [!forme] replaces '%COMMAND%' in detault template with command name.
       content = content.gsub('%COMMAND%', command)
       return content
     end
 
     def normalize_task_name(name)
+      #; [!cwfml] converts a Symbol object to a String object.
+      #; [!nntke] replaces '-' in name with '_'.
       return name.to_s.gsub(/-/, "_")
     end
 
     def hyphenize_task_name(name)
+      #; [!e77l6] converts symbol to string.
+      #; [!uned9] converts "a_b_c" into "a-b-c".
+      #; [!hdlhm] converts "-foo" into "_foo".
+      #; [!9aimn] converts "foo:-bar" into "foo:_bar".
       name = name.to_s
       name = name.gsub(/_/, '-')         # ex: "a_b_c" -> "a-b-c"
       name = name.gsub(/(^|:)-/, '\1_')  # ex: "-a" -> "_a", "b:-c" -> "b:_c"
@@ -80,6 +92,11 @@ module Benry::MicroRake
     end
 
     def format_argname(name)
+      #; [!zv7xb] converts symbol into string.
+      #; [!dhg0y] converts `:yes_or_no` to `"yes|no"`.
+      #; [!srnd1] converts `:file__html` to `"file.html"`.
+      #; [!9y6re] converts `:my_src_file` to `"my-src-file"`.
+      #; [!27nhc] converts `:_foo_bar_baz` to `"_foo-bar-baz"`.
       s = name.to_s
       s = s.gsub(/_or_/, '|')          # ex: "yes_or_no"  -> "yes|no"
       s = s.gsub(/__/, '.')            # ex: "file__html" -> "file.html"
@@ -89,14 +106,17 @@ module Benry::MicroRake
     end
 
     def colorize_appname(str)
+      #; [!n3evs] returns corolized string.
       return "\e[1m#{str}\e[0m"   # bold
     end
 
     def colorize_taskname(str)
+      #; [!0ouyi] returns corolized string.
       return "\e[1m#{str}\e[0m"   # bold
     end
 
     def colorize_secheader(str)
+      #; [!jahx6] returns colorized string.
       ## 30: black, 31: red, 32: green, 33: yellow, 34: blue,
       ## 35: magenta, 36: cyan, 37: white, 90: gray, 2: gray
       #return "\e[1;34m#{str}\e[0m"   # blue; bold
@@ -104,34 +124,42 @@ module Benry::MicroRake
     end
 
     def colorize_location(str)
+      #; [!8kgb8] returns colorized string.
       return "\e[2;3m#{str}\e[0m"    # gray, itatlic
     end
 
     def colorize_important(str)
+      #; [!u76lu] returns colorized string.
       return "\e[1m#{str}\e[0m"      # bold
     end
 
     def colorize_unimportant(str)
+      #; [!17hi0] returns colorized string.
       return "\e[2m#{str}\e[0m"      # gray
     end
 
     def colorize_hidden(str)
+      #; [!f5dvq] returns colorized string.
       return "\e[2m#{str}\e[0m"      # gray
     end
 
     def colorize_trace(str)
+      #; [!nxyvc] returns colorized string.
       return "\e[33m#{str}\e[0m"     # yellow
     end
 
     def colorize_error(str)
+      #; [!bnfcm] returns red-colorized string.
       return "\e[31m#{str}\e[0m"     # red
     end
 
     def uncolorize(str)
+      #; [!v5lvk] deletes escape sequences from a string.
       return str.gsub(/\e\[.*?m/, '')
     end
 
     def uncolorize_unless_tty(str)
+      #; [!i9hd9] deletes escape sequences when stdout is not a tty.
       return $stdout.tty? ? str : uncolorize(str)
     end
 
@@ -139,6 +167,7 @@ module Benry::MicroRake
     class FilepathShortener
 
       def initialize()
+        #; [!6krfz] prepares path replacement mapping dict.
         here   = Dir.pwd() + "/"
         parent = File.dirname(here) + "/"
         home   = File.expand_path("~") + "/"
@@ -151,18 +180,23 @@ module Benry::MicroRake
       end
 
       def shorten_filepath(filepath)
+        #; [!t9w8h] converts "/home/yourname/lib/" to "~/lib/".
+        #; [!2s6p9] converts "/home/yourname/src/foo" to "./".
+        #; [!665n9] converts "/home/yourname/src/bar" to "../bar".
         return nil if filepath == nil
         @dict.each do |path, newpath|
           if filepath.start_with?(path)
             return filepath.sub(path, newpath)
           end
         end
+        #; [!om9f6] returns filepath as is if it doesn't match to replacement path.
         return filepath
       end
 
       private
 
       def _root_path(here, taskfile_fullpath=nil)
+        #; [!j2fjj] detects relative path from here to task file.
         taskfile_fullpath ||= $URAKE_TASKFILE_FULLPATH
         return nil unless taskfile_fullpath
         root_abspath = File.dirname(taskfile_fullpath) + "/"
@@ -182,17 +216,22 @@ module Benry::MicroRake
       end
 
       def clear_cache()
+        #; [!0c6ye] clears line cache.
         @lines_cache.clear()
       end
 
       def get_line_of_file_at(filepath, lineno)
+        #; [!s5fur] reads lines of file and stores into line cache.
         lines = (@lines_cache[filepath] ||= _get_lines_of_file(filepath))
+        #; [!9rnqn] returns a line string of file.
         return lines[lineno - 1]
       end
 
       private
 
       def _get_lines_of_file(filepath)
+        #; [!5ovcm] splits file content into lines.
+        #; [!vgoe6] each line doesn't contain "\n".
         return File.read(filepath, encoding: 'utf-8').split("\n")
       rescue               # Errno::ENOENT
         return []
