@@ -914,6 +914,7 @@ module Benry::MicroRake
             case pname.to_s
             when /\Aopt_(\w)\z/   ; schema.add(pname, "-#{$1}", "")
             when /\Aopt_(\w)_\z/  ; schema.add(pname, "-#{$1} <val>", "")
+            when /_\z/            ; schema.add(pname, "--#{pname[0..-2]}=<val>", "")
             else                  ; schema.add(pname, "--#{pname}[=<val>]", "")
             end
           when :keyrest
