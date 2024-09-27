@@ -1314,9 +1314,7 @@ module Benry::MicroRake
     end
 
     def run(*args)
-      parser = Benry::CmdOpt::Parser.new(@gopt_schema)
-      global_opts = parser.parse(args, all: false)
-      g_opts = global_opts
+      g_opts = parse_global_options(args)
       #
       done = handle_global_opts(g_opts)
       return 0 if done
@@ -1345,6 +1343,12 @@ module Benry::MicroRake
     end
 
     protected
+
+    def parse_global_options(args)
+      parser = Benry::CmdOpt::Parser.new(@gopt_schema)
+      global_opts = parser.parse(args, all: false)
+      return global_opts
+    end
 
     def handle_global_opts(g_opts)
       handler = @action_handler
