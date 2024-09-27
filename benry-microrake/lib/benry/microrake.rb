@@ -1536,8 +1536,8 @@ module Benry::MicroRake
     end
 
     def handle_exception(exc)
-      puts = $stdout.tty? ? proc {|s| $stdout.puts s } \
-                          : proc {|s| $stdout.puts Util.uncolorize(s) }
+      puts = $stderr.tty? ? proc {|s| $stderr.puts s } \
+                          : proc {|s| $stderr.puts Util.uncolorize(s) }
       puts.("#{Util.colorize_error('[ERROR]')} #{exc.message}")
       return if skip_backtrace?(exc)
       shortener = Util::FilepathShortener.new()
