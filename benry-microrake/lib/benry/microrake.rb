@@ -1443,9 +1443,7 @@ module Benry::MicroRake
       i = 0
       while (i += 1) <= max
         filepath = File.join(dirpath, filename)
-        if File.exist?(filepath)
-          return filepath
-        end
+        return filepath if File.exist?(filepath)
         dirpath2 = File.dirname(dirpath)
         break if dirpath2 == dirpath
         dirpath = dirpath2
