@@ -1518,8 +1518,7 @@ module Benry::MicroRake
       end
       #; [!1cwjs] parses task options even after arguments.
       #; [!8dn6t] not parse task options after '--'.
-      parser = TaskOptionParser.new(task.schema)
-      task_opts = parser.parse(args, all: true)
+      task_opts = parse_task_options(task, args)
       #; [!xs3gw] if '-h' or '--help' option specified for task, show help message of the task.
       if task_opts[:help]
         #; [!4wzxj] global option '-A' or '--all' affects to task help message.
@@ -1530,6 +1529,12 @@ module Benry::MicroRake
       #; [!wqfjl] runs the task with args and options if task name specified.
       args = task_argvals if task_argvals
       mgr.run_task(task, *args, **task_opts)
+    end
+
+    def parse_task_options(task, args)
+      parser = TaskOptionParser.new(task.schema)
+      task_opts = parser.parse(args, all: true)
+      return task_opts
     end
 
     def handle_exception(exc)
