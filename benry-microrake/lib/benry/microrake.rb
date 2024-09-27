@@ -1316,7 +1316,7 @@ module Benry::MicroRake
     def run(*args)
       g_opts = parse_global_options(args)
       #
-      done = handle_global_opts(g_opts)
+      done = handle_global_options(g_opts)
       return 0 if done
       toggle_global_mode(g_opts)
       #
@@ -1350,7 +1350,7 @@ module Benry::MicroRake
       return global_opts
     end
 
-    def handle_global_opts(g_opts)
+    def handle_global_options(g_opts)
       handler = @action_handler
       #; [!pcn0t] '-h' or '--help' option prints help message.
       if g_opts[:help]

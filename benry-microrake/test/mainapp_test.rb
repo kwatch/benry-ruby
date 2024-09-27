@@ -33,7 +33,7 @@ Oktest.scope do
     end
 
 
-    topic '#handle_global_opts()' do
+    topic '#handle_global_options()' do
 
       spec "[!pcn0t] '-h' or '--help' option prints help message." do |main|
         ["-h", "--help"].each do |opt|
@@ -232,12 +232,12 @@ END
         capture_sio do
           main.instance_exec(self) do |_|
             options.each do |sym|
-              _.ok {handle_global_opts({sym => true})} == true
+              _.ok {handle_global_options({sym => true})} == true
             end
             false_options.each do |sym|
-              _.ok {handle_global_opts({sym => true})} == false
+              _.ok {handle_global_options({sym => true})} == false
             end
-            _.ok {handle_global_opts({:libdir => [libdir]})} == false
+            _.ok {handle_global_options({:libdir => [libdir]})} == false
           end
         end
       end
