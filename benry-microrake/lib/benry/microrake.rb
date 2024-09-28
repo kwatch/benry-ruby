@@ -1695,10 +1695,11 @@ END
 
     def _each_task_with_hyphenized_name(all, &b)
       mgr = @task_manager
-      mgr.each_task.collect {|task|
+      pairs = mgr.each_task.collect {|task|
         name = Util.hyphenize_task_name(task.name)  # ex: "a_b_c" -> "a-b-c"
         [name, task]
-      }.sort_by {|pair| pair[0] }.each do |(name, task)|
+      }
+      pairs.sort_by {|pair| pair[0] }.each do |(name, task)|
         next if ! all && task.hidden?
         if task.argnames
           name = "%s[%s]" % [name, task.argnames.join(",")]
