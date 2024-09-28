@@ -1302,10 +1302,13 @@ module Benry::MicroRake
       if envvar && ! envvar.empty?
         argv = envvar.split() + argv
       end
-      #
+      #; [!ndfqt] returns 0 if no exception raised.
       begin
         status_code = run(*argv)
         return status_code
+      #; [!ljpqg] catches exception and prints reduced backtrace.
+      #; [!yfdw9] raises exception if '-t' or '--backtrace' option specified.
+      #; [!ggxr1] returns 1 if any exception raised.
       rescue => exc
         raise if @backtrace_enabled
         handle_exception(exc)
@@ -1314,28 +1317,40 @@ module Benry::MicroRake
     end
 
     def run(*args)
+      #; [!biwyv] parses global options only (not parse task options).
       g_opts = parse_global_options(args)
-      #
+      #; [!0rv6h] returns 0 when certain global options such as '-h' or '-V' are specified.
       done = handle_global_options(g_opts)
       return 0 if done
+      #; [!ufbzx] changs global variables when '-q', '-s', -t' options are specified.
       toggle_global_mode(g_opts)
-      #
+      #; [!qppmx] use specified task filename when '-f' option specified.
+      #; [!36ry7] use default task filename when '-f' option not specified.
       filename = determine_task_filename(g_opts)
+      #; [!8yyoq] searches task file in current dir or in parent dir.
+      #; [!bjq75] not search task file in parent dir if '-N' option specified.
       filepath = find_task_file(filename, g_opts[:nosearch])
+      #; [!g64iv] when task file not found...
       if filepath == nil
+        #; [!rcqfk] prints short usage message if no task name specified.
         if args.empty?
           @action_handler.do_when_no_tasks_specified(false)
           return 0
         end
+        #; [!f6cre] raises error if task name specified.
         raise CommandLineError, "#{filename}: Task file not found."
       end
-      #
+      #; [!0a2fw] changes current dir to where task file placed.
       change_dir_if_necessary(g_opts[:dir], filepath, filename, g_opts[:silent]) do
+        #; [!xh7qi] loads task file after current directory changed.
         require_rubyscript(filepath)
+        #; [!ehzxe] runs ruby code and exit 0 if '-e' option specified.
+        #; [!iiegt] runs ruby code but not exit if '-E' option specified.
         if (rubycode = g_opts[:execexit] || g_opts[:execcont])
           @action_handler.do_exec_code(rubycode)
           return 0 if g_opts[:execexit]
         end
+        #; [!u9inq] runs specified task with args and opts.
         run_the_task(args, g_opts)
       end
       #
@@ -1345,6 +1360,8 @@ module Benry::MicroRake
     protected
 
     def parse_global_options(args)
+      #; [!ba0tb] parses only global options and not parse task options.
+      #; [!3elu3] raises error if invalid global option specified.
       parser = Benry::CmdOpt::Parser.new(@gopt_schema)
       global_opts = parser.parse(args, all: false)
       return global_opts
@@ -1412,14 +1429,21 @@ module Benry::MicroRake
     end
 
     def _filter2regexp(filter_pattern)
+      #; [!tu020] do nothing if filter pattern is nil.
       return nil unless filter_pattern
+      #; [!lgy64] compiles filter pattern string to regexp object.
       return Regexp.compile(filter_pattern)
     rescue RegexpError
+      #; [!hgt9s] raises error if filter pattern cannot be compiled.
       raise CommandLineError.new("#{filter_pattern}: Invalid regexp pattern.")
     end
     private :_filter2regexp
 
     def toggle_global_mode(g_opts)
+      #; [!rtghg] '-q' or '--quiet' option enables quiet mode and disables verbose mode.
+      #; [!xr8km] '-s' or '--silent' option enables quiet mode and disables verbose mdoe.
+      #; [!wijrh] '-n' or '--dry-run' option enables dryrun mode.
+      #; [!j4y2v] '-t' or '--trace' option enables trace mode.
       $VERBOSE_MODE = false if g_opts[:quiet] || g_opts[:silent]
       $QUIET_MODE   = true  if g_opts[:quiet] || g_opts[:silent]
       $DRYRUN_MODE  = true  if g_opts[:dryrun]
@@ -1427,18 +1451,24 @@ module Benry::MicroRake
     end
 
     def determine_task_filename(g_opts)
+      #; [!zrmec] returns specified task file name when '-f' option specified.
+      #; [!2fzyc] returns 'Rakefile' when '-u' option specified.
+      #; [!4ufpx] returns 'Taskfile.rb' when no global option specified.
       filename = g_opts[:taskfile] || g_opts[:rakefile] \
                  || (g_opts[:userake] ? 'Rakefile' : DEFAULT_TASKFILE)
       return filename
     end
 
     def find_task_file(filename, nosearch=false, max: 20)
+      #; [!siwnn] returns absolute filepath of task file when exists.
       if File.exist?(filename)
         return File.absolute_path(filename)
+      #; [!2gxmu] returns nil if task file not found and '-N' option specified.
       elsif nosearch
         return nil
       end
-      #
+      #; [!hha89] searches task file in parent directory.
+      #; [!9wein] stops task file searching when loop time goes over max time.
       dirpath = Dir.pwd()
       i = 0
       while (i += 1) <= max
@@ -1448,36 +1478,51 @@ module Benry::MicroRake
         break if dirpath2 == dirpath
         dirpath = dirpath2
       end
+      #; [!295n1] returns nil if task file not found in parent directories.
       return nil
     end
 
     def load_task_file(g_opts)
+      #; [!hzdd9] searches and loads task file.
       filename = determine_task_filename(g_opts)
       filepath = find_task_file(filename, g_opts[:nosearch])
+      #; [!aeeuq] raises error if task file not found.
       filepath != nil  or
         raise CommandLineError, "#{filename}: Task file not found."
+      #; [!176my] loads task file if found.
       require_rubyscript(filepath)
     end
 
     def require_rubyscript(filepath)
+      #; [!yr615] sets task file path to global var.
       $URAKE_TASKFILE_FULLPATH = filepath
+      #; [!3nfq9] requires task file if file name ends with '.rb'.
       if filepath.end_with?(".rb")
         require filepath
+      #; [!ua08a] loads task file if file name not end with '.rb'.
       else
         load filepath
       end
     end
 
     def change_dir_if_necessary(dir, filepath, filename, silent, &b)
+      #; [!nvx4s] when dir is current dir, not change dir.
+      #; [!n6el9] when dir is specified, change to it.
+      #; [!5045n] when task file exists in current dir, not change dir.
+      #; [!6u9uc] when task file not exist in current dir, change dir.
       dirpath = dir == '.' ? nil \
               : dir        ? dir \
               : File.exist?(filename) ? nil \
               : filepath[0..-(filename.length+1)]  # File.dirname(filepath)
+      #; [!donwz] yields block after directory changed.
+      #; [!hi5wr] back to original dir after yielding block.
       if dirpath == nil
         yield
       else
         back_to = Dir.pwd()
         Dir.chdir(dirpath)
+        #; [!b9esj] prints information when directory changed.
+        #; [!fa18c] not print information when '-s' option specified.
         $stderr.puts "(in #{dirpath})" unless silent
         begin
           yield
@@ -1530,6 +1575,8 @@ module Benry::MicroRake
     end
 
     def parse_task_options(task, args)
+      #; [!!1cwjs] parses task options even after arguments.
+      #; [!!8dn6t] not parse task options after '--'.
       parser = TaskOptionParser.new(task.schema)
       task_opts = parser.parse(args, all: true)
       return task_opts
@@ -1539,7 +1586,11 @@ module Benry::MicroRake
       puts = $stderr.tty? ? proc {|s| $stderr.puts s } \
                           : proc {|s| $stderr.puts Util.uncolorize(s) }
       puts.("#{Util.colorize_error('[ERROR]')} #{exc.message}")
+      #; [!gwnzq] not print backtrace if OptionError.
+      #; [!5yp7f] not print backtrace if CommandLineError.
+      #; [!swz7v] not print backtrace if CyclicTaskError.
       return if skip_backtrace?(exc)
+      #; [!gvbkd] prints processed backtrace.
       shortener = Util::FilepathShortener.new()
       filecache = Util::FileLinesCache.new()
       filter_backtrace(exc.backtrace).each do |bt|
@@ -1552,20 +1603,24 @@ module Benry::MicroRake
           puts.("        #{line.strip}") if line
         end
       end
+      #; [!arcqw] clears file lines cache.
       filecache.clear_cache()
     end
 
     def skip_backtrace?(exc)
+      #; [!d42wd] returns true if exception is one of OptionError, CommandLineError, or CyclicTaskError.
       case exc
       #when Benry::CmdOpt::SchemaError     ; return true
       when Benry::CmdOpt::OptionError     ; return true
       when CommandLineError               ; return true
       when CyclicTaskError                ; return true
       end
+      #; [!5fy6f] returns false if else.
       return false
     end
 
     def filter_backtrace(backtrace)
+      #; [!h50s4] filters backtrace entries to reduce output.
       this_file = __FILE__ + ":"
       command_file = "/#{@command}:"
       return backtrace.reject {|bt|
@@ -1577,7 +1632,10 @@ module Benry::MicroRake
 
 
   def self.main(argv=nil, command=nil)
+    #; [!23nxr] command name will be set automatically.
     main_app = MainApp.new(command || File.basename($0))
+    #; [!61tgk] returns 0 if command finished successfully.
+    #; [!9u4mu] returns 1 if command finished unsuccessfully.
     status_code = main_app.main(argv || ARGV)
     return status_code
   end
