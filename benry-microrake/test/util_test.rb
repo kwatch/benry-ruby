@@ -232,6 +232,7 @@ Oktest.scope do
   topic Benry::MicroRake::Util::FilepathShortener do
 
     fixture :shortener do
+      $URAKE_TASKFILE_FULLPATH = File.absolute_path("Taskfile.rb")
       Benry::MicroRake::Util::FilepathShortener.new
     end
 

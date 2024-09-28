@@ -24,6 +24,8 @@ module MicroRakeTestHelper
     $QUIET_MODE   = false
     $DRYRUN_MODE  = false
     $TRACE_MODE   = false
+    #
+    $URAKE_TASKFILE_FULLPATH = nil
   end
 
   $__here = Dir.pwd()
