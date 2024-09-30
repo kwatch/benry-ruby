@@ -157,5 +157,22 @@ namespace :readme do
     puts "[not changed] #{mdfile}"  unless changed
   end
 
+  desc "builds table of contents (by 'md2')"
+  task :toc2 do
+    do_readme_toc2()
+  end
+
+  def do_readme_toc2()
+    sh "awk '{print}/<!-- TOC -->/{print \"\"; exit}' README.md   >  README.tmp"
+    sh "ruby ../docs/md2 --toc README.md                        >> README.tmp"
+    sh "awk '/<!-- \\/TOC -->/{print \"\"; x=1}x{print}' README.md >> README.tmp"
+    if cmp "README.md", "README.tmp"
+      puts "[not changed] README.md"
+      rm "README.tmp"
+    else
+      puts "[changed] README.md"
+      mv "README.tmp", "README.md"
+    end
+  end
 
 end
