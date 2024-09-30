@@ -1776,14 +1776,13 @@ END
 
     def _traverse_prerequeistes(task, depth, buf, stack)
       TaskManager.detect_cyclic_task(task, stack)
-      mgr = @task_manager
-      indent = "    " * depth
       name = Util.hyphenize_task_name(task.name)
+      indent = "    " * depth
       buf << indent << name << "\n"
       _traverse_task(task) do |tsk|
         stack.push(tsk)
         tsk.prerequisites.each do |pre_name|
-          pre_task = mgr.find_task(pre_name, tsk)  or
+          pre_task = @task_manager.find_task(pre_name, tsk)  or
             raise TaskDefinitionError, "#{pre_name}: Prerequisite task not found."
           _traverse_prerequeistes(pre_task, depth+1, buf, stack)
         end
@@ -1793,7 +1792,7 @@ END
     end
     private :_traverse_prerequeistes
 
-    def _traverse_task(task)
+    def _traverse_task(task, &b)
       tsk = task
       while tsk != nil
         yield tsk
