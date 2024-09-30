@@ -728,6 +728,30 @@ END
 END
       end
 
+      spec "[!bgpsm] includes name of alias which is equal to prefix name excluding tailing ':'." do
+        HelpTestAction.class_eval do
+          category "p5983:", action: "aaa" do
+            @action.("AAA")
+            def aaa()
+            end
+            @action.("BBB")
+            def bbb()
+            end
+          end
+        end
+        Benry::CmdApp.define_alias("p59", ["p5983", "-h"])  # !!!!
+        x = @builder.section_candidates("p5983:")
+        ok {x} == <<"END"
+\e[1;34mActions:\e[0m
+  p5983              : AAA
+\e[2m                       (alias: p59 (with '-h'))\e[0m
+  p5983:bbb          : BBB
+
+\e[1;34mAliases:\e[0m
+  p59                : alias for 'p5983 -h'
+END
+      end
+
       spec "[!h5ek7] includes hidden aliases when `all: true` passed." do
         Benry::CmdApp.define_alias("add", "git:stage", hidden: true)
         at_end { Benry::CmdApp.undef_alias("add") }

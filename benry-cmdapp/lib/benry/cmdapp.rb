@@ -1493,9 +1493,10 @@ module Benry::CmdApp
       }
       s1 = str.empty? ? nil : render_section(header(:HEADER_ACTIONS), str)
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
+      #; [!bgpsm] includes name of alias which is equal to prefix name excluding tailing ':'.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       str = _render_metadata_list(c.format_action, all: all) {|metadata|
-        metadata.alias? && metadata.action.start_with?(prefix)
+        metadata.alias? && (metadata.action.start_with?(prefix) || metadata.action == prefix2)
       }
       #; [!9lnn2] alias names in candidate list are sorted by action name.
       str = str.each_line.sort_by {|line|
