@@ -2,6 +2,13 @@ CHANGES
 =======
 
 
+Release 1.1.2 (2024-09-30)
+--------------------------
+
+* [change] Change to report error when prefix not matched any task names.
+* [bugfix] Fix a minor bug related to listing candidates.
+
+
 Release 1.1.1 (2023-12-29)
 --------------------------
 
