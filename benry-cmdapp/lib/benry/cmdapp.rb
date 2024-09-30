@@ -1491,8 +1491,7 @@ module Benry::CmdApp
         #; [!nwwrd] if prefix is 'xxx:' and alias name is 'xxx' and action name of alias matches to 'xxx:', skip it because it will be shown in 'Aliases:' section.
         _category_action?(metadata, prefix)
       }
-      #s1 = str.empty? ? nil : render_section(header(:HEADER_ACTIONS), str)
-      s1 = render_section(header(:HEADER_ACTIONS), str)
+      s1 = str.empty? ? nil : render_section(header(:HEADER_ACTIONS), str)
       #; [!otvbt] includes name of alias which corresponds to action starting with prefix.
       #; [!h5ek7] includes hidden aliases when `all: true` passed.
       str = _render_metadata_list(c.format_action, all: all) {|metadata|
@@ -1506,8 +1505,12 @@ module Benry::CmdApp
       #; [!80t51] alias names are displayed in separated section from actions.
       s2 = str.empty? ? nil : render_section(header(:HEADER_ALIASES), str)
       #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
+      #; [!jek9k] raises error when no actions nor aliases found starting with prefix.
+      arr = [s1, s2].compact()
+      ! arr.empty?  or
+        raise CommandError, "'#{prefix}' : Unknown prefix. (Hint: try ':' instead of '#{prefix}' to list all prefixes.)"
       #; [!3c3f1] returns list of actions which name starts with prefix specified.
-      return [s1, s2].compact().join("\n")
+      return arr.join("\n")
     end
 
     def _category_action?(md, prefix)
