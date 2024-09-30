@@ -1767,6 +1767,7 @@ END
       mgr = @task_manager
       buf = []
       mgr.each_task do |task|
+        next if ! all && task.hidden?
         next if filter && filter !~ task.name
         _traverse_prerequeistes(task, 0, buf, [])
       end
