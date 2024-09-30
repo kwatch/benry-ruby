@@ -1,9 +1,12 @@
-parent=`dirname $PWD`
+parent=$(dirname $PWD)
 export GEM_HOME=$parent/gem
 export RUBYLIB=$PWD/lib:$parent/lib:$HOME/lib/ruby
-[ -n "${_path:-}" ] || _path=$PATH
-export PATH=$_path:$PWD/bin:$parent/bin:$GEM_HOME/bin
+export PATH=${_path:=$PATH}:$PWD/bin:$parent/bin:$GEM_HOME/bin
 unset parent
+
+set -u
+
+ns="[$(basename $PWD | sed 's/benry-//')]"
 
 alias t="rake test"
 alias ta="rake test:all"
