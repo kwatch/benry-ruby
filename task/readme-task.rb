@@ -121,7 +121,8 @@ namespace :readme do
     htmlfile = "tmp/README.html"
     sh "curl -s -o #{htmlfile} #{url}"
     #rexp = /<h(\d) dir="auto"><a id="(.*?)" class="anchor".*><\/a>(.*)<\/h\1>/
-    rexp = /<h(\d) id="user-content-.*?" dir="auto"><a class="heading-link" href="#(.*?)">(.*)<svg/
+    #rexp = /<h(\d) id="user-content-.*?" dir="auto"><a class="heading-link" href="#(.*?)">(.*)<svg/
+    rexp = /<h(\d) class="heading-element" dir="auto">(.*?)<\/h\1><a id="user-content-(.*?)" class="anchor" aria-label=".*?" href="(.*?)">/
     html_str = File.read(htmlfile, encoding: 'utf-8')
     buf = []
     html_str.scan(rexp) do
