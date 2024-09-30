@@ -1505,7 +1505,6 @@ module Benry::CmdApp
       }.join()
       #; [!80t51] alias names are displayed in separated section from actions.
       s2 = str.empty? ? nil : render_section(header(:HEADER_ALIASES), str)
-      #; [!rqx7w] returns header string if both no actions nor aliases found with names starting with prefix.
       #; [!jek9k] raises error when no actions nor aliases found starting with prefix.
       arr = [s1, s2].compact()
       ! arr.empty?  or
