@@ -1768,9 +1768,7 @@ END
       buf = []
       mgr.each_task do |task|
         next if filter && filter !~ task.name
-        _traverse_task(task) do |tsk|
-          _traverse_prerequeistes(tsk, 0, buf, [])
-        end
+        _traverse_prerequeistes(task, 0, buf, [])
       end
       print buf.join()
     end
