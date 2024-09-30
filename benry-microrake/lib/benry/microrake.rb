@@ -1650,6 +1650,7 @@ module Benry::MicroRake
     end
 
     def help_message(command)
+      #; [!tel3c] returns help message.
       name = APP_NAME
       schema = @gopt_schema
       return <<END
@@ -1674,9 +1675,11 @@ END
     end
 
     def short_usage(command, taskfile_exist)
+      #; [!znc5e] changes hint message according to whether taskfile exists or not.
       msg = taskfile_exist \
           ? "`#{command} -T` for task list." \
           : "`#{command} --new` to create 'Taskfile.rb'."
+      #; [!74761] returns short usage message.
       return <<END
 Usage: #{command} [<options>] <task>
 
@@ -1685,66 +1688,88 @@ END
     end
 
     def do_help()
+      #; [!y7sxx] prints help message in color if stdout is a tty.
+      #; [!9yhvu] prints help message without color if stdout is not a tty.
       s = help_message(@command)
       print Util.uncolorize_unless_tty(s)
     end
 
     def do_version()
+      #; [!azrt9] prints version number.
       puts VERSION
     end
 
     def _each_task_with_hyphenized_name(all, &b)
       mgr = @task_manager
       pairs = mgr.each_task.collect {|task|
+        #; [!mfmhj] converts task name 'a_b_c' into 'a-b-c'.
         name = Util.hyphenize_task_name(task.name)  # ex: "a_b_c" -> "a-b-c"
         [name, task]
       }
+      #; [!wvi9f] sorts by task name.
       pairs.sort_by {|pair| pair[0] }.each do |(name, task)|
+        #; [!cth9a] ignores hidden tasks.
+        #; [!uyl6f] includes hidden tasks when '-a' option specified.
         next if ! all && task.hidden?
+        #; [!tgi25] appends task argnames to each task name.
         if task.argnames
           name = "%s[%s]" % [name, task.argnames.join(",")]
         end
+        #; [!x7bng] yields task name and task object.
         yield name, task
       end
     end
     private :_each_task_with_hyphenized_name
 
     def _colorize_according_to_task(s, task)
+      #; [!vdps0] hidden task name will be in gray color.
       return Util.colorize_hidden(s)    if task.hidden?     # gray color
+      #; [!hunkk] important task name will be in bold style.
       return Util.colorize_important(s) if task.important?  # bold
       return s
     end
     private :_colorize_according_to_task
 
     def do_list_tasks(all: false, filter: nil, with_command: true)
+      #; [!h8vwc] lists tasks with command when '-T' specified.
+      #; [!1kjof] lists tasks without command when '-l' specified.
       format = with_command ?    # true if '-T', false if '-l'
                "#{@command} %-16s # %s" : "%-20s # %s"
       sb = []
       _each_task_with_hyphenized_name(all) do |name, task|
+        #; [!hi9es] filters task names if '-F' option specified.
         next if filter && filter !~ name
+        #; [!1ud7j] prints the first line of task description.
         firstline = task.desc =~ /(.*)$/ ? $1 : nil
         s = format % [name, firstline]
+        #; [!0hlgl] colorizes task names.
         s = _colorize_according_to_task(s, task)
         sb << s << "\n"
       end
+      #; [!i8chw] lists tasks without color when stdout is not a tty.
       print Util.uncolorize_unless_tty(sb.join())
     end
 
     def do_list_descriptions(all: false, filter: nil)
+      #; [!nu0sw] list task names and descriptions.
       format = "#{@command} %s"
       sb = []
       _each_task_with_hyphenized_name(all) do |name, task|
+        #; [!q6ygj] ignores if task name not matched to filter.
         next if filter && filter !~ name
+        #; [!gmx0k] colorizes task names.
         s = format % name
         s = _colorize_according_to_task(s, task)
         sb << s << "\n"
         if task.desc
+          #; [!1i8x1] adds indent to each line of description.
           text = task.desc.gsub(/^/, "    ")
           text.chomp!
           sb << text << "\n"
         end
         sb << "\n"
       end
+      #; [!ur9bl] lists tasks without color when stdout is not a tty.
       print Util.uncolorize_unless_tty(sb.join())
     end
 
@@ -1753,13 +1778,17 @@ END
       shortener = Util::FilepathShortener.new()
       sb = []
       _each_task_with_hyphenized_name(all) do |name, task|
+        #; [!1j4cl] ignores if task name not matched to filter.
         next if filter && filter !~ name
+        #; [!io3vq] shorten locations.
         location = shortener.shorten_filepath(task.location)
         location = location.split(/:in `/).first if location
+        #; [!oqwim] colorizes tasks and locations.
         s = format % name
         s = _colorize_according_to_task(s, task)
         sb << s << " " << location << "\n"
       end
+      #; [!17q9m] lists task locations without color when stdout is not a tty.
       print Util.uncolorize_unless_tty(sb.join())
     end
 
@@ -1767,21 +1796,28 @@ END
       mgr = @task_manager
       buf = []
       mgr.each_task do |task|
+        #; [!50vab] ignores hidden task if '-A' not specified.
         next if ! all && task.hidden?
+        #; [!0oe25] ignores if task name not matched to filter.
         next if filter && filter !~ task.name
+        #; [!3pfri] lists task names with prerequisite tasks.
         _traverse_prerequeistes(task, 0, buf, [])
       end
       print buf.join()
     end
 
     def _traverse_prerequeistes(task, depth, buf, stack)
+      #; [!u9pr4] raises error if cyclic task exists.
       TaskManager.detect_cyclic_task(task, stack)
+      #; [!41w2a] task names should be hyphenized.
       name = Util.hyphenize_task_name(task.name)
+      #; [!bkj2c] prerequiste task names are indented.
       indent = "    " * depth
       buf << indent << name << "\n"
       _traverse_task(task) do |tsk|
         stack.push(tsk)
         tsk.prerequisites.each do |pre_name|
+          #; [!i6p8r] error if prerequisite task is not found.
           pre_task = @task_manager.find_task(pre_name, tsk)  or
             raise TaskDefinitionError, "#{pre_name}: Prerequisite task not found."
           _traverse_prerequeistes(pre_task, depth+1, buf, stack)
@@ -1793,6 +1829,7 @@ END
     private :_traverse_prerequeistes
 
     def _traverse_task(task, &b)
+      #; [!9b2ge] yileds block with task and traverses next task.
       tsk = task
       while tsk != nil
         yield tsk
@@ -1801,14 +1838,19 @@ END
     end
 
     def do_exec_code(ruby_code)
+      #; [!w3c3o] executes ruby code if provided.
+      #; [!anihk] do nothing if ruby code is nil.
       eval ruby_code if ruby_code
     end
 
     def do_new_taskfile()
+      #; [!8mz1b] prints taskfile skeleton.
       print Util.render_default_taskfile(@command)
     end
 
     def do_when_no_tasks_specified(taskfile_exist)
+      #; [!ldvle] prints short usage in color.
+      #; [!3rlt8] prints without color if stdout is not a tty.
       s = short_usage(@command, taskfile_exist)
       print Util.uncolorize_unless_tty(s)
     end
